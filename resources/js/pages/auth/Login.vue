@@ -101,6 +101,8 @@ defineProps<{
             </Button>
         </div>
 
-        <p class="text-center text-xs text-muted-foreground">নতুন অ্যাকাউন্ট শুধু হিসাব অ্যাডমিন খুলে দিতে পারেন।</p>
+        <p class="text-center text-xs text-muted-foreground">
+            নতুন অ্যাকাউন্ট শুধু হিসাব অ্যাডমিন খুলে দিতে পারেন।
+        </p>
     </Form>
 </template>

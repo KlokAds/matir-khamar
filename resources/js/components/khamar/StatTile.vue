@@ -22,14 +22,21 @@ const tones = {
 </script>
 
 <template>
-    <div class="relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-[0_1px_0_0_var(--border)]">
+    <div
+        class="relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-[0_1px_0_0_var(--border)]"
+    >
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
                 <p class="text-[13px] text-muted-foreground">{{ label }}</p>
-                <p class="num mt-1 truncate text-2xl font-semibold tracking-tight">
+                <p
+                    class="num mt-1 truncate text-2xl font-semibold tracking-tight"
+                >
                     {{ value }}
                 </p>
-                <p v-if="hint" class="mt-1 truncate text-xs text-muted-foreground">
+                <p
+                    v-if="hint"
+                    class="mt-1 truncate text-xs text-muted-foreground"
+                >
                     {{ hint }}
                 </p>
             </div>

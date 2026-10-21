@@ -8,8 +8,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans:
-        'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
     --color-income: var(--income);
     --color-expense: var(--expense);
     --color-soil: var(--soil);
@@ -89,8 +88,7 @@
     html {
         /* Noto Sans Bengali sits centred in buttons and stays clear at small
            sizes; Tiro Bangla gives headings the feel of a printed khata. */
-        --font-sans:
-            'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
+        --font-sans: 'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
         --font-display: 'Tiro Bangla', 'Noto Sans Bengali', Georgia, serif;
     }
 

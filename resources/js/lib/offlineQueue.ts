@@ -30,7 +30,9 @@ function open(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, 1);
         request.onupgradeneeded = () => {
-            const store = request.result.createObjectStore(STORE, { keyPath: 'uuid' });
+            const store = request.result.createObjectStore(STORE, {
+                keyPath: 'uuid',
+            });
             store.createIndex('userId', 'userId');
         };
         request.onsuccess = () => resolve(request.result);
@@ -38,21 +40,34 @@ function open(): Promise<IDBDatabase> {
     });
 }
 
-async function tx<T>(mode: IDBTransactionMode, run: (store: IDBObjectStore) => IDBRequest<T> | void): Promise<T | undefined> {
+async function tx<T>(
+    mode: IDBTransactionMode,
+    run: (store: IDBObjectStore) => IDBRequest<T> | void,
+): Promise<T | undefined> {
     const db = await open();
 
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(STORE, mode);
         const request = run(transaction.objectStore(STORE));
-        transaction.oncomplete = () => resolve(request ? request.result : undefined);
+        transaction.oncomplete = () =>
+            resolve(request ? request.result : undefined);
         transaction.onerror = () => reject(transaction.error);
     });
 }
 
 export async function listFor(userId: number): Promise<QueueItem[]> {
-    const items = ((await tx<QueueItem[]>('readonly', (store) => store.index('userId').getAll(userId))) ?? []).sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
+    const items = (
+        (await tx<QueueItem[]>('readonly', (store) =>
+            store.index('userId').getAll(userId),
+        )) ?? []
+    ).sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
     const cutoff = Date.now() - KEEP_DONE_DAYS * 86400000;
-    const stale = items.filter((item) => item.status === 'done' && item.syncedAt && Date.parse(item.syncedAt) < cutoff);
+    const stale = items.filter(
+        (item) =>
+            item.status === 'done' &&
+            item.syncedAt &&
+            Date.parse(item.syncedAt) < cutoff,
+    );
 
     for (const item of stale) {
         await tx('readwrite', (store) => store.delete(item.uuid));
@@ -62,7 +77,9 @@ export async function listFor(userId: number): Promise<QueueItem[]> {
 }
 
 function put(item: QueueItem) {
-    return tx('readwrite', (store) => store.put(JSON.parse(JSON.stringify(item))));
+    return tx('readwrite', (store) =>
+        store.put(JSON.parse(JSON.stringify(item))),
+    );
 }
 
 export function remove(uuid: string) {
@@ -83,8 +100,24 @@ function newId(): string {
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-export async function enqueue(userId: number, kind: QueueKind, label: string, payload: Record<string, unknown>): Promise<QueueItem> {
-    const item: QueueItem = { uuid: newId(), userId, kind, label, payload, recordedAt: new Date().toISOString(), status: 'pending', message: null, number: null, syncedAt: null };
+export async function enqueue(
+    userId: number,
+    kind: QueueKind,
+    label: string,
+    payload: Record<string, unknown>,
+): Promise<QueueItem> {
+    const item: QueueItem = {
+        uuid: newId(),
+        userId,
+        kind,
+        label,
+        payload,
+        recordedAt: new Date().toISOString(),
+        status: 'pending',
+        message: null,
+        number: null,
+        syncedAt: null,
+    };
     await put(item);
     notify();
 
@@ -104,7 +137,9 @@ let running: Promise<SyncOutcome> | null = null;
 /** Sends every waiting entry of this user. Safe to call often: one run at a time. */
 export function syncNow(userId: number): Promise<SyncOutcome> {
     running ??= (async (): Promise<SyncOutcome> => {
-        const pending = (await listFor(userId)).filter((item) => item.status === 'pending').reverse();
+        const pending = (await listFor(userId))
+            .filter((item) => item.status === 'pending')
+            .reverse();
 
         if (!pending.length) {
             return 'nothing';
@@ -122,8 +157,20 @@ export function syncNow(userId: number): Promise<SyncOutcome> {
                 response = await fetch('/offline/sync', {
                     method: 'POST',
                     credentials: 'same-origin',
-                    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-XSRF-TOKEN': xsrfToken() },
-                    body: JSON.stringify({ items: batch.map((item) => ({ uuid: item.uuid, kind: item.kind, recorded_at: item.recordedAt, payload: item.payload })) }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-XSRF-TOKEN': xsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        items: batch.map((item) => ({
+                            uuid: item.uuid,
+                            kind: item.kind,
+                            recorded_at: item.recordedAt,
+                            payload: item.payload,
+                        })),
+                    }),
                 });
             } catch {
                 return 'offline';
@@ -137,16 +184,31 @@ export function syncNow(userId: number): Promise<SyncOutcome> {
                 return 'error';
             }
 
-            const { results } = (await response.json()) as { results: { uuid: string; status: 'done' | 'failed' | 'retry'; message: string | null; number: string | null }[] };
+            const { results } = (await response.json()) as {
+                results: {
+                    uuid: string;
+                    status: 'done' | 'failed' | 'retry';
+                    message: string | null;
+                    number: string | null;
+                }[];
+            };
 
             for (const result of results) {
-                const item = batch.find((candidate) => candidate.uuid === result.uuid);
+                const item = batch.find(
+                    (candidate) => candidate.uuid === result.uuid,
+                );
 
                 if (!item || result.status === 'retry') {
                     continue;
                 }
 
-                await put({ ...item, status: result.status, message: result.message, number: result.number, syncedAt: new Date().toISOString() });
+                await put({
+                    ...item,
+                    status: result.status,
+                    message: result.message,
+                    number: result.number,
+                    syncedAt: new Date().toISOString(),
+                });
             }
         }
 
@@ -162,12 +224,17 @@ export function syncNow(userId: number): Promise<SyncOutcome> {
 
 /** Live count of waiting entries for the badge, shared across tabs. */
 export const pendingCount = ref(0);
-const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('matir-khamar-queue') : null;
+const channel =
+    typeof BroadcastChannel !== 'undefined'
+        ? new BroadcastChannel('matir-khamar-queue')
+        : null;
 let watchedUser: number | null = null;
 
 async function refreshCount() {
     if (watchedUser !== null) {
-        pendingCount.value = (await listFor(watchedUser)).filter((item) => item.status === 'pending').length;
+        pendingCount.value = (await listFor(watchedUser)).filter(
+            (item) => item.status === 'pending',
+        ).length;
     }
 }
 
@@ -193,6 +260,9 @@ export function watchQueue(userId: number) {
     attempt();
     window.addEventListener('online', attempt);
     window.addEventListener('focus', attempt);
-    document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && attempt());
+    document.addEventListener(
+        'visibilitychange',
+        () => document.visibilityState === 'visible' && attempt(),
+    );
     window.setInterval(attempt, 60 * 1000);
 }
