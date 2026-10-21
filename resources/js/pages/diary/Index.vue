@@ -16,6 +16,7 @@ import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, day, qty, today, useCan } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
@@ -364,9 +365,8 @@ const rules = [
 
                     <div class="grid gap-3">
                         <Field label="তারিখ" :error="note.errors.date">
-                            <Input
+                            <DateField
                                 v-model="note.date"
-                                type="date"
                                 :max="todayStr"
                                 class="h-10"
                             />
@@ -429,9 +429,9 @@ const rules = [
                             hint="ঐচ্ছিক — দিন পার হলে লাল হয়ে মনে করিয়ে দেবে।"
                             :error="note.errors.follow_up_on"
                         >
-                            <Input
+                            <DateField
+                                clearable
                                 v-model="note.follow_up_on"
-                                type="date"
                                 :min="note.date"
                                 class="h-10"
                             />
@@ -829,9 +829,9 @@ const rules = [
                             />
                         </Field>
                         <Field label="শেষ তারিখ" :error="goal.errors.due_on">
-                            <Input
+                            <DateField
+                                clearable
                                 v-model="goal.due_on"
-                                type="date"
                                 :min="todayStr"
                                 class="h-10"
                             />

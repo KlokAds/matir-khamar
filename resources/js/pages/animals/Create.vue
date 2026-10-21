@@ -6,6 +6,7 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
@@ -171,10 +172,10 @@ watch(
                         : 'খামারে আসার তারিখ'
                 "
                 :error="f.errors.acquired_on"
-                ><Input v-model="f.acquired_on" type="date" :max="today()"
+                ><DateField v-model="f.acquired_on" :max="today()"
             /></Field>
             <Field v-if="f.acquisition !== 'born'" label="জন্ম তারিখ (জানলে)"
-                ><Input v-model="f.birth_date" type="date" :max="today()"
+                ><DateField clearable v-model="f.birth_date" :max="today()"
             /></Field>
             <Field
                 v-if="showBatch"

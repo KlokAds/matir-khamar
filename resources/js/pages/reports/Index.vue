@@ -6,6 +6,7 @@ import CenterRows from '@/components/khamar/CenterRows.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import TrendBars from '@/components/khamar/TrendBars.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { day, taka } from '@/lib/khamar';
 import type { TreeNode } from '@/lib/khamar';
@@ -69,9 +70,9 @@ const sum = (rows: { balance: number }[]) =>
                     class="flex items-center gap-2 print:hidden"
                     @submit.prevent="apply"
                 >
-                    <Input v-model="range.from" type="date" class="w-36" />
+                    <DateField v-model="range.from" class="w-36" />
                     <span class="text-muted-foreground">—</span>
-                    <Input v-model="range.to" type="date" class="w-36" />
+                    <DateField v-model="range.to" class="w-36" />
                     <Button type="submit" size="sm" variant="secondary"
                         >দেখুন</Button
                     >

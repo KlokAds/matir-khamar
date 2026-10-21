@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Moon, Sun } from '@lucide/vue';
 import { computed } from 'vue';
 import Field from '@/components/khamar/Field.vue';
+import SessionPicker from '@/components/khamar/SessionPicker.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
-import { day, qty, today } from '@/lib/khamar';
+import { currentSession, day, qty, today } from '@/lib/khamar';
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'দুধের হিসাব', href: '/milk' }] },
@@ -15,13 +16,13 @@ defineOptions({
 const props = defineProps<{
     sessions: Record<string, string>;
     cows: { id: number; tag: string; name: string | null }[];
-    days: { date: string; morning: number; evening: number }[];
+    days: { date: string; by: Record<string, number>; total: number }[];
     month: number;
 }>();
 
 const f = useForm({
     date: today(),
-    session: new Date().getHours() < 13 ? 'morning' : 'evening',
+    session: currentSession(),
     rows: props.cows.length
         ? props.cows.map((cow) => ({
               animal_id: cow.id as number | null,
@@ -61,35 +62,11 @@ const cowLabel = (id: number | null) => {
                     })
                 "
             >
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-3">
                     <Field label="তারিখ" :error="f.errors.date"
-                        ><Input v-model="f.date" type="date" :max="today()"
+                        ><DateField v-model="f.date" :max="today()"
                     /></Field>
-                    <div class="grid gap-1.5">
-                        <span class="text-sm font-medium">বেলা</span>
-                        <div
-                            class="grid grid-cols-2 gap-1 rounded-md border border-input p-1"
-                        >
-                            <button
-                                v-for="(label, key) in sessions"
-                                :key="key"
-                                type="button"
-                                :class="[
-                                    'flex items-center justify-center gap-1 rounded py-1.5 text-sm',
-                                    f.session === key
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-accent',
-                                ]"
-                                @click="f.session = key"
-                            >
-                                <component
-                                    :is="key === 'morning' ? Sun : Moon"
-                                    class="size-4"
-                                />
-                                {{ label }}
-                            </button>
-                        </div>
-                    </div>
+                    <SessionPicker v-model="f.session" :sessions="sessions" />
                 </div>
 
                 <div class="mt-4 space-y-2">
@@ -147,8 +124,13 @@ const cowLabel = (id: number | null) => {
                     <thead class="text-left text-xs text-muted-foreground">
                         <tr class="border-b border-border">
                             <th class="pb-2 font-medium">তারিখ</th>
-                            <th class="pb-2 text-right font-medium">সকাল</th>
-                            <th class="pb-2 text-right font-medium">বিকাল</th>
+                            <th
+                                v-for="(label, key) in sessions"
+                                :key="key"
+                                class="pb-2 text-right font-medium"
+                            >
+                                {{ label }}
+                            </th>
                             <th class="pb-2 text-right font-medium">মোট</th>
                         </tr>
                     </thead>
@@ -159,19 +141,23 @@ const cowLabel = (id: number | null) => {
                             class="border-b border-border/60"
                         >
                             <td class="py-2">{{ day(d.date) }}</td>
-                            <td class="num py-2 text-right">
-                                {{ qty(d.morning) }}
-                            </td>
-                            <td class="num py-2 text-right">
-                                {{ qty(d.evening) }}
+                            <td
+                                v-for="(label, key) in sessions"
+                                :key="key"
+                                :class="[
+                                    'num py-2 text-right',
+                                    !d.by[key] && 'text-muted-foreground/50',
+                                ]"
+                            >
+                                {{ d.by[key] ? qty(d.by[key]) : '—' }}
                             </td>
                             <td class="num py-2 text-right font-medium">
-                                {{ qty(d.morning + d.evening) }}
+                                {{ qty(d.total) }}
                             </td>
                         </tr>
                         <tr v-if="!days.length">
                             <td
-                                colspan="4"
+                                :colspan="Object.keys(sessions).length + 2"
                                 class="py-8 text-center text-muted-foreground"
                             >
                                 এখনো দুধের হিসাব নেই।

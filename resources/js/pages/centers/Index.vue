@@ -7,6 +7,7 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, taka, useCan } from '@/lib/khamar';
 import type { Center, TreeNode } from '@/lib/khamar';
@@ -66,9 +67,9 @@ const applyRange = () =>
                     class="flex items-center gap-2"
                     @submit.prevent="applyRange"
                 >
-                    <Input v-model="range.from" type="date" class="w-36" />
+                    <DateField v-model="range.from" class="w-36" />
                     <span class="text-muted-foreground">—</span>
-                    <Input v-model="range.to" type="date" class="w-36" />
+                    <DateField v-model="range.to" class="w-36" />
                     <Button type="submit" size="sm" variant="secondary"
                         >দেখুন</Button
                     >

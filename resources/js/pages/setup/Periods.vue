@@ -5,6 +5,7 @@ import { LockKeyhole } from '@lucide/vue';
 import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 
 defineOptions({
@@ -65,7 +66,7 @@ async function unlock(id: number) {
         >
             <div class="flex-1">
                 <Field label="কোন মাস" :error="f.errors.month"
-                    ><Input v-model="f.month" type="month"
+                    ><DateField mode="month" v-model="f.month"
                 /></Field>
             </div>
             <Button type="submit" :disabled="f.processing"

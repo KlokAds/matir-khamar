@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $cost_center_id
  * @property CarbonImmutable $date
  * @property string $direction
- * @property string|null $session morning, noon or evening for feed given
+ * @property string|null $session morning, noon, evening or night for feed given
  * @property float $qty
  * @property float|null $land_decimals land the grass came from or the fertiliser went on (শতাংশ)
  * @property int|null $head_count animals in the category on the day it was fed
@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StockMovement extends Model
 {
     /** Feeding times through the day. */
-    public const SESSIONS = ['morning' => 'সকাল', 'noon' => 'দুপুর', 'evening' => 'বিকাল'];
+    public const SESSIONS = ['morning' => 'সকাল', 'noon' => 'দুপুর', 'evening' => 'বিকাল', 'night' => 'রাত'];
 
     protected function casts(): array
     {

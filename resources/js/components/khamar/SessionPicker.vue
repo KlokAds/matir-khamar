@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Moon, Sun, Sunrise } from '@lucide/vue';
+import { Moon, Sun, Sunrise, Sunset } from '@lucide/vue';
 
-/** Morning / noon / afternoon buttons for feeding (and any other time-of-day entry). */
+/** সকাল / দুপুর / বিকাল / রাত buttons for feeding (and any other time-of-day entry). */
 defineProps<{ sessions: Record<string, string>; label?: string }>();
 
 const model = defineModel<string>({ required: true });
 const icons: Record<string, typeof Sun> = {
     morning: Sunrise,
     noon: Sun,
-    evening: Moon,
+    evening: Sunset,
+    night: Moon,
 };
 </script>
 

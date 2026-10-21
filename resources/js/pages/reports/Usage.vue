@@ -4,6 +4,7 @@ import { Leaf, Pill, Sprout, Wheat } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { qty, taka } from '@/lib/khamar';
 
@@ -109,7 +110,7 @@ const share = (row: Row, used: Used) =>
         >
             <template #actions>
                 <Field label="মাস" class="w-44">
-                    <Input v-model="month" type="month" />
+                    <DateField mode="month" v-model="month" />
                 </Field>
             </template>
         </PageTitle>

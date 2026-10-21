@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Daily milk yield, morning and evening. Sales are entered as income. */
+/** Daily milk yield by milking time (সকাল, দুপুর, বিকাল, রাত). Sales are entered as income. */
 class MilkController extends Controller
 {
     public function index(): Response
@@ -31,8 +31,8 @@ class MilkController extends Controller
                 ->groupBy(fn ($row) => substr((string) $row->date, 0, 10))
                 ->map(fn ($rows, $date) => [
                     'date' => $date,
-                    'morning' => (float) ($rows->firstWhere('session', 'morning')->liters ?? 0),
-                    'evening' => (float) ($rows->firstWhere('session', 'evening')->liters ?? 0),
+                    'by' => collect(MilkRecord::SESSIONS)->map(fn ($label, $key) => (float) ($rows->firstWhere('session', $key)->liters ?? 0))->all(),
+                    'total' => (float) $rows->sum('liters'),
                 ])
                 ->values(),
             'month' => (float) MilkRecord::query()->whereDate('date', '>=', now()->startOfMonth())->sum('liters'),

@@ -5,6 +5,7 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, taka } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
@@ -87,7 +88,7 @@ const share = (id: number) =>
                 >
             </Field>
             <Field label="মাস"
-                ><Input v-model="pick.month" type="month"
+                ><DateField mode="month" v-model="pick.month"
             /></Field>
         </div>
 

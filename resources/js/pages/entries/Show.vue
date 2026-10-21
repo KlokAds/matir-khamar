@@ -5,6 +5,7 @@ import { computed, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { day, taka, today, useCan } from '@/lib/khamar';
 
@@ -137,7 +138,7 @@ function pick(event: Event) {
                 />
             </Field>
             <Field label="বাতিলের তারিখ" :error="reverse.errors.date">
-                <Input v-model="reverse.date" type="date" :max="today()" />
+                <DateField v-model="reverse.date" :max="today()" />
             </Field>
             <Button
                 type="submit"

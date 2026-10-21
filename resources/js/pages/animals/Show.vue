@@ -8,6 +8,7 @@ import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { day, qty, taka, today, useCan } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
@@ -145,7 +146,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 >
             </Field>
             <Field label="কবে থেকে" :error="transfer.errors.date"
-                ><Input v-model="transfer.date" type="date" :max="today()"
+                ><DateField v-model="transfer.date" :max="today()"
             /></Field>
             <Button type="submit" :disabled="transfer.processing">বদলান</Button>
         </form>
@@ -158,7 +159,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
             "
         >
             <Field label="বিক্রির তারিখ" :error="sell.errors.date"
-                ><Input v-model="sell.date" type="date" :max="today()"
+                ><DateField v-model="sell.date" :max="today()"
             /></Field>
             <Field label="বিক্রয় মূল্য (৳)" :error="sell.errors.amount"
                 ><Input
@@ -201,7 +202,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
             "
         >
             <Field label="তারিখ" :error="death.errors.date"
-                ><Input v-model="death.date" type="date" :max="today()"
+                ><DateField v-model="death.date" :max="today()"
             /></Field>
             <Field label="কারণ"><Input v-model="death.note" /></Field>
             <Button

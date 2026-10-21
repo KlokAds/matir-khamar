@@ -13,6 +13,7 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { day, taka, today, useCan } from '@/lib/khamar';
 import type { Option } from '@/lib/khamar';
@@ -188,7 +189,7 @@ const place = useForm({
                 />
             </Field>
             <Field label="তারিখ" :error="move.errors.date">
-                <Input v-model="move.date" type="date" :max="today()" />
+                <DateField v-model="move.date" :max="today()" />
             </Field>
             <Button type="submit" :disabled="move.processing">সরান</Button>
             <div class="sm:col-span-2 lg:col-span-5">
@@ -248,11 +249,7 @@ const place = useForm({
                 label="কোন তারিখের হিসাবে"
                 :error="place.errors.opening_date"
             >
-                <Input
-                    v-model="place.opening_date"
-                    type="date"
-                    :max="today()"
-                />
+                <DateField v-model="place.opening_date" :max="today()" />
             </Field>
             <Button type="submit" :disabled="place.processing">যোগ করুন</Button>
         </form>

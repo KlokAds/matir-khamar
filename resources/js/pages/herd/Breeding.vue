@@ -16,6 +16,7 @@ import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
 import { day, today } from '@/lib/khamar';
@@ -389,9 +390,8 @@ function saveCalving(card: BreedingCard) {
                                 label="তারিখ"
                                 :error="calving.errors.calved_on"
                             >
-                                <Input
+                                <DateField
                                     v-model="calving.calved_on"
-                                    type="date"
                                     :max="today()"
                                     class="h-10"
                                 />

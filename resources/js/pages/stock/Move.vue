@@ -7,6 +7,7 @@ import SessionPicker from '@/components/khamar/SessionPicker.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, currentSession, qty, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
@@ -228,7 +229,7 @@ function submit() {
                         </NSelect>
                     </Field>
                     <Field label="তারিখ" :error="f.errors.date">
-                        <Input v-model="f.date" type="date" :max="today()" />
+                        <DateField v-model="f.date" :max="today()" />
                     </Field>
                 </div>
 

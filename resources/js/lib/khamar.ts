@@ -82,6 +82,10 @@ export function monthLabel(ym: string): string {
 export function currentSession(): string {
     const hour = new Date().getHours();
 
+    if (hour < 4 || hour >= 20) {
+        return 'night';
+    }
+
     return hour < 11 ? 'morning' : hour < 15 ? 'noon' : 'evening';
 }
 

@@ -16,6 +16,7 @@ import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
@@ -411,10 +412,10 @@ const trackedStock = computed(() =>
                                     {{ p.label }}
                                 </button>
                             </div>
-                            <Input
+                            <DateField
+                                mode="datetime"
                                 v-if="preset === 'custom'"
                                 v-model="f.due_at"
-                                type="datetime-local"
                                 class="mt-2"
                                 required
                             />

@@ -5,6 +5,7 @@ import { reactive } from 'vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, day, taka, useCan } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
@@ -98,9 +99,9 @@ function apply() {
                     {{ centerLabel(c) }}
                 </option>
             </NSelect>
-            <Input v-model="filter.from" type="date" class="h-10" />
+            <DateField clearable v-model="filter.from" class="h-10" />
             <div class="flex gap-2">
-                <Input v-model="filter.to" type="date" class="h-10" />
+                <DateField clearable v-model="filter.to" class="h-10" />
                 <Button type="submit" class="h-10">খুঁজুন</Button>
             </div>
         </form>

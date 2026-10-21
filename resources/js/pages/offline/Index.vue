@@ -6,9 +6,7 @@ import {
     CloudUpload,
     HandCoins,
     Milk,
-    Moon,
     RefreshCw,
-    Sun,
     Trash2,
     Wheat,
     Wifi,
@@ -19,6 +17,7 @@ import SessionPicker from '@/components/khamar/SessionPicker.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { currentSession, day, qty, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
@@ -61,7 +60,7 @@ const animalCenters = computed(() =>
 
 const milk = reactive({
     date: today(),
-    session: new Date().getHours() < 13 ? 'morning' : 'evening',
+    session: currentSession(),
     rows: props.cows.length
         ? props.cows.map((cow) => ({
               animal_id: cow.id as number | null,
@@ -379,38 +378,14 @@ const outcomeText: Record<SyncOutcome, string> = {
                     class="space-y-3"
                     @submit.prevent="save('milk')"
                 >
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid gap-3">
                         <Field label="তারিখ"
-                            ><Input
-                                v-model="milk.date"
-                                type="date"
-                                :max="today()"
+                            ><DateField v-model="milk.date" :max="today()"
                         /></Field>
-                        <div class="grid gap-1.5">
-                            <span class="text-sm font-medium">বেলা</span>
-                            <div
-                                class="grid grid-cols-2 gap-1 rounded-md border border-input p-1"
-                            >
-                                <button
-                                    v-for="(label, key) in sessions"
-                                    :key="key"
-                                    type="button"
-                                    :class="[
-                                        'flex items-center justify-center gap-1 rounded py-1.5 text-sm',
-                                        milk.session === key
-                                            ? 'bg-primary text-primary-foreground'
-                                            : '',
-                                    ]"
-                                    @click="milk.session = key"
-                                >
-                                    <component
-                                        :is="key === 'morning' ? Sun : Moon"
-                                        class="size-4"
-                                    />
-                                    {{ label }}
-                                </button>
-                            </div>
-                        </div>
+                        <SessionPicker
+                            v-model="milk.session"
+                            :sessions="sessions"
+                        />
                     </div>
                     <div
                         v-for="(row, index) in milk.rows"
@@ -467,10 +442,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                             >
                         </Field>
                         <Field label="তারিখ"
-                            ><Input
-                                v-model="feed.date"
-                                type="date"
-                                :max="today()"
+                            ><DateField v-model="feed.date" :max="today()"
                         /></Field>
                     </div>
                     <p class="rounded-lg bg-muted/60 p-3 text-sm">
@@ -533,10 +505,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                     @submit.prevent="save('expense')"
                 >
                     <Field label="তারিখ"
-                        ><Input
-                            v-model="expense.date"
-                            type="date"
-                            :max="today()"
+                        ><DateField v-model="expense.date" :max="today()"
                     /></Field>
                     <Field label="টাকা কোথা থেকে"
                         ><NSelect v-model="expense.money_account_id"

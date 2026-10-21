@@ -14,6 +14,7 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
 import { centerLabel, day, taka, today, useCan } from '@/lib/khamar';
@@ -234,7 +235,7 @@ async function closeBatch(card: BatchCard) {
                 ><Input v-model="batch.name" placeholder="যেমন: কোরবানি ২০২৭"
             /></Field>
             <Field label="শুরুর তারিখ" :error="batch.errors.started_on"
-                ><Input v-model="batch.started_on" type="date" required
+                ><DateField v-model="batch.started_on" required
             /></Field>
             <Field
                 label="লক্ষ্য (দিন)"
@@ -543,7 +544,7 @@ async function closeBatch(card: BatchCard) {
                             :placeholder="`ব্যাচ-${b.number}`"
                     /></Field>
                     <Field label="শুরুর তারিখ" :error="editErrors.started_on"
-                        ><Input v-model="edit.started_on" type="date" required
+                        ><DateField v-model="edit.started_on" required
                     /></Field>
                     <Field label="লক্ষ্য (দিন)" :error="editErrors.target_days"
                         ><Input

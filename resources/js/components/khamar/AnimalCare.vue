@@ -5,6 +5,7 @@ import { computed, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
 import { day, today, useCan } from '@/lib/khamar';
@@ -188,10 +189,7 @@ const marks = [
                     v-if="service.mode === 'served'"
                     label="বীজ দেওয়ার তারিখ"
                     :error="service.errors.served_on"
-                    ><Input
-                        v-model="service.served_on"
-                        type="date"
-                        :max="today()"
+                    ><DateField v-model="service.served_on" :max="today()"
                 /></Field>
                 <Field
                     v-else
@@ -348,10 +346,7 @@ const marks = [
                     @submit.prevent="saveCalving"
                 >
                     <Field label="তারিখ" :error="calf.errors.calved_on"
-                        ><Input
-                            v-model="calf.calved_on"
-                            type="date"
-                            :max="today()"
+                        ><DateField v-model="calf.calved_on" :max="today()"
                     /></Field>
                     <Field label="কী হলো" :error="calf.errors.outcome">
                         <NSelect v-model="calf.outcome">
@@ -465,7 +460,7 @@ const marks = [
                 @submit.prevent="saveWeight"
             >
                 <Field label="তারিখ" :error="weight.errors.date"
-                    ><Input v-model="weight.date" type="date" :max="today()"
+                    ><DateField v-model="weight.date" :max="today()"
                 /></Field>
                 <Field label="ওজন (কেজি)" :error="weight.errors.kg"
                     ><Input

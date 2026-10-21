@@ -6,6 +6,7 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { centerLabel, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
@@ -236,9 +237,8 @@ const help: Record<string, string> = {
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <Field label="তারিখ" :error="f.errors.date">
-                            <Input
+                            <DateField
                                 v-model="f.date"
-                                type="date"
                                 :max="today()"
                                 required
                             />
@@ -454,7 +454,7 @@ const help: Record<string, string> = {
                                 label="লিজ শুরুর মাস"
                                 :error="f.errors.start_month"
                             >
-                                <Input v-model="f.start_month" type="date" />
+                                <DateField v-model="f.start_month" />
                             </Field>
                         </template>
 
