@@ -96,7 +96,7 @@ const item = useForm({
                         >{{ kinds[i.kind] }}</span
                     >
                 </div>
-                <p class="num font-display mt-2 text-2xl">
+                <p class="num mt-2 font-display text-2xl">
                     {{ qty(i.qty_on_hand, i.unit_label) }}
                 </p>
                 <p class="num text-sm text-muted-foreground">
@@ -200,7 +200,7 @@ const item = useForm({
         </div>
 
         <section class="mt-6 rounded-xl border border-border bg-card">
-            <h2 class="font-display border-b border-border p-4 text-lg">
+            <h2 class="border-b border-border p-4 font-display text-lg">
                 সাম্প্রতিক আনা-নেওয়া
             </h2>
             <div class="overflow-x-auto">

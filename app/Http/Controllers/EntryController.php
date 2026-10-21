@@ -53,6 +53,7 @@ class EntryController extends Controller
             'to' => ['nullable', 'date'],
             'q' => ['nullable', 'string', 'max:100'],
             'center' => ['nullable', 'exists:cost_centers,id'],
+            'party' => ['nullable', 'exists:parties,id'],
         ]);
 
         $entries = JournalEntry::query()
@@ -62,6 +63,7 @@ class EntryController extends Controller
             ->when($filters['from'] ?? null, fn ($query, $from) => $query->whereDate('date', '>=', $from))
             ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('date', '<=', $to))
             ->when($filters['q'] ?? null, fn ($query, $q) => $query->where(fn ($inner) => $inner->where('description', 'like', "%{$q}%")->orWhere('number', 'like', "%{$q}%")))
+            ->when($filters['party'] ?? null, fn ($query, $party) => $query->where('party_id', $party))
             ->when($filters['center'] ?? null, function ($query, $centerId) {
                 $ids = CostCenter::query()->findOrFail((int) $centerId)->descendantIds();
                 $query->whereHas('lines', fn ($lines) => $lines->whereIn('cost_center_id', $ids));

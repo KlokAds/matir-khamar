@@ -7,6 +7,8 @@ use App\Models\AnimalWeight;
 use App\Models\Batch;
 use App\Models\Breeding;
 use App\Models\FarmNote;
+use App\Models\HealthEvent;
+use App\Models\MilkRecord;
 use App\Support\BanglaDate;
 use App\Support\CareGuide;
 use Carbon\CarbonInterface;
@@ -183,6 +185,91 @@ class HerdCare
         ];
     }
 
+    /**
+     * Vaccines and dewormings due within a week (or overdue), unless a newer dose of the same
+     * thing was already given to the same animal or category.
+     *
+     * @return list<array{kind:string, title:string, detail:string, href:string, when:string, urgent:bool}>
+     */
+    public function healthDue(CarbonInterface $today, int $withinDays = 7): array
+    {
+        $items = [];
+        $events = HealthEvent::query()->with(['animal:id,tag,status', 'costCenter:id,name'])
+            ->whereNotNull('next_due_on')
+            ->whereDate('next_due_on', '<=', $today->addDays($withinDays))
+            ->get();
+
+        foreach ($events as $event) {
+            if ($event->animal && $event->animal->status !== 'active') {
+                continue;
+            }
+
+            $newer = HealthEvent::query()->where('name', $event->name)
+                ->where('animal_id', $event->animal_id)->where('cost_center_id', $event->cost_center_id)
+                ->whereDate('given_on', '>', $event->given_on)->exists();
+
+            if ($newer) {
+                continue;
+            }
+
+            /** @var CarbonInterface $due */
+            $due = $event->next_due_on;
+            $left = (int) $today->diffInDays($due, false);
+            $items[] = [
+                'kind' => 'health',
+                'title' => "{$event->target()}: {$event->name}".($left < 0 ? ' — '.abs($left).' দিন পার' : ($left === 0 ? ' আজ' : " {$left} দিন পর")),
+                'detail' => (HealthEvent::KINDS[$event->kind] ?? '').' · আগেরটা '.BanglaDate::day($event->given_on),
+                'href' => $event->animal_id ? "/animals/{$event->animal_id}" : '/health',
+                'when' => $due->toDateString(),
+                'urgent' => $left <= 0,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * A cow giving clearly less milk than her own recent days is often the first sign of
+     * illness: the last 3 days against the 7 before them, per cow, when she gives at least 2 L.
+     *
+     * @return list<array{kind:string, title:string, detail:string, href:string, when:string, urgent:bool}>
+     */
+    public function milkDrops(CarbonInterface $today): array
+    {
+        $recentFrom = $today->subDays(3)->toDateString();
+        $baseFrom = $today->subDays(10)->toDateString();
+        $rows = MilkRecord::query()->whereNotNull('animal_id')
+            ->where('date', '>=', $baseFrom)->where('date', '<', $today->toDateString())
+            ->selectRaw('animal_id, SUM(CASE WHEN date >= ? THEN liters ELSE 0 END) as recent, SUM(CASE WHEN date < ? THEN liters ELSE 0 END) as base', [$recentFrom, $recentFrom])
+            ->groupBy('animal_id')->get();
+        $items = [];
+
+        foreach ($rows as $row) {
+            $recent = (float) $row->getAttribute('recent') / 3;
+            $base = (float) $row->getAttribute('base') / 7;
+
+            if ($base >= 2 && $recent < $base * 0.8) {
+                $animal = Animal::query()->whereKey((int) $row->getAttribute('animal_id'))->first();
+
+                if ($animal === null || $animal->status !== 'active') {
+                    continue;
+                }
+
+                $drop = (int) round((1 - $recent / $base) * 100);
+                $items[] = [
+                    'kind' => 'milk',
+                    'title' => "{$animal->tag}: দুধ {$drop}% কমেছে — শরীর দেখুন",
+                    'detail' => 'আগে দিনে '.round($base, 1).' লি., এখন '.round($recent, 1).' লি.',
+                    'href' => "/animals/{$animal->id}",
+                    'when' => $today->toDateString(),
+                    'urgent' => $drop >= 35,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
     /** Whether the farm has cows in the dairy category, so missing milk is worth a nudge. */
     public function hasMilkingCows(): bool
     {
@@ -237,6 +324,14 @@ class HerdCare
             if ($days >= $batch->target_days) {
                 $items[] = ['kind' => 'batch', 'title' => "{$batch->label()}: লক্ষ্যের {$batch->target_days} দিন পূর্ণ", 'detail' => "চলছে {$days} দিন — বিক্রির কথা ভাবুন", 'href' => '/batches', 'when' => $today->toDateString(), 'urgent' => $days > $batch->target_days + 14];
             }
+        }
+
+        foreach ($this->healthDue($today) as $due) {
+            $items[] = $due;
+        }
+
+        foreach ($this->milkDrops($today) as $drop) {
+            $items[] = $drop;
         }
 
         $notes = FarmNote::query()->whereNull('done_at')->whereNotNull('follow_up_on')

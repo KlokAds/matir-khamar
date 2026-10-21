@@ -9,7 +9,7 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
         <AppLogoIcon class="size-7" />
     </div>
     <div class="ml-1 grid flex-1 text-left leading-tight">
-        <span class="font-display truncate text-[15px] text-sidebar-foreground">
+        <span class="truncate font-display text-[15px] text-sidebar-foreground">
             মাটির খামার
         </span>
         <span

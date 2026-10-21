@@ -123,7 +123,7 @@ const share = (row: Row, used: Used) =>
         </p>
 
         <section v-for="section in sections" :key="section.key" class="mb-8">
-            <h2 class="font-display mb-3 flex items-center gap-2 text-xl">
+            <h2 class="mb-3 flex items-center gap-2 font-display text-xl">
                 <component :is="section.icon" class="size-5 text-paddy" />
                 {{ section.title }}
             </h2>

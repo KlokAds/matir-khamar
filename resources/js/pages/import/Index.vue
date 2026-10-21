@@ -570,7 +570,7 @@ const stockCategoryIds = computed(() =>
         </section>
 
         <section class="mb-6 rounded-xl border border-border bg-card">
-            <h2 class="font-display border-b border-border p-4 text-lg">
+            <h2 class="border-b border-border p-4 font-display text-lg">
                 ২. বিলিং-এর সারি (তারিখের ক্রমে খাতায় ওঠে)
             </h2>
             <div class="overflow-x-auto">
@@ -706,7 +706,7 @@ const stockCategoryIds = computed(() =>
         </section>
 
         <section class="min-w-0 rounded-xl border border-border bg-card p-4">
-            <h2 class="font-display mb-1 text-lg">৩. মিলিয়ে দেখা</h2>
+            <h2 class="mb-1 font-display text-lg">৩. মিলিয়ে দেখা</h2>
             <p class="mb-3 text-sm text-muted-foreground">
                 বিলিং-এ আজ যা আছে বনাম খাতায় যা উঠেছে। পার্থক্য থাকলে বিলিং-এ
                 পরে কিছু বদলানো হয়েছে।

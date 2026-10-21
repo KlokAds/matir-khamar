@@ -275,7 +275,7 @@ const trackedStock = computed(() =>
                 <!-- This phone -->
                 <section class="rounded-xl border border-border bg-card p-4">
                     <h2
-                        class="font-display mb-2 flex items-center gap-2 text-lg"
+                        class="mb-2 flex items-center gap-2 font-display text-lg"
                     >
                         <Smartphone class="size-5 text-paddy" /> এই ফোনে
                         নোটিফিকেশন
@@ -379,7 +379,7 @@ const trackedStock = computed(() =>
                     @submit.prevent="save"
                 >
                     <h2
-                        class="font-display mb-3 flex items-center gap-2 text-lg"
+                        class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
                         <AlarmClock class="size-5 text-turmeric" /> নতুন
                         রিমাইন্ডার
@@ -505,7 +505,7 @@ const trackedStock = computed(() =>
                     class="rounded-xl border border-border bg-card p-4"
                 >
                     <h2
-                        class="font-display mb-3 flex items-center gap-2 text-lg"
+                        class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
                         <Package class="size-5 text-clay" /> স্টক আর কত দিন চলবে
                     </h2>

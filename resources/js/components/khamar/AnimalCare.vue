@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, useForm } from '@inertiajs/vue3';
-import { Baby, CalendarHeart, Layers, Scale } from '@lucide/vue';
+import { Baby, CalendarHeart, Layers, Scale, Syringe } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
@@ -61,6 +61,14 @@ const props = defineProps<{
     };
     ageDays: number | null;
     calfStage: Stage | null;
+    health: {
+        id: number;
+        kind_label: string;
+        name: string;
+        target: string;
+        given_on: string;
+        next_due_on: string | null;
+    }[];
 }>();
 
 const can = useCan();
@@ -147,7 +155,7 @@ const marks = [
             class="min-w-0 rounded-xl border border-border bg-card p-4"
         >
             <div class="mb-3 flex items-center justify-between gap-2">
-                <h2 class="font-display flex items-center gap-2 text-lg">
+                <h2 class="flex items-center gap-2 font-display text-lg">
                     <CalendarHeart class="size-5 text-clay" /> গর্ভ ও বাচ্চা
                 </h2>
                 <Button
@@ -427,10 +435,56 @@ const marks = [
             </ul>
         </section>
 
+        <!-- টিকা ও কৃমি -->
+        <section class="min-w-0 rounded-xl border border-border bg-card p-4">
+            <div class="mb-3 flex items-center justify-between gap-2">
+                <h2 class="flex items-center gap-2 font-display text-lg">
+                    <Syringe class="size-5 text-paddy" /> টিকা ও কৃমি
+                </h2>
+                <Link
+                    v-if="can['post-daily'] && active"
+                    href="/health"
+                    class="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                    >লিখুন →</Link
+                >
+            </div>
+            <ul v-if="health.length" class="divide-y divide-border/60 text-sm">
+                <li
+                    v-for="h in health"
+                    :key="h.id"
+                    class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-2"
+                >
+                    <span
+                        ><b class="font-medium">{{ h.name }}</b>
+                        <small class="text-muted-foreground">
+                            · {{ h.kind_label }} · {{ h.target }}</small
+                        ></span
+                    >
+                    <span class="text-xs text-muted-foreground"
+                        >{{ day(h.given_on)
+                        }}<template v-if="h.next_due_on">
+                            → পরেরটা
+                            <b
+                                :class="
+                                    h.next_due_on < today()
+                                        ? 'text-destructive'
+                                        : 'text-foreground'
+                                "
+                                >{{ day(h.next_due_on) }}</b
+                            ></template
+                        ></span
+                    >
+                </li>
+            </ul>
+            <p v-else class="text-sm text-muted-foreground">
+                এখনো কোনো টিকা বা কৃমিনাশক লেখা হয়নি।
+            </p>
+        </section>
+
         <!-- ওজন ও ব্যাচ -->
         <section class="min-w-0 rounded-xl border border-border bg-card p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
-                <h2 class="font-display flex items-center gap-2 text-lg">
+                <h2 class="flex items-center gap-2 font-display text-lg">
                     <Scale class="size-5 text-pond" /> ওজন ও বাড়া
                 </h2>
                 <Button

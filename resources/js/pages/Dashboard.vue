@@ -317,7 +317,7 @@ const greeting = computed(() => {
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 xl:col-span-2"
             >
-                <h2 class="font-display mb-4 text-lg">গত ৬ মাস</h2>
+                <h2 class="mb-4 font-display text-lg">গত ৬ মাস</h2>
                 <TrendBars :months="trend" />
             </section>
         </div>

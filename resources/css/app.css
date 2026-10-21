@@ -83,6 +83,12 @@
     }
 }
 
+/* A real utility, so components can also @apply it. */
+@utility font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.005em;
+}
+
 @layer utilities {
     body,
     html {
@@ -90,11 +96,6 @@
            sizes; Tiro Bangla gives headings the feel of a printed khata. */
         --font-sans: 'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
         --font-display: 'Tiro Bangla', 'Noto Sans Bengali', Georgia, serif;
-    }
-
-    .font-display {
-        font-family: var(--font-display);
-        letter-spacing: 0.005em;
     }
 
     /* Figures in ledgers line up digit under digit. */

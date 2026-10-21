@@ -91,7 +91,7 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">
+                <h2 class="mb-3 font-display text-lg">
                     লাভ-ক্ষতি — খাত অনুযায়ী
                 </h2>
                 <table class="w-full text-sm">
@@ -162,7 +162,7 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">
+                <h2 class="mb-3 font-display text-lg">
                     ক্যাটাগরি / প্রজেক্ট অনুযায়ী
                 </h2>
                 <table class="w-full text-sm">
@@ -188,7 +188,7 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">
+                <h2 class="mb-3 font-display text-lg">
                     খামারের সম্পদ ও দায় (আজ পর্যন্ত)
                 </h2>
                 <div class="grid gap-4 sm:grid-cols-2">
@@ -247,7 +247,7 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-4 text-lg">গত ১২ মাস</h2>
+                <h2 class="mb-4 font-display text-lg">গত ১২ মাস</h2>
                 <TrendBars :months="trend" />
             </section>
         </div>

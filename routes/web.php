@@ -6,6 +6,7 @@ use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HerdController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LocaleController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SystemController;
@@ -31,6 +33,8 @@ Route::post('reminders/{reminder}/act/{action}', [ReminderController::class, 'ac
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::inertia('guide', 'guide/Index')->name('guide');
+    Route::get('search', SearchController::class)->middleware('throttle:120,1')->name('search');
 
     // Reminders and phone notifications: everyone signed in can set and receive their own.
     Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');
@@ -52,6 +56,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('animals/{animal}/breedings', [HerdController::class, 'storeBreeding'])->name('breedings.store');
         Route::put('breedings/{breeding}', [HerdController::class, 'updateBreeding'])->name('breedings.update');
         Route::post('animals/{animal}/weights', [HerdController::class, 'storeWeight'])->name('weights.store');
+        Route::post('health', [HealthController::class, 'store'])->name('health.store');
+        Route::delete('health/{event}', [HealthController::class, 'destroy'])->name('health.destroy');
         Route::post('diary/notes', [DiaryController::class, 'storeNote'])->name('diary.notes.store');
         Route::put('diary/notes/{note}', [DiaryController::class, 'updateNote'])->name('diary.notes.update');
     });
@@ -68,11 +74,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
         Route::get('reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
+        Route::get('reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');
         Route::inertia('guide/split', 'guide/Split')->name('guide.split');
         Route::get('money', [MoneyController::class, 'index'])->name('money.index');
         Route::get('breeding', [HerdController::class, 'breeding'])->name('breeding.index');
         Route::get('batches', [HerdController::class, 'batches'])->name('batches.index');
         Route::get('diary', [DiaryController::class, 'index'])->name('diary.index');
+        Route::get('health', [HealthController::class, 'index'])->name('health.index');
+        Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');
     });
 
     Route::middleware('can:post-entries')->group(function () {

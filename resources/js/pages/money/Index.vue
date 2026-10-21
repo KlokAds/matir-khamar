@@ -294,7 +294,7 @@ const place = useForm({
             v-if="selected"
             class="mt-6 min-w-0 rounded-xl border border-border bg-card"
         >
-            <h2 class="font-display border-b border-border p-4 text-lg">
+            <h2 class="border-b border-border p-4 font-display text-lg">
                 {{ selected.name }} — আসা-যাওয়া
             </h2>
             <div class="overflow-x-auto">

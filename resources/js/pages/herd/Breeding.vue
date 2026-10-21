@@ -189,7 +189,7 @@ function saveCalving(card: BreedingCard) {
 
         <!-- Open pregnancies -->
         <section class="mt-6">
-            <h2 class="font-display mb-3 text-lg">চলমান গর্ভ</h2>
+            <h2 class="mb-3 font-display text-lg">চলমান গর্ভ</h2>
 
             <div
                 v-if="!open.length"
@@ -209,7 +209,7 @@ function saveCalving(card: BreedingCard) {
                         <div class="min-w-0">
                             <Link
                                 :href="`/animals/${card.animal_id}`"
-                                class="font-display block truncate text-lg leading-tight hover:underline"
+                                class="block truncate font-display text-lg leading-tight hover:underline"
                                 >{{ cowName(card) }}</Link
                             >
                             <p class="mt-0.5 text-sm text-foreground/80">

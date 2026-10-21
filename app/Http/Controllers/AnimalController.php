@@ -7,6 +7,7 @@ use App\Models\Animal;
 use App\Models\Batch;
 use App\Models\Breeding;
 use App\Models\CostCenter;
+use App\Models\HealthEvent;
 use App\Models\JournalLine;
 use App\Models\MilkRecord;
 use App\Services\AllocationService;
@@ -216,6 +217,19 @@ class AnimalController extends Controller
             'breedingOptions' => ['methods' => Breeding::METHODS, 'results' => Breeding::RESULTS, 'outcomes' => Breeding::OUTCOMES],
             'ageDays' => $ageDays,
             'calfStage' => $ageDays !== null && $ageDays <= 540 ? CareGuide::stageFor(CareGuide::calf(), $ageDays) : null,
+            // Its own doses plus those given to its whole category or the whole farm.
+            'health' => HealthEvent::query()->with(['animal:id,tag', 'costCenter:id,name'])
+                ->where(fn ($q) => $q->where('animal_id', $animal->id)
+                    ->orWhere(fn ($w) => $w->whereNull('animal_id')->where(fn ($c) => $c->where('cost_center_id', $animal->cost_center_id)->orWhereNull('cost_center_id'))))
+                ->orderByDesc('given_on')->limit(20)->get()
+                ->map(fn (HealthEvent $e) => [
+                    'id' => $e->id,
+                    'kind_label' => HealthEvent::KINDS[$e->kind] ?? $e->kind,
+                    'name' => $e->name,
+                    'target' => $e->target(),
+                    'given_on' => $e->given_on->toDateString(),
+                    'next_due_on' => $e->next_due_on?->toDateString(),
+                ]),
         ]);
     }
 

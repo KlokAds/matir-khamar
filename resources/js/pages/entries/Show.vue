@@ -238,7 +238,7 @@ function pick(event: Event) {
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">ভাউচার / রসিদ</h2>
+                <h2 class="mb-3 font-display text-lg">ভাউচার / রসিদ</h2>
                 <ul v-if="entry.attachments.length" class="mb-3 space-y-2">
                     <li v-for="file in entry.attachments" :key="file.id">
                         <a

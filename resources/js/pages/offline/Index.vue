@@ -572,7 +572,7 @@ const outcomeText: Record<SyncOutcome, string> = {
             <section
                 class="min-w-0 rounded-xl border border-border bg-card lg:col-span-2"
             >
-                <h2 class="font-display border-b border-border p-4 text-lg">
+                <h2 class="border-b border-border p-4 font-display text-lg">
                     এই ফোনের এন্ট্রি
                 </h2>
                 <ul class="divide-y divide-border/70">

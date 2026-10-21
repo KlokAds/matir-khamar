@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Models\Concerns\Auditable;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * The farm diary: what happened today, a mistake not to repeat, a lesson, an idea to try.
@@ -27,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CostCenter|null $costCenter
  * @property-read Animal|null $animal
  * @property-read User|null $author
+ * @property-read Collection<int, FarmNoteFile> $files
  */
 #[Fillable(['date', 'kind', 'title', 'body', 'cost_center_id', 'animal_id', 'follow_up_on', 'done_at', 'created_by'])]
 class FarmNote extends Model
@@ -60,6 +63,12 @@ class FarmNote extends Model
     public function animal(): BelongsTo
     {
         return $this->belongsTo(Animal::class);
+    }
+
+    /** @return HasMany<FarmNoteFile, $this> */
+    public function files(): HasMany
+    {
+        return $this->hasMany(FarmNoteFile::class);
     }
 
     /** @return BelongsTo<User, $this> */

@@ -150,7 +150,7 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
                 :key="g.type"
                 class="rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-2 text-lg">{{ types[g.type] }}</h2>
+                <h2 class="mb-2 font-display text-lg">{{ types[g.type] }}</h2>
                 <ul class="divide-y divide-border/60">
                     <li
                         v-for="a in g.rows"

@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Animal;
 use App\Models\FarmNote;
+use App\Models\FarmNoteFile;
 use App\Models\Goal;
 use App\Support\CareGuide;
 use App\Support\Lookups;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * The farm diary (what happened, mistakes, lessons, ideas), the goals the farm is chasing,
@@ -27,7 +31,7 @@ class DiaryController extends Controller
             'kind' => $kind,
             'kinds' => FarmNote::KINDS,
             'counts' => FarmNote::query()->selectRaw('kind, COUNT(*) as n')->groupBy('kind')->pluck('n', 'kind'),
-            'notes' => FarmNote::query()->with(['costCenter:id,name', 'animal:id,tag', 'author:id,name'])
+            'notes' => FarmNote::query()->with(['costCenter:id,name', 'animal:id,tag', 'author:id,name', 'files'])
                 ->when($kind, fn ($query) => $query->where('kind', $kind))
                 ->orderByDesc('date')->orderByDesc('id')->limit(200)->get()
                 ->map(fn (FarmNote $note) => [
@@ -42,6 +46,7 @@ class DiaryController extends Controller
                     'follow_up_on' => $note->follow_up_on?->toDateString(),
                     'done' => $note->done_at !== null,
                     'author' => $note->author?->name,
+                    'files' => $note->files->map(fn (FarmNoteFile $f) => ['id' => $f->id, 'kind' => $f->kind(), 'name' => $f->original_name, 'url' => "/diary/files/{$f->id}"])->values(),
                 ]),
             'goals' => Goal::query()->with('costCenter:id,name')->orderByRaw('achieved_at IS NOT NULL')->orderBy('due_on')->get()
                 ->map(fn (Goal $goal) => [
@@ -59,10 +64,41 @@ class DiaryController extends Controller
 
     public function storeNote(Request $request): RedirectResponse
     {
-        FarmNote::query()->create([...$this->noteData($request), 'created_by' => $request->user()->id]);
+        $request->validate([
+            'files' => ['nullable', 'array', 'max:5'],
+            // Photos from the phone camera, and voice notes recorded in the browser (webm/ogg/m4a).
+            'files.*' => ['file', 'max:10240', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif,audio/webm,audio/ogg,audio/mp4,audio/mpeg,audio/aac,audio/x-m4a,video/webm'],
+        ]);
+
+        $note = FarmNote::query()->create([...$this->noteData($request), 'created_by' => $request->user()->id]);
+
+        foreach ((array) $request->file('files', []) as $upload) {
+            if (! $upload instanceof UploadedFile) {
+                continue;
+            }
+
+            $note->files()->create([
+                'path' => $upload->store('diary/'.now()->format('Y/m'), 'local'),
+                'original_name' => mb_substr($upload->getClientOriginalName() ?: 'voice', 0, 200),
+                'mime' => (string) $upload->getMimeType(),
+                'size' => (int) $upload->getSize(),
+            ]);
+        }
+
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ডায়েরিতে লেখা হলো।']);
 
         return back();
+    }
+
+    /** A diary photo or voice note, only for signed-in users who can read the diary. */
+    public function file(FarmNoteFile $file): StreamedResponse
+    {
+        abort_unless(Storage::disk('local')->exists($file->path), 404);
+
+        return Storage::disk('local')->response($file->path, $file->original_name, [
+            'Content-Type' => $file->mime,
+            'Cache-Control' => 'private, max-age=86400',
+        ]);
     }
 
     public function updateNote(Request $request, FarmNote $note): RedirectResponse

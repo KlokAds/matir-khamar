@@ -119,7 +119,7 @@ const cowLabel = (id: number | null) => {
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-3"
             >
-                <h2 class="font-display mb-3 text-lg">গত ৩০ দিন</h2>
+                <h2 class="mb-3 font-display text-lg">গত ৩০ দিন</h2>
                 <table class="w-full text-sm">
                     <thead class="text-left text-xs text-muted-foreground">
                         <tr class="border-b border-border">

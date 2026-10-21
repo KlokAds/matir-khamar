@@ -58,7 +58,7 @@ function cancel() {
             <form class="grid gap-4" @submit.prevent="submit">
                 <DialogHeader>
                     <DialogTitle
-                        class="font-display flex items-center gap-2 text-xl"
+                        class="flex items-center gap-2 font-display text-xl"
                     >
                         <CircleAlert
                             v-if="current.danger"

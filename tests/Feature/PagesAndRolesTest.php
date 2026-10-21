@@ -62,3 +62,17 @@ it('logs out a disabled user at once', function () {
     $this->actingAs($user)->get('/dashboard')->assertRedirect(route('login'));
     $this->assertGuest();
 });
+
+it('finds animals, entries and pages from the search box, and hides books from the daily role', function () {
+    $admin = User::query()->where('email', 'admin@khamar.test')->first();
+
+    $this->actingAs($admin)->getJson('/search?q=B-0')->assertOk()
+        ->assertJsonFragment(['group' => 'গরু'])
+        ->assertJsonFragment(['group' => 'খাতার এন্ট্রি']);
+
+    $worker = User::factory()->create(['role' => Role::Entry]);
+    $results = $this->actingAs($worker)->getJson('/search?q=B-0')->assertOk()->json('results');
+    expect($results)->toBe([]);
+
+    $this->actingAs($worker)->get('/guide')->assertOk();
+});

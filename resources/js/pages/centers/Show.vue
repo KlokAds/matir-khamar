@@ -232,7 +232,7 @@ const applyRange = () =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 xl:col-span-3"
             >
-                <h2 class="font-display mb-3 text-lg">খাত অনুযায়ী</h2>
+                <h2 class="mb-3 font-display text-lg">খাত অনুযায়ী</h2>
                 <table class="w-full text-sm">
                     <tbody>
                         <tr
@@ -269,7 +269,7 @@ const applyRange = () =>
                 </table>
 
                 <template v-if="node && node.children.length">
-                    <h2 class="font-display mt-6 mb-2 text-lg">
+                    <h2 class="mt-6 mb-2 font-display text-lg">
                         ভেতরের ক্যাটাগরি
                     </h2>
                     <table class="w-full text-sm">
@@ -286,7 +286,7 @@ const applyRange = () =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 xl:col-span-2"
             >
-                <h2 class="font-display mb-4 text-lg">গত ৬ মাস</h2>
+                <h2 class="mb-4 font-display text-lg">গত ৬ মাস</h2>
                 <TrendBars :months="trend" />
             </section>
         </div>
@@ -295,7 +295,7 @@ const applyRange = () =>
             v-if="animals.length"
             class="mt-6 rounded-xl border border-border bg-card p-4"
         >
-            <h2 class="font-display mb-3 text-lg">এখানকার গরু</h2>
+            <h2 class="mb-3 font-display text-lg">এখানকার গরু</h2>
             <div class="flex flex-wrap gap-2">
                 <Link
                     v-for="a in animals"
@@ -313,7 +313,7 @@ const applyRange = () =>
         </section>
 
         <section class="mt-6 rounded-xl border border-border bg-card">
-            <h2 class="font-display border-b border-border p-4 text-lg">
+            <h2 class="border-b border-border p-4 font-display text-lg">
                 লেনদেন
             </h2>
             <div class="overflow-x-auto">

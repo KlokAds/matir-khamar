@@ -110,7 +110,7 @@ const share = (id: number) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-2"
             >
-                <h2 class="font-display mb-3 text-lg">ভাগ করার মতো খরচ</h2>
+                <h2 class="mb-3 font-display text-lg">ভাগ করার মতো খরচ</h2>
                 <table class="w-full text-sm">
                     <tbody>
                         <tr

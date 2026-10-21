@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Bell, ChevronRight, CloudOff, Plus, RefreshCw } from '@lucide/vue';
+import {
+    Bell,
+    ChevronRight,
+    CloudOff,
+    Plus,
+    RefreshCw,
+    Search,
+} from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import GlobalSearch from '@/components/GlobalSearch.vue';
+import QuickAddMenu from '@/components/QuickAddMenu.vue';
 import { useSidebar } from '@/components/ui/sidebar';
 import { currentLocale, t } from '@/lib/i18n';
 import { useCan } from '@/lib/khamar';
@@ -25,6 +34,7 @@ const props = withDefaults(
 const { toggleSidebar } = useSidebar();
 const can = useCan();
 const page = usePage();
+const searching = ref(false);
 
 const title = computed(
     () => props.breadcrumbs[props.breadcrumbs.length - 1]?.title ?? '',
@@ -143,12 +153,23 @@ const switchTo = (next: 'bn' | 'en') => {
                     >
                 </template>
             </p>
-            <p class="font-display truncate text-lg md:text-xl">
+            <p class="truncate font-display text-lg md:text-xl">
                 {{ t(title) }}
             </p>
         </div>
 
         <div class="flex shrink-0 items-center gap-1.5">
+            <button
+                type="button"
+                class="search-btn"
+                :aria-label="t('খুঁজুন')"
+                @click="searching = true"
+            >
+                <Search class="size-4" />
+                <span class="hidden lg:inline">{{ t('খুঁজুন…') }}</span>
+                <kbd class="hidden lg:inline">Ctrl K</kbd>
+            </button>
+
             <Link
                 v-if="!online || pendingCount > 0"
                 href="/offline"
@@ -206,16 +227,18 @@ const switchTo = (next: 'bn' | 'en') => {
                 </button>
             </div>
 
-            <Link
-                v-if="can['post-entries']"
-                href="/entries/create"
-                class="add-btn"
-                :aria-label="t('নতুন এন্ট্রি')"
-            >
-                <Plus class="size-4" />
-                <span class="hidden lg:inline">{{ t('এন্ট্রি') }}</span>
-            </Link>
+            <QuickAddMenu v-if="can['post-daily'] || can['post-entries']">
+                <button
+                    type="button"
+                    class="add-btn hidden md:flex"
+                    :aria-label="t('নতুন কিছু লিখুন')"
+                >
+                    <Plus class="size-4" />
+                    <span class="hidden lg:inline">{{ t('লিখুন') }}</span>
+                </button>
+            </QuickAddMenu>
         </div>
+        <GlobalSearch v-model:open="searching" />
     </header>
 </template>
 
@@ -244,6 +267,14 @@ const switchTo = (next: 'bn' | 'en') => {
     @apply flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-paddy shadow-xs transition-colors hover:bg-paddy hover:text-primary-foreground;
 }
 
+.search-btn {
+    @apply flex size-9 items-center justify-center gap-2 rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground lg:w-auto lg:min-w-52 lg:justify-start lg:px-3 lg:text-sm;
+}
+
+.search-btn kbd {
+    @apply ml-auto rounded border border-border px-1.5 text-[10px] font-medium;
+}
+
 .bell {
     @apply flex size-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground;
 }
@@ -261,6 +292,6 @@ const switchTo = (next: 'bn' | 'en') => {
 }
 
 .add-btn {
-    @apply flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-medium text-primary-foreground shadow-xs transition-opacity hover:opacity-90;
+    @apply h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-medium text-primary-foreground shadow-xs transition-opacity hover:opacity-90;
 }
 </style>

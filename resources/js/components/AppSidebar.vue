@@ -71,6 +71,7 @@ const items = computed<NavItem[]>(() => {
             ['নতুন গরু', '/animals/create', !!c['post-entries']],
             ['দুধের হিসাব', '/milk', !!c['post-daily']],
             ['গর্ভ ও বাছুর', '/breeding', !!c['view-reports']],
+            ['টিকা ও কৃমি', '/health', !!c['view-reports']],
             ['মোটাতাজা ব্যাচ', '/batches', !!c['view-reports']],
             ['খামার ডায়েরি ও লক্ষ্য', '/diary', !!c['view-reports']],
         ]),
@@ -94,8 +95,10 @@ const items = computed<NavItem[]>(() => {
         ...group('রিপোর্ট', ChartColumnBig, [
             ['ক্যাটাগরি ও প্রজেক্ট', '/centers', !!c['view-reports']],
             ['লাভ-ক্ষতি ও সম্পদ', '/reports', !!c['view-reports']],
+            ['মাসিক রিপোর্ট', '/reports/monthly', !!c['view-reports']],
             ['উদ্যোগ বাজেট', '/reports/budget', !!c['view-reports']],
             ['ভাগ কীভাবে হয় (উদাহরণ)', '/guide/split', !!c['view-reports']],
+            ['সাহায্য ও গাইড', '/guide', true],
         ]),
         ...group('সেটআপ ও নিরাপত্তা', Settings2, [
             ['প্রজেক্ট সাজান', '/setup/centers', !!c['manage-setup']],

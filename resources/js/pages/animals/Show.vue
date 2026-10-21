@@ -62,6 +62,7 @@ const props = defineProps<{
     breedingOptions: InstanceType<typeof AnimalCare>['$props']['options'];
     ageDays: number | null;
     calfStage: InstanceType<typeof AnimalCare>['$props']['calfStage'];
+    health: InstanceType<typeof AnimalCare>['$props']['health'];
 }>();
 
 defineOptions({
@@ -261,13 +262,14 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
             :options="breedingOptions"
             :age-days="ageDays"
             :calf-stage="calfStage"
+            :health="health"
         />
 
         <div class="mt-6 grid gap-6 lg:grid-cols-3">
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">কোথায় কতদিন</h2>
+                <h2 class="mb-3 font-display text-lg">কোথায় কতদিন</h2>
                 <ol
                     class="relative ml-2 border-l-2 border-dashed border-border pl-4"
                 >
@@ -302,7 +304,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
             <section
                 class="min-w-0 rounded-xl border border-border bg-card lg:col-span-2"
             >
-                <h2 class="font-display border-b border-border p-4 text-lg">
+                <h2 class="border-b border-border p-4 font-display text-lg">
                     এই গরুর লেনদেন
                 </h2>
                 <table class="w-full text-sm">

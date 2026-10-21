@@ -3,18 +3,28 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
     CalendarClock,
     Check,
+    FileText,
     Lightbulb,
     ListChecks,
     NotebookPen,
     Target,
     TriangleAlert,
     Trophy,
+    X,
 } from '@lucide/vue';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import {
+    computed,
+    onBeforeUnmount,
+    onMounted,
+    reactive,
+    ref,
+    watch,
+} from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import Toggle from '@/components/khamar/Toggle.vue';
+import VoiceRecorder from '@/components/khamar/VoiceRecorder.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
@@ -37,6 +47,14 @@ type Note = {
     follow_up_on: string | null;
     done: boolean;
     author: string | null;
+    files: NoteFile[];
+};
+
+type NoteFile = {
+    id: number;
+    kind: 'image' | 'audio' | 'file';
+    name: string;
+    url: string;
 };
 
 type Goal = {
@@ -115,14 +133,114 @@ const note = useForm({
     cost_center_id: null as number | null,
     animal_id: null as number | null,
     follow_up_on: '',
+    files: [] as File[],
 });
+
+/* attachments: photos and voice notes */
+
+const MAX_FILES = 5;
+const tooMany = `একটি লেখায় সর্বোচ্চ ${MAX_FILES}টি ছবি বা ভয়েস রাখা যায়।`;
+type Picked = { key: number; file: File; url: string; kind: 'image' | 'audio' };
+const picked = ref<Picked[]>([]);
+const fileMessage = ref('');
+const recorderOpen = ref(false);
+const photoInput = ref<HTMLInputElement | null>(null);
+let pickKey = 0;
+
+function syncFiles() {
+    note.files = picked.value.map((p) => p.file);
+}
+
+function addFiles(files: File[]) {
+    fileMessage.value = '';
+
+    for (const file of files) {
+        if (picked.value.length >= MAX_FILES) {
+            fileMessage.value = tooMany;
+            break;
+        }
+
+        picked.value.push({
+            key: ++pickKey,
+            file,
+            url: URL.createObjectURL(file),
+            kind: file.type.startsWith('image/') ? 'image' : 'audio',
+        });
+    }
+
+    syncFiles();
+}
+
+function onPhotos(e: Event) {
+    const input = e.target as HTMLInputElement;
+    addFiles(Array.from(input.files ?? []));
+    input.value = '';
+}
+
+function onRecorded(file: File) {
+    addFiles([file]);
+    recorderOpen.value = false;
+}
+
+function openRecorder() {
+    if (picked.value.length >= MAX_FILES) {
+        fileMessage.value = tooMany;
+
+        return;
+    }
+
+    recorderOpen.value = true;
+}
+
+function openCamera() {
+    if (picked.value.length >= MAX_FILES) {
+        fileMessage.value = tooMany;
+
+        return;
+    }
+
+    photoInput.value?.click();
+}
+
+function removePicked(key: number) {
+    const item = picked.value.find((p) => p.key === key);
+
+    if (item) {
+        URL.revokeObjectURL(item.url);
+    }
+
+    picked.value = picked.value.filter((p) => p.key !== key);
+    fileMessage.value = '';
+    syncFiles();
+}
+
+function clearPicked() {
+    picked.value.forEach((p) => URL.revokeObjectURL(p.url));
+    picked.value = [];
+    fileMessage.value = '';
+    recorderOpen.value = false;
+    syncFiles();
+}
+
+onBeforeUnmount(() => picked.value.forEach((p) => URL.revokeObjectURL(p.url)));
+
+const fileErrors = computed(() =>
+    Object.entries(note.errors as Record<string, string | undefined>)
+        .filter(([key, msg]) => key.startsWith('files') && !!msg)
+        .map(([, msg]) => msg as string),
+);
+
+const imagesOf = (n: Note) => (n.files ?? []).filter((f) => f.kind === 'image');
+const othersOf = (n: Note) => (n.files ?? []).filter((f) => f.kind !== 'image');
 
 function saveNote() {
     note.post('/diary/notes', {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             note.reset();
             note.date = today();
+            clearPicked();
         },
     });
 }
@@ -345,7 +463,7 @@ const rules = [
                     class="rounded-xl border border-border bg-card p-4"
                     @submit.prevent="saveNote"
                 >
-                    <h2 class="font-display mb-3 text-lg">আজ কী লিখবেন?</h2>
+                    <h2 class="mb-3 font-display text-lg">আজ কী লিখবেন?</h2>
 
                     <Field
                         label="কী ধরনের কথা"
@@ -436,6 +554,91 @@ const rules = [
                                 class="h-10"
                             />
                         </Field>
+
+                        <div class="grid gap-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    class="h-11 text-base"
+                                    @click="openCamera"
+                                >
+                                    📷 ছবি
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    class="h-11 text-base"
+                                    :disabled="recorderOpen"
+                                    @click="openRecorder"
+                                >
+                                    🎙 ভয়েস নোট
+                                </Button>
+                            </div>
+                            <input
+                                ref="photoInput"
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                multiple
+                                class="hidden"
+                                @change="onPhotos"
+                            />
+
+                            <VoiceRecorder
+                                v-if="recorderOpen"
+                                @recorded="onRecorded"
+                                @close="recorderOpen = false"
+                            />
+
+                            <ul v-if="picked.length" class="grid gap-2">
+                                <li
+                                    v-for="p in picked"
+                                    :key="p.key"
+                                    class="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-1.5"
+                                >
+                                    <template v-if="p.kind === 'image'">
+                                        <img
+                                            :src="p.url"
+                                            alt=""
+                                            class="size-12 shrink-0 rounded-md object-cover"
+                                        />
+                                        <span
+                                            class="min-w-0 flex-1 truncate text-xs text-muted-foreground"
+                                            >{{ p.file.name }}</span
+                                        >
+                                    </template>
+                                    <audio
+                                        v-else
+                                        controls
+                                        :src="p.url"
+                                        class="h-10 min-w-0 flex-1"
+                                    />
+                                    <button
+                                        type="button"
+                                        class="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-destructive"
+                                        aria-label="সরিয়ে দিন"
+                                        @click="removePicked(p.key)"
+                                    >
+                                        <X class="size-4" />
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <p
+                                v-if="fileMessage"
+                                class="text-xs text-destructive"
+                            >
+                                {{ fileMessage }}
+                            </p>
+                            <p
+                                v-for="(msg, i) in fileErrors"
+                                :key="i"
+                                class="text-xs text-destructive"
+                            >
+                                {{ msg }}
+                            </p>
+                        </div>
                     </div>
 
                     <Button
@@ -521,7 +724,7 @@ const rules = [
                 <div v-else class="space-y-6">
                     <div v-for="g in grouped" :key="g.date">
                         <h3
-                            class="font-display mb-2 flex items-center gap-2 text-sm text-muted-foreground"
+                            class="mb-2 flex items-center gap-2 font-display text-sm text-muted-foreground"
                         >
                             <span>{{ day(g.date) }}</span>
                             <span
@@ -582,6 +785,53 @@ const rules = [
                                 >
                                     {{ n.body }}
                                 </p>
+                                <div
+                                    v-if="imagesOf(n).length"
+                                    class="mt-2 flex flex-wrap gap-2"
+                                >
+                                    <a
+                                        v-for="f in imagesOf(n)"
+                                        :key="f.id"
+                                        :href="f.url"
+                                        target="_blank"
+                                        rel="noopener"
+                                        class="block overflow-hidden rounded-lg border border-border"
+                                    >
+                                        <img
+                                            :src="f.url"
+                                            :alt="f.name"
+                                            loading="lazy"
+                                            class="size-20 object-cover"
+                                        />
+                                    </a>
+                                </div>
+                                <div
+                                    v-if="othersOf(n).length"
+                                    class="mt-2 grid gap-2"
+                                >
+                                    <template
+                                        v-for="f in othersOf(n)"
+                                        :key="f.id"
+                                    >
+                                        <audio
+                                            v-if="f.kind === 'audio'"
+                                            controls
+                                            preload="none"
+                                            :src="f.url"
+                                            class="w-full"
+                                        />
+                                        <a
+                                            v-else
+                                            :href="f.url"
+                                            target="_blank"
+                                            rel="noopener"
+                                            class="inline-flex items-center gap-1.5 text-sm text-pond hover:underline"
+                                        >
+                                            <FileText class="size-4" />
+                                            {{ f.name }}
+                                        </a>
+                                    </template>
+                                </div>
                                 <div
                                     class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"
                                 >
@@ -675,7 +925,7 @@ const rules = [
                         </span>
                         <span
                             v-else
-                            class="num font-display shrink-0 text-xl text-paddy"
+                            class="num shrink-0 font-display text-xl text-paddy"
                             >{{ clampPct(g.progress) }}%</span
                         >
                     </div>

@@ -297,7 +297,7 @@ async function closeBatch(card: BatchCard) {
             >
                 <header class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        <h2 class="font-display truncate text-xl leading-tight">
+                        <h2 class="truncate font-display text-xl leading-tight">
                             {{ b.label }}
                         </h2>
                         <p class="truncate text-sm text-muted-foreground">
@@ -608,7 +608,7 @@ async function closeBatch(card: BatchCard) {
             class="group rounded-xl border border-border bg-card p-4"
         >
             <summary
-                class="font-display flex cursor-pointer list-none items-center gap-2 text-lg"
+                class="flex cursor-pointer list-none items-center gap-2 font-display text-lg"
             >
                 <BookOpen class="size-5 text-paddy" />
                 মোটাতাজার গাইড — দিন অনুযায়ী
