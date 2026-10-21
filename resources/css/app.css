@@ -226,3 +226,19 @@
         line-height: 1.6;
     }
 }
+
+/*
+ * Bangla vowel signs (ি ী ু ূ ৃ) reach above and below a Latin-sized line. Text cut off with
+ * "…" hides everything outside its line box, so give those lines room. Unlayered on purpose,
+ * so it wins over leading-* utilities on the same element.
+ */
+.truncate {
+    line-height: 1.65;
+}
+
+/* Sidebar menu labels get their "…" from a parent selector, not the .truncate class. */
+[data-sidebar='menu-button'] > span:last-child,
+[data-sidebar='menu-sub-button'] > span:last-child {
+    line-height: 1.65;
+    padding-block: 1px;
+}
