@@ -3,11 +3,12 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
     CalendarClock,
     Check,
+    Lightbulb,
     ListChecks,
     NotebookPen,
     Target,
-    Trophy,
     TriangleAlert,
+    Trophy,
 } from '@lucide/vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import Field from '@/components/khamar/Field.vue';
@@ -325,14 +326,17 @@ const rules = [
         <div v-if="tab === 'diary'" class="grid gap-6 lg:grid-cols-5">
             <div class="space-y-4 lg:col-span-2">
                 <div
-                    class="rounded-xl border border-turmeric/40 bg-turmeric/10 p-4 text-sm leading-relaxed"
+                    class="flex gap-3 rounded-xl border border-border bg-card p-4 text-sm leading-relaxed"
                 >
-                    <p class="font-display text-base">কেন লিখবেন?</p>
-                    <p class="mt-1 text-muted-foreground">
-                        প্রতিদিনের ছোট কথা, ভুল আর শিক্ষা লিখে রাখলে প্রতি মাসে
-                        খামার একটু করে ভালো হয়। একই ভুল দুবার হয় না, আর ভালো
-                        চিন্তাগুলো হারিয়ে যায় না।
-                    </p>
+                    <Lightbulb class="mt-0.5 size-5 shrink-0 text-turmeric" />
+                    <div>
+                        <p class="font-display text-base">কেন লিখবেন?</p>
+                        <p class="mt-1 text-muted-foreground">
+                            প্রতিদিনের ছোট কথা, ভুল আর শিক্ষা লিখে রাখলে প্রতি
+                            মাসে খামার একটু করে ভালো হয়। একই ভুল দুবার হয় না,
+                            আর ভালো চিন্তাগুলো হারিয়ে যায় না।
+                        </p>
+                    </div>
                 </div>
 
                 <form

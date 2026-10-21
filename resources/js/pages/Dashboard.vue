@@ -164,7 +164,7 @@ const greeting = computed(() => {
 
         <section
             v-if="reminders.length"
-            class="mt-4 rounded-xl border border-turmeric/40 bg-turmeric/8 p-3"
+            class="mt-4 rounded-xl border border-border bg-card p-3"
         >
             <h2 class="mb-2 flex items-center gap-2 text-sm font-semibold">
                 <BellRing class="size-4 text-turmeric" /> মনে রাখার কাজ
@@ -173,7 +173,7 @@ const greeting = computed(() => {
                 <li v-for="r in reminders.slice(0, 8)" :key="r.title + r.when">
                     <Link
                         :href="r.href"
-                        class="flex items-start gap-2 rounded-lg bg-card/70 p-2 text-sm hover:bg-card"
+                        class="flex items-start gap-2 rounded-lg bg-muted/40 p-2 text-sm hover:bg-muted/70"
                     >
                         <span
                             :class="[
