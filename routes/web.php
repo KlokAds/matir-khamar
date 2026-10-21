@@ -11,6 +11,7 @@ use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\SystemController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard')->name('home');
@@ -86,6 +87,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('users', [SetupController::class, 'users'])->name('users');
         Route::post('users', [SetupController::class, 'storeUser'])->name('users.store');
         Route::put('users/{user}', [SetupController::class, 'updateUser'])->name('users.update');
+        Route::get('update', [SystemController::class, 'show'])->name('update');
+        Route::post('update', [SystemController::class, 'update'])->middleware('throttle:3,10')->name('update.run');
     });
 
     Route::middleware('can:lock-periods')->prefix('setup')->name('setup.')->group(function () {

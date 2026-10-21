@@ -16,3 +16,7 @@ Artisan::command('khamar:amortize', function (PrepaidService $prepaid) {
 Schedule::command('khamar:amortize')->dailyAt('00:30');
 Schedule::command('khamar:crater-sync')->hourly()->withoutOverlapping();
 Schedule::command('khamar:backup')->dailyAt('02:00');
+
+if (config('khamar.updates.auto')) {
+    Schedule::command('khamar:update --if-behind')->everyTenMinutes()->withoutOverlapping(20);
+}

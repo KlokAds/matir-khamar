@@ -1,0 +1,59 @@
+name: Hostinger deploy
+
+# Every push to main builds the app (production PHP packages + built frontend) and commits it to
+# the hostinger-dist branch. The live site pulls that branch from Setup → App update (or by
+# itself when KHAMAR_AUTO_UPDATE=true): backup, checkout, migrate, caches.
+# deploy/hostinger/README.md has the one-time server setup.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hostinger-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: intl, gd, zip, pdo_mysql
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Check out the hostinger-dist branch (or start it)
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --depth 1 --branch hostinger-dist "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" dist-repo \
+            || { mkdir dist-repo && git -C dist-repo init -q -b hostinger-dist && git -C dist-repo remote add origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"; }
+
+      - name: Build into it
+        run: bash deploy/hostinger/build-bundle.sh --dir "$PWD/dist-repo"
+
+      - name: Commit and push
+        run: |
+          cd dist-repo
+          git config user.name "khamar-deploy"
+          git config user.email "deploy@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Build ${GITHUB_SHA::7}: $(git -C .. log -1 --format=%s | head -c 120)" || { echo "Nothing changed."; exit 0; }
+          git push origin hostinger-dist

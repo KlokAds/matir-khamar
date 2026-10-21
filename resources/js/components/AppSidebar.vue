@@ -15,6 +15,7 @@ import {
     Milk,
     Network,
     PackageOpen,
+    RefreshCw,
     Scale,
     Users,
     UsersRound,
@@ -82,7 +83,7 @@ const groups = computed(() => {
     }
 
     if (can.value['manage-users']) {
-        setup.push({ title: 'ব্যবহারকারী', href: '/setup/users', icon: Users });
+        setup.push({ title: 'ব্যবহারকারী', href: '/setup/users', icon: Users }, { title: 'অ্যাপ আপডেট', href: '/setup/update', icon: RefreshCw });
     }
 
     if (can.value['lock-periods']) {
