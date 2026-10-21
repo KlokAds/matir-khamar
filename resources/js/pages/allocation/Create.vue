@@ -196,7 +196,7 @@ const share = (id: number) =>
                             type="number"
                             min="0"
                             step="0.01"
-                            class="num h-9 text-right"
+                            class="num text-right"
                         />
                         <span class="num text-right text-muted-foreground">{{
                             taka(share(c.id))

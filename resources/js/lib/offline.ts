@@ -1,3 +1,4 @@
+import { ask } from '@/lib/dialog';
 import { router } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
 import { watchQueue } from '@/lib/offlineQueue';
@@ -101,9 +102,11 @@ export function initializeOffline(): void {
 export async function prepareLogout(pending: number): Promise<boolean> {
     if (
         pending > 0 &&
-        !window.confirm(
-            `এই ফোনে ${pending}টি এন্ট্রি এখনো পাঠানো হয়নি। লগআউট করলেও এগুলো ফোনে থাকবে, আবার লগইন করলে যাবে। লগআউট করবেন?`,
-        )
+        !(await ask.confirm({
+            title: 'লগআউট করবেন?',
+            body: `এই ফোনে ${pending}টি এন্ট্রি এখনো পাঠানো হয়নি। লগআউট করলেও এগুলো ফোনে থাকবে, আবার লগইন করলে যাবে।`,
+            confirmText: 'লগআউট',
+        }))
     ) {
         return false;
     }

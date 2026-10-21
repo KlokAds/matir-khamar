@@ -24,6 +24,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $role key of a row in the roles table
  * @property bool $is_active
  * @property bool $is_super
+ * @property string $locale bn or en
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret

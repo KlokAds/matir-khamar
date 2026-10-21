@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { CircleCheck, CircleAlert, GitBranch, RefreshCw } from '@lucide/vue';
 import { computed } from 'vue';
@@ -44,11 +45,13 @@ const when = (iso: string | null | undefined) =>
           })
         : '—';
 
-function run() {
+async function run() {
     if (
-        window.confirm(
-            'সাইট ১-২ মিনিটের জন্য বন্ধ থাকবে (আগে ব্যাকআপ নেওয়া হবে)। আপডেট করবেন?',
-        )
+        await ask.confirm({
+            title: 'এখনই আপডেট করবেন?',
+            body: 'সাইট ১-২ মিনিটের জন্য বন্ধ থাকবে। শুরুর আগে ডাটাবেসের ব্যাকআপ নেওয়া হবে।',
+            confirmText: 'আপডেট করুন',
+        })
     ) {
         f.post('/setup/update', {
             preserveScroll: true,

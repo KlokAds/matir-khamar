@@ -6,6 +6,7 @@ use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
@@ -17,6 +18,9 @@ use App\Http\Controllers\SystemController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard')->name('home');
+
+// The বাংলা | English switch works before login too.
+Route::post('locale', LocaleController::class)->middleware('throttle:30,1')->name('locale');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

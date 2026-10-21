@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { Plus, ShieldCheck, Trash2, UserRound } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
@@ -75,8 +76,14 @@ const save = (role: RoleRow) =>
         preserveScroll: true,
     });
 
-const remove = (role: RoleRow) => {
-    if (window.confirm(`"${role.name}" রোল মুছে ফেলবেন?`)) {
+const remove = async (role: RoleRow) => {
+    if (
+        await ask.confirm({
+            title: `"${role.name}" রোল মুছবেন?`,
+            confirmText: 'মুছুন',
+            danger: true,
+        })
+    ) {
         router.delete(`/setup/roles/${role.id}`, { preserveScroll: true });
     }
 };
@@ -173,7 +180,7 @@ const create = useForm({
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <Input
                         v-model="drafts[role.id].name"
-                        class="h-10 max-w-64 font-medium"
+                        class="max-w-64 font-medium"
                     />
                     <div
                         class="flex items-center gap-3 text-xs text-muted-foreground"

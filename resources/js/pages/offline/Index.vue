@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head } from '@inertiajs/vue3';
 import {
     CloudOff,
@@ -223,7 +224,14 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
 }
 
 async function discard(uuid: string) {
-    if (window.confirm('এই এন্ট্রিটি ফোন থেকে মুছে ফেলবেন?')) {
+    if (
+        await ask.confirm({
+            title: 'এন্ট্রিটি মুছবেন?',
+            body: 'এটা শুধু এই ফোন থেকে মুছবে; খাতায় ওঠেনি।',
+            confirmText: 'মুছুন',
+            danger: true,
+        })
+    ) {
         await remove(uuid);
         await reload();
     }
@@ -420,7 +428,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                                 step="0.1"
                                 min="0"
                                 max="80"
-                                class="num h-11 pr-10 text-right text-lg"
+                                class="num h-12 pr-10 text-right text-lg"
                                 placeholder="0"
                             />
                             <span
@@ -493,7 +501,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                                 inputmode="decimal"
                                 step="0.001"
                                 min="0"
-                                class="num h-11 pr-12 text-right text-lg"
+                                class="num h-12 pr-12 text-right text-lg"
                                 placeholder="0"
                             />
                             <span
@@ -572,7 +580,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                             inputmode="decimal"
                             step="0.01"
                             min="0"
-                            class="num h-11 text-lg"
+                            class="num h-12 text-lg"
                     /></Field>
                     <Field label="বিবরণ"
                         ><Input v-model="expense.description"

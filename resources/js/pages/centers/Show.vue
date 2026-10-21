@@ -107,9 +107,9 @@ const applyRange = () =>
                     class="flex items-center gap-2"
                     @submit.prevent="applyRange"
                 >
-                    <Input v-model="range.from" type="date" class="h-9 w-36" />
+                    <Input v-model="range.from" type="date" class="w-36" />
                     <span class="text-muted-foreground">—</span>
-                    <Input v-model="range.to" type="date" class="h-9 w-36" />
+                    <Input v-model="range.to" type="date" class="w-36" />
                     <Button type="submit" size="sm" variant="secondary"
                         >দেখুন</Button
                     >

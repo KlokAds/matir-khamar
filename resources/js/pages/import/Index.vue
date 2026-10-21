@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import {
     CloudDownload,
@@ -157,11 +158,14 @@ const saveConnection = () =>
         onSuccess: () => conn.reset('password', 'current_password'),
     });
 const forget = useForm({ current_password: '' });
-const forgetConnection = () => {
+const forgetConnection = async () => {
     if (
-        window.confirm(
-            'বিলিং সংযোগের তথ্য মুছে ফেলবেন? আগে আনা সারিগুলো থাকবে।',
-        )
+        await ask.confirm({
+            title: 'বিলিং সংযোগ মুছবেন?',
+            body: 'আগে আনা সারিগুলো খাতায় থেকে যাবে।',
+            confirmText: 'মুছুন',
+            danger: true,
+        })
     ) {
         forget.delete('/setup/import/connection', { preserveScroll: true });
     }

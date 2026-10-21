@@ -83,7 +83,7 @@ function apply() {
                 <Input
                     v-model="filter.q"
                     placeholder="বিবরণ বা নম্বর খুঁজুন"
-                    class="h-10 pl-8"
+                    class="pl-8"
                 />
             </div>
             <NSelect v-model="filter.type">

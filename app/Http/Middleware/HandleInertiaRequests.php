@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('khamar.name'),
+            'locale' => app()->getLocale(),
             'auth' => [
                 'user' => $request->user()?->only(['id', 'name', 'email', 'email_verified_at', 'two_factor_confirmed_at', 'created_at', 'updated_at']),
                 'role' => $request->user()?->role,

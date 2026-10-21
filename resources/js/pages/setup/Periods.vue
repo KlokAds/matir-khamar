@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { LockKeyhole } from '@lucide/vue';
 import Field from '@/components/khamar/Field.vue';
@@ -30,8 +31,15 @@ const lastMonth = (() => {
 
 const f = useForm({ month: lastMonth });
 
-function unlock(id: number) {
-    const reason = window.prompt('কেন লক খুলছেন? (অডিট লগে থাকবে)');
+async function unlock(id: number) {
+    const reason = await ask.prompt({
+        title: 'মাসের লক খুলবেন?',
+        body: 'কারণটি অডিট লগে লেখা থাকবে।',
+        label: 'কেন খুলছেন',
+        minLength: 5,
+        confirmText: 'লক খুলুন',
+        danger: true,
+    });
 
     if (reason) {
         router.delete(`/setup/periods/${id}`, {

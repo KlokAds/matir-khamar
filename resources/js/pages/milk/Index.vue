@@ -109,7 +109,7 @@ const cowLabel = (id: number | null) => {
                                 step="0.1"
                                 min="0"
                                 max="80"
-                                class="num h-11 pr-12 text-right text-lg"
+                                class="num h-12 pr-12 text-right text-lg"
                                 placeholder="0"
                             />
                             <span

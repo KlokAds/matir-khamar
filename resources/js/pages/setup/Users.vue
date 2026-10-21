@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ShieldCheck, ShieldOff, UserPlus } from '@lucide/vue';
 import { ref } from 'vue';
@@ -41,10 +42,19 @@ function update(
     );
 }
 
-function resetPassword(user: { id: number; role: string; is_active: boolean }) {
-    const password = window.prompt(
-        'নতুন পাসওয়ার্ড (কমপক্ষে ১০ অক্ষর, অক্ষর ও সংখ্যা)',
-    );
+async function resetPassword(user: {
+    id: number;
+    role: string;
+    is_active: boolean;
+}) {
+    const password = await ask.prompt({
+        title: 'নতুন পাসওয়ার্ড',
+        body: 'অক্ষর ও সংখ্যা মিলিয়ে। ব্যবহারকারীকে নিজে জানিয়ে দিন।',
+        label: 'পাসওয়ার্ড',
+        inputType: 'password',
+        minLength: 10,
+        confirmText: 'বদলান',
+    });
 
     if (password) {
         update(user, { password });
@@ -148,7 +158,7 @@ function resetPassword(user: { id: number; role: string; is_active: boolean }) {
                 <div class="mt-3 flex flex-wrap items-center gap-2">
                     <NSelect
                         :model-value="u.role"
-                        class="h-9 w-auto"
+                        class="w-auto"
                         @update:model-value="(role) => update(u, { role })"
                     >
                         <option

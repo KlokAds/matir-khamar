@@ -250,7 +250,7 @@ function submit() {
                                     inputmode="decimal"
                                     step="0.001"
                                     min="0"
-                                    class="num h-11 pr-12 text-right text-lg"
+                                    class="num h-12 pr-12 text-right text-lg"
                                     placeholder="0"
                                 />
                                 <span
