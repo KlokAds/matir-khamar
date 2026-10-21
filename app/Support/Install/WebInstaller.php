@@ -114,9 +114,10 @@ class WebInstaller
             );
             $pdo->query('SELECT 1');
 
-            $existing = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'journal_entries'")->fetchColumn();
+            $hasTable = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'journal_entries'")->fetchColumn() > 0;
+            $hasEntries = $hasTable && (int) $pdo->query('SELECT COUNT(*) FROM journal_entries')->fetchColumn() > 0;
 
-            return $existing > 0 ? 'এই ডাটাবেসে আগে থেকেই খামারের হিসাব আছে। খালি ডাটাবেস দিন — পুরনো হিসাব মুছে যাওয়ার ঝুঁকি নেওয়া হবে না।' : null;
+            return $hasEntries ? 'এই ডাটাবেসে আগে থেকেই খামারের হিসাব আছে। খালি ডাটাবেস দিন — পুরনো হিসাব মুছে যাওয়ার ঝুঁকি নেওয়া হবে না।' : null;
         } catch (Throwable $exception) {
             return 'ডাটাবেসে সংযোগ হয়নি: '.$exception->getMessage();
         }
@@ -167,13 +168,13 @@ class WebInstaller
     }
 
     /**
-     * Write .env, boot Laravel and set everything up. Returns the log lines; throws on failure
-     * (the .env stays marked in progress so the form can be sent again).
+     * Step "build the database": write .env (marked in progress), create the tables and the
+     * farm's starting chart of accounts. Safe to run again after a failure.
      *
      * @param  array<string, string>  $in
      * @return list<string>
      */
-    public function install(array $in): array
+    public function prepareDatabase(array $in): array
     {
         @set_time_limit(0);
         ignore_user_abort(true);
@@ -182,11 +183,9 @@ class WebInstaller
         @chmod($this->base.'/.env', 0600);
         @unlink($this->base.'/bootstrap/cache/config.php');
 
-        $app = require $this->base.'/bootstrap/app.php';
-        $kernel = $app->make(Kernel::class);
-        $kernel->bootstrap();
-
+        $kernel = $this->boot();
         $log = [];
+
         $kernel->call('migrate', ['--force' => true]);
         $log[] = 'ডাটাবেসের টেবিল তৈরি হয়েছে।';
 
@@ -199,27 +198,50 @@ class WebInstaller
             // Vouchers live on the private disk; the public link is only a convenience.
         }
 
-        if (User::query()->where('email', $in['admin_email'])->exists()) {
-            throw new RuntimeException('এই ইমেইলে আগে থেকেই একজন ব্যবহারকারী আছে।');
+        return $log;
+    }
+
+    /**
+     * Step "admin": make the first hishab admin, then take the in-progress mark out, cache the
+     * config and lock the installer for good.
+     *
+     * @return list<string>
+     */
+    public function finish(string $name, string $email, string $password): array
+    {
+        $kernel = $this->boot();
+
+        if (User::query()->where('role', Role::Admin->value)->exists()) {
+            throw new RuntimeException('একজন অ্যাডমিন আগে থেকেই আছে।');
         }
 
         User::query()->create([
-            'name' => $in['admin_name'],
-            'email' => $in['admin_email'],
-            'password' => $in['admin_password'],
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
             'role' => Role::Admin,
             'is_active' => true,
         ])->forceFill(['email_verified_at' => now()])->save();
-        $log[] = "অ্যাডমিন {$in['admin_email']} তৈরি হয়েছে। প্রথম লগইনের পর ২-ধাপ যাচাই (2FA) চালু করতে বলবে।";
 
-        // Done: take the in-progress mark out, cache the config, lock the installer.
         $env = (string) file_get_contents($this->base.'/.env');
         file_put_contents($this->base.'/.env', str_replace(self::IN_PROGRESS.PHP_EOL, '', $env));
+        @unlink($this->base.'/bootstrap/cache/config.php');
         $kernel->call('optimize');
         file_put_contents($this->lockFile(), json_encode(['installed_at' => gmdate('c')]).PHP_EOL);
         @unlink($this->tokenFile());
-        $log[] = 'ইনস্টলার বন্ধ করা হয়েছে — আর কেউ এটা চালাতে পারবে না।';
 
-        return $log;
+        return [
+            "অ্যাডমিন {$email} তৈরি হয়েছে।",
+            'ইনস্টলার বন্ধ করা হয়েছে — আর কেউ এটা চালাতে পারবে না।',
+        ];
+    }
+
+    private function boot(): Kernel
+    {
+        $app = require $this->base.'/bootstrap/app.php';
+        $kernel = $app->make(Kernel::class);
+        $kernel->bootstrap();
+
+        return $kernel;
     }
 }
