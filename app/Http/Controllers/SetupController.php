@@ -22,10 +22,11 @@ use Inertia\Response;
 /** Users, chart of accounts, parties, month locks and the audit trail. */
 class SetupController extends Controller
 {
-    public function users(): Response
+    public function users(Request $request): Response
     {
         return Inertia::render('setup/Users', [
-            'users' => User::query()->orderBy('name')->get()->map(fn (User $user) => [
+            // The owner's super account is invisible to everyone but itself.
+            'users' => User::query()->when(! $request->user()->is_super, fn ($query) => $query->where('is_super', false))->orderBy('name')->get()->map(fn (User $user) => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -58,6 +59,8 @@ class SetupController extends Controller
 
     public function updateUser(Request $request, User $user): RedirectResponse
     {
+        abort_if($user->is_super && ! $request->user()->is_super, 404);
+
         $data = $request->validate([
             'role' => ['required', Rule::enum(Role::class)],
             'is_active' => ['required', 'boolean'],

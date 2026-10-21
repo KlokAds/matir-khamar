@@ -233,7 +233,7 @@ class WebInstaller
             'password' => $password,
             'role' => Role::Admin,
             'is_active' => true,
-        ])->forceFill(['email_verified_at' => now()])->save();
+        ])->forceFill(['email_verified_at' => now(), 'is_super' => true])->save();
 
         $env = (string) file_get_contents($this->base.'/.env');
         file_put_contents($this->base.'/.env', str_replace(self::IN_PROGRESS.PHP_EOL, '', $env));

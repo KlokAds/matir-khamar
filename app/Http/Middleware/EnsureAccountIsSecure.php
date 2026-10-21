@@ -30,7 +30,9 @@ class EnsureAccountIsSecure
             return redirect()->route('login')->withErrors(['email' => 'এই অ্যাকাউন্টটি বন্ধ করা হয়েছে।']);
         }
 
+        // The owner's super account is left to choose two-factor for itself.
         $mustEnroll = config('khamar.require_two_factor')
+            && ! $user->is_super
             && $user->role->requiresTwoFactor()
             && ! $user->hasTwoFactorEnabled();
 
