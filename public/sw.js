@@ -20,8 +20,19 @@ self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys()
-            .then((keys) => Promise.all(keys.filter((key) => key.startsWith('khamar-') && ![ASSETS, PAGES].includes(key)).map((key) => caches.delete(key))))
+        caches
+            .keys()
+            .then((keys) =>
+                Promise.all(
+                    keys
+                        .filter(
+                            (key) =>
+                                key.startsWith('khamar-') &&
+                                ![ASSETS, PAGES].includes(key),
+                        )
+                        .map((key) => caches.delete(key)),
+                ),
+            )
             .then(() => self.clients.claim()),
     );
 });
@@ -38,7 +49,10 @@ self.addEventListener('message', (event) => {
 
 /** Fetches /offline, keeps it, and keeps every built file it needs. */
 async function refreshOfflinePage(request = OFFLINE_URL) {
-    const response = await fetch(request, { credentials: 'same-origin', redirect: 'follow' });
+    const response = await fetch(request, {
+        credentials: 'same-origin',
+        redirect: 'follow',
+    });
     const url = new URL(response.url);
 
     // Signed out (sent to /login) or refused: never keep that.
@@ -48,12 +62,35 @@ async function refreshOfflinePage(request = OFFLINE_URL) {
 
     const html = await response.clone().text();
     const pages = await caches.open(PAGES);
-    await pages.put(OFFLINE_URL, new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
+    await pages.put(
+        OFFLINE_URL,
+        new Response(html, {
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        }),
+    );
 
     const assets = await caches.open(ASSETS);
-    const files = [...new Set([...html.matchAll(/(?:href|src)="([^"]*\/build\/[^"]+)"/g)].map((match) => new URL(match[1], self.location.origin).pathname))];
-    await Promise.all(files.map((file) => assets.match(file).then((hit) => hit || assets.add(file).catch(() => undefined))));
-    await assets.addAll(['/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png']).catch(() => undefined);
+    const files = [
+        ...new Set(
+            [...html.matchAll(/(?:href|src)="([^"]*\/build\/[^"]+)"/g)].map(
+                (match) => new URL(match[1], self.location.origin).pathname,
+            ),
+        ),
+    ];
+    await Promise.all(
+        files.map((file) =>
+            assets
+                .match(file)
+                .then((hit) => hit || assets.add(file).catch(() => undefined)),
+        ),
+    );
+    await assets
+        .addAll([
+            '/manifest.webmanifest',
+            '/favicon.svg',
+            '/icons/icon-192.png',
+        ])
+        .catch(() => undefined);
 
     return response;
 }
@@ -76,7 +113,12 @@ async function cacheFirst(request) {
 }
 
 async function offlinePage() {
-    return (await caches.match(OFFLINE_URL, { cacheName: PAGES })) || new Response(FALLBACK, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return (
+        (await caches.match(OFFLINE_URL, { cacheName: PAGES })) ||
+        new Response(FALLBACK, {
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        })
+    );
 }
 
 self.addEventListener('fetch', (event) => {
@@ -88,7 +130,10 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    if (url.origin === self.location.origin && url.pathname.startsWith('/build/')) {
+    if (
+        url.origin === self.location.origin &&
+        url.pathname.startsWith('/build/')
+    ) {
         event.respondWith(cacheFirst(request));
 
         return;
@@ -105,7 +150,9 @@ self.addEventListener('fetch', (event) => {
     }
 
     if (url.pathname === OFFLINE_URL) {
-        event.respondWith(refreshOfflinePage(request).catch(() => offlinePage()));
+        event.respondWith(
+            refreshOfflinePage(request).catch(() => offlinePage()),
+        );
 
         return;
     }

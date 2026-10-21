@@ -42,13 +42,25 @@ import type { NavItem } from '@/types';
 const can = useCan();
 
 const groups = computed(() => {
-    const daily: NavItem[] = [{ title: 'আজকের খামার', href: dashboard(), icon: LayoutGrid }];
+    const daily: NavItem[] = [
+        { title: 'আজকের খামার', href: dashboard(), icon: LayoutGrid },
+    ];
 
     if (can.value['post-daily']) {
         daily.push(
             { title: 'দুধের হিসাব', href: '/milk', icon: Milk },
-            { title: 'খাবার ব্যবহার', href: '/stock/move?mode=issue', icon: Wheat },
-            { title: 'অফলাইন এন্ট্রি', href: '/offline', icon: CloudOff, reload: true, badge: pendingCount.value },
+            {
+                title: 'খাবার ব্যবহার',
+                href: '/stock/move?mode=issue',
+                icon: Wheat,
+            },
+            {
+                title: 'অফলাইন এন্ট্রি',
+                href: '/offline',
+                icon: CloudOff,
+                reload: true,
+                badge: pendingCount.value,
+            },
         );
     }
 
@@ -66,7 +78,11 @@ const groups = computed(() => {
             { title: 'ক্যাটাগরি ও প্রজেক্ট', href: '/centers', icon: Network },
             { title: 'গরুর তালিকা', href: '/animals', icon: Beef },
             { title: 'স্টক (খাবার/ঔষধ)', href: '/stock', icon: PackageOpen },
-            { title: 'খাতা (সব এন্ট্রি)', href: '/entries', icon: BookOpenText },
+            {
+                title: 'খাতা (সব এন্ট্রি)',
+                href: '/entries',
+                icon: BookOpenText,
+            },
             { title: 'রিপোর্ট', href: '/reports', icon: ChartColumnBig },
             { title: 'উদ্যোগ বাজেট', href: '/reports/budget', icon: Landmark },
         );
@@ -76,18 +92,37 @@ const groups = computed(() => {
 
     if (can.value['manage-setup']) {
         setup.push(
-            { title: 'হিসাব খাত', href: '/setup/accounts', icon: ArrowLeftRight },
-            { title: 'ক্রেতা, বিনিয়োগকারী…', href: '/setup/parties', icon: UsersRound },
-            { title: 'বিলিং থেকে আনা', href: '/setup/import', icon: CloudDownload },
+            {
+                title: 'হিসাব খাত',
+                href: '/setup/accounts',
+                icon: ArrowLeftRight,
+            },
+            {
+                title: 'ক্রেতা, বিনিয়োগকারী…',
+                href: '/setup/parties',
+                icon: UsersRound,
+            },
+            {
+                title: 'বিলিং থেকে আনা',
+                href: '/setup/import',
+                icon: CloudDownload,
+            },
         );
     }
 
     if (can.value['manage-users']) {
-        setup.push({ title: 'ব্যবহারকারী', href: '/setup/users', icon: Users }, { title: 'অ্যাপ আপডেট', href: '/setup/update', icon: RefreshCw });
+        setup.push(
+            { title: 'ব্যবহারকারী', href: '/setup/users', icon: Users },
+            { title: 'অ্যাপ আপডেট', href: '/setup/update', icon: RefreshCw },
+        );
     }
 
     if (can.value['lock-periods']) {
-        setup.push({ title: 'মাস লক', href: '/setup/periods', icon: LockKeyhole });
+        setup.push({
+            title: 'মাস লক',
+            href: '/setup/periods',
+            icon: LockKeyhole,
+        });
     }
 
     if (can.value['view-audit']) {

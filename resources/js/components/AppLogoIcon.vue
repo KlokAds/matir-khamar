@@ -27,7 +27,12 @@ defineProps<Props>();
             d="M24 31c0-6 3-10 8-11-1 5-3 8-8 11Zm0 0c0-5-2.5-8-6.5-9 .8 4.2 2.6 6.8 6.5 9Z"
             fill="var(--paddy)"
         />
-        <path d="M24 31v5" stroke="var(--paddy)" stroke-width="2" stroke-linecap="round" />
+        <path
+            d="M24 31v5"
+            stroke="var(--paddy)"
+            stroke-width="2"
+            stroke-linecap="round"
+        />
         <path
             d="M4 36c8-3 32-3 40 0M6 41c8-2.5 28-2.5 36 0"
             stroke="var(--clay)"

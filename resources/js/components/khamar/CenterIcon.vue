@@ -41,7 +41,12 @@ const tone = computed(
 </script>
 
 <template>
-    <span :class="['inline-flex shrink-0 items-center justify-center rounded-md p-1.5', tone]">
+    <span
+        :class="[
+            'inline-flex shrink-0 items-center justify-center rounded-md p-1.5',
+            tone,
+        ]"
+    >
         <component :is="icon" class="size-4" />
     </span>
 </template>

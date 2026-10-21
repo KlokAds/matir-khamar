@@ -2,7 +2,10 @@ import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 /** Poisha (integer) to "৳ 1,23,450.00" with South-Asian digit grouping. */
-export function taka(poisha: number | null | undefined, withSymbol = true): string {
+export function taka(
+    poisha: number | null | undefined,
+    withSymbol = true,
+): string {
     const value = Math.abs((poisha ?? 0) / 100);
     const sign = (poisha ?? 0) < 0 ? '−' : '';
     const text = value.toLocaleString('en-IN', {
@@ -14,12 +17,27 @@ export function taka(poisha: number | null | undefined, withSymbol = true): stri
 }
 
 export function qty(value: number | null | undefined, unit = ''): string {
-    const text = (value ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 3 });
+    const text = (value ?? 0).toLocaleString('en-IN', {
+        maximumFractionDigits: 3,
+    });
 
     return unit ? `${text} ${unit}` : text;
 }
 
-const months = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+const months = [
+    'জানু',
+    'ফেব্রু',
+    'মার্চ',
+    'এপ্রিল',
+    'মে',
+    'জুন',
+    'জুলাই',
+    'আগস্ট',
+    'সেপ্টে',
+    'অক্টো',
+    'নভে',
+    'ডিসে',
+];
 
 /** "2026-10-21" -> "21 অক্টো 2026" */
 export function day(value: string | null | undefined): string {
@@ -32,7 +50,20 @@ export function day(value: string | null | undefined): string {
     return `${d} ${months[m - 1]} ${y}`;
 }
 
-const monthsFull = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+const monthsFull = [
+    'জানুয়ারি',
+    'ফেব্রুয়ারি',
+    'মার্চ',
+    'এপ্রিল',
+    'মে',
+    'জুন',
+    'জুলাই',
+    'আগস্ট',
+    'সেপ্টেম্বর',
+    'অক্টোবর',
+    'নভেম্বর',
+    'ডিসেম্বর',
+];
 
 /** "2026-10" -> "অক্টোবর 2026" */
 export function monthFull(ym: string): string {
@@ -71,7 +102,9 @@ export type Abilities = Partial<
 export function useCan() {
     const page = usePage();
 
-    return computed(() => (page.props.auth as unknown as { can: Abilities }).can ?? {});
+    return computed(
+        () => (page.props.auth as unknown as { can: Abilities }).can ?? {},
+    );
 }
 
 /** Indented label for the category tree in a native select. */
@@ -89,7 +122,12 @@ export type Center = {
     is_active: boolean;
 };
 
-export type Option = { id: number; name: string; code?: string; subtype?: string | null };
+export type Option = {
+    id: number;
+    name: string;
+    code?: string;
+    subtype?: string | null;
+};
 
 export type TreeNode = {
     id: number;
@@ -101,6 +139,11 @@ export type TreeNode = {
     income: number;
     expense: number;
     profit: number;
-    rolled: { income: number; expense: number; internal_income: number; internal_expense: number };
+    rolled: {
+        income: number;
+        expense: number;
+        internal_income: number;
+        internal_expense: number;
+    };
     children: TreeNode[];
 };

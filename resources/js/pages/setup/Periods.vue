@@ -11,7 +11,13 @@ defineOptions({
 });
 
 defineProps<{
-    locks: { id: number; month: string; label: string; by: string | null; at: string | null }[];
+    locks: {
+        id: number;
+        month: string;
+        label: string;
+        by: string | null;
+        at: string | null;
+    }[];
 }>();
 
 const lastMonth = (() => {
@@ -28,7 +34,10 @@ function unlock(id: number) {
     const reason = window.prompt('কেন লক খুলছেন? (অডিট লগে থাকবে)');
 
     if (reason) {
-        router.delete(`/setup/periods/${id}`, { data: { reason }, preserveScroll: true });
+        router.delete(`/setup/periods/${id}`, {
+            data: { reason },
+            preserveScroll: true,
+        });
     }
 }
 </script>
@@ -37,22 +46,47 @@ function unlock(id: number) {
     <Head title="মাস লক" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
-        <PageTitle title="মাসের হিসাব লক" subtitle="মাস শেষে হিসাব মিলিয়ে লক করুন। লক করা মাসে কেউ নতুন এন্ট্রি দিতে পারবে না — পুরনো হিসাব আর বদলায় না।" />
+        <PageTitle
+            title="মাসের হিসাব লক"
+            subtitle="মাস শেষে হিসাব মিলিয়ে লক করুন। লক করা মাসে কেউ নতুন এন্ট্রি দিতে পারবে না — পুরনো হিসাব আর বদলায় না।"
+        />
 
-        <form class="mb-6 flex max-w-md items-end gap-3 rounded-xl border border-border bg-card p-4" @submit.prevent="f.post('/setup/periods')">
-            <div class="flex-1"><Field label="কোন মাস" :error="f.errors.month"><Input v-model="f.month" type="month" /></Field></div>
-            <Button type="submit" :disabled="f.processing"><LockKeyhole /> লক করুন</Button>
+        <form
+            class="mb-6 flex max-w-md items-end gap-3 rounded-xl border border-border bg-card p-4"
+            @submit.prevent="f.post('/setup/periods')"
+        >
+            <div class="flex-1">
+                <Field label="কোন মাস" :error="f.errors.month"
+                    ><Input v-model="f.month" type="month"
+                /></Field>
+            </div>
+            <Button type="submit" :disabled="f.processing"
+                ><LockKeyhole /> লক করুন</Button
+            >
         </form>
 
         <div class="max-w-2xl rounded-xl border border-border bg-card">
-            <div v-for="l in locks" :key="l.id" class="flex items-center justify-between border-b border-border/60 px-4 py-3 last:border-0">
+            <div
+                v-for="l in locks"
+                :key="l.id"
+                class="flex items-center justify-between border-b border-border/60 px-4 py-3 last:border-0"
+            >
                 <div>
                     <p class="font-medium">{{ l.label }}</p>
-                    <p class="text-xs text-muted-foreground">{{ l.by }} · {{ l.at }}</p>
+                    <p class="text-xs text-muted-foreground">
+                        {{ l.by }} · {{ l.at }}
+                    </p>
                 </div>
-                <Button size="sm" variant="ghost" @click="unlock(l.id)">খুলুন</Button>
+                <Button size="sm" variant="ghost" @click="unlock(l.id)"
+                    >খুলুন</Button
+                >
             </div>
-            <p v-if="!locks.length" class="p-6 text-center text-sm text-muted-foreground">এখনো কোনো মাস লক করা হয়নি।</p>
+            <p
+                v-if="!locks.length"
+                class="p-6 text-center text-sm text-muted-foreground"
+            >
+                এখনো কোনো মাস লক করা হয়নি।
+            </p>
         </div>
     </div>
 </template>

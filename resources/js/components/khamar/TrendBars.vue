@@ -6,13 +6,18 @@ const props = defineProps<{
     months: { month: string; income: number; expense: number }[];
 }>();
 
-const peak = computed(() => Math.max(1, ...props.months.flatMap((m) => [m.income, m.expense])));
-const height = (value: number) => `${Math.max(2, Math.round((Math.max(0, value) / peak.value) * 100))}%`;
+const peak = computed(() =>
+    Math.max(1, ...props.months.flatMap((m) => [m.income, m.expense])),
+);
+const height = (value: number) =>
+    `${Math.max(2, Math.round((Math.max(0, value) / peak.value) * 100))}%`;
 </script>
 
 <template>
     <div>
-        <div class="flex h-44 items-end gap-2 border-b border-border pb-px sm:gap-3">
+        <div
+            class="flex h-44 items-end gap-2 border-b border-border pb-px sm:gap-3"
+        >
             <div
                 v-for="m in months"
                 :key="m.month"
@@ -41,11 +46,16 @@ const height = (value: number) => `${Math.max(2, Math.round((Math.max(0, value) 
                 v-for="m in months"
                 :key="m.month"
                 class="flex-1 text-center text-[11px] text-muted-foreground"
-            >{{ monthLabel(m.month) }}</span>
+                >{{ monthLabel(m.month) }}</span
+            >
         </div>
         <div class="mt-3 flex gap-4 text-xs text-muted-foreground">
-            <span class="flex items-center gap-1.5"><i class="size-2.5 rounded-sm bg-income" /> আয়</span>
-            <span class="flex items-center gap-1.5"><i class="size-2.5 rounded-sm bg-expense" /> খরচ</span>
+            <span class="flex items-center gap-1.5"
+                ><i class="size-2.5 rounded-sm bg-income" /> আয়</span
+            >
+            <span class="flex items-center gap-1.5"
+                ><i class="size-2.5 rounded-sm bg-expense" /> খরচ</span
+            >
         </div>
     </div>
 </template>
