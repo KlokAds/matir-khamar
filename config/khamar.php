@@ -31,6 +31,12 @@ return [
     ],
 
     /*
+    | No hPanel cron: web traffic starts `schedule:run` at most once a minute
+    | (App\Support\WebCron). On for the live server through .env.
+    */
+    'web_cron' => (bool) env('KHAMAR_WEB_CRON', false),
+
+    /*
     | Command-line php for processes the web app starts (updates). Empty: the
     | php next to the web one (Hostinger: /opt/alt/php85/usr/bin/php).
     */

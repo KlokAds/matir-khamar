@@ -34,8 +34,10 @@ The repository is private: store a GitHub login for the server user once
 (`git config --global credential.helper store`, then one `git fetch` with a token as the password)
 so the in-app update can fetch.
 
-Scheduler (backups at 02:00, lease months, billing sync, auto-update): a cron entry in hPanel,
-every minute: `/opt/alt/php85/usr/bin/php ~/klokads_khamar_app/artisan schedule:run`.
+Scheduler (backups at 02:00, lease months, billing sync, auto-update): no hPanel cron. With
+`KHAMAR_WEB_CRON=true` (the installer writes it) the first web request of each minute starts
+`schedule:run` in the background. Add a free uptime monitor that pings `https://<site>/up` every
+5 minutes so the nightly backup runs even when nobody opens the site.
 
 **Never change `APP_KEY` on the live site**: the billing password and the backups are encrypted
 with it. Keep a copy of it somewhere safe, apart from the backups.
