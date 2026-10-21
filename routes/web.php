@@ -4,7 +4,9 @@ use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\HerdController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
@@ -33,6 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('stock/issue', [StockController::class, 'issue'])->name('stock.issue');
         Route::get('offline', [OfflineController::class, 'show'])->name('offline.show');
         Route::post('offline/sync', [OfflineController::class, 'sync'])->middleware('throttle:30,1')->name('offline.sync');
+        Route::post('animals/{animal}/breedings', [HerdController::class, 'storeBreeding'])->name('breedings.store');
+        Route::put('breedings/{breeding}', [HerdController::class, 'updateBreeding'])->name('breedings.update');
+        Route::post('animals/{animal}/weights', [HerdController::class, 'storeWeight'])->name('weights.store');
+        Route::post('diary/notes', [DiaryController::class, 'storeNote'])->name('diary.notes.store');
+        Route::put('diary/notes/{note}', [DiaryController::class, 'updateNote'])->name('diary.notes.update');
     });
 
     Route::middleware('can:view-reports')->group(function () {
@@ -49,6 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
         Route::inertia('guide/split', 'guide/Split')->name('guide.split');
         Route::get('money', [MoneyController::class, 'index'])->name('money.index');
+        Route::get('breeding', [HerdController::class, 'breeding'])->name('breeding.index');
+        Route::get('batches', [HerdController::class, 'batches'])->name('batches.index');
+        Route::get('diary', [DiaryController::class, 'index'])->name('diary.index');
     });
 
     Route::middleware('can:post-entries')->group(function () {
@@ -64,6 +74,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('animals/{animal}/death', [AnimalController::class, 'death'])->name('animals.death');
         Route::get('allocation', [AllocationController::class, 'create'])->name('allocation.create');
         Route::post('allocation', [AllocationController::class, 'store'])->name('allocation.store');
+        Route::post('batches', [HerdController::class, 'storeBatch'])->name('batches.store');
+        Route::put('batches/{batch}', [HerdController::class, 'updateBatch'])->name('batches.update');
+        Route::post('diary/goals', [DiaryController::class, 'storeGoal'])->name('diary.goals.store');
+        Route::put('diary/goals/{goal}', [DiaryController::class, 'updateGoal'])->name('diary.goals.update');
     });
 
     Route::post('entries/{entry}/reverse', [EntryController::class, 'reverse'])->middleware('can:reverse-entries')->name('entries.reverse');

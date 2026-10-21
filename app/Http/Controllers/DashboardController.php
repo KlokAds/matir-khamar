@@ -8,6 +8,7 @@ use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\JournalEntry;
 use App\Models\MilkRecord;
+use App\Services\HerdCare;
 use App\Services\PrepaidService;
 use App\Services\ReportService;
 use Carbon\CarbonInterface;
@@ -17,7 +18,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid): Response
+    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care): Response
     {
         // Lease months that have started are moved into their category before anything is shown.
         $prepaid->amortizeDue();
@@ -28,6 +29,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'canSeeMoney' => $canSeeMoney,
+            'reminders' => $care->reminders(),
             'month' => $from->format('Y-m'),
             'farm' => $canSeeMoney ? $reports->farmTotals($from, $to) : null,
             'farmYear' => $canSeeMoney ? $reports->farmTotals(now()->startOfYear(), $to) : null,

@@ -64,6 +64,9 @@ const items = computed<NavItem[]>(() => {
             ['গরুর তালিকা', '/animals', !!c['view-reports']],
             ['নতুন গরু', '/animals/create', !!c['post-entries']],
             ['দুধের হিসাব', '/milk', !!c['post-daily']],
+            ['গর্ভ ও বাছুর', '/breeding', !!c['view-reports']],
+            ['মোটাতাজা ব্যাচ', '/batches', !!c['view-reports']],
+            ['খামার ডায়েরি ও লক্ষ্য', '/diary', !!c['view-reports']],
         ]),
         ...group('খাবার ও স্টক', Wheat, [
             ['গরুকে খাবার দেওয়া', '/stock/move?mode=issue', !!c['post-daily']],

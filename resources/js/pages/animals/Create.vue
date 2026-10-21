@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
 import { Paperclip } from '@lucide/vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
@@ -25,7 +26,19 @@ const props = defineProps<{
     mothers: { id: number; tag: string; name: string | null }[];
     acquisitions: Record<string, string>;
     maxVoucherKb: number;
+    batches: {
+        id: number;
+        label: string;
+        cost_center_id: number;
+        started_on: string;
+    }[];
+    nextBatchNumbers: Record<string, number>;
 }>();
+
+// Coming from a calving ("বাছুরটি তালিকায় যোগ করুন"): the mother is already known.
+const motherFromLink = Number(
+    new URLSearchParams(window.location.search).get('mother') ?? 0,
+);
 
 const f = useForm({
     tag: '',
@@ -33,16 +46,40 @@ const f = useForm({
     sex: 'female',
     breed: '',
     cost_center_id: props.centers[0]?.id ?? null,
-    acquisition: 'purchase',
+    acquisition: motherFromLink ? 'born' : 'purchase',
     acquired_on: today(),
     birth_date: '',
-    mother_id: null as number | null,
+    mother_id: (motherFromLink || null) as number | null,
+    batch: '' as string,
+    weight_kg: '',
+    months_pregnant: '',
     notes: '',
     cost: '',
     paid_from_account_id: props.moneyAccounts[0]?.id ?? null,
     budget_head_id: null as number | null,
     attachments: [] as File[],
 });
+
+const center = computed(() =>
+    props.centers.find((c) => c.id === f.cost_center_id),
+);
+const centerBatches = computed(() =>
+    props.batches.filter((b) => b.cost_center_id === f.cost_center_id),
+);
+// Fattening rounds are offered where they are used: মোটাতাজা, or any category that has one open.
+const showBatch = computed(
+    () => center.value?.code === 'MOTATAJA' || centerBatches.value.length > 0,
+);
+
+watch(
+    () => f.cost_center_id,
+    () => {
+        f.batch = showBatch.value
+            ? String(centerBatches.value[0]?.id ?? 'new')
+            : '';
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
@@ -109,6 +146,57 @@ const f = useForm({
             <Field v-if="f.acquisition !== 'born'" label="জন্ম তারিখ (জানলে)"
                 ><Input v-model="f.birth_date" type="date" :max="today()"
             /></Field>
+            <Field
+                v-if="showBatch"
+                label="কোন ব্যাচে"
+                :error="f.errors.batch"
+                hint="একসাথে কেনা গরু এক ব্যাচে — দিন, খরচ আর লাভ ব্যাচ ধরে দেখা যাবে"
+            >
+                <NSelect v-model="f.batch">
+                    <option
+                        v-for="b in centerBatches"
+                        :key="b.id"
+                        :value="String(b.id)"
+                    >
+                        {{ b.label }} (শুরু {{ b.started_on }})
+                    </option>
+                    <option value="new">
+                        নতুন: ব্যাচ-{{
+                            nextBatchNumbers[String(f.cost_center_id)] ?? 1
+                        }}
+                    </option>
+                    <option value="">কোনো ব্যাচে নয়</option>
+                </NSelect>
+            </Field>
+            <Field
+                label="ওজন (কেজি, ঐচ্ছিক)"
+                :error="f.errors.weight_kg"
+                hint="শুরুর ওজন থাকলে পরে দিনে কত বাড়লো দেখা যাবে"
+            >
+                <Input
+                    v-model="f.weight_kg"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    class="num"
+                />
+            </Field>
+            <Field
+                v-if="f.sex === 'female' && f.acquisition !== 'born'"
+                label="গর্ভবতী? কত মাস চলছে"
+                :error="f.errors.months_pregnant"
+                hint="জানা থাকলে লিখুন, যেমন 4 — বাচ্চা হওয়ার আনুমানিক দিন হিসাব হবে"
+            >
+                <Input
+                    v-model="f.months_pregnant"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="9.5"
+                    class="num"
+                    placeholder="গর্ভবতী না হলে খালি রাখুন"
+                />
+            </Field>
             <Field v-if="f.acquisition === 'born' && mothers.length" label="মা">
                 <NSelect v-model="f.mother_id"
                     ><option :value="null">—</option>

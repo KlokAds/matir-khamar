@@ -2,6 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowRightLeft, Coins, HeartCrack } from '@lucide/vue';
 import { ref } from 'vue';
+import AnimalCare from '@/components/khamar/AnimalCare.vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
@@ -53,6 +54,13 @@ const props = defineProps<{
     centers: Center[];
     moneyAccounts: Option[];
     customers: { id: number; name: string }[];
+    batch: InstanceType<typeof AnimalCare>['$props']['batch'];
+    weights: InstanceType<typeof AnimalCare>['$props']['weights'];
+    growth: InstanceType<typeof AnimalCare>['$props']['growth'];
+    breedings: InstanceType<typeof AnimalCare>['$props']['breedings'];
+    breedingOptions: InstanceType<typeof AnimalCare>['$props']['options'];
+    ageDays: number | null;
+    calfStage: InstanceType<typeof AnimalCare>['$props']['calfStage'];
 }>();
 
 defineOptions({
@@ -240,6 +248,19 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
             "ক্যাটাগরির ভাগ" = গরুটি যে ক্যাটাগরিতে যতদিন ছিল, সেই ক্যাটাগরির
             খাবার-ঔষধ-মজুরির খরচ থেকে পশু-দিন অনুযায়ী তার অংশ।
         </p>
+
+        <AnimalCare
+            :animal-id="animal.id"
+            :sex="animal.sex"
+            :active="animal.status === 'active'"
+            :batch="batch"
+            :weights="weights"
+            :growth="growth"
+            :breedings="breedings"
+            :options="breedingOptions"
+            :age-days="ageDays"
+            :calf-stage="calfStage"
+        />
 
         <div class="mt-6 grid gap-6 lg:grid-cols-3">
             <section

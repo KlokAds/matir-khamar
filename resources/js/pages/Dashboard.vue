@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import {
     Beef,
+    BellRing,
     CircleAlert,
     HandCoins,
     Milk,
@@ -28,6 +29,14 @@ defineOptions({
 
 const props = defineProps<{
     canSeeMoney: boolean;
+    reminders: {
+        kind: string;
+        title: string;
+        detail: string;
+        href: string;
+        when: string;
+        urgent: boolean;
+    }[];
     month: string;
     farm: { income: number; expense: number; profit: number } | null;
     farmYear: { income: number; expense: number; profit: number } | null;
@@ -152,6 +161,36 @@ const greeting = computed(() => {
                 :hint="animals.map((a) => `${a.center} ${a.count}`).join(' · ')"
             />
         </div>
+
+        <section
+            v-if="reminders.length"
+            class="mt-4 rounded-xl border border-turmeric/40 bg-turmeric/8 p-3"
+        >
+            <h2 class="mb-2 flex items-center gap-2 text-sm font-semibold">
+                <BellRing class="size-4 text-turmeric" /> মনে রাখার কাজ
+            </h2>
+            <ul class="grid gap-1.5 sm:grid-cols-2">
+                <li v-for="r in reminders.slice(0, 8)" :key="r.title + r.when">
+                    <Link
+                        :href="r.href"
+                        class="flex items-start gap-2 rounded-lg bg-card/70 p-2 text-sm hover:bg-card"
+                    >
+                        <span
+                            :class="[
+                                'mt-1.5 size-2 shrink-0 rounded-full',
+                                r.urgent ? 'bg-destructive' : 'bg-turmeric',
+                            ]"
+                        />
+                        <span class="min-w-0">
+                            <span class="block font-medium">{{ r.title }}</span>
+                            <span class="block text-xs text-muted-foreground">{{
+                                r.detail
+                            }}</span>
+                        </span>
+                    </Link>
+                </li>
+            </ul>
+        </section>
 
         <div
             v-if="lowStock.length"
