@@ -286,7 +286,7 @@ const whyNoDelete = (row: Row) =>
                     <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
                         <div
                             :class="[
-                                'flex min-w-0 flex-1 items-center gap-2.5',
+                                'flex min-w-0 flex-1 basis-full items-center gap-2.5 sm:basis-auto',
                                 !row.is_active && 'opacity-60',
                             ]"
                         >
@@ -322,7 +322,7 @@ const whyNoDelete = (row: Row) =>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-1">
+                        <div class="flex w-full items-center gap-1 sm:w-auto">
                             <Toggle
                                 :model-value="row.is_active"
                                 on-text="চালু"
