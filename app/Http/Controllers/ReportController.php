@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BudgetHead;
 use App\Models\JournalLine;
 use App\Services\ReportService;
+use App\Services\UsageReport;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,18 @@ class ReportController extends Controller
             'trend' => $reports->monthlyTrend(12, null, true),
             'balances' => $balances,
             'retained' => $result['profit'],
+        ]);
+    }
+
+    /** Feed, grass and fertiliser by kilo: from how much land, to which category, for how many animals. */
+    public function usage(Request $request, UsageReport $usage): Response
+    {
+        $request->validate(['month' => ['nullable', 'date_format:Y-m']]);
+        $month = Date::parse(($request->string('month')->toString() ?: now()->format('Y-m')).'-01');
+
+        return Inertia::render('reports/Usage', [
+            'month' => $month->format('Y-m'),
+            'items' => $usage->items($month->startOfMonth(), $month->endOfMonth()),
         ]);
     }
 

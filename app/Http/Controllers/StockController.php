@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\Animal;
 use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\StockMovement;
@@ -61,6 +62,8 @@ class StockController extends Controller
             'canPurchase' => $request->user()->can('post-entries'),
             'maxVoucherKb' => config('khamar.max_voucher_kb'),
             'grassCenterId' => CostCenter::query()->where('code', 'GHAS')->value('id'),
+            // Animals in each category today, shown next to the kilos so "for how many" is clear.
+            'herd' => (object) Animal::query()->where('status', 'active')->selectRaw('cost_center_id, COUNT(*) as n')->groupBy('cost_center_id')->pluck('n', 'cost_center_id')->map(fn ($n) => (int) $n)->all(),
         ]);
     }
 
@@ -101,6 +104,7 @@ class StockController extends Controller
             'splits' => ['required', 'array', 'min:1', 'max:20'],
             'splits.*.cost_center_id' => ['required', 'exists:cost_centers,id'],
             'splits.*.qty' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
+            'splits.*.land' => ['nullable', 'numeric', 'min:0', 'max:100000'],
             'note' => ['nullable', 'string', 'max:255'],
             'session' => ['nullable', Rule::in(array_keys(StockMovement::SESSIONS))],
         ]);
@@ -120,10 +124,11 @@ class StockController extends Controller
             'qty' => ['required', 'numeric', 'min:0.001', 'max:9999999'],
             'rate' => Money::rule(),
             'cost_center_id' => ['required', 'exists:cost_centers,id'],
+            'land_decimals' => ['nullable', 'numeric', 'min:0', 'max:100000'],
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $entry = $stock->produce(Item::query()->findOrFail((int) $data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['rate']), (int) $data['cost_center_id'], $data['note'] ?? null);
+        $entry = $stock->produce(Item::query()->findOrFail((int) $data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['rate']), (int) $data['cost_center_id'], $data['note'] ?? null, isset($data['land_decimals']) ? (float) $data['land_decimals'] : null);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "উৎপাদন স্টকে উঠেছে ({$entry->number})।"]);
 

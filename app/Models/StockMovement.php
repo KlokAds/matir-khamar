@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $direction
  * @property string|null $session morning, noon or evening for feed given
  * @property float $qty
+ * @property float|null $land_decimals land the grass came from or the fertiliser went on (শতাংশ)
+ * @property int|null $head_count animals in the category on the day it was fed
  * @property int $value
  * @property string|null $note
  * @property CarbonImmutable|null $created_at
@@ -24,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CostCenter|null $costCenter
  * @property-read JournalEntry $entry
  */
-#[Fillable(['item_id', 'journal_entry_id', 'cost_center_id', 'date', 'direction', 'session', 'qty', 'value', 'note'])]
+#[Fillable(['item_id', 'journal_entry_id', 'cost_center_id', 'date', 'direction', 'session', 'qty', 'land_decimals', 'head_count', 'value', 'note'])]
 class StockMovement extends Model
 {
     /** Feeding times through the day. */
@@ -35,6 +37,8 @@ class StockMovement extends Model
         return [
             'date' => 'date',
             'qty' => 'float',
+            'land_decimals' => 'float',
+            'head_count' => 'integer',
             'value' => 'integer',
         ];
     }

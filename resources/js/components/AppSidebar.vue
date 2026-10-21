@@ -74,6 +74,7 @@ const items = computed<NavItem[]>(() => {
                 !!c['post-entries'],
             ],
             ['স্টকে কী আছে', '/stock', !!c['view-reports']],
+            ['কোথায় কত কেজি গেল', '/reports/usage', !!c['view-reports']],
         ]),
         ...group('টাকার হিসাব', HandCoins, [
             ['নতুন এন্ট্রি', '/entries/create', !!c['post-entries']],
@@ -85,6 +86,7 @@ const items = computed<NavItem[]>(() => {
             ['ক্যাটাগরি ও প্রজেক্ট', '/centers', !!c['view-reports']],
             ['লাভ-ক্ষতি ও সম্পদ', '/reports', !!c['view-reports']],
             ['উদ্যোগ বাজেট', '/reports/budget', !!c['view-reports']],
+            ['ভাগ কীভাবে হয় (উদাহরণ)', '/guide/split', !!c['view-reports']],
         ]),
         ...group('সেটআপ ও নিরাপত্তা', Settings2, [
             ['হিসাব খাত', '/setup/accounts', !!c['manage-setup']],

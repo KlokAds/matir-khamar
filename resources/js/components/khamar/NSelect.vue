@@ -35,7 +35,40 @@ const props = withDefaults(
 );
 
 type Value = string | number | null | undefined;
-type Choice = { key: number; value: Value; label: string; disabled: boolean };
+type Choice = {
+    key: number;
+    value: Value;
+    label: string;
+    disabled: boolean;
+    depth: number;
+    parent: boolean;
+};
+
+const NBSP = '\u00a0';
+
+/**
+ * centerLabel() writes the tree as text ("   └ বকনা") so a plain <option> can carry it.
+ * Here that text is turned back into a level, and drawn with guide lines instead.
+ */
+function splitTree(text: string): { depth: number; label: string } {
+    let indent = 0;
+
+    while (text[indent] === NBSP) {
+        indent++;
+    }
+
+    let label = text.slice(indent);
+    const branch = label.startsWith('└ ');
+
+    if (branch) {
+        label = label.slice(2);
+    }
+
+    return {
+        depth: branch ? Math.max(1, Math.round(indent / 3)) : 0,
+        label,
+    };
+}
 
 const model = defineModel<Value>();
 const slots = useSlots();
@@ -77,6 +110,11 @@ function collect(nodes: VNode[] | undefined, out: Choice[]): Choice[] {
             collect(node.children as VNode[], out);
         } else if (node.type === 'option') {
             const attrs = (node.props ?? {}) as Record<string, unknown>;
+            const tree = splitTree(
+                textOf(node.children)
+                    .replace(/[ \t\r\n]+/g, ' ')
+                    .replace(/^ | $/g, ''),
+            );
             out.push({
                 key: out.length,
                 // :value="null" must stay null (the "none" choice), not fall back to the text.
@@ -85,13 +123,18 @@ function collect(nodes: VNode[] | undefined, out: Choice[]): Choice[] {
                         ? (attrs.value as Value)
                         : textOf(node.children).trim(),
                 // Only plain spaces are squeezed: centerLabel indents with no-break spaces.
-                label: textOf(node.children)
-                    .replace(/[ \t\r\n]+/g, ' ')
-                    .replace(/^ | $/g, ''),
+                label: tree.label,
+                depth: tree.depth,
+                parent: false,
                 disabled: attrs.disabled === '' || attrs.disabled === true,
             });
         }
     }
+
+    // A row is a parent when the next one sits a level deeper.
+    out.forEach((choice, index) => {
+        choice.parent = (out[index + 1]?.depth ?? 0) > choice.depth;
+    });
 
     return out;
 }
@@ -112,6 +155,7 @@ const selected = computed(() =>
 );
 
 const searchable = computed(() => choices.value.length > 8);
+const isTree = computed(() => choices.value.some((choice) => choice.depth > 0));
 
 const shown = computed(() => {
     const needle = query.value.trim().toLowerCase();
@@ -278,6 +322,7 @@ function onTriggerKey(event: KeyboardEvent) {
                         :disabled="choice.disabled"
                         :class="[
                             'flex min-h-10 w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[15px] leading-snug',
+                            isTree && !query && 'min-h-9 py-1',
                             choice.disabled
                                 ? 'cursor-default text-xs text-muted-foreground'
                                 : 'cursor-pointer',
@@ -287,9 +332,33 @@ function onTriggerKey(event: KeyboardEvent) {
                         @mousemove="!choice.disabled && (active = index)"
                         @click="pick(choice)"
                     >
-                        <span class="min-w-0 flex-1 whitespace-pre-wrap">{{
-                            choice.label || '—'
-                        }}</span>
+                        <template v-if="isTree && !query">
+                            <span
+                                v-for="level in choice.depth"
+                                :key="level"
+                                aria-hidden="true"
+                                class="relative w-3 shrink-0 self-stretch before:absolute before:-inset-y-1.5 before:left-1 before:border-l before:border-border"
+                            />
+                            <span
+                                aria-hidden="true"
+                                :class="[
+                                    'shrink-0 rounded-full',
+                                    choice.parent
+                                        ? 'size-2 bg-paddy'
+                                        : 'size-1.5 bg-muted-foreground/50',
+                                ]"
+                            />
+                        </template>
+                        <span
+                            :class="[
+                                'min-w-0 flex-1',
+                                isTree && choice.parent && 'font-semibold',
+                                isTree &&
+                                    choice.depth === 0 &&
+                                    'text-foreground',
+                            ]"
+                            >{{ choice.label || '—' }}</span
+                        >
                         <Check
                             v-if="choice === selected"
                             class="size-4 shrink-0"

@@ -46,6 +46,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('animals/{animal}', [AnimalController::class, 'show'])->whereNumber('animal')->name('animals.show');
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
+        Route::get('reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
+        Route::inertia('guide/split', 'guide/Split')->name('guide.split');
         Route::get('money', [MoneyController::class, 'index'])->name('money.index');
     });
 

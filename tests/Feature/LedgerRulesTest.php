@@ -14,6 +14,7 @@ use App\Services\Ledger;
 use App\Services\PrepaidService;
 use App\Services\ReportService;
 use App\Services\StockService;
+use App\Services\UsageReport;
 use Database\Seeders\KhamarSetupSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
@@ -171,4 +172,29 @@ it('remembers the feeding time of day on each issue', function () {
 
     expect(StockMovement::query()->where('journal_entry_id', $entry->id)->value('session'))->toBe('noon')
         ->and($entry->description)->toContain('দুপুর');
+});
+
+it('records the land grass came from and how many animals it fed', function () {
+    $grass = Item::query()->where('name', 'কাঁচা ঘাস (নিজের জমির)')->firstOrFail();
+    $stock = app(StockService::class);
+    $animals = app(AnimalService::class);
+
+    foreach (['G-1', 'G-2', 'G-3', 'G-4'] as $tag) {
+        $animals->register(['tag' => $tag, 'sex' => 'female', 'cost_center_id' => ($this->center)('GAVI')->id, 'acquisition' => 'opening', 'acquired_on' => '2026-01-01'], 9000000, null);
+    }
+    // A cow that arrives later is not counted for the earlier feed.
+    $animals->register(['tag' => 'G-5', 'sex' => 'female', 'cost_center_id' => ($this->center)('GAVI')->id, 'acquisition' => 'opening', 'acquired_on' => '2026-10-20'], 9000000, null);
+
+    $stock->produce($grass, '2026-10-01', 600, 400, ($this->center)('GHAS')->id, null, 10);
+    $stock->issue($grass->fresh(), '2026-10-02', [['cost_center_id' => ($this->center)('GAVI')->id, 'qty' => 40]], null, 'morning');
+    $stock->issue($grass->fresh(), '2026-10-02', [['cost_center_id' => ($this->center)('GAVI')->id, 'qty' => 40]], null, 'evening');
+
+    $row = collect(app(UsageReport::class)->items(Date::parse('2026-10-01'), Date::parse('2026-10-31')))->firstWhere('id', $grass->id);
+
+    expect(StockMovement::query()->where('direction', 'out')->pluck('head_count')->all())->toBe([4, 4])
+        ->and($row['produced']['land'])->toEqual(10.0)
+        ->and($row['produced']['per_land'])->toEqual(60.0)
+        // Two feeds on one day share one herd: 80 kg / (4 cows x 1 day) = 20 kg per cow.
+        ->and($row['used'][0]['animals'])->toEqual(4.0)
+        ->and($row['used'][0]['per_animal_day'])->toEqual(20.0);
 });

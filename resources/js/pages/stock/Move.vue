@@ -42,6 +42,7 @@ const props = defineProps<{
     canPurchase: boolean;
     maxVoucherKb: number;
     grassCenterId: number | null;
+    herd: Record<string, number>;
 }>();
 
 const tabs = computed(() =>
@@ -95,10 +96,11 @@ const f = useForm({
     note: '',
     splits: animalCenters.value
         .filter((c) => c.holds_animals)
-        .map((c) => ({ cost_center_id: c.id, qty: '' })),
+        .map((c) => ({ cost_center_id: c.id, qty: '', land: '' })),
     attachments: [] as File[],
     stay: true,
     session: currentSession(),
+    land_decimals: '',
 });
 
 const item = computed(() => props.items.find((i) => i.id === f.item_id));
@@ -110,6 +112,19 @@ const overStock = computed(
         item.value !== undefined &&
         issueTotal.value > item.value.qty_on_hand + 0.0005,
 );
+// Fertiliser and seed go on land, so each line also asks how many decimals (শতাংশ).
+const onLand = computed(() => item.value?.kind === 'crop_input');
+const herdOf = (id: number) => props.herd[String(id)] ?? 0;
+const perHead = (split: { cost_center_id: number; qty: string }) => {
+    const head = herdOf(split.cost_center_id);
+    const amount = parseFloat(split.qty) || 0;
+
+    return head > 0 && amount > 0
+        ? `${head}টি গরু · প্রতিটি ${Math.round((amount / head) * 100) / 100} ${item.value?.unit_label ?? ''}`
+        : head > 0
+          ? `এখন ${head}টি গরু`
+          : '';
+};
 const centerName = (id: number) =>
     props.centers.find((c) => c.id === id)?.name ?? '';
 
@@ -133,7 +148,7 @@ function addSplit() {
     );
 
     if (unused) {
-        f.splits.push({ cost_center_id: unused.id, qty: '' });
+        f.splits.push({ cost_center_id: unused.id, qty: '', land: '' });
     }
 }
 
@@ -154,8 +169,12 @@ function submit() {
                 'description',
                 'note',
                 'attachments',
+                'land_decimals',
             );
-            f.splits.forEach((split) => (split.qty = ''));
+            f.splits.forEach((split) => {
+                split.qty = '';
+                split.land = '';
+            });
         },
     });
 }
@@ -277,6 +296,51 @@ function submit() {
                             >
                                 <X class="size-4" />
                             </button>
+                            <div
+                                v-if="onLand"
+                                class="col-span-3 flex items-center gap-2 text-sm sm:col-span-4"
+                            >
+                                <span class="text-muted-foreground"
+                                    >কত শতাংশ জমিতে</span
+                                >
+                                <div class="relative w-32">
+                                    <Input
+                                        v-model="split.land"
+                                        type="number"
+                                        inputmode="decimal"
+                                        step="0.01"
+                                        min="0"
+                                        class="num pr-14 text-right"
+                                        placeholder="0"
+                                    />
+                                    <span
+                                        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
+                                        >শতাংশ</span
+                                    >
+                                </div>
+                                <span
+                                    v-if="
+                                        parseFloat(split.land) > 0 &&
+                                        parseFloat(split.qty) > 0
+                                    "
+                                    class="num text-xs text-muted-foreground"
+                                    >প্রতি শতাংশে
+                                    {{
+                                        Math.round(
+                                            (parseFloat(split.qty) /
+                                                parseFloat(split.land)) *
+                                                100,
+                                        ) / 100
+                                    }}
+                                    {{ item?.unit_label }}</span
+                                >
+                            </div>
+                            <p
+                                v-else-if="perHead(split)"
+                                class="col-span-3 px-1 text-xs text-muted-foreground sm:col-span-4"
+                            >
+                                {{ perHead(split) }}
+                            </p>
                         </div>
                     </div>
                     <Button
@@ -411,9 +475,10 @@ function submit() {
                     <p class="rounded-lg bg-paddy/10 p-3 text-sm">
                         নিজের জমির ঘাস কাটলে বাজারদরে স্টকে তুলুন। ঘাস চাষ
                         ক্যাটাগরি তখন দেখাবে — নিজে চাষ করা কেনার চেয়ে লাভজনক
-                        কি না।
+                        কি না। কত শতাংশ জমি থেকে কাটলেন লিখলে রিপোর্টে দেখা যাবে
+                        প্রতি শতাংশে কত কেজি হলো।
                     </p>
-                    <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <Field
                             :label="`পরিমাণ (${item?.unit_label ?? ''})`"
                             :error="f.errors.qty"
@@ -453,6 +518,25 @@ function submit() {
                                     {{ centerLabel(c) }}
                                 </option>
                             </NSelect>
+                        </Field>
+                        <Field
+                            label="কত শতাংশ জমি থেকে (ঐচ্ছিক)"
+                            :error="f.errors.land_decimals"
+                            :hint="
+                                parseFloat(f.land_decimals) > 0 &&
+                                parseFloat(f.qty) > 0
+                                    ? `প্রতি শতাংশে ${Math.round((parseFloat(f.qty) / parseFloat(f.land_decimals)) * 10) / 10} ${item?.unit_label ?? ''}`
+                                    : undefined
+                            "
+                        >
+                            <Input
+                                v-model="f.land_decimals"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="num"
+                                placeholder="যেমন 10"
+                            />
                         </Field>
                     </div>
                 </template>
