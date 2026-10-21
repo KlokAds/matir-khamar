@@ -88,9 +88,6 @@ const total = computed(() =>
         0,
     ),
 );
-const usableCenters = computed(() =>
-    props.centers.filter((center) => center.kind !== 'group'),
-);
 
 const partyFilter = computed(() => {
     switch (f.form) {
@@ -393,9 +390,10 @@ const help: Record<string, string> = {
                         >
                             <NSelect v-model="f.cost_center_id">
                                 <option
-                                    v-for="c in usableCenters"
+                                    v-for="c in centers"
                                     :key="c.id"
                                     :value="c.id"
+                                    :disabled="c.kind === 'group'"
                                 >
                                     {{ centerLabel(c) }}
                                 </option>
@@ -550,9 +548,10 @@ const help: Record<string, string> = {
                                 >
                                     <NSelect v-model="line.cost_center_id">
                                         <option
-                                            v-for="c in usableCenters"
+                                            v-for="c in centers"
                                             :key="c.id"
                                             :value="c.id"
+                                            :disabled="c.kind === 'group'"
                                         >
                                             {{ centerLabel(c) }}
                                         </option>

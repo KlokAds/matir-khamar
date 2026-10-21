@@ -68,6 +68,10 @@ const tabs = computed(() =>
     ].filter((tab) => tab.show),
 );
 
+// For the dropdowns: project groups show as headings so the tree reads right.
+const centerChoices = computed(() =>
+    props.centers.filter((center) => center.kind !== 'overhead'),
+);
 const animalCenters = computed(() =>
     props.centers.filter(
         (center) => center.kind !== 'group' && center.kind !== 'overhead',
@@ -255,11 +259,12 @@ function submit() {
                                 class="col-span-3 sm:col-span-1"
                             >
                                 <option
-                                    v-for="c in animalCenters"
+                                    v-for="c in centerChoices"
                                     :key="c.id"
                                     :value="c.id"
+                                    :disabled="c.kind === 'group'"
                                 >
-                                    {{ c.name }}
+                                    {{ centerLabel(c) }}
                                 </option>
                             </NSelect>
                             <div class="relative w-36 sm:w-full">
@@ -511,9 +516,10 @@ function submit() {
                         >
                             <NSelect v-model="f.cost_center_id">
                                 <option
-                                    v-for="c in animalCenters"
+                                    v-for="c in centerChoices"
                                     :key="c.id"
                                     :value="c.id"
+                                    :disabled="c.kind === 'group'"
                                 >
                                     {{ centerLabel(c) }}
                                 </option>

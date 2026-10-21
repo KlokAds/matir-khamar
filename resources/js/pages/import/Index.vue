@@ -124,7 +124,6 @@ const undecided = computed(
         props.mappings.filter((m) => !m.complete && m.kind !== 'payment_method')
             .length,
 );
-const usable = computed(() => props.centers.filter((c) => c.kind !== 'group'));
 const qtyDraft = reactive<Record<number, string>>({});
 
 function save(map: Mapping) {
@@ -528,9 +527,10 @@ const stockCategoryIds = computed(() =>
                                 placeholder="ক্যাটাগরি"
                             >
                                 <option
-                                    v-for="c in usable"
+                                    v-for="c in centers"
                                     :key="c.id"
                                     :value="c.id"
+                                    :disabled="c.kind === 'group'"
                                 >
                                     {{ centerLabel(c) }}
                                 </option>

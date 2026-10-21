@@ -324,7 +324,9 @@ function onTriggerKey(event: KeyboardEvent) {
                             'flex min-h-10 w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[15px] leading-snug',
                             isTree && !query && 'min-h-9 py-1',
                             choice.disabled
-                                ? 'cursor-default text-xs text-muted-foreground'
+                                ? isTree
+                                    ? 'cursor-default text-[13px] font-semibold text-muted-foreground'
+                                    : 'cursor-default text-xs text-muted-foreground'
                                 : 'cursor-pointer',
                             index === active && !choice.disabled && 'bg-accent',
                             choice === selected && 'font-medium text-primary',
@@ -337,9 +339,10 @@ function onTriggerKey(event: KeyboardEvent) {
                                 v-for="level in choice.depth"
                                 :key="level"
                                 aria-hidden="true"
-                                class="relative w-3 shrink-0 self-stretch before:absolute before:-inset-y-1.5 before:left-1 before:border-l before:border-border"
+                                class="relative w-3 shrink-0 self-stretch before:absolute before:-inset-y-1.5 before:left-1 before:border-l before:border-muted-foreground/25"
                             />
                             <span
+                                v-if="!choice.disabled"
                                 aria-hidden="true"
                                 :class="[
                                     'shrink-0 rounded-full',
