@@ -228,17 +228,22 @@
 }
 
 /*
- * Bangla vowel signs (ি ী ু ূ ৃ) reach above and below a Latin-sized line. Text cut off with
- * "…" hides everything outside its line box, so give those lines room. Unlayered on purpose,
- * so it wins over leading-* utilities on the same element.
+ * Bangla vowel signs (ি ী ু ূ ৃ) and ya-phala (্য) can draw above or below the line box,
+ * whatever its height. Text cut off with "…" used overflow: hidden, which clips every
+ * direction; overflow-x: clip cuts only the right edge and leaves the top and bottom free.
+ * Unlayered on purpose, so it wins over the utilities and the sidebar's own truncate rule.
  */
-.truncate {
+.truncate,
+[data-sidebar='menu-button'] > span:last-child,
+[data-sidebar='menu-sub-button'] > span:last-child {
+    overflow-x: clip;
+    overflow-y: visible;
     line-height: 1.65;
 }
 
-/* Sidebar menu labels get their "…" from a parent selector, not the .truncate class. */
-[data-sidebar='menu-button'] > span:last-child,
-[data-sidebar='menu-sub-button'] > span:last-child {
-    line-height: 1.65;
-    padding-block: 1px;
+/* The sidebar's menu buttons clip too; let their labels breathe vertically. */
+[data-sidebar='menu-button'],
+[data-sidebar='menu-sub-button'] {
+    overflow-y: visible;
+    overflow-x: clip;
 }
