@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:110
+* @see app/Http/Controllers/SetupController.php:113
 * @route '/setup/accounts'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:110
+* @see app/Http/Controllers/SetupController.php:113
 * @route '/setup/accounts'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:110
+* @see app/Http/Controllers/SetupController.php:113
 * @route '/setup/accounts'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:110
+* @see app/Http/Controllers/SetupController.php:113
 * @route '/setup/accounts'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:110
+* @see app/Http/Controllers/SetupController.php:113
 * @route '/setup/accounts'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:128
+* @see app/Http/Controllers/SetupController.php:131
 * @route '/setup/accounts/{account}'
 */
 export const update = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -72,7 +72,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:128
+* @see app/Http/Controllers/SetupController.php:131
 * @route '/setup/accounts/{account}'
 */
 update.url = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -105,7 +105,7 @@ update.url = (args: { account: number | { id: number } } | [account: number | { 
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:128
+* @see app/Http/Controllers/SetupController.php:131
 * @route '/setup/accounts/{account}'
 */
 update.put = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -115,7 +115,7 @@ update.put = (args: { account: number | { id: number } } | [account: number | { 
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:128
+* @see app/Http/Controllers/SetupController.php:131
 * @route '/setup/accounts/{account}'
 */
 const updateForm = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -130,7 +130,7 @@ const updateForm = (args: { account: number | { id: number } } | [account: numbe
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:128
+* @see app/Http/Controllers/SetupController.php:131
 * @route '/setup/accounts/{account}'
 */
 updateForm.put = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

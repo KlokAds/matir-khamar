@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:184
+* @see app/Http/Controllers/SetupController.php:187
 * @route '/setup/parties'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:184
+* @see app/Http/Controllers/SetupController.php:187
 * @route '/setup/parties'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:184
+* @see app/Http/Controllers/SetupController.php:187
 * @route '/setup/parties'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:184
+* @see app/Http/Controllers/SetupController.php:187
 * @route '/setup/parties'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:184
+* @see app/Http/Controllers/SetupController.php:187
 * @route '/setup/parties'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:201
+* @see app/Http/Controllers/SetupController.php:204
 * @route '/setup/parties/{party}'
 */
 export const update = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -72,7 +72,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:201
+* @see app/Http/Controllers/SetupController.php:204
 * @route '/setup/parties/{party}'
 */
 update.url = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -105,7 +105,7 @@ update.url = (args: { party: number | { id: number } } | [party: number | { id: 
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:201
+* @see app/Http/Controllers/SetupController.php:204
 * @route '/setup/parties/{party}'
 */
 update.put = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -115,7 +115,7 @@ update.put = (args: { party: number | { id: number } } | [party: number | { id: 
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:201
+* @see app/Http/Controllers/SetupController.php:204
 * @route '/setup/parties/{party}'
 */
 const updateForm = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -130,7 +130,7 @@ const updateForm = (args: { party: number | { id: number } } | [party: number | 
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:201
+* @see app/Http/Controllers/SetupController.php:204
 * @route '/setup/parties/{party}'
 */
 updateForm.put = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

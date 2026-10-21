@@ -21,6 +21,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $email
  * @property Role $role
  * @property bool $is_active
+ * @property bool $is_super
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -53,6 +54,7 @@ class User extends Authenticatable implements PasskeyUser
             'last_login_at' => 'datetime',
             'role' => Role::class,
             'is_active' => 'boolean',
+            'is_super' => 'boolean',
         ];
     }
 
