@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\ImportedRecord;
 use App\Models\ImportMapping;
+use App\Models\Setting;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -49,14 +50,94 @@ class CraterImporter
         return $count;
     }
 
+    /** Connection fields the admin can set from the app; the password is never read back to a page. */
+    public const SETTING_KEYS = ['host', 'port', 'database', 'username', 'password', 'company_id'];
+
+    private bool $applied = false;
+
     public function configured(): bool
     {
+        $this->applySettings();
+
         return config('database.connections.crater.database') !== '' && config('database.connections.crater.username') !== '';
     }
 
     public function connection(): ConnectionInterface
     {
+        $this->applySettings();
+
         return DB::connection('crater');
+    }
+
+    /**
+     * Settings saved in the app (encrypted) take the place of the CRATER_DB_*
+     * values from .env. Nothing saved: .env stays in charge.
+     */
+    private function applySettings(): void
+    {
+        if ($this->applied) {
+            return;
+        }
+
+        $this->applied = true;
+        $saved = Setting::query()->where('key', 'like', 'crater.%')->get()->mapWithKeys(fn (Setting $setting) => [substr($setting->key, 7) => $setting->value]);
+
+        if (empty($saved['database']) || empty($saved['username'])) {
+            return;
+        }
+
+        config([
+            'database.connections.crater' => [
+                ...config('database.connections.crater'),
+                'driver' => 'mysql',
+                'host' => $saved['host'] ?? '127.0.0.1',
+                'port' => $saved['port'] ?? '3306',
+                'database' => $saved['database'],
+                'username' => $saved['username'],
+                'password' => $saved['password'] ?? '',
+            ],
+            'services.crater.company_id' => $saved['company_id'] ?? null,
+        ]);
+
+        DB::purge('crater');
+    }
+
+    /** Forget the cached settings after they were changed in this request. */
+    public function refreshSettings(): void
+    {
+        $this->applied = false;
+        $this->applySettings();
+    }
+
+    /**
+     * Tries the connection and reads what it would import. Also warns when
+     * the database user could write, since this app only ever needs to read.
+     *
+     * @return array{ok:bool, message:string, can_write:bool|null, counts:array<string,int>}
+     */
+    public function testConnection(): array
+    {
+        try {
+            $db = $this->connection();
+            $counts = [];
+
+            foreach (['expenses', 'payments', 'expense_categories', 'customers'] as $table) {
+                $counts[$table] = $db->table($table)->count();
+            }
+
+            $canWrite = null;
+
+            if ($db->getDriverName() === 'mysql') {
+                $grants = collect($db->select('SHOW GRANTS FOR CURRENT_USER()'))->map(fn ($row) => strtoupper((string) array_values((array) $row)[0]))->implode(' ');
+                $canWrite = (bool) preg_match('/ALL PRIVILEGES|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bDROP\b/', $grants);
+            }
+
+            return ['ok' => true, 'message' => 'সংযোগ হয়েছে।', 'can_write' => $canWrite, 'counts' => $counts];
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return ['ok' => false, 'message' => 'সংযোগ হয়নি: '.mb_substr(preg_replace('/\(Connection:.*$/s', '', $exception->getMessage()), 0, 200), 'can_write' => null, 'counts' => []];
+        }
     }
 
     /**

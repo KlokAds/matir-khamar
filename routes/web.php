@@ -71,6 +71,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('parties/{party}', [SetupController::class, 'updateParty'])->name('parties.update');
         Route::put('budget/{head}', [ReportController::class, 'updateBudgetHead'])->name('budget.update');
         Route::get('import', [ImportController::class, 'index'])->name('import');
+        Route::put('import/connection', [ImportController::class, 'saveConnection'])->middleware('throttle:10,1')->name('import.connection');
+        Route::post('import/connection/test', [ImportController::class, 'testConnection'])->middleware('throttle:10,1')->name('import.connection.test');
+        Route::delete('import/connection', [ImportController::class, 'forgetConnection'])->middleware('throttle:10,1')->name('import.connection.forget');
         Route::post('import/fetch', [ImportController::class, 'fetch'])->middleware('throttle:6,1')->name('import.fetch');
         Route::post('import/post', [ImportController::class, 'post'])->middleware('throttle:6,1')->name('import.post');
         Route::put('import/mappings/{mapping}', [ImportController::class, 'updateMapping'])->name('import.mapping');
