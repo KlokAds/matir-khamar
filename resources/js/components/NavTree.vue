@@ -11,6 +11,7 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/types';
 
@@ -22,6 +23,14 @@ import type { NavItem } from '@/types';
 const props = defineProps<{ items: NavItem[]; label?: string }>();
 
 const page = usePage();
+const { isMobile, setOpenMobile } = useSidebar();
+
+// On a phone the menu covers the page; once a page is picked it should get out of the way.
+const closeOnPhone = () => {
+    if (isMobile.value) {
+        setOpenMobile(false);
+    }
+};
 const current = computed(() => new URL(page.url, window.location.origin));
 
 function matches(href: NavItem['href']): boolean {
@@ -88,10 +97,15 @@ watch(
                                 <a
                                     v-if="child.reload"
                                     :href="String(child.href)"
+                                    @click="closeOnPhone"
                                 >
                                     <span>{{ child.title }}</span>
                                 </a>
-                                <Link v-else :href="child.href">
+                                <Link
+                                    v-else
+                                    :href="child.href"
+                                    @click="closeOnPhone"
+                                >
                                     <span>{{ child.title }}</span>
                                 </Link>
                             </SidebarMenuSubButton>
@@ -105,7 +119,11 @@ watch(
                     :is-active="matches(item.href)"
                     :tooltip="item.title"
                 >
-                    <a v-if="item.reload" :href="String(item.href)">
+                    <a
+                        v-if="item.reload"
+                        :href="String(item.href)"
+                        @click="closeOnPhone"
+                    >
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                         <span
@@ -114,7 +132,7 @@ watch(
                             >{{ item.badge }}</span
                         >
                     </a>
-                    <Link v-else :href="item.href">
+                    <Link v-else :href="item.href" @click="closeOnPhone">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                     </Link>
