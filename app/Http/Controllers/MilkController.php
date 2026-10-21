@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Animal;
 use App\Models\CostCenter;
 use App\Models\MilkRecord;
+use App\Services\MilkBook;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -38,7 +39,7 @@ class MilkController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, MilkBook $milk): RedirectResponse
     {
         $data = $request->validate([
             'date' => ['required', 'date', 'before_or_equal:today', 'after_or_equal:'.now()->subDays(7)->toDateString()],
@@ -50,20 +51,7 @@ class MilkController extends Controller
             'date.after_or_equal' => 'এক সপ্তাহের বেশি পুরনো দুধের হিসাব অ্যাডমিন ঠিক করবেন।',
         ]);
 
-        $gavi = CostCenter::query()->where('code', 'GAVI')->value('id');
-        $saved = 0;
-
-        foreach ($data['rows'] as $row) {
-            if ((float) ($row['liters'] ?? 0) <= 0) {
-                continue;
-            }
-
-            MilkRecord::query()->updateOrCreate(
-                ['date' => $data['date'], 'session' => $data['session'], 'animal_id' => $row['animal_id'] ?? null],
-                ['liters' => $row['liters'], 'cost_center_id' => $gavi, 'recorded_by' => $request->user()->id],
-            );
-            $saved++;
-        }
+        $saved = $milk->record($data['date'], $data['session'], $data['rows'], $request->user()->id);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => $saved > 0 ? 'দুধের হিসাব রাখা হয়েছে।' : 'কোনো লিটার দেওয়া হয়নি।']);
 

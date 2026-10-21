@@ -6,6 +6,7 @@ import {
     BookOpenText,
     ChartColumnBig,
     CloudDownload,
+    CloudOff,
     FileClock,
     HandCoins,
     Landmark,
@@ -33,6 +34,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCan } from '@/lib/khamar';
+import { pendingCount } from '@/lib/offlineQueue';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -45,6 +47,7 @@ const groups = computed(() => {
         daily.push(
             { title: 'দুধের হিসাব', href: '/milk', icon: Milk },
             { title: 'খাবার ব্যবহার', href: '/stock/move?mode=issue', icon: Wheat },
+            { title: 'অফলাইন এন্ট্রি', href: '/offline', icon: CloudOff, reload: true, badge: pendingCount.value },
         );
     }
 

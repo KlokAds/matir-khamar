@@ -11,4 +11,7 @@ export type NavItem = {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon;
     isActive?: boolean;
+    /** Full page load instead of an Inertia visit (lets the service worker answer offline). */
+    reload?: boolean;
+    badge?: number;
 };

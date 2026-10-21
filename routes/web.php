@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MilkController;
+use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
@@ -23,6 +24,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('milk', [MilkController::class, 'store'])->name('milk.store');
         Route::get('stock/move', [StockController::class, 'create'])->name('stock.create');
         Route::post('stock/issue', [StockController::class, 'issue'])->name('stock.issue');
+        Route::get('offline', [OfflineController::class, 'show'])->name('offline.show');
+        Route::post('offline/sync', [OfflineController::class, 'sync'])->middleware('throttle:30,1')->name('offline.sync');
     });
 
     Route::middleware('can:view-reports')->group(function () {
