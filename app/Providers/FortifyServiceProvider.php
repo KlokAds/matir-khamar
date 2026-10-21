@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -41,6 +43,17 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        // Disabled accounts cannot log in, even with the right password.
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::query()->where('email', $request->string(Fortify::username()))->first();
+
+            if ($user && $user->is_active && Hash::check($request->string('password'), $user->password)) {
+                return $user;
+            }
+
+            return null;
+        });
     }
 
     /**
