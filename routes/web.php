@@ -99,6 +99,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('can:manage-setup')->prefix('setup')->name('setup.')->group(function () {
         Route::post('centers', [CostCenterController::class, 'store'])->name('centers.store');
         Route::put('centers/{center}', [CostCenterController::class, 'update'])->name('centers.update');
+        Route::get('centers', [CostCenterController::class, 'manage'])->name('centers.manage');
+        Route::post('centers/{center}/toggle', [CostCenterController::class, 'toggle'])->name('centers.toggle');
+        Route::post('centers/{center}/move', [CostCenterController::class, 'move'])->name('centers.move');
+        Route::delete('centers/{center}', [CostCenterController::class, 'destroy'])->name('centers.destroy');
         Route::post('items', [StockController::class, 'storeItem'])->name('items.store');
         Route::put('items/{item}', [StockController::class, 'updateItem'])->name('items.update');
         Route::get('accounts', [SetupController::class, 'accounts'])->name('accounts');

@@ -1,0 +1,50 @@
+<?php
+
+use App\Enums\Role;
+use App\Models\CostCenter;
+use App\Models\User;
+use Database\Seeders\KhamarSetupSeeder;
+
+beforeEach(function () {
+    $this->seed(KhamarSetupSeeder::class);
+    $this->actingAs(User::factory()->create(['role' => Role::Admin]));
+    $this->code = fn (string $code) => CostCenter::query()->where('code', $code)->firstOrFail();
+});
+
+it('hides and shows a project with one switch', function () {
+    $fish = ($this->code)('MACH');
+
+    $this->post("/setup/centers/{$fish->id}/toggle")->assertRedirect();
+    expect($fish->fresh()->is_active)->toBeTrue();
+
+    $this->post("/setup/centers/{$fish->id}/toggle")->assertRedirect();
+    expect($fish->fresh()->is_active)->toBeFalse();
+});
+
+it('deletes only an unused category and never the ones the app relies on', function () {
+    $this->delete('/setup/centers/'.($this->code)('STORE')->id)->assertRedirect();
+    expect(CostCenter::query()->where('code', 'STORE')->exists())->toBeFalse();
+
+    $this->delete('/setup/centers/'.($this->code)('GAVI')->id)->assertSessionHasErrors('center');
+    expect(CostCenter::query()->where('code', 'GAVI')->exists())->toBeTrue();
+});
+
+it('moves a category above its neighbour', function () {
+    $sobji = ($this->code)('SHOBJI');
+    $joibo = ($this->code)('JOIBO');
+
+    $this->post("/setup/centers/{$sobji->id}/move", ['direction' => 'up'])->assertRedirect();
+
+    expect($sobji->fresh()->sort)->toBeLessThan($joibo->fresh()->sort);
+});
+
+it('keeps the code of a system category', function () {
+    $gavi = ($this->code)('GAVI');
+
+    $this->put("/setup/centers/{$gavi->id}", ['name' => 'দুধের গাভী', 'code' => 'COWS', 'kind' => 'livestock', 'parent_id' => $gavi->parent_id, 'holds_animals' => true, 'is_active' => true])
+        ->assertSessionHasErrors('code');
+    $this->put("/setup/centers/{$gavi->id}", ['name' => 'দুধের গাভী', 'code' => 'GAVI', 'kind' => 'livestock', 'parent_id' => $gavi->parent_id, 'holds_animals' => true, 'is_active' => true])
+        ->assertSessionHasNoErrors();
+
+    expect($gavi->fresh()->name)->toBe('দুধের গাভী');
+});

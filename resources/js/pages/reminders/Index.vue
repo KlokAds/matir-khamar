@@ -17,7 +17,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { centerLabel, useCan } from '@/lib/khamar';
+import { centerLabel } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 import { disablePush, enablePush, pushState } from '@/lib/push';
 import type { PushState } from '@/lib/push';
@@ -63,8 +63,6 @@ const props = defineProps<{
         low: boolean;
     }[];
 }>();
-
-const can = useCan();
 
 /* ---------- this phone's notifications ---------- */
 const state = ref<PushState>('off');
@@ -677,16 +675,6 @@ const trackedStock = computed(() =>
                         </li>
                     </ul>
                 </details>
-
-                <p
-                    v-if="can['manage-update']"
-                    class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
-                >
-                    ঠিক মিনিটে পাঠাতে সার্ভারকে প্রতি মিনিটে একবার জাগাতে হয়।
-                    একটি ফ্রি মনিটর (যেমন cron-job.org) দিয়ে প্রতি মিনিটে
-                    <code>https://khamar.klokads.com/up</code> খোলালেই হবে —
-                    hPanel ক্রন লাগবে না।
-                </p>
             </div>
         </div>
     </div>

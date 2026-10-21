@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { Plus } from '@lucide/vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Plus, Settings2 } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
 import Field from '@/components/khamar/Field.vue';
@@ -73,12 +73,11 @@ const applyRange = () =>
                         >দেখুন</Button
                     >
                 </form>
-                <Button
-                    v-if="can['manage-setup']"
-                    size="sm"
-                    @click="adding = !adding"
-                    ><Plus /> নতুন ক্যাটাগরি</Button
-                >
+                <Button v-if="can['manage-setup']" as-child size="sm">
+                    <Link href="/setup/centers"
+                        ><Settings2 /> সাজান ও এডিট</Link
+                    >
+                </Button>
             </template>
         </PageTitle>
 

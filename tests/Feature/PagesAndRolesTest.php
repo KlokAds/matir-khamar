@@ -22,7 +22,7 @@ it('opens every page for the hishab admin', function () {
         '/entries', '/entries/create', '/entries/create?form=lease', '/entries/'.JournalEntry::query()->value('id'),
         '/animals', '/animals/create', '/animals/'.Animal::query()->value('id'),
         '/allocation', '/reports', '/reports/budget', '/reports/usage', '/guide/split', '/breeding', '/batches', '/diary',
-        '/setup/accounts', '/setup/parties', '/setup/import', '/setup/users', '/setup/periods', '/setup/audit',
+        '/setup/accounts', '/setup/centers', '/reminders', '/setup/parties', '/setup/import', '/setup/users', '/setup/periods', '/setup/audit',
     ];
 
     foreach ($pages as $page) {

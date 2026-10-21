@@ -42,8 +42,8 @@ Schedule::command('khamar:backup')->everyMinute()->withoutOverlapping(30)
 
 Schedule::command('khamar:amortize')->everyMinute()->when($oncePer('amortize', 3600));
 
-// Reminders go out within a minute of falling due, as long as something pings the site each
-// minute (a free uptime monitor on /up). The morning list after 07:00, the evening nudge after 19:00.
+// Reminders go out within a minute of falling due: the background clock (khamar:clock, started
+// by the first web visit) runs this every minute. Morning list after 07:00, evening nudge after 19:00.
 Schedule::command('khamar:notify')->everyMinute()->withoutOverlapping(5);
 Schedule::command('khamar:notify --morning')->everyMinute()
     ->when(fn (): bool => now()->hour >= 7 && now()->hour < 11 && Cache::add('khamar:schedule:morning-'.now()->toDateString(), true, 86400));

@@ -98,6 +98,7 @@ const items = computed<NavItem[]>(() => {
             ['ভাগ কীভাবে হয় (উদাহরণ)', '/guide/split', !!c['view-reports']],
         ]),
         ...group('সেটআপ ও নিরাপত্তা', Settings2, [
+            ['প্রজেক্ট সাজান', '/setup/centers', !!c['manage-setup']],
             ['হিসাব খাত', '/setup/accounts', !!c['manage-setup']],
             ['ক্রেতা, বিনিয়োগকারী…', '/setup/parties', !!c['manage-setup']],
             ['বিলিং থেকে আনা', '/setup/import', !!c['manage-import']],
