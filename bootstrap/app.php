@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureAccountIsSecure;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RunWebCron;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        // Every request (pages, /up pings) may start the scheduler once a minute: no hPanel cron needed.
+        $middleware->append(RunWebCron::class);
 
         $middleware->web(append: [
             HandleAppearance::class,
