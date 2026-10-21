@@ -8,6 +8,7 @@ use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\MilkRecord;
 use App\Models\OfflineSubmission;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\Ledger;
 use App\Services\MilkBook;
@@ -43,6 +44,7 @@ class OfflineController extends Controller
             'userId' => $request->user()->id,
             'snapshotAt' => now()->toIso8601String(),
             'sessions' => MilkRecord::SESSIONS,
+            'feedSessions' => StockMovement::SESSIONS,
             'cows' => Animal::query()->where('status', 'active')->where('sex', 'female')->when($gavi, fn ($query) => $query->where('cost_center_id', $gavi))->orderBy('tag')->get(['id', 'tag', 'name']),
             'items' => Lookups::items(),
             'centers' => array_values(array_filter(Lookups::centers(), fn ($center) => ! in_array($center['kind'], ['group'], true))),
@@ -118,8 +120,9 @@ class OfflineController extends Controller
                             'splits.*.cost_center_id' => ['required', 'exists:cost_centers,id'],
                             'splits.*.qty' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
                             'note' => ['nullable', 'string', 'max:255'],
+                            'session' => ['nullable', Rule::in(array_keys(StockMovement::SESSIONS))],
                         ])->validate();
-                        $entryId = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], trim(($data['note'] ?? '').' (অফলাইন)'))->id;
+                        $entryId = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], trim(($data['note'] ?? '').' (অফলাইন)'), $data['session'] ?? null)->id;
                         break;
 
                     case 'expense':

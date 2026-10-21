@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Role;
+use App\Models\AccessRole;
 use App\Models\Account;
 use App\Models\AuditLog;
 use App\Models\JournalLine;
@@ -30,14 +31,15 @@ class SetupController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role->value,
-                'role_label' => $user->role->label(),
+                'role' => $user->role,
+                'role_label' => $user->roleLabel(),
+                'is_super' => $user->is_super,
                 'is_active' => $user->is_active,
                 'two_factor' => $user->hasTwoFactorEnabled(),
                 'last_login_at' => $user->last_login_at?->toDateTimeString(),
                 'last_login_ip' => $user->last_login_ip,
             ]),
-            'roles' => Role::options(),
+            'roles' => AccessRole::options(),
         ]);
     }
 
@@ -46,7 +48,7 @@ class SetupController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
-            'role' => ['required', Rule::enum(Role::class)],
+            'role' => ['required', Rule::exists('roles', 'key')],
             'password' => ['required', Password::min(10)->letters()->numbers()],
         ]);
 
@@ -62,7 +64,7 @@ class SetupController extends Controller
         abort_if($user->is_super && ! $request->user()->is_super, 404);
 
         $data = $request->validate([
-            'role' => ['required', Rule::enum(Role::class)],
+            'role' => ['required', Rule::exists('roles', 'key')],
             'is_active' => ['required', 'boolean'],
             'password' => ['nullable', Password::min(10)->letters()->numbers()],
             'reset_two_factor' => ['boolean'],
@@ -72,7 +74,7 @@ class SetupController extends Controller
             return back()->withErrors(['role' => 'নিজের অ্যাডমিন ক্ষমতা নিজে সরানো যাবে না।']);
         }
 
-        $user->role = Role::from($data['role']);
+        $user->role = $data['role'];
         $user->is_active = (bool) $data['is_active'];
 
         if (! empty($data['password'])) {
@@ -116,7 +118,7 @@ class SetupController extends Controller
             'parent_id' => ['required', Rule::exists('accounts', 'id')->whereNull('parent_id')],
             'code' => ['required', 'string', 'max:20', 'regex:/^[0-9-]+$/', 'unique:accounts,code'],
             'name' => ['required', 'string', 'max:120'],
-            'subtype' => ['nullable', Rule::in(['cash', 'bank', 'wallet', 'inventory', 'fixed_asset', 'land'])],
+            'subtype' => ['nullable', Rule::in(['cash', 'bank', 'wallet', 'person', 'inventory', 'fixed_asset', 'land'])],
         ]);
 
         $parent = Account::query()->findOrFail((int) $data['parent_id']);

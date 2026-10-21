@@ -36,6 +36,7 @@ class StockController extends Controller
                 'item' => $movement->item->name,
                 'unit' => Item::UNITS[$movement->item->unit] ?? $movement->item->unit,
                 'direction' => $movement->direction,
+                'session' => $movement->session ? StockMovement::SESSIONS[$movement->session] ?? null : null,
                 'qty' => $movement->qty,
                 'value' => $movement->value,
                 'center' => $movement->costCenter?->name,
@@ -51,6 +52,7 @@ class StockController extends Controller
 
         return Inertia::render('stock/Move', [
             'mode' => $mode,
+            'sessions' => StockMovement::SESSIONS,
             'items' => Lookups::items(),
             'centers' => Lookups::centers(),
             'moneyAccounts' => Lookups::moneyAccounts(),
@@ -100,9 +102,10 @@ class StockController extends Controller
             'splits.*.cost_center_id' => ['required', 'exists:cost_centers,id'],
             'splits.*.qty' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
             'note' => ['nullable', 'string', 'max:255'],
+            'session' => ['nullable', Rule::in(array_keys(StockMovement::SESSIONS))],
         ]);
 
-        $entry = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], $data['note'] ?? null);
+        $entry = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], $data['note'] ?? null, $data['session'] ?? null);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "ব্যবহার লেখা হয়েছে ({$entry->number})।"]);
 

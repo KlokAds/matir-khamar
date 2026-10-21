@@ -3,11 +3,12 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { Paperclip, Plus, Sprout, Truck, Wheat, X } from '@lucide/vue';
 import { computed, watch } from 'vue';
 import Field from '@/components/khamar/Field.vue';
+import SessionPicker from '@/components/khamar/SessionPicker.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { centerLabel, qty, taka, today } from '@/lib/khamar';
+import { centerLabel, currentSession, qty, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 
 defineOptions({
@@ -32,6 +33,7 @@ type StockItem = {
 
 const props = defineProps<{
     mode: 'purchase' | 'issue' | 'produce';
+    sessions: Record<string, string>;
     items: StockItem[];
     centers: Center[];
     moneyAccounts: Option[];
@@ -96,6 +98,7 @@ const f = useForm({
         .map((c) => ({ cost_center_id: c.id, qty: '' })),
     attachments: [] as File[],
     stay: true,
+    session: currentSession(),
 });
 
 const item = computed(() => props.items.find((i) => i.id === f.item_id));
@@ -207,6 +210,7 @@ function submit() {
                 </div>
 
                 <template v-if="f.mode === 'issue'">
+                    <SessionPicker v-model="f.session" :sessions="sessions" />
                     <div class="rounded-lg bg-muted/60 p-3 text-sm">
                         স্টকে আছে
                         <b class="num">{{

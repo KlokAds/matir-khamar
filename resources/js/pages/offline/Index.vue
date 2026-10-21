@@ -14,11 +14,12 @@ import {
 } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
+import SessionPicker from '@/components/khamar/SessionPicker.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { day, qty, taka, today } from '@/lib/khamar';
+import { currentSession, day, qty, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 import { enqueue, listFor, remove, syncNow } from '@/lib/offlineQueue';
 import type { QueueItem, SyncOutcome } from '@/lib/offlineQueue';
@@ -31,6 +32,7 @@ const props = defineProps<{
     userId: number;
     snapshotAt: string;
     sessions: Record<string, string>;
+    feedSessions: Record<string, string>;
     cows: { id: number; tag: string; name: string | null }[];
     items: {
         id: number;
@@ -68,6 +70,7 @@ const milk = reactive({
 });
 
 const feed = reactive({
+    session: currentSession(),
     item_id:
         props.items.find((i) => i.qty_on_hand > 0)?.id ??
         props.items[0]?.id ??
@@ -177,9 +180,10 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
         await enqueue(
             props.userId,
             'feed',
-            `${item.value?.name} ${qty(feedTotal.value, item.value?.unit_label)} — ${parts.map((s) => centerName(s.cost_center_id)).join(', ')}`,
+            `${item.value?.name} ${qty(feedTotal.value, item.value?.unit_label)} — ${parts.map((s) => centerName(s.cost_center_id)).join(', ')} (${props.feedSessions[feed.session]})`,
             {
                 item_id: feed.item_id,
+                session: feed.session,
                 date: feed.date,
                 note: feed.note,
                 splits: parts,
@@ -438,6 +442,10 @@ const outcomeText: Record<SyncOutcome, string> = {
                     class="space-y-3"
                     @submit.prevent="save('feed')"
                 >
+                    <SessionPicker
+                        v-model="feed.session"
+                        :sessions="feedSessions"
+                    />
                     <div class="grid grid-cols-2 gap-3">
                         <Field label="কোন মাল">
                             <NSelect v-model="feed.item_id"

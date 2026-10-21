@@ -7,8 +7,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MilkController;
+use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SystemController;
@@ -40,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('animals/{animal}', [AnimalController::class, 'show'])->whereNumber('animal')->name('animals.show');
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
+        Route::get('money', [MoneyController::class, 'index'])->name('money.index');
     });
 
     Route::middleware('can:post-entries')->group(function () {
@@ -71,6 +74,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('parties', [SetupController::class, 'storeParty'])->name('parties.store');
         Route::put('parties/{party}', [SetupController::class, 'updateParty'])->name('parties.update');
         Route::put('budget/{head}', [ReportController::class, 'updateBudgetHead'])->name('budget.update');
+        Route::post('money', [MoneyController::class, 'store'])->name('money.store');
+    });
+
+    Route::middleware('can:manage-import')->prefix('setup')->name('setup.')->group(function () {
         Route::get('import', [ImportController::class, 'index'])->name('import');
         Route::put('import/connection', [ImportController::class, 'saveConnection'])->middleware('throttle:10,1')->name('import.connection');
         Route::post('import/connection/test', [ImportController::class, 'testConnection'])->middleware('throttle:10,1')->name('import.connection.test');
@@ -83,12 +90,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('import/ignore-undecided', [ImportController::class, 'ignoreUndecided'])->name('import.ignore');
     });
 
+    Route::middleware('can:manage-roles')->prefix('setup')->name('setup.')->group(function () {
+        Route::get('roles', [RoleController::class, 'index'])->name('roles');
+        Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    Route::middleware('can:manage-update')->prefix('setup')->name('setup.')->group(function () {
+        Route::get('update', [SystemController::class, 'show'])->name('update');
+        Route::post('update', [SystemController::class, 'update'])->middleware('throttle:3,10')->name('update.run');
+    });
+
     Route::middleware('can:manage-users')->prefix('setup')->name('setup.')->group(function () {
         Route::get('users', [SetupController::class, 'users'])->name('users');
         Route::post('users', [SetupController::class, 'storeUser'])->name('users.store');
         Route::put('users/{user}', [SetupController::class, 'updateUser'])->name('users.update');
-        Route::get('update', [SystemController::class, 'show'])->name('update');
-        Route::post('update', [SystemController::class, 'update'])->middleware('throttle:3,10')->name('update.run');
     });
 
     Route::middleware('can:lock-periods')->prefix('setup')->name('setup.')->group(function () {

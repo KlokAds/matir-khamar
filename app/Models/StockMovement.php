@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $cost_center_id
  * @property CarbonImmutable $date
  * @property string $direction
+ * @property string|null $session morning, noon or evening for feed given
  * @property float $qty
  * @property int $value
  * @property string|null $note
@@ -23,9 +24,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CostCenter|null $costCenter
  * @property-read JournalEntry $entry
  */
-#[Fillable(['item_id', 'journal_entry_id', 'cost_center_id', 'date', 'direction', 'qty', 'value', 'note'])]
+#[Fillable(['item_id', 'journal_entry_id', 'cost_center_id', 'date', 'direction', 'session', 'qty', 'value', 'note'])]
 class StockMovement extends Model
 {
+    /** Feeding times through the day. */
+    public const SESSIONS = ['morning' => 'সকাল', 'noon' => 'দুপুর', 'evening' => 'বিকাল'];
+
     protected function casts(): array
     {
         return [

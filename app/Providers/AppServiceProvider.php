@@ -63,10 +63,8 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureGates(): void
     {
-        $abilities = collect(Role::cases())->flatMap(fn (Role $role) => $role->abilities())->unique();
-
-        foreach ($abilities as $ability) {
-            Gate::define($ability, fn (User $user) => $user->is_active && in_array($ability, $user->role->abilities(), true));
+        foreach (array_keys(Role::ABILITIES) as $ability) {
+            Gate::define($ability, fn (User $user) => $user->hasAbility($ability));
         }
     }
 

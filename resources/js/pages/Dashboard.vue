@@ -12,6 +12,7 @@ import {
     Wheat,
 } from '@lucide/vue';
 import { computed } from 'vue';
+import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
@@ -31,6 +32,17 @@ const props = defineProps<{
     farm: { income: number; expense: number; profit: number } | null;
     farmYear: { income: number; expense: number; profit: number } | null;
     tree: TreeNode[];
+    projects: {
+        id: number;
+        name: string;
+        kind: string;
+        income: number;
+        expense: number;
+        profit: number;
+        year_profit: number;
+        animals: number | null;
+        milk: number;
+    }[];
     trend: { month: string; income: number; expense: number }[];
     money: { id: number; name: string; balance: number }[];
     milkThisMonth: number;
@@ -156,6 +168,72 @@ const greeting = computed(() => {
                 </span>
             </p>
         </div>
+
+        <section v-if="canSeeMoney && projects.length" class="mt-6">
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="font-display text-lg">প্রজেক্ট অনুযায়ী এ মাস</h2>
+                <Link
+                    href="/centers"
+                    class="text-sm text-primary hover:underline"
+                    >সব ক্যাটাগরি</Link
+                >
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <Link
+                    v-for="p in projects"
+                    :key="p.id"
+                    :href="`/centers/${p.id}`"
+                    class="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md"
+                >
+                    <div class="flex items-center gap-2">
+                        <CenterIcon :kind="p.kind" />
+                        <p class="min-w-0 flex-1 truncate font-medium">
+                            {{ p.name }}
+                        </p>
+                        <span
+                            v-if="p.animals !== null"
+                            class="num rounded-full bg-accent px-2 py-0.5 text-xs"
+                            >{{ p.animals }}টি</span
+                        >
+                    </div>
+                    <p
+                        :class="[
+                            'num mt-3 text-2xl font-semibold',
+                            p.profit < 0
+                                ? 'text-destructive'
+                                : 'text-foreground',
+                        ]"
+                    >
+                        {{ taka(p.profit) }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                        এ মাসের লাভ / ক্ষতি
+                    </p>
+                    <div
+                        class="mt-3 grid grid-cols-2 gap-2 border-t border-dashed border-border pt-3 text-xs"
+                    >
+                        <span
+                            >আয়
+                            <b class="num block text-sm text-income">{{
+                                taka(p.income)
+                            }}</b></span
+                        >
+                        <span
+                            >খরচ
+                            <b class="num block text-sm text-expense">{{
+                                taka(p.expense)
+                            }}</b></span
+                        >
+                    </div>
+                    <p class="mt-2 text-xs text-muted-foreground">
+                        বছরে {{ taka(p.year_profit) }}
+                        <span v-if="p.milk > 0">
+                            · দুধ {{ qty(p.milk) }} লি.</span
+                        >
+                    </p>
+                </Link>
+            </div>
+        </section>
 
         <div v-if="canSeeMoney" class="mt-6 grid gap-6 xl:grid-cols-5">
             <section

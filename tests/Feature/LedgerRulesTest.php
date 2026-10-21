@@ -6,6 +6,7 @@ use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\JournalEntry;
 use App\Models\PeriodLock;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\AllocationService;
 use App\Services\AnimalService;
@@ -159,4 +160,15 @@ it('keeps own grass internal so the farm total is not inflated', function () {
     expect($totals[($this->center)('GHAS')->id]['internal_income'])->toBe(300000)
         ->and($totals[($this->center)('BOKNA')->id]['internal_expense'])->toBe(300000)
         ->and($report->farmTotals(...$range))->toBe(['income' => 0, 'expense' => 0, 'profit' => 0]);
+});
+
+it('remembers the feeding time of day on each issue', function () {
+    $vushi = Item::query()->where('name', 'ভুসি')->firstOrFail();
+    $stock = app(StockService::class);
+    $stock->purchase($vushi, '2026-10-01', 30, 45000, ['credit_account_id' => $this->cash->id]);
+
+    $entry = $stock->issue($vushi->fresh(), '2026-10-02', [['cost_center_id' => ($this->center)('BOKNA')->id, 'qty' => 10]], null, 'noon');
+
+    expect(StockMovement::query()->where('journal_entry_id', $entry->id)->value('session'))->toBe('noon')
+        ->and($entry->description)->toContain('দুপুর');
 });

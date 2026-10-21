@@ -22,7 +22,7 @@ it('stops other admins from changing or disabling the super admin', function () 
     $this->actingAs($this->admin)->put("/setup/users/{$this->super->id}", ['role' => 'viewer', 'is_active' => false])->assertNotFound();
 
     expect($this->super->fresh()->is_active)->toBeTrue()
-        ->and($this->super->fresh()->role)->toBe(Role::Admin);
+        ->and($this->super->fresh()->role)->toBe('admin');
 });
 
 it('does not force two-factor on the super admin, but does on other admins', function () {

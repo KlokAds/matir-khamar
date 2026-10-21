@@ -71,8 +71,9 @@ class StockService
 
     /**
      * @param  list<array{cost_center_id:int, qty:float}>  $splits
+     * @param  string|null  $session  morning, noon or evening (StockMovement::SESSIONS)
      */
-    public function issue(Item $item, string $date, array $splits, ?string $note): JournalEntry
+    public function issue(Item $item, string $date, array $splits, ?string $note, ?string $session = null): JournalEntry
     {
         $splits = array_values(array_filter(
             array_map(fn ($split) => ['cost_center_id' => (int) $split['cost_center_id'], 'qty' => round((float) $split['qty'], 3)], $splits),
@@ -83,7 +84,7 @@ class StockService
             throw ValidationException::withMessages(['splits' => 'অন্তত একটি ক্যাটাগরিতে পরিমাণ দিন।']);
         }
 
-        return DB::transaction(function () use ($item, $date, $splits, $note) {
+        return DB::transaction(function () use ($item, $date, $splits, $note, $session) {
             $item = Item::query()->lockForUpdate()->findOrFail($item->id);
             $totalQty = round(array_sum(array_column($splits, 'qty')), 3);
 
@@ -107,10 +108,11 @@ class StockService
 
             $lines[] = ['account_id' => $item->inventory_account_id, 'credit' => array_sum($values), 'memo' => $item->name];
 
-            $entry = $this->ledger->post('stock_issue', $date, $note ?: "{$item->name} ব্যবহার — ".$this->qtyLabel($item, $totalQty), $lines);
+            $when = $session !== null ? ' ('.(StockMovement::SESSIONS[$session] ?? $session).')' : '';
+            $entry = $this->ledger->post('stock_issue', $date, ($note ?: "{$item->name} ব্যবহার — ".$this->qtyLabel($item, $totalQty)).$when, $lines);
 
             foreach ($splits as $index => $split) {
-                $this->move($item, $entry, 'out', $split['qty'], $values[$index], $split['cost_center_id'], $date);
+                $this->move($item, $entry, 'out', $split['qty'], $values[$index], $split['cost_center_id'], $date, $session);
             }
 
             return $entry;
@@ -160,7 +162,7 @@ class StockService
         }
     }
 
-    private function move(Item $item, JournalEntry $entry, string $direction, float $qty, int $value, ?int $costCenterId, string $date): void
+    private function move(Item $item, JournalEntry $entry, string $direction, float $qty, int $value, ?int $costCenterId, string $date, ?string $session = null): void
     {
         StockMovement::query()->create([
             'item_id' => $item->id,
@@ -168,6 +170,7 @@ class StockService
             'cost_center_id' => $costCenterId,
             'date' => $date,
             'direction' => $direction,
+            'session' => $session,
             'qty' => $qty,
             'value' => $value,
         ]);

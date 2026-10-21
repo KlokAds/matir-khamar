@@ -78,6 +78,13 @@ export function monthLabel(ym: string): string {
     return `${months[m - 1]} ${String(y).slice(2)}`;
 }
 
+/** Feeding time by the clock: before 11 morning, before 3 pm noon, then afternoon. */
+export function currentSession(): string {
+    const hour = new Date().getHours();
+
+    return hour < 11 ? 'morning' : hour < 15 ? 'noon' : 'evening';
+}
+
 export function today(): string {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
@@ -94,7 +101,10 @@ export type Abilities = Partial<
         | 'manage-users'
         | 'lock-periods'
         | 'reverse-entries'
-        | 'view-audit',
+        | 'view-audit'
+        | 'manage-import'
+        | 'manage-roles'
+        | 'manage-update',
         boolean
     >
 >;

@@ -35,6 +35,7 @@ defineProps<{
         item: string;
         unit: string;
         direction: string;
+        session: string | null;
         qty: number;
         value: number;
         center: string | null;
@@ -228,6 +229,11 @@ const item = useForm({
                                     }}</span
                                 >
                                 {{ m.item }}
+                                <span
+                                    v-if="m.session"
+                                    class="ml-1 text-xs text-muted-foreground"
+                                    >· {{ m.session }}</span
+                                >
                             </td>
                             <td class="num px-4 py-2.5 text-right">
                                 {{ qty(m.qty, m.unit) }}
