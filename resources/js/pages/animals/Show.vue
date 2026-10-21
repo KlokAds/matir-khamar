@@ -2,12 +2,15 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowRightLeft, Coins, HeartCrack } from '@lucide/vue';
 import { ref } from 'vue';
+import AnimalCare from '@/components/khamar/AnimalCare.vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { day, qty, taka, today, useCan } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 
@@ -53,6 +56,14 @@ const props = defineProps<{
     centers: Center[];
     moneyAccounts: Option[];
     customers: { id: number; name: string }[];
+    batch: InstanceType<typeof AnimalCare>['$props']['batch'];
+    weights: InstanceType<typeof AnimalCare>['$props']['weights'];
+    growth: InstanceType<typeof AnimalCare>['$props']['growth'];
+    breedings: InstanceType<typeof AnimalCare>['$props']['breedings'];
+    breedingOptions: InstanceType<typeof AnimalCare>['$props']['options'];
+    ageDays: number | null;
+    calfStage: InstanceType<typeof AnimalCare>['$props']['calfStage'];
+    health: InstanceType<typeof AnimalCare>['$props']['health'];
 }>();
 
 defineOptions({
@@ -89,7 +100,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
             :title="`${animal.tag}${animal.name ? ' · ' + animal.name : ''}`"
-            :subtitle="`${animal.sex === 'female' ? 'গাভী/বকনা' : 'ষাঁড়/এঁড়ে'}${animal.breed ? ' · ' + animal.breed : ''} · ${animal.center} · ${animal.status_label}`"
+            :subtitle="`${animal.sex === 'female' ? t('গাভী/বকনা') : t('ষাঁড়/এঁড়ে')}${animal.breed ? ' · ' + animal.breed : ''} · ${t(animal.center)} · ${t(animal.status_label)}`"
         >
             <template
                 v-if="animal.status === 'active' && can['post-entries']"
@@ -98,15 +109,15 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 <Button
                     variant="secondary"
                     @click="action = action === 'transfer' ? '' : 'transfer'"
-                    ><ArrowRightLeft /> ক্যাটাগরি বদল</Button
+                    ><ArrowRightLeft /> {{ t('ক্যাটাগরি বদল') }}</Button
                 >
                 <Button @click="action = action === 'sell' ? '' : 'sell'"
-                    ><Coins /> বিক্রি</Button
+                    ><Coins /> {{ t('বিক্রি') }}</Button
                 >
                 <Button
                     variant="ghost"
                     @click="action = action === 'death' ? '' : 'death'"
-                    ><HeartCrack /> মৃত্যু</Button
+                    ><HeartCrack /> {{ t('মৃত্যু') }}</Button
                 >
             </template>
         </PageTitle>
@@ -121,7 +132,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
             "
         >
             <Field
-                label="নতুন ক্যাটাগরি (যেমন বকনা বাচ্চা দিলে → গাভী)"
+                :label="t('নতুন ক্যাটাগরি (যেমন বকনা বাচ্চা দিলে → গাভী)')"
                 :error="transfer.errors.cost_center_id"
             >
                 <NSelect v-model="transfer.cost_center_id"
@@ -132,14 +143,16 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                         :key="c.id"
                         :value="c.id"
                     >
-                        {{ c.name }}
+                        {{ t(c.name) }}
                     </option></NSelect
                 >
             </Field>
-            <Field label="কবে থেকে" :error="transfer.errors.date"
-                ><Input v-model="transfer.date" type="date" :max="today()"
+            <Field :label="t('কবে থেকে')" :error="transfer.errors.date"
+                ><DateField v-model="transfer.date" :max="today()"
             /></Field>
-            <Button type="submit" :disabled="transfer.processing">বদলান</Button>
+            <Button type="submit" :disabled="transfer.processing">{{
+                t('বদলান')
+            }}</Button>
         </form>
 
         <form
@@ -149,10 +162,10 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 sell.post(`/animals/${animal.id}/sell`, { onSuccess: done })
             "
         >
-            <Field label="বিক্রির তারিখ" :error="sell.errors.date"
-                ><Input v-model="sell.date" type="date" :max="today()"
+            <Field :label="t('বিক্রির তারিখ')" :error="sell.errors.date"
+                ><DateField v-model="sell.date" :max="today()"
             /></Field>
-            <Field label="বিক্রয় মূল্য (৳)" :error="sell.errors.amount"
+            <Field :label="t('বিক্রয় মূল্য (৳)')" :error="sell.errors.amount"
                 ><Input
                     v-model="sell.amount"
                     type="number"
@@ -161,18 +174,18 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                     class="num"
                     required
             /></Field>
-            <Field label="টাকা কোথায় এল"
+            <Field :label="t('টাকা কোথায় এল')"
                 ><NSelect v-model="sell.money_account_id"
                     ><option
                         v-for="a in moneyAccounts"
                         :key="a.id"
                         :value="a.id"
                     >
-                        {{ a.name }}
+                        {{ t(a.name) }}
                     </option></NSelect
                 ></Field
             >
-            <Field label="ক্রেতা"
+            <Field :label="t('ক্রেতা')"
                 ><NSelect v-model="sell.party_id"
                     ><option :value="null">—</option>
                     <option v-for="p in customers" :key="p.id" :value="p.id">
@@ -180,9 +193,9 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                     </option></NSelect
                 ></Field
             >
-            <Button type="submit" :disabled="sell.processing"
-                >বিক্রি লিখুন</Button
-            >
+            <Button type="submit" :disabled="sell.processing">{{
+                t('বিক্রি লিখুন')
+            }}</Button>
         </form>
 
         <form
@@ -192,60 +205,84 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 death.post(`/animals/${animal.id}/death`, { onSuccess: done })
             "
         >
-            <Field label="তারিখ" :error="death.errors.date"
-                ><Input v-model="death.date" type="date" :max="today()"
+            <Field :label="t('তারিখ')" :error="death.errors.date"
+                ><DateField v-model="death.date" :max="today()"
             /></Field>
-            <Field label="কারণ"><Input v-model="death.note" /></Field>
+            <Field :label="t('কারণ')"><Input v-model="death.note" /></Field>
             <Button
                 type="submit"
                 variant="destructive"
                 :disabled="death.processing"
-                >লিখুন</Button
+                >{{ t('লিখুন') }}</Button
             >
         </form>
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatTile
-                label="কেনা দাম"
+                :label="t('কেনা দাম')"
                 :value="taka(cost.purchase)"
-                :hint="`${animal.acquisition_label} · ${day(animal.acquired_on)}`"
+                :hint="`${t(animal.acquisition_label)} · ${day(animal.acquired_on)}`"
                 tone="soil"
             />
             <StatTile
-                label="এর পেছনে খরচ"
+                :label="t('এর পেছনে খরচ')"
                 :value="taka(cost.direct + cost.shared)"
-                :hint="`নিজস্ব ${taka(cost.direct)} + ক্যাটাগরির ভাগ ${taka(cost.shared)}`"
+                :hint="
+                    t('নিজস্ব :direct + ক্যাটাগরির ভাগ :shared', {
+                        direct: taka(cost.direct),
+                        shared: taka(cost.shared),
+                    })
+                "
                 tone="clay"
             />
             <StatTile
-                label="মোট বিনিয়োগ"
+                :label="t('মোট বিনিয়োগ')"
                 :value="taka(totalCost)"
                 tone="pond"
             />
             <StatTile
                 v-if="cost.profit !== null"
-                label="বিক্রিতে আসল লাভ"
+                :label="t('বিক্রিতে আসল লাভ')"
                 :value="taka(cost.profit)"
-                :hint="`বিক্রি ${taka(cost.sale)}`"
+                :hint="t('বিক্রি :amount', { amount: taka(cost.sale) })"
                 :tone="cost.profit < 0 ? 'clay' : 'paddy'"
             />
             <StatTile
                 v-else-if="milk > 0"
-                label="মোট দুধ"
-                :value="qty(milk, 'লিটার')"
+                :label="t('মোট দুধ')"
+                :value="qty(milk, t('লিটার'))"
                 tone="paddy"
             />
         </div>
         <p class="mt-2 text-xs text-muted-foreground">
-            "ক্যাটাগরির ভাগ" = গরুটি যে ক্যাটাগরিতে যতদিন ছিল, সেই ক্যাটাগরির
-            খাবার-ঔষধ-মজুরির খরচ থেকে পশু-দিন অনুযায়ী তার অংশ।
+            {{
+                t(
+                    '"ক্যাটাগরির ভাগ" = গরুটি যে ক্যাটাগরিতে যতদিন ছিল, সেই ক্যাটাগরির খাবার-ঔষধ-মজুরির খরচ থেকে পশু-দিন অনুযায়ী তার অংশ।',
+                )
+            }}
         </p>
+
+        <AnimalCare
+            :animal-id="animal.id"
+            :sex="animal.sex"
+            :active="animal.status === 'active'"
+            :batch="batch"
+            :weights="weights"
+            :growth="growth"
+            :breedings="breedings"
+            :options="breedingOptions"
+            :age-days="ageDays"
+            :calf-stage="calfStage"
+            :health="health"
+        />
 
         <div class="mt-6 grid gap-6 lg:grid-cols-3">
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">কোথায় কতদিন</h2>
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('কোথায় কতদিন') }}
+                </h2>
                 <ol
                     class="relative ml-2 border-l-2 border-dashed border-border pl-4"
                 >
@@ -257,9 +294,10 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                         <span
                             class="absolute -left-[7px] mt-1.5 size-3 rounded-full bg-paddy"
                         />
-                        <p class="font-medium">{{ p.center }}</p>
+                        <p class="font-medium">{{ t(p.center) }}</p>
                         <p class="text-xs text-muted-foreground">
-                            {{ day(p.from) }} — {{ p.to ? day(p.to) : 'এখন' }}
+                            {{ day(p.from) }} —
+                            {{ p.to ? day(p.to) : t('এখন') }}
                         </p>
                     </li>
                 </ol>
@@ -273,15 +311,15 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                     v-if="animal.mother"
                     class="mt-2 text-sm text-muted-foreground"
                 >
-                    মা: {{ animal.mother }}
+                    {{ t('মা: :name', { name: animal.mother }) }}
                 </p>
             </section>
 
             <section
                 class="min-w-0 rounded-xl border border-border bg-card lg:col-span-2"
             >
-                <h2 class="font-display border-b border-border p-4 text-lg">
-                    এই গরুর লেনদেন
+                <h2 class="border-b border-border p-4 font-display text-lg">
+                    {{ t('এই গরুর লেনদেন') }}
                 </h2>
                 <table class="w-full text-sm">
                     <tbody>
@@ -298,7 +336,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                             <td class="px-4 py-2.5">
                                 {{ l.description }}
                                 <p class="text-xs text-muted-foreground">
-                                    {{ l.account }}
+                                    {{ t(l.account) }}
                                 </p>
                             </td>
                             <td class="num px-4 py-2.5 text-right">
@@ -316,7 +354,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                             <td
                                 class="px-4 py-8 text-center text-muted-foreground"
                             >
-                                কিছু নেই।
+                                {{ t('কিছু নেই।') }}
                             </td>
                         </tr>
                     </tbody>

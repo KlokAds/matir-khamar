@@ -1,21 +1,33 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
+import { t } from '@/lib/i18n';
 import { taka } from '@/lib/khamar';
 import type { TreeNode } from '@/lib/khamar';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         nodes: TreeNode[];
         depth?: number;
         query?: string;
+        showClosed?: boolean;
     }>(),
-    { depth: 0, query: '' },
+    { depth: 0, query: '', showClosed: false },
 );
+
+/**
+ * A closed (বন্ধ) project stays out of the list. It still shows if money moved in it during
+ * the period, so the rows always add up to the totals above them.
+ */
+const visible = (node: TreeNode): boolean =>
+    props.showClosed ||
+    node.is_active ||
+    node.income !== 0 ||
+    node.expense !== 0;
 </script>
 
 <template>
-    <template v-for="node in nodes" :key="node.id">
+    <template v-for="node in nodes.filter(visible)" :key="node.id">
         <tr
             :class="[
                 'border-b border-border/60 hover:bg-accent/40',
@@ -35,12 +47,12 @@ withDefaults(
                                 ? 'font-semibold'
                                 : ''
                         "
-                        >{{ node.name }}</span
+                        >{{ t(node.name) }}</span
                     >
                     <span
                         v-if="!node.is_active"
                         class="rounded bg-muted px-1.5 text-[11px] text-muted-foreground"
-                        >ভবিষ্যৎ</span
+                        >{{ t('বন্ধ') }}</span
                     >
                 </Link>
             </td>
@@ -64,6 +76,7 @@ withDefaults(
             :nodes="node.children"
             :depth="depth + 1"
             :query="query"
+            :show-closed="showClosed"
         />
     </template>
 </template>

@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
+import { t } from '@/lib/i18n';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { LockKeyhole } from '@lucide/vue';
 import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 
 defineOptions({
@@ -30,8 +33,15 @@ const lastMonth = (() => {
 
 const f = useForm({ month: lastMonth });
 
-function unlock(id: number) {
-    const reason = window.prompt('কেন লক খুলছেন? (অডিট লগে থাকবে)');
+async function unlock(id: number) {
+    const reason = await ask.prompt({
+        title: t('মাসের লক খুলবেন?'),
+        body: t('কারণটি অডিট লগে লেখা থাকবে।'),
+        label: t('কেন খুলছেন'),
+        minLength: 5,
+        confirmText: t('লক খুলুন'),
+        danger: true,
+    });
 
     if (reason) {
         router.delete(`/setup/periods/${id}`, {
@@ -43,12 +53,16 @@ function unlock(id: number) {
 </script>
 
 <template>
-    <Head title="মাস লক" />
+    <Head :title="t('মাস লক')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="মাসের হিসাব লক"
-            subtitle="মাস শেষে হিসাব মিলিয়ে লক করুন। লক করা মাসে কেউ নতুন এন্ট্রি দিতে পারবে না — পুরনো হিসাব আর বদলায় না।"
+            :title="t('মাসের হিসাব লক')"
+            :subtitle="
+                t(
+                    'মাস শেষে হিসাব মিলিয়ে লক করুন। লক করা মাসে কেউ নতুন এন্ট্রি দিতে পারবে না — পুরনো হিসাব আর বদলায় না।',
+                )
+            "
         />
 
         <form
@@ -56,12 +70,12 @@ function unlock(id: number) {
             @submit.prevent="f.post('/setup/periods')"
         >
             <div class="flex-1">
-                <Field label="কোন মাস" :error="f.errors.month"
-                    ><Input v-model="f.month" type="month"
+                <Field :label="t('কোন মাস')" :error="f.errors.month"
+                    ><DateField mode="month" v-model="f.month"
                 /></Field>
             </div>
             <Button type="submit" :disabled="f.processing"
-                ><LockKeyhole /> লক করুন</Button
+                ><LockKeyhole /> {{ t('লক করুন') }}</Button
             >
         </form>
 
@@ -77,15 +91,15 @@ function unlock(id: number) {
                         {{ l.by }} · {{ l.at }}
                     </p>
                 </div>
-                <Button size="sm" variant="ghost" @click="unlock(l.id)"
-                    >খুলুন</Button
-                >
+                <Button size="sm" variant="ghost" @click="unlock(l.id)">{{
+                    t('লক খুলুন')
+                }}</Button>
             </div>
             <p
                 v-if="!locks.length"
                 class="p-6 text-center text-sm text-muted-foreground"
             >
-                এখনো কোনো মাস লক করা হয়নি।
+                {{ t('এখনো কোনো মাস লক করা হয়নি।') }}
             </p>
         </div>
     </div>

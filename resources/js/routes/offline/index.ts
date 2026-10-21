@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 export const show = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 show.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ show.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 const showForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const showForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 showForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ showForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\OfflineController::show
-* @see app/Http/Controllers/OfflineController.php:37
+* @see app/Http/Controllers/OfflineController.php:39
 * @route '/offline'
 */
 showForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\OfflineController::sync
-* @see app/Http/Controllers/OfflineController.php:55
+* @see app/Http/Controllers/OfflineController.php:58
 * @route '/offline/sync'
 */
 export const sync = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -97,7 +97,7 @@ sync.definition = {
 
 /**
 * @see \App\Http\Controllers\OfflineController::sync
-* @see app/Http/Controllers/OfflineController.php:55
+* @see app/Http/Controllers/OfflineController.php:58
 * @route '/offline/sync'
 */
 sync.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ sync.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OfflineController::sync
-* @see app/Http/Controllers/OfflineController.php:55
+* @see app/Http/Controllers/OfflineController.php:58
 * @route '/offline/sync'
 */
 sync.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -116,7 +116,7 @@ sync.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\OfflineController::sync
-* @see app/Http/Controllers/OfflineController.php:55
+* @see app/Http/Controllers/OfflineController.php:58
 * @route '/offline/sync'
 */
 const syncForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -126,7 +126,7 @@ const syncForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 
 /**
 * @see \App\Http\Controllers\OfflineController::sync
-* @see app/Http/Controllers/OfflineController.php:55
+* @see app/Http/Controllers/OfflineController.php:58
 * @route '/offline/sync'
 */
 syncForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

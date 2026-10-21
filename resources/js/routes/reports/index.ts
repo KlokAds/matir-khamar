@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\ReportController::index
-* @see app/Http/Controllers/ReportController.php:17
+* @see app/Http/Controllers/ReportController.php:27
 * @route '/reports'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 export const budget = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ budget.definition = {
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 budget.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ budget.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 budget.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -116,7 +116,7 @@ budget.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 budget.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -126,7 +126,7 @@ budget.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 const budgetForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -136,7 +136,7 @@ const budgetForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 budgetForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -146,7 +146,7 @@ budgetForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:40
+* @see app/Http/Controllers/ReportController.php:194
 * @route '/reports/budget'
 */
 budgetForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -161,9 +161,173 @@ budgetForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 budget.form = budgetForm
 
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+export const usage = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: usage.url(options),
+    method: 'get',
+})
+
+usage.definition = {
+    methods: ["get","head"],
+    url: '/reports/usage',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+usage.url = (options?: RouteQueryOptions) => {
+    return usage.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+usage.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: usage.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+usage.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: usage.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+const usageForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: usage.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+usageForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: usage.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::usage
+* @see app/Http/Controllers/ReportController.php:51
+* @route '/reports/usage'
+*/
+usageForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: usage.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+usage.form = usageForm
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+export const monthly = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: monthly.url(options),
+    method: 'get',
+})
+
+monthly.definition = {
+    methods: ["get","head"],
+    url: '/reports/monthly',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+monthly.url = (options?: RouteQueryOptions) => {
+    return monthly.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+monthly.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: monthly.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+monthly.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: monthly.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+const monthlyForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: monthly.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+monthlyForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: monthly.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\ReportController::monthly
+* @see app/Http/Controllers/ReportController.php:63
+* @route '/reports/monthly'
+*/
+monthlyForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: monthly.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+monthly.form = monthlyForm
+
 const reports = {
     index: Object.assign(index, index),
     budget: Object.assign(budget, budget),
+    usage: Object.assign(usage, usage),
+    monthly: Object.assign(monthly, monthly),
 }
 
 export default reports

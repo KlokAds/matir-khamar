@@ -363,8 +363,64 @@ homeForm.query = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 home.form = homeForm
 
 /**
+* @see \App\Http\Controllers\LocaleController::__invoke
+* @see app/Http/Controllers/LocaleController.php:13
+* @route '/locale'
+*/
+export const locale = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: locale.url(options),
+    method: 'post',
+})
+
+locale.definition = {
+    methods: ["post"],
+    url: '/locale',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\LocaleController::__invoke
+* @see app/Http/Controllers/LocaleController.php:13
+* @route '/locale'
+*/
+locale.url = (options?: RouteQueryOptions) => {
+    return locale.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\LocaleController::__invoke
+* @see app/Http/Controllers/LocaleController.php:13
+* @route '/locale'
+*/
+locale.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: locale.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\LocaleController::__invoke
+* @see app/Http/Controllers/LocaleController.php:13
+* @route '/locale'
+*/
+const localeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: locale.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\LocaleController::__invoke
+* @see app/Http/Controllers/LocaleController.php:13
+* @route '/locale'
+*/
+localeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: locale.url(options),
+    method: 'post',
+})
+
+locale.form = localeForm
+
+/**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 export const dashboard = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -379,7 +435,7 @@ dashboard.definition = {
 
 /**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 dashboard.url = (options?: RouteQueryOptions) => {
@@ -388,7 +444,7 @@ dashboard.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -398,7 +454,7 @@ dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -408,7 +464,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -418,7 +474,7 @@ const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> 
 
 /**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -428,7 +484,7 @@ dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\DashboardController::__invoke
-* @see app/Http/Controllers/DashboardController.php:16
+* @see app/Http/Controllers/DashboardController.php:21
 * @route '/dashboard'
 */
 dashboardForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -442,3 +498,165 @@ dashboardForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =
 })
 
 dashboard.form = dashboardForm
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+export const guide = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: guide.url(options),
+    method: 'get',
+})
+
+guide.definition = {
+    methods: ["get","head"],
+    url: '/guide',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+guide.url = (options?: RouteQueryOptions) => {
+    return guide.definition.url + queryParams(options)
+}
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+guide.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: guide.url(options),
+    method: 'get',
+})
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+guide.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: guide.url(options),
+    method: 'head',
+})
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+const guideForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: guide.url(options),
+    method: 'get',
+})
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+guideForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: guide.url(options),
+    method: 'get',
+})
+
+/**
+* @see \Inertia\Controller::__invoke
+* @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @route '/guide'
+*/
+guideForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: guide.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+guide.form = guideForm
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+export const search = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: search.url(options),
+    method: 'get',
+})
+
+search.definition = {
+    methods: ["get","head"],
+    url: '/search',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+search.url = (options?: RouteQueryOptions) => {
+    return search.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+search.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: search.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+search.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: search.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+const searchForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: search.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+searchForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: search.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\SearchController::__invoke
+* @see app/Http/Controllers/SearchController.php:24
+* @route '/search'
+*/
+searchForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: search.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+search.form = searchForm

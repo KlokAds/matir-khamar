@@ -5,6 +5,7 @@ import { computed, ref } from 'vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { day, taka, useCan } from '@/lib/khamar';
 
 defineOptions({
@@ -56,12 +57,16 @@ const pct = (head: { approved: number; spent: number }) =>
 </script>
 
 <template>
-    <Head title="উদ্যোগ বাজেট" />
+    <Head :title="t('উদ্যোগ বাজেট')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="উদ্যোগ কর্মসূচির বাজেট"
-            subtitle="অনুমোদিত খাতে, ভাউচারসহ খরচ হলে অনুদান ফেরত দিতে হয় না। এই পাতা ব্যাংককে দেখানোর জন্য।"
+            :title="t('উদ্যোগ কর্মসূচির বাজেট')"
+            :subtitle="
+                t(
+                    'অনুমোদিত খাতে, ভাউচারসহ খরচ হলে অনুদান ফেরত দিতে হয় না। এই পাতা ব্যাংককে দেখানোর জন্য।',
+                )
+            "
         >
             <template #actions
                 ><Button
@@ -69,7 +74,7 @@ const pct = (head: { approved: number; spent: number }) =>
                     variant="secondary"
                     class="print:hidden"
                     @click="print"
-                    ><Printer /> প্রিন্ট</Button
+                    ><Printer /> {{ t('প্রিন্ট') }}</Button
                 ></template
             >
         </PageTitle>
@@ -79,8 +84,8 @@ const pct = (head: { approved: number; spent: number }) =>
             class="mb-5 rounded-xl border border-clay/40 bg-clay/8 p-4 text-sm"
         >
             <p class="flex items-center gap-2 font-medium">
-                <CircleAlert class="size-4 text-clay" /> {{ missing.length }}টি
-                বাজেট-খরচে ভাউচার নেই
+                <CircleAlert class="size-4 text-clay" />
+                {{ t(':nটি বাজেট-খরচে ভাউচার নেই', { n: missing.length }) }}
             </p>
             <ul class="mt-2 space-y-1">
                 <li v-for="m in missing" :key="m.entry_id">
@@ -98,15 +103,19 @@ const pct = (head: { approved: number; spent: number }) =>
                     class="bg-muted/60 text-left text-xs text-muted-foreground"
                 >
                     <tr>
-                        <th class="px-4 py-2.5 font-medium">খাত</th>
+                        <th class="px-4 py-2.5 font-medium">{{ t('খাত') }}</th>
                         <th class="px-4 py-2.5 text-right font-medium">
-                            অনুমোদিত
+                            {{ t('অনুমোদিত') }}
                         </th>
                         <th class="px-4 py-2.5 text-right font-medium">
-                            খরচ হয়েছে
+                            {{ t('খরচ হয়েছে') }}
                         </th>
-                        <th class="px-4 py-2.5 text-right font-medium">বাকি</th>
-                        <th class="w-40 px-4 py-2.5 font-medium">অগ্রগতি</th>
+                        <th class="px-4 py-2.5 text-right font-medium">
+                            {{ t('বাকি') }}
+                        </th>
+                        <th class="w-40 px-4 py-2.5 font-medium">
+                            {{ t('অগ্রগতি') }}
+                        </th>
                         <th class="px-4 py-2.5" />
                     </tr>
                 </thead>
@@ -117,7 +126,7 @@ const pct = (head: { approved: number; spent: number }) =>
                                 <span class="num mr-1 text-muted-foreground">{{
                                     h.code
                                 }}</span>
-                                {{ h.name }}
+                                {{ t(h.name) }}
                                 <p
                                     v-if="h.details"
                                     class="text-xs text-muted-foreground"
@@ -128,8 +137,11 @@ const pct = (head: { approved: number; spent: number }) =>
                                     v-if="h.missing_vouchers"
                                     class="text-xs text-clay"
                                 >
-                                    {{ h.missing_vouchers }}টি এন্ট্রিতে ভাউচার
-                                    নেই
+                                    {{
+                                        t(':nটি এন্ট্রিতে ভাউচার নেই', {
+                                            n: h.missing_vouchers,
+                                        })
+                                    }}
                                 </p>
                             </td>
                             <td class="num px-4 py-3 text-right">
@@ -184,7 +196,7 @@ const pct = (head: { approved: number; spent: number }) =>
                                     <Input v-model="edit.name" required />
                                     <Input
                                         v-model="edit.details"
-                                        placeholder="বিবরণ"
+                                        :placeholder="t('বিবরণ')"
                                     />
                                     <Input
                                         v-model="edit.approved_amount"
@@ -192,13 +204,13 @@ const pct = (head: { approved: number; spent: number }) =>
                                         min="0"
                                         step="0.01"
                                         class="num"
-                                        placeholder="অনুমোদিত ৳"
+                                        :placeholder="t('অনুমোদিত ৳')"
                                     />
                                     <Button
                                         type="submit"
                                         size="sm"
                                         :disabled="edit.processing"
-                                        >রাখুন</Button
+                                        >{{ t('রাখুন') }}</Button
                                     >
                                 </form>
                             </td>
@@ -207,7 +219,7 @@ const pct = (head: { approved: number; spent: number }) =>
                 </tbody>
                 <tfoot class="font-semibold">
                     <tr class="border-t-2 border-border">
-                        <td class="px-4 py-3">মোট</td>
+                        <td class="px-4 py-3">{{ t('মোট') }}</td>
                         <td class="num px-4 py-3 text-right">
                             {{ taka(totals.approved) }}
                         </td>
@@ -223,8 +235,11 @@ const pct = (head: { approved: number; spent: number }) =>
             </table>
         </div>
         <p class="mt-3 text-xs text-muted-foreground">
-            বাজেটের অঙ্কগুলো ১৪ অক্টোবরের আবেদন থেকে নেওয়া; ব্যাংকের
-            অনুমোদনপত্র এলে সেই অনুযায়ী ✎ দিয়ে ঠিক করুন।
+            {{
+                t(
+                    'বাজেটের অঙ্কগুলো ১৪ অক্টোবরের আবেদন থেকে নেওয়া; ব্যাংকের অনুমোদনপত্র এলে সেই অনুযায়ী ✎ দিয়ে ঠিক করুন।',
+                )
+            }}
         </p>
     </div>
 </template>

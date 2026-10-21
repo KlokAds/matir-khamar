@@ -4,11 +4,19 @@ use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\HerdController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
+use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SystemController;
@@ -16,8 +24,26 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard')->name('home');
 
+// The বাংলা | English switch works before login too.
+Route::post('locale', LocaleController::class)->middleware('throttle:30,1')->name('locale');
+
+// "হয়ে গেছে" / "১ ঘণ্টা পরে" pressed on a notification: the link itself is signed, no session needed.
+Route::post('reminders/{reminder}/act/{action}', [ReminderController::class, 'act'])
+    ->middleware(['signed', 'throttle:30,1'])->name('reminders.act');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::inertia('guide', 'guide/Index')->name('guide');
+    Route::get('search', SearchController::class)->middleware('throttle:120,1')->name('search');
+
+    // Reminders and phone notifications: everyone signed in can set and receive their own.
+    Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');
+    Route::post('reminders', [ReminderController::class, 'store'])->middleware('throttle:60,1')->name('reminders.store');
+    Route::put('reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
+    Route::post('push/subscribe', [ReminderController::class, 'subscribe'])->middleware('throttle:20,1')->name('push.subscribe');
+    Route::post('push/unsubscribe', [ReminderController::class, 'unsubscribe'])->name('push.unsubscribe');
+    Route::post('push/test', [ReminderController::class, 'test'])->middleware('throttle:10,1')->name('push.test');
+    Route::put('notify-prefs', [ReminderController::class, 'prefs'])->name('notify.prefs');
 
     // Daily work: milk and feed use. Open to the entry role.
     Route::middleware('can:post-daily')->group(function () {
@@ -27,6 +53,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('stock/issue', [StockController::class, 'issue'])->name('stock.issue');
         Route::get('offline', [OfflineController::class, 'show'])->name('offline.show');
         Route::post('offline/sync', [OfflineController::class, 'sync'])->middleware('throttle:30,1')->name('offline.sync');
+        Route::post('animals/{animal}/breedings', [HerdController::class, 'storeBreeding'])->name('breedings.store');
+        Route::put('breedings/{breeding}', [HerdController::class, 'updateBreeding'])->name('breedings.update');
+        Route::post('animals/{animal}/weights', [HerdController::class, 'storeWeight'])->name('weights.store');
+        Route::post('health', [HealthController::class, 'store'])->name('health.store');
+        Route::delete('health/{event}', [HealthController::class, 'destroy'])->name('health.destroy');
+        Route::post('diary/notes', [DiaryController::class, 'storeNote'])->name('diary.notes.store');
+        Route::put('diary/notes/{note}', [DiaryController::class, 'updateNote'])->name('diary.notes.update');
     });
 
     Route::middleware('can:view-reports')->group(function () {
@@ -40,6 +73,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('animals/{animal}', [AnimalController::class, 'show'])->whereNumber('animal')->name('animals.show');
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
+        Route::get('reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
+        Route::get('reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');
+        Route::inertia('guide/split', 'guide/Split')->name('guide.split');
+        Route::get('money', [MoneyController::class, 'index'])->name('money.index');
+        Route::get('breeding', [HerdController::class, 'breeding'])->name('breeding.index');
+        Route::get('batches', [HerdController::class, 'batches'])->name('batches.index');
+        Route::get('diary', [DiaryController::class, 'index'])->name('diary.index');
+        Route::get('health', [HealthController::class, 'index'])->name('health.index');
+        Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');
     });
 
     Route::middleware('can:post-entries')->group(function () {
@@ -55,6 +97,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('animals/{animal}/death', [AnimalController::class, 'death'])->name('animals.death');
         Route::get('allocation', [AllocationController::class, 'create'])->name('allocation.create');
         Route::post('allocation', [AllocationController::class, 'store'])->name('allocation.store');
+        Route::post('batches', [HerdController::class, 'storeBatch'])->name('batches.store');
+        Route::put('batches/{batch}', [HerdController::class, 'updateBatch'])->name('batches.update');
+        Route::post('diary/goals', [DiaryController::class, 'storeGoal'])->name('diary.goals.store');
+        Route::put('diary/goals/{goal}', [DiaryController::class, 'updateGoal'])->name('diary.goals.update');
     });
 
     Route::post('entries/{entry}/reverse', [EntryController::class, 'reverse'])->middleware('can:reverse-entries')->name('entries.reverse');
@@ -62,6 +108,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('can:manage-setup')->prefix('setup')->name('setup.')->group(function () {
         Route::post('centers', [CostCenterController::class, 'store'])->name('centers.store');
         Route::put('centers/{center}', [CostCenterController::class, 'update'])->name('centers.update');
+        Route::get('centers', [CostCenterController::class, 'manage'])->name('centers.manage');
+        Route::post('centers/{center}/toggle', [CostCenterController::class, 'toggle'])->name('centers.toggle');
+        Route::post('centers/{center}/move', [CostCenterController::class, 'move'])->name('centers.move');
+        Route::delete('centers/{center}', [CostCenterController::class, 'destroy'])->name('centers.destroy');
         Route::post('items', [StockController::class, 'storeItem'])->name('items.store');
         Route::put('items/{item}', [StockController::class, 'updateItem'])->name('items.update');
         Route::get('accounts', [SetupController::class, 'accounts'])->name('accounts');
@@ -71,6 +121,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('parties', [SetupController::class, 'storeParty'])->name('parties.store');
         Route::put('parties/{party}', [SetupController::class, 'updateParty'])->name('parties.update');
         Route::put('budget/{head}', [ReportController::class, 'updateBudgetHead'])->name('budget.update');
+        Route::post('money', [MoneyController::class, 'store'])->name('money.store');
+    });
+
+    Route::middleware('can:manage-import')->prefix('setup')->name('setup.')->group(function () {
         Route::get('import', [ImportController::class, 'index'])->name('import');
         Route::put('import/connection', [ImportController::class, 'saveConnection'])->middleware('throttle:10,1')->name('import.connection');
         Route::post('import/connection/test', [ImportController::class, 'testConnection'])->middleware('throttle:10,1')->name('import.connection.test');
@@ -83,12 +137,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('import/ignore-undecided', [ImportController::class, 'ignoreUndecided'])->name('import.ignore');
     });
 
+    Route::middleware('can:manage-roles')->prefix('setup')->name('setup.')->group(function () {
+        Route::get('roles', [RoleController::class, 'index'])->name('roles');
+        Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    Route::middleware('can:manage-update')->prefix('setup')->name('setup.')->group(function () {
+        Route::get('update', [SystemController::class, 'show'])->name('update');
+        Route::post('update', [SystemController::class, 'update'])->middleware('throttle:3,10')->name('update.run');
+    });
+
     Route::middleware('can:manage-users')->prefix('setup')->name('setup.')->group(function () {
         Route::get('users', [SetupController::class, 'users'])->name('users');
         Route::post('users', [SetupController::class, 'storeUser'])->name('users.store');
         Route::put('users/{user}', [SetupController::class, 'updateUser'])->name('users.update');
-        Route::get('update', [SystemController::class, 'show'])->name('update');
-        Route::post('update', [SystemController::class, 'update'])->middleware('throttle:3,10')->name('update.run');
     });
 
     Route::middleware('can:lock-periods')->prefix('setup')->name('setup.')->group(function () {

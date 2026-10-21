@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { t } from '@/lib/i18n';
 
 defineProps<{
     title?: string;
@@ -68,13 +69,16 @@ defineProps<{
                 <p
                     class="font-display text-5xl leading-tight text-soil dark:text-[oklch(0.92_0.03_85)]"
                 >
-                    মাটির খামার
+                    {{ t('মাটির খামার') }}
                 </p>
                 <p
                     class="mt-3 max-w-sm text-lg text-soil/75 dark:text-[oklch(0.85_0.03_85)]"
                 >
-                    গোপাই কাটখৈর, নওগাঁ — প্রতিটি গরু, প্রতি কেজি খাবার, প্রতিটি
-                    টাকার সঠিক হিসাব।
+                    {{
+                        t(
+                            'গোপাই কাটখৈর, নওগাঁ — প্রতিটি গরু, প্রতি কেজি খাবার, প্রতিটি টাকার সঠিক হিসাব।',
+                        )
+                    }}
                 </p>
             </div>
         </aside>
@@ -91,11 +95,13 @@ defineProps<{
                             <AppLogoIcon class="size-12" />
                         </div>
                         <div class="space-y-2 text-center">
-                            <h1 class="font-display text-2xl">{{ title }}</h1>
+                            <h1 class="font-display text-2xl">
+                                {{ t(title ?? '') }}
+                            </h1>
                             <p
                                 class="text-center text-sm text-muted-foreground"
                             >
-                                {{ description }}
+                                {{ t(description ?? '') }}
                             </p>
                         </div>
                     </div>
@@ -103,7 +109,7 @@ defineProps<{
                 </div>
             </div>
             <p class="text-xs text-muted-foreground">
-                Klok Ads-এর একটি কৃষি উদ্যোগ
+                {{ t('Klok Ads-এর একটি কৃষি উদ্যোগ') }}
             </p>
         </main>
     </div>

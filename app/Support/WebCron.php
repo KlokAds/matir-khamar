@@ -17,6 +17,17 @@ class WebCron
 {
     public const SLOT_KEY = 'khamar:web-cron';
 
+    /** Written every minute by the running khamar:clock. */
+    public const CLOCK_BEAT = 'khamar:clock-beat';
+
+    public const CLOCK_OWNER = 'khamar:clock-owner';
+
+    /** True while a khamar:clock process is ticking. */
+    public function clockAlive(): bool
+    {
+        return Cache::has(self::CLOCK_BEAT);
+    }
+
     public function enabled(): bool
     {
         return (bool) config('khamar.web_cron')
@@ -47,10 +58,43 @@ class WebCron
         }
     }
 
+    /** Starts the background clock, at most once every five minutes while it is not ticking. */
+    public function startClock(): void
+    {
+        if (! Cache::add('khamar:clock-starting', true, 300)) {
+            return;
+        }
+
+        $command = sprintf(
+            'cd %s && nohup %s artisan khamar:clock >> %s 2>&1 &',
+            escapeshellarg(base_path()),
+            escapeshellarg(PhpCli::path()),
+            escapeshellarg(storage_path('logs/clock.log')),
+        );
+
+        try {
+            Process::timeout(10)->run(['sh', '-c', $command]);
+        } catch (Throwable $exception) {
+            Log::warning('Web cron could not start the clock: '.$exception->getMessage());
+        }
+    }
+
     public function tick(): void
     {
         try {
-            if ($this->enabled() && $this->due()) {
+            if (! $this->enabled()) {
+                return;
+            }
+
+            // With the clock ticking, the minute is already covered; otherwise start it, and
+            // run this minute from the request as before so nothing is missed meanwhile.
+            if ($this->clockAlive()) {
+                return;
+            }
+
+            $this->startClock();
+
+            if ($this->due()) {
                 $this->start();
             }
         } catch (Throwable $exception) {

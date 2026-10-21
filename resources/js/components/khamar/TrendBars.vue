@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { t } from '@/lib/i18n';
 import { monthLabel, taka } from '@/lib/khamar';
 
 const props = defineProps<{
@@ -35,9 +36,15 @@ const height = (value: number) =>
                     class="pointer-events-none absolute bottom-full z-10 mb-2 hidden w-max rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs shadow-md group-hover:block"
                 >
                     <p class="font-medium">{{ monthLabel(m.month) }}</p>
-                    <p class="num text-income">আয় {{ taka(m.income) }}</p>
-                    <p class="num text-expense">খরচ {{ taka(m.expense) }}</p>
-                    <p class="num">লাভ {{ taka(m.income - m.expense) }}</p>
+                    <p class="num text-income">
+                        {{ t('আয়') }} {{ taka(m.income) }}
+                    </p>
+                    <p class="num text-expense">
+                        {{ t('খরচ') }} {{ taka(m.expense) }}
+                    </p>
+                    <p class="num">
+                        {{ t('লাভ') }} {{ taka(m.income - m.expense) }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -51,10 +58,12 @@ const height = (value: number) =>
         </div>
         <div class="mt-3 flex gap-4 text-xs text-muted-foreground">
             <span class="flex items-center gap-1.5"
-                ><i class="size-2.5 rounded-sm bg-income" /> আয়</span
+                ><i class="size-2.5 rounded-sm bg-income" />
+                {{ t('আয়') }}</span
             >
             <span class="flex items-center gap-1.5"
-                ><i class="size-2.5 rounded-sm bg-expense" /> খরচ</span
+                ><i class="size-2.5 rounded-sm bg-expense" />
+                {{ t('খরচ') }}</span
             >
         </div>
     </div>

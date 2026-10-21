@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import {
     CloudDownload,
@@ -15,6 +16,7 @@ import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, day, monthLabel, qty, taka } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 
@@ -91,6 +93,9 @@ const props = defineProps<{
     }[];
 }>();
 
+const statusLabels = computed(() => tAll(props.statuses));
+const tCenter = (c: Center) => centerLabel({ ...c, name: t(c.name) });
+
 const page = usePage();
 const errors = computed(() =>
     Object.values((page.props.errors ?? {}) as Record<string, string>),
@@ -123,7 +128,6 @@ const undecided = computed(
         props.mappings.filter((m) => !m.complete && m.kind !== 'payment_method')
             .length,
 );
-const usable = computed(() => props.centers.filter((c) => c.kind !== 'group'));
 const qtyDraft = reactive<Record<number, string>>({});
 
 function save(map: Mapping) {
@@ -157,21 +161,24 @@ const saveConnection = () =>
         onSuccess: () => conn.reset('password', 'current_password'),
     });
 const forget = useForm({ current_password: '' });
-const forgetConnection = () => {
+const forgetConnection = async () => {
     if (
-        window.confirm(
-            'বিলিং সংযোগের তথ্য মুছে ফেলবেন? আগে আনা সারিগুলো থাকবে।',
-        )
+        await ask.confirm({
+            title: t('বিলিং সংযোগ মুছবেন?'),
+            body: t('আগে আনা সারিগুলো খাতায় থেকে যাবে।'),
+            confirmText: t('মুছুন'),
+            danger: true,
+        })
     ) {
         forget.delete('/setup/import/connection', { preserveScroll: true });
     }
 };
-const tables: Record<string, string> = {
-    expenses: 'খরচ',
-    payments: 'পেমেন্ট',
-    expense_categories: 'খরচের ক্যাটাগরি',
-    customers: 'ক্রেতা',
-};
+const tables = computed<Record<string, string>>(() => ({
+    expenses: t('খরচ'),
+    payments: t('পেমেন্ট'),
+    expense_categories: t('খরচের ক্যাটাগরি'),
+    customers: t('ক্রেতা'),
+}));
 const run = (url: string) => action.post(url, { preserveScroll: true });
 const saveQty = (id: number) =>
     router.post(
@@ -193,24 +200,28 @@ const stockCategoryIds = computed(() =>
 </script>
 
 <template>
-    <Head title="বিলিং থেকে আনা" />
+    <Head :title="t('বিলিং থেকে আনা')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="billing.klokads.com থেকে খামারের হিসাব"
-            subtitle="বিলিং-এ এজেন্সির হিসাবও আছে — শুধু যেগুলো খামারের বলে ম্যাপ করবেন সেগুলোই আসবে, বাকি বাদ। বিলিং-এ কিছু লেখা বা বদলানো হয় না।"
+            :title="t('billing.klokads.com থেকে খামারের হিসাব')"
+            :subtitle="
+                t(
+                    'বিলিং-এ এজেন্সির হিসাবও আছে — শুধু যেগুলো খামারের বলে ম্যাপ করবেন সেগুলোই আসবে, বাকি বাদ। বিলিং-এ কিছু লেখা বা বদলানো হয় না।',
+                )
+            "
         >
             <template #actions>
                 <Button
                     variant="secondary"
                     :disabled="!configured || action.processing"
                     @click="run('/setup/import/fetch')"
-                    ><CloudDownload /> নতুন সারি আনুন</Button
+                    ><CloudDownload /> {{ t('নতুন সারি আনুন') }}</Button
                 >
                 <Button
                     :disabled="action.processing"
                     @click="run('/setup/import/post')"
-                    ><Send /> খাতায় তুলুন</Button
+                    ><Send /> {{ t('খাতায় তুলুন') }}</Button
                 >
             </template>
         </PageTitle>
@@ -231,24 +242,25 @@ const stockCategoryIds = computed(() =>
                     /></span>
                     <div>
                         <h2 class="font-display text-lg">
-                            বিলিং ডাটাবেসের সংযোগ
+                            {{ t('বিলিং ডাটাবেসের সংযোগ') }}
                         </h2>
                         <p class="text-sm text-muted-foreground">
                             <template v-if="connection.source === 'app'"
                                 >{{ connection.username }}@{{
                                     connection.host
                                 }}
-                                / {{ connection.database }} · পাসওয়ার্ড
-                                এনক্রিপ্ট করে রাখা<span
-                                    v-if="connection.updated_at"
-                                >
+                                / {{ connection.database }} ·
+                                {{ t('পাসওয়ার্ড এনক্রিপ্ট করে রাখা')
+                                }}<span v-if="connection.updated_at">
                                     · {{ connection.updated_at }}</span
                                 ></template
                             >
-                            <template v-else-if="connection.source === 'env'"
-                                >সার্ভারের .env থেকে নেওয়া হচ্ছে</template
-                            >
-                            <template v-else>এখনো দেওয়া হয়নি</template>
+                            <template v-else-if="connection.source === 'env'">{{
+                                t('সার্ভারের .env থেকে নেওয়া হচ্ছে')
+                            }}</template>
+                            <template v-else>{{
+                                t('এখনো দেওয়া হয়নি')
+                            }}</template>
                         </p>
                     </div>
                 </div>
@@ -259,7 +271,7 @@ const stockCategoryIds = computed(() =>
                         size="sm"
                         :disabled="action.processing"
                         @click="run('/setup/import/connection/test')"
-                        >সংযোগ পরীক্ষা</Button
+                        >{{ t('সংযোগ পরীক্ষা') }}</Button
                     >
                     <Button
                         variant="secondary"
@@ -267,7 +279,9 @@ const stockCategoryIds = computed(() =>
                         @click="showConnection = !showConnection"
                         ><KeyRound />
                         {{
-                            connection.source === 'app' ? 'বদলান' : 'তথ্য দিন'
+                            connection.source === 'app'
+                                ? t('বদলান')
+                                : t('তথ্য দিন')
                         }}</Button
                     >
                 </div>
@@ -282,14 +296,14 @@ const stockCategoryIds = computed(() =>
                         : 'bg-destructive/10 text-destructive',
                 ]"
             >
-                <p class="font-medium">{{ connectionTest.message }}</p>
+                <p class="font-medium">{{ t(connectionTest.message) }}</p>
                 <p v-if="connectionTest.ok" class="mt-1 text-muted-foreground">
-                    বিলিং-এ আছে:
+                    {{ t('বিলিং-এ আছে:') }}
                     <span
-                        v-for="(n, t) in connectionTest.counts"
-                        :key="t"
+                        v-for="(n, tbl) in connectionTest.counts"
+                        :key="tbl"
                         class="mr-3"
-                        >{{ tables[t] ?? t }}
+                        >{{ tables[tbl] ?? tbl }}
                         <b class="num text-foreground">{{ n }}</b></span
                     >
                 </p>
@@ -297,17 +311,19 @@ const stockCategoryIds = computed(() =>
                     v-if="connectionTest.can_write === true"
                     class="mt-2 flex items-start gap-2 text-clay"
                 >
-                    <ShieldAlert class="mt-0.5 size-4 shrink-0" /> এই ডাটাবেস
-                    ইউজারের লেখার/মোছার অনুমতি আছে। এই অ্যাপ শুধু পড়ে, তবু
-                    নিরাপত্তার জন্য hPanel-এ শুধু SELECT অনুমতির আলাদা ইউজার
-                    বানিয়ে সেটা দিন।
+                    <ShieldAlert class="mt-0.5 size-4 shrink-0" />
+                    {{
+                        t(
+                            'এই ডাটাবেস ইউজারের লেখার/মোছার অনুমতি আছে। এই অ্যাপ শুধু পড়ে, তবু নিরাপত্তার জন্য hPanel-এ শুধু SELECT অনুমতির আলাদা ইউজার বানিয়ে সেটা দিন।',
+                        )
+                    }}
                 </p>
                 <p
                     v-if="connectionTest.can_write === false"
                     class="mt-2 flex items-center gap-2 text-paddy"
                 >
-                    <ShieldCheck class="size-4" /> ইউজারটির শুধু পড়ার অনুমতি —
-                    ঠিক আছে।
+                    <ShieldCheck class="size-4" />
+                    {{ t('ইউজারটির শুধু পড়ার অনুমতি — ঠিক আছে।') }}
                 </p>
             </div>
 
@@ -318,29 +334,29 @@ const stockCategoryIds = computed(() =>
                 @submit.prevent="saveConnection"
             >
                 <Field
-                    label="হোস্ট"
+                    :label="t('হোস্ট')"
                     :error="conn.errors.host"
-                    hint="একই Hostinger সার্ভারে হলে localhost"
+                    :hint="t('একই Hostinger সার্ভারে হলে localhost')"
                     ><Input v-model="conn.host" required
                 /></Field>
-                <Field label="পোর্ট" :error="conn.errors.port"
+                <Field :label="t('পোর্ট')" :error="conn.errors.port"
                     ><Input v-model="conn.port" type="number" required
                 /></Field>
-                <Field label="ডাটাবেসের নাম" :error="conn.errors.database"
+                <Field :label="t('ডাটাবেসের নাম')" :error="conn.errors.database"
                     ><Input v-model="conn.database" required
                 /></Field>
                 <Field
-                    label="ডাটাবেস ইউজার"
+                    :label="t('ডাটাবেস ইউজার')"
                     :error="conn.errors.username"
-                    hint="শুধু SELECT অনুমতির ইউজার দিন"
+                    :hint="t('শুধু SELECT অনুমতির ইউজার দিন')"
                     ><Input v-model="conn.username" required autocomplete="off"
                 /></Field>
                 <Field
-                    label="ডাটাবেস পাসওয়ার্ড"
+                    :label="t('ডাটাবেস পাসওয়ার্ড')"
                     :error="conn.errors.password"
                     :hint="
                         connection.password_set
-                            ? 'রাখা আছে — বদলাতে চাইলেই শুধু লিখুন'
+                            ? t('রাখা আছে — বদলাতে চাইলেই শুধু লিখুন')
                             : ''
                     "
                 >
@@ -353,14 +369,14 @@ const stockCategoryIds = computed(() =>
                     />
                 </Field>
                 <Field
-                    label="Crater কোম্পানি নম্বর (ঐচ্ছিক)"
+                    :label="t('Crater কোম্পানি নম্বর (ঐচ্ছিক)')"
                     :error="conn.errors.company_id"
-                    hint="খামারের আলাদা কোম্পানি থাকলে শুধু সেটা পড়া হবে"
+                    :hint="t('খামারের আলাদা কোম্পানি থাকলে শুধু সেটা পড়া হবে')"
                     ><Input v-model="conn.company_id" type="number" min="1"
                 /></Field>
                 <div class="sm:col-span-2 lg:col-span-3">
                     <Field
-                        label="নিশ্চিত করতে আপনার নিজের লগইন পাসওয়ার্ড"
+                        :label="t('নিশ্চিত করতে আপনার নিজের লগইন পাসওয়ার্ড')"
                         :error="conn.errors.current_password"
                     >
                         <Input
@@ -375,12 +391,15 @@ const stockCategoryIds = computed(() =>
                 <div
                     class="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-3"
                 >
-                    <Button type="submit" :disabled="conn.processing"
-                        >রাখুন ও পরীক্ষা করুন</Button
-                    >
+                    <Button type="submit" :disabled="conn.processing">{{
+                        t('রাখুন ও পরীক্ষা করুন')
+                    }}</Button>
                     <p class="text-xs text-muted-foreground">
-                        পাসওয়ার্ড APP_KEY দিয়ে এনক্রিপ্ট হয়ে থাকে, কোনো
-                        পাতায় আর দেখানো হয় না।
+                        {{
+                            t(
+                                'পাসওয়ার্ড APP_KEY দিয়ে এনক্রিপ্ট হয়ে থাকে, কোনো পাতায় আর দেখানো হয় না।',
+                            )
+                        }}
                     </p>
                 </div>
             </form>
@@ -391,7 +410,7 @@ const stockCategoryIds = computed(() =>
                 @submit.prevent="forgetConnection"
             >
                 <Field
-                    label="সংযোগ মুছতে নিজের পাসওয়ার্ড"
+                    :label="t('সংযোগ মুছতে নিজের পাসওয়ার্ড')"
                     :error="forget.errors.current_password"
                 >
                     <Input
@@ -408,7 +427,7 @@ const stockCategoryIds = computed(() =>
                     size="sm"
                     class="text-destructive"
                     :disabled="forget.processing"
-                    >সংযোগ মুছে ফেলুন</Button
+                    >{{ t('সংযোগ মুছে ফেলুন') }}</Button
                 >
             </form>
         </section>
@@ -430,10 +449,10 @@ const stockCategoryIds = computed(() =>
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-card',
                 ]"
-                >সব</Link
+                >{{ t('সব') }}</Link
             >
             <Link
-                v-for="(label, key) in statuses"
+                v-for="(label, key) in statusLabels"
                 :key="key"
                 :href="`/setup/import?status=${key}`"
                 :class="[
@@ -451,19 +470,23 @@ const stockCategoryIds = computed(() =>
         <section class="mb-6 rounded-xl border border-border bg-card p-4">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="font-display text-lg">
-                    ১. কোনটা খামারের, কোথায় যাবে
+                    {{ t('১. কোনটা খামারের, কোথায় যাবে') }}
                 </h2>
                 <Button
                     v-if="undecided"
                     size="sm"
                     variant="secondary"
                     @click="run('/setup/import/ignore-undecided')"
-                    ><ListChecks /> বাকি {{ undecided }}টি "খামারের নয়"</Button
+                    ><ListChecks />
+                    {{ t('বাকি :nটি "খামারের নয়"', { n: undecided }) }}</Button
                 >
             </div>
             <p v-if="!mappings.length" class="text-sm text-muted-foreground">
-                প্রথমে "নতুন সারি আনুন" চাপুন — বিলিং-এর ক্যাটাগরিগুলো এখানে চলে
-                আসবে।
+                {{
+                    t(
+                        'প্রথমে "নতুন সারি আনুন" চাপুন — বিলিং-এর ক্যাটাগরিগুলো এখানে চলে আসবে।',
+                    )
+                }}
             </p>
 
             <div
@@ -474,7 +497,7 @@ const stockCategoryIds = computed(() =>
                 <p
                     class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                 >
-                    {{ kinds[group.kind] }}
+                    {{ t(kinds[group.kind]) }}
                 </p>
                 <div class="space-y-2">
                     <div
@@ -491,44 +514,49 @@ const stockCategoryIds = computed(() =>
                         <NSelect v-model="edits[m.id].target">
                             <template v-if="group.kind === 'payment_method'"
                                 ><option value="account">
-                                    এই হিসাবে
+                                    {{ t('এই হিসাবে') }}
                                 </option></template
                             >
                             <template v-else>
-                                <option value="account">খাত + ক্যাটাগরি</option>
+                                <option value="account">
+                                    {{ t('খাত + ক্যাটাগরি') }}
+                                </option>
                                 <option
                                     v-if="group.kind === 'expense_category'"
                                     value="stock"
                                 >
-                                    স্টকে (কেজি)
+                                    {{ t('স্টকে (কেজি)') }}
                                 </option>
-                                <option value="ignore">খামারের নয়</option>
+                                <option value="ignore">
+                                    {{ t('খামারের নয়') }}
+                                </option>
                             </template>
                         </NSelect>
                         <template v-if="edits[m.id].target === 'account'">
                             <NSelect
                                 v-model="edits[m.id].account_id"
-                                placeholder="খাত বাছুন"
+                                :placeholder="t('খাত বাছুন')"
                             >
                                 <option
                                     v-for="a in accounts[group.kind]"
                                     :key="a.id"
                                     :value="a.id"
                                 >
-                                    {{ a.name }}
+                                    {{ t(a.name) }}
                                 </option>
                             </NSelect>
                             <NSelect
                                 v-if="group.kind !== 'payment_method'"
                                 v-model="edits[m.id].cost_center_id"
-                                placeholder="ক্যাটাগরি"
+                                :placeholder="t('ক্যাটাগরি')"
                             >
                                 <option
-                                    v-for="c in usable"
+                                    v-for="c in centers"
                                     :key="c.id"
                                     :value="c.id"
+                                    :disabled="c.kind === 'group'"
                                 >
-                                    {{ centerLabel(c) }}
+                                    {{ tCenter(c) }}
                                 </option>
                             </NSelect>
                             <span v-else />
@@ -536,29 +564,33 @@ const stockCategoryIds = computed(() =>
                         <template v-else-if="edits[m.id].target === 'stock'">
                             <NSelect
                                 v-model="edits[m.id].item_id"
-                                placeholder="কোন মাল"
+                                :placeholder="t('কোন মাল')"
                             >
                                 <option
                                     v-for="i in items"
                                     :key="i.id"
                                     :value="i.id"
                                 >
-                                    {{ i.name }}
+                                    {{ t(i.name) }}
                                 </option>
                             </NSelect>
-                            <span class="text-xs text-muted-foreground"
-                                >প্রতি সারিতে পরিমাণ লিখতে হবে; পরে কেজি
-                                অনুযায়ী ক্যাটাগরিতে যাবে</span
-                            >
+                            <span class="text-xs text-muted-foreground">{{
+                                t(
+                                    'প্রতি সারিতে পরিমাণ লিখতে হবে; পরে কেজি অনুযায়ী ক্যাটাগরিতে যাবে',
+                                )
+                            }}</span>
                         </template>
                         <template v-else
                             ><span
                                 class="text-xs text-muted-foreground md:col-span-2"
-                                >এগুলো আসবে না</span
+                                >{{ t('এগুলো আসবে না') }}</span
                             ></template
                         >
-                        <Button size="sm" variant="secondary" @click="save(m)"
-                            >রাখুন</Button
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            @click="save(m)"
+                            >{{ t('রাখুন') }}</Button
                         >
                     </div>
                 </div>
@@ -566,8 +598,8 @@ const stockCategoryIds = computed(() =>
         </section>
 
         <section class="mb-6 rounded-xl border border-border bg-card">
-            <h2 class="font-display border-b border-border p-4 text-lg">
-                ২. বিলিং-এর সারি (তারিখের ক্রমে খাতায় ওঠে)
+            <h2 class="border-b border-border p-4 font-display text-lg">
+                {{ t('২. বিলিং-এর সারি (তারিখের ক্রমে খাতায় ওঠে)') }}
             </h2>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[760px] text-sm">
@@ -583,7 +615,11 @@ const stockCategoryIds = computed(() =>
                                 {{ day(r.date) }}
                             </td>
                             <td class="px-4 py-2.5">
-                                {{ r.table === 'expenses' ? 'খরচ' : 'পেমেন্ট' }}
+                                {{
+                                    r.table === 'expenses'
+                                        ? t('খরচ')
+                                        : t('পেমেন্ট')
+                                }}
                                 {{ r.number ?? '#' + r.external_id }}
                                 <p
                                     class="line-clamp-1 text-xs text-muted-foreground"
@@ -607,13 +643,13 @@ const stockCategoryIds = computed(() =>
                                                 'bg-destructive/10 text-destructive',
                                         }[r.status],
                                     ]"
-                                    >{{ statuses[r.status] }}</span
+                                    >{{ statusLabels[r.status] }}</span
                                 >
                                 <p
                                     v-if="r.problem"
                                     class="mt-0.5 text-xs text-clay"
                                 >
-                                    {{ r.problem }}
+                                    {{ t(r.problem) }}
                                 </p>
                             </td>
                             <td class="px-4 py-2.5">
@@ -621,7 +657,7 @@ const stockCategoryIds = computed(() =>
                                     v-if="r.entry_id"
                                     :href="`/entries/${r.entry_id}`"
                                     class="text-primary hover:underline"
-                                    >এন্ট্রি</Link
+                                    >{{ t('এন্ট্রি') }}</Link
                                 >
                                 <form
                                     v-else-if="
@@ -641,14 +677,14 @@ const stockCategoryIds = computed(() =>
                                         min="0"
                                         class="num h-8 w-24"
                                         :placeholder="
-                                            r.qty ? qty(r.qty) : 'কেজি'
+                                            r.qty ? qty(r.qty) : t('কেজি')
                                         "
                                     />
                                     <Button
                                         size="sm"
                                         variant="secondary"
                                         type="submit"
-                                        >রাখুন</Button
+                                        >{{ t('রাখুন') }}</Button
                                     >
                                 </form>
                                 <div
@@ -659,13 +695,13 @@ const stockCategoryIds = computed(() =>
                                         size="sm"
                                         variant="secondary"
                                         @click="resolve(r.id, 'repost')"
-                                        >আবার তুলুন</Button
+                                        >{{ t('আবার তুলুন') }}</Button
                                     >
                                     <Button
                                         size="sm"
                                         variant="ghost"
                                         @click="resolve(r.id, 'keep')"
-                                        >আগেরটা ঠিক</Button
+                                        >{{ t('আগেরটা ঠিক') }}</Button
                                     >
                                 </div>
                             </td>
@@ -674,7 +710,7 @@ const stockCategoryIds = computed(() =>
                             <td
                                 class="px-4 py-8 text-center text-muted-foreground"
                             >
-                                কোনো সারি নেই।
+                                {{ t('কোনো সারি নেই।') }}
                             </td>
                         </tr>
                     </tbody>
@@ -702,20 +738,33 @@ const stockCategoryIds = computed(() =>
         </section>
 
         <section class="min-w-0 rounded-xl border border-border bg-card p-4">
-            <h2 class="font-display mb-1 text-lg">৩. মিলিয়ে দেখা</h2>
+            <h2 class="mb-1 font-display text-lg">
+                {{ t('৩. মিলিয়ে দেখা') }}
+            </h2>
             <p class="mb-3 text-sm text-muted-foreground">
-                বিলিং-এ আজ যা আছে বনাম খাতায় যা উঠেছে। পার্থক্য থাকলে বিলিং-এ
-                পরে কিছু বদলানো হয়েছে।
+                {{
+                    t(
+                        'বিলিং-এ আজ যা আছে বনাম খাতায় যা উঠেছে। পার্থক্য থাকলে বিলিং-এ পরে কিছু বদলানো হয়েছে।',
+                    )
+                }}
             </p>
             <table class="w-full text-sm">
                 <thead class="text-left text-xs text-muted-foreground">
                     <tr class="border-b border-border">
-                        <th class="pb-2 font-medium">মাস</th>
-                        <th class="pb-2 font-medium">ধরন</th>
-                        <th class="pb-2 text-right font-medium">সারি</th>
-                        <th class="pb-2 text-right font-medium">বিলিং</th>
-                        <th class="pb-2 text-right font-medium">খাতা</th>
-                        <th class="pb-2 text-right font-medium">পার্থক্য</th>
+                        <th class="pb-2 font-medium">{{ t('মাস') }}</th>
+                        <th class="pb-2 font-medium">{{ t('ধরন') }}</th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('সারি') }}
+                        </th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('বিলিং') }}
+                        </th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('খাতা') }}
+                        </th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('পার্থক্য') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -726,7 +775,11 @@ const stockCategoryIds = computed(() =>
                     >
                         <td class="py-2">{{ monthLabel(row.month) }}</td>
                         <td class="py-2">
-                            {{ row.table === 'expenses' ? 'খরচ' : 'পেমেন্ট' }}
+                            {{
+                                row.table === 'expenses'
+                                    ? t('খরচ')
+                                    : t('পেমেন্ট')
+                            }}
                         </td>
                         <td class="num py-2 text-right">{{ row.rows }}</td>
                         <td class="num py-2 text-right">
@@ -745,7 +798,7 @@ const stockCategoryIds = computed(() =>
                         >
                             {{
                                 row.difference === 0
-                                    ? '✓ মিলেছে'
+                                    ? t('✓ মিলেছে')
                                     : taka(row.difference)
                             }}
                         </td>
@@ -755,7 +808,7 @@ const stockCategoryIds = computed(() =>
                             colspan="6"
                             class="py-6 text-center text-muted-foreground"
                         >
-                            এখনো কিছু খাতায় ওঠেনি।
+                            {{ t('এখনো কিছু খাতায় ওঠেনি।') }}
                         </td>
                     </tr>
                 </tbody>

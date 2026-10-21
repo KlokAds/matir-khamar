@@ -6,7 +6,9 @@ import CenterRows from '@/components/khamar/CenterRows.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import TrendBars from '@/components/khamar/TrendBars.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { day, taka } from '@/lib/khamar';
 import type { TreeNode } from '@/lib/khamar';
 
@@ -57,31 +59,31 @@ const sum = (rows: { balance: number }[]) =>
 </script>
 
 <template>
-    <Head title="রিপোর্ট" />
+    <Head :title="t('রিপোর্ট')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="খামারের রিপোর্ট"
-            :subtitle="`${day(from)} থেকে ${day(to)}`"
+            :title="t('খামারের রিপোর্ট')"
+            :subtitle="t(':from থেকে :to', { from: day(from), to: day(to) })"
         >
             <template #actions>
                 <form
                     class="flex items-center gap-2 print:hidden"
                     @submit.prevent="apply"
                 >
-                    <Input v-model="range.from" type="date" class="h-9 w-36" />
+                    <DateField v-model="range.from" class="w-36" />
                     <span class="text-muted-foreground">—</span>
-                    <Input v-model="range.to" type="date" class="h-9 w-36" />
-                    <Button type="submit" size="sm" variant="secondary"
-                        >দেখুন</Button
-                    >
+                    <DateField v-model="range.to" class="w-36" />
+                    <Button type="submit" size="sm" variant="secondary">{{
+                        t('দেখুন')
+                    }}</Button>
                 </form>
                 <Button
                     size="sm"
                     variant="secondary"
                     class="print:hidden"
                     @click="print"
-                    ><Printer /> প্রিন্ট / PDF</Button
+                    ><Printer /> {{ t('প্রিন্ট / PDF') }}</Button
                 >
             </template>
         </PageTitle>
@@ -90,14 +92,14 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">
-                    লাভ-ক্ষতি — খাত অনুযায়ী
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('লাভ-ক্ষতি — খাত অনুযায়ী') }}
                 </h2>
                 <table class="w-full text-sm">
                     <tbody>
                         <tr class="bg-muted/50">
                             <td class="px-2 py-1.5 font-medium" colspan="2">
-                                আয়
+                                {{ t('আয়') }}
                             </td>
                         </tr>
                         <tr
@@ -107,20 +109,20 @@ const sum = (rows: { balance: number }[]) =>
                             :key="a.id"
                             class="border-b border-border/50"
                         >
-                            <td class="px-2 py-1.5">{{ a.name }}</td>
+                            <td class="px-2 py-1.5">{{ t(a.name) }}</td>
                             <td class="num px-2 py-1.5 text-right">
                                 {{ taka(a.amount) }}
                             </td>
                         </tr>
                         <tr class="font-semibold">
-                            <td class="px-2 py-2">মোট আয়</td>
+                            <td class="px-2 py-2">{{ t('মোট আয়') }}</td>
                             <td class="num px-2 py-2 text-right text-income">
                                 {{ taka(farm.income) }}
                             </td>
                         </tr>
                         <tr class="bg-muted/50">
                             <td class="px-2 py-1.5 font-medium" colspan="2">
-                                খরচ
+                                {{ t('খরচ') }}
                             </td>
                         </tr>
                         <tr
@@ -130,13 +132,13 @@ const sum = (rows: { balance: number }[]) =>
                             :key="a.id"
                             class="border-b border-border/50"
                         >
-                            <td class="px-2 py-1.5">{{ a.name }}</td>
+                            <td class="px-2 py-1.5">{{ t(a.name) }}</td>
                             <td class="num px-2 py-1.5 text-right">
                                 {{ taka(a.amount) }}
                             </td>
                         </tr>
                         <tr class="font-semibold">
-                            <td class="px-2 py-2">মোট খরচ</td>
+                            <td class="px-2 py-2">{{ t('মোট খরচ') }}</td>
                             <td class="num px-2 py-2 text-right text-expense">
                                 {{ taka(farm.expense) }}
                             </td>
@@ -144,7 +146,9 @@ const sum = (rows: { balance: number }[]) =>
                         <tr
                             class="border-t-2 border-foreground/70 text-base font-semibold"
                         >
-                            <td class="px-2 py-2.5">নিট লাভ / ক্ষতি</td>
+                            <td class="px-2 py-2.5">
+                                {{ t('নিট লাভ / ক্ষতি') }}
+                            </td>
                             <td
                                 :class="[
                                     'num px-2 py-2.5 text-right',
@@ -161,18 +165,26 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">
-                    ক্যাটাগরি / প্রজেক্ট অনুযায়ী
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('ক্যাটাগরি / প্রজেক্ট অনুযায়ী') }}
                 </h2>
                 <table class="w-full text-sm">
                     <thead>
                         <tr
                             class="border-b border-border text-left text-xs text-muted-foreground"
                         >
-                            <th class="pb-2 font-medium">ক্যাটাগরি</th>
-                            <th class="pb-2 text-right font-medium">আয়</th>
-                            <th class="pb-2 text-right font-medium">খরচ</th>
-                            <th class="pb-2 text-right font-medium">লাভ</th>
+                            <th class="pb-2 font-medium">
+                                {{ t('ক্যাটাগরি') }}
+                            </th>
+                            <th class="pb-2 text-right font-medium">
+                                {{ t('আয়') }}
+                            </th>
+                            <th class="pb-2 text-right font-medium">
+                                {{ t('খরচ') }}
+                            </th>
+                            <th class="pb-2 text-right font-medium">
+                                {{ t('লাভ') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -187,26 +199,26 @@ const sum = (rows: { balance: number }[]) =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-3 text-lg">
-                    খামারের সম্পদ ও দায় (আজ পর্যন্ত)
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('খামারের সম্পদ ও দায় (আজ পর্যন্ত)') }}
                 </h2>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <p
                             class="mb-1 text-xs font-medium text-muted-foreground"
                         >
-                            সম্পদ
+                            {{ t('সম্পদ') }}
                         </p>
                         <p
                             v-for="b in assets"
                             :key="b.id"
                             class="flex justify-between border-b border-border/50 py-1.5 text-sm"
                         >
-                            <span>{{ b.name }}</span
+                            <span>{{ t(b.name) }}</span
                             ><span class="num">{{ taka(b.balance) }}</span>
                         </p>
                         <p class="flex justify-between py-2 font-semibold">
-                            <span>মোট</span
+                            <span>{{ t('মোট') }}</span
                             ><span class="num">{{ taka(sum(assets)) }}</span>
                         </p>
                     </div>
@@ -214,24 +226,24 @@ const sum = (rows: { balance: number }[]) =>
                         <p
                             class="mb-1 text-xs font-medium text-muted-foreground"
                         >
-                            দায় ও মূলধন
+                            {{ t('দায় ও মূলধন') }}
                         </p>
                         <p
                             v-for="b in [...liabilities, ...equity]"
                             :key="b.id"
                             class="flex justify-between border-b border-border/50 py-1.5 text-sm"
                         >
-                            <span>{{ b.name }}</span
+                            <span>{{ t(b.name) }}</span
                             ><span class="num">{{ taka(b.balance) }}</span>
                         </p>
                         <p
                             class="flex justify-between border-b border-border/50 py-1.5 text-sm"
                         >
-                            <span>এ পর্যন্ত জমা লাভ / ক্ষতি</span
+                            <span>{{ t('এ পর্যন্ত জমা লাভ / ক্ষতি') }}</span
                             ><span class="num">{{ taka(retained) }}</span>
                         </p>
                         <p class="flex justify-between py-2 font-semibold">
-                            <span>মোট</span
+                            <span>{{ t('মোট') }}</span
                             ><span class="num">{{
                                 taka(sum(liabilities) + sum(equity) + retained)
                             }}</span>
@@ -239,14 +251,16 @@ const sum = (rows: { balance: number }[]) =>
                     </div>
                 </div>
                 <p class="mt-2 text-xs text-muted-foreground">
-                    দুই পাশ সবসময় সমান থাকে — না মিললে কোথাও ভুল আছে।
+                    {{
+                        t('দুই পাশ সবসময় সমান থাকে — না মিললে কোথাও ভুল আছে।')
+                    }}
                 </p>
             </section>
 
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-4 text-lg">গত ১২ মাস</h2>
+                <h2 class="mb-4 font-display text-lg">{{ t('গত ১২ মাস') }}</h2>
                 <TrendBars :months="trend" />
             </section>
         </div>

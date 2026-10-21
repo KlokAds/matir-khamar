@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\ImportedRecord;
 use App\Models\ImportMapping;
 use App\Models\Setting;
+use App\Support\Tr;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Date;
@@ -134,11 +135,11 @@ class CraterImporter
                 $canWrite = (bool) preg_match('/ALL PRIVILEGES|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bDROP\b/', $grants);
             }
 
-            return ['ok' => true, 'message' => 'সংযোগ হয়েছে।', 'can_write' => $canWrite, 'counts' => $counts];
+            return ['ok' => true, 'message' => Tr::get('সংযোগ হয়েছে।'), 'can_write' => $canWrite, 'counts' => $counts];
         } catch (Throwable $exception) {
             report($exception);
 
-            return ['ok' => false, 'message' => 'সংযোগ হয়নি: '.mb_substr(preg_replace('/\(Connection:.*$/s', '', $exception->getMessage()), 0, 200), 'can_write' => null, 'counts' => []];
+            return ['ok' => false, 'message' => Tr::get('সংযোগ হয়নি: :error', ['error' => mb_substr((string) preg_replace('/\(Connection:.*$/s', '', $exception->getMessage()), 0, 200)]), 'can_write' => null, 'counts' => []];
         }
     }
 

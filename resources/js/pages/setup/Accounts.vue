@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Plus } from '@lucide/vue';
+import { Pencil, Plus } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
+import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ask } from '@/lib/dialog';
+import { t, tAll } from '@/lib/i18n';
 import { taka } from '@/lib/khamar';
 
 defineOptions({
@@ -47,10 +50,15 @@ const parentType = computed(
     () => props.parents.find((p) => p.id === f.parent_id)?.type,
 );
 
-const rename = (a: { id: number; name: string; is_active: boolean }) => {
-    const name = window.prompt('নতুন নাম', a.name);
+const rename = async (a: { id: number; name: string; is_active: boolean }) => {
+    const name = await ask.prompt({
+        title: t('খাতের নাম বদলান'),
+        label: t('নতুন নাম'),
+        initial: a.name,
+        confirmText: t('রাখুন'),
+    });
 
-    if (name) {
+    if (name && name !== a.name) {
         router.put(
             `/setup/accounts/${a.id}`,
             { name, is_active: a.is_active },
@@ -58,25 +66,44 @@ const rename = (a: { id: number; name: string; is_active: boolean }) => {
         );
     }
 };
-const toggle = (a: { id: number; name: string; is_active: boolean }) =>
+const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
+    // Turning off only hides the head from new entries; its history stays in the books.
+    if (
+        a.is_active &&
+        !(await ask.confirm({
+            title: t('":name" বন্ধ করবেন?', { name: a.name }),
+            body: t(
+                'নতুন এন্ট্রিতে আর দেখাবে না। আগের হিসাব যেমন আছে তেমনই থাকবে; পরে আবার চালু করা যাবে।',
+            ),
+            confirmText: t('বন্ধ করুন'),
+        }))
+    ) {
+        return;
+    }
+
     router.put(
         `/setup/accounts/${a.id}`,
         { name: a.name, is_active: !a.is_active },
         { preserveScroll: true },
     );
+};
 </script>
 
 <template>
-    <Head title="হিসাব খাত" />
+    <Head :title="t('হিসাব খাত')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="হিসাব খাত (চার্ট অব অ্যাকাউন্টস)"
-            subtitle="নতুন খরচ বা আয়ের ধরন এলে এখানে খাত যোগ করুন। ব্যবহৃত খাত মোছা যায় না, বন্ধ করা যায়।"
+            :title="t('হিসাব খাত (চার্ট অব অ্যাকাউন্টস)')"
+            :subtitle="
+                t(
+                    'নতুন খরচ বা আয়ের ধরন এলে খাত যোগ করুন। ✎ দিয়ে নাম বদলান; সুইচ দিয়ে খাত চালু বা বন্ধ করুন — বন্ধ খাত নতুন এন্ট্রিতে আসে না, পুরনো হিসাব থাকে।',
+                )
+            "
         >
             <template #actions
                 ><Button @click="adding = !adding"
-                    ><Plus /> নতুন খাত</Button
+                    ><Plus /> {{ t('নতুন খাত') }}</Button
                 ></template
             >
         </PageTitle>
@@ -93,34 +120,42 @@ const toggle = (a: { id: number; name: string; is_active: boolean }) =>
                 })
             "
         >
-            <Field label="কোন ধরনের ভেতরে"
+            <Field :label="t('কোন ধরনের ভেতরে')"
                 ><NSelect v-model="f.parent_id"
                     ><option v-for="p in parents" :key="p.id" :value="p.id">
-                        {{ p.code }} · {{ p.name }}
+                        {{ p.code }} · {{ t(p.name) }}
                     </option></NSelect
                 ></Field
             >
-            <Field label="কোড" :error="f.errors.code" hint="যেমন 5130"
+            <Field
+                :label="t('কোড')"
+                :error="f.errors.code"
+                :hint="t('যেমন 5130')"
                 ><Input v-model="f.code" required
             /></Field>
-            <Field label="নাম" :error="f.errors.name"
+            <Field :label="t('নাম')" :error="f.errors.name"
                 ><Input
                     v-model="f.name"
                     required
-                    placeholder="যেমন: লবণ ও ভিটামিন"
+                    :placeholder="t('যেমন: লবণ ও ভিটামিন')"
             /></Field>
-            <Field v-if="parentType === 'asset'" label="এটা কী"
+            <Field v-if="parentType === 'asset'" :label="t('এটা কী')"
                 ><NSelect v-model="f.subtype"
-                    ><option :value="null">সাধারণ</option>
-                    <option value="cash">নগদ</option>
-                    <option value="bank">ব্যাংক</option>
-                    <option value="wallet">মোবাইল ওয়ালেট</option>
-                    <option value="fixed_asset">স্থায়ী সম্পদ</option>
-                    <option value="land">জমি</option>
-                    <option value="inventory">স্টক</option></NSelect
+                    ><option :value="null">{{ t('সাধারণ') }}</option>
+                    <option value="cash">{{ t('নগদ') }}</option>
+                    <option value="bank">{{ t('ব্যাংক') }}</option>
+                    <option value="wallet">{{ t('মোবাইল ওয়ালেট') }}</option>
+                    <option value="person">{{ t('কারো কাছে রাখা') }}</option>
+                    <option value="fixed_asset">
+                        {{ t('স্থায়ী সম্পদ') }}
+                    </option>
+                    <option value="land">{{ t('জমি') }}</option>
+                    <option value="inventory">{{ t('স্টক') }}</option></NSelect
                 ></Field
             >
-            <Button type="submit" :disabled="f.processing">যোগ করুন</Button>
+            <Button type="submit" :disabled="f.processing">{{
+                t('যোগ করুন')
+            }}</Button>
         </form>
 
         <div class="grid gap-5 xl:grid-cols-2">
@@ -129,41 +164,47 @@ const toggle = (a: { id: number; name: string; is_active: boolean }) =>
                 :key="g.type"
                 class="rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="font-display mb-2 text-lg">{{ types[g.type] }}</h2>
-                <table class="w-full text-sm">
-                    <tbody>
-                        <tr
-                            v-for="a in g.rows"
-                            :key="a.id"
-                            :class="[
-                                'border-b border-border/60',
-                                !a.is_active && 'opacity-50',
-                            ]"
+                <h2 class="mb-2 font-display text-lg">
+                    {{ tAll(types)[g.type] }}
+                </h2>
+                <ul class="divide-y divide-border/60">
+                    <li
+                        v-for="a in g.rows"
+                        :key="a.id"
+                        class="flex items-center gap-3 py-2.5"
+                    >
+                        <span
+                            class="num w-12 shrink-0 rounded bg-muted px-1.5 py-0.5 text-center text-xs text-muted-foreground"
+                            >{{ a.code }}</span
                         >
-                            <td class="num w-16 py-2 text-muted-foreground">
-                                {{ a.code }}
-                            </td>
-                            <td class="py-2">{{ a.name }}</td>
-                            <td class="num py-2 text-right">
-                                {{ a.used ? taka(a.balance) : '' }}
-                            </td>
-                            <td class="py-2 pl-2 text-right whitespace-nowrap">
-                                <button
-                                    class="text-xs text-primary hover:underline"
-                                    @click="rename(a)"
-                                >
-                                    নাম
-                                </button>
-                                <button
-                                    class="ml-2 text-xs text-muted-foreground hover:underline"
-                                    @click="toggle(a)"
-                                >
-                                    {{ a.is_active ? 'বন্ধ' : 'চালু' }}
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <span
+                            :class="[
+                                'min-w-0 flex-1 truncate text-sm',
+                                !a.is_active &&
+                                    'text-muted-foreground line-through',
+                            ]"
+                            >{{ t(a.name) }}</span
+                        >
+                        <span
+                            v-if="a.used"
+                            class="num shrink-0 text-sm text-muted-foreground"
+                            >{{ taka(a.balance) }}</span
+                        >
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            :title="t('নাম বদলান')"
+                            :aria-label="t('নাম বদলান')"
+                            @click="rename(a)"
+                        >
+                            <Pencil />
+                        </Button>
+                        <Toggle
+                            :model-value="a.is_active"
+                            @update:model-value="toggle(a)"
+                        />
+                    </li>
+                </ul>
             </section>
         </div>
     </div>

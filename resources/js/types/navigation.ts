@@ -14,4 +14,6 @@ export type NavItem = {
     /** Full page load instead of an Inertia visit (lets the service worker answer offline). */
     reload?: boolean;
     badge?: number;
+    /** Sub-entries shown under this one in the sidebar. */
+    children?: NavItem[];
 };

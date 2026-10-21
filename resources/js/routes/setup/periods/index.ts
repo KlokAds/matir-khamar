@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\SetupController::lock
-* @see app/Http/Controllers/SetupController.php:232
+* @see app/Http/Controllers/SetupController.php:235
 * @route '/setup/periods'
 */
 export const lock = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ lock.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::lock
-* @see app/Http/Controllers/SetupController.php:232
+* @see app/Http/Controllers/SetupController.php:235
 * @route '/setup/periods'
 */
 lock.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ lock.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::lock
-* @see app/Http/Controllers/SetupController.php:232
+* @see app/Http/Controllers/SetupController.php:235
 * @route '/setup/periods'
 */
 lock.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ lock.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::lock
-* @see app/Http/Controllers/SetupController.php:232
+* @see app/Http/Controllers/SetupController.php:235
 * @route '/setup/periods'
 */
 const lockForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const lockForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 
 /**
 * @see \App\Http\Controllers\SetupController::lock
-* @see app/Http/Controllers/SetupController.php:232
+* @see app/Http/Controllers/SetupController.php:235
 * @route '/setup/periods'
 */
 lockForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ lock.form = lockForm
 
 /**
 * @see \App\Http\Controllers\SetupController::unlock
-* @see app/Http/Controllers/SetupController.php:248
+* @see app/Http/Controllers/SetupController.php:251
 * @route '/setup/periods/{lock}'
 */
 export const unlock = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -72,7 +72,7 @@ unlock.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::unlock
-* @see app/Http/Controllers/SetupController.php:248
+* @see app/Http/Controllers/SetupController.php:251
 * @route '/setup/periods/{lock}'
 */
 unlock.url = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -105,7 +105,7 @@ unlock.url = (args: { lock: number | { id: number } } | [lock: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\SetupController::unlock
-* @see app/Http/Controllers/SetupController.php:248
+* @see app/Http/Controllers/SetupController.php:251
 * @route '/setup/periods/{lock}'
 */
 unlock.delete = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -115,7 +115,7 @@ unlock.delete = (args: { lock: number | { id: number } } | [lock: number | { id:
 
 /**
 * @see \App\Http\Controllers\SetupController::unlock
-* @see app/Http/Controllers/SetupController.php:248
+* @see app/Http/Controllers/SetupController.php:251
 * @route '/setup/periods/{lock}'
 */
 const unlockForm = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -130,7 +130,7 @@ const unlockForm = (args: { lock: number | { id: number } } | [lock: number | { 
 
 /**
 * @see \App\Http\Controllers\SetupController::unlock
-* @see app/Http/Controllers/SetupController.php:248
+* @see app/Http/Controllers/SetupController.php:251
 * @route '/setup/periods/{lock}'
 */
 unlockForm.delete = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

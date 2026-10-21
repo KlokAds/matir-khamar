@@ -7,6 +7,7 @@ import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { day, qty, taka, useCan } from '@/lib/khamar';
 import type { Option } from '@/lib/khamar';
 
@@ -35,6 +36,7 @@ defineProps<{
         item: string;
         unit: string;
         direction: string;
+        session: string | null;
         qty: number;
         value: number;
         center: string | null;
@@ -56,27 +58,27 @@ const item = useForm({
 </script>
 
 <template>
-    <Head title="স্টক" />
+    <Head :title="t('স্টক')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="গুদাম / স্টক"
-            subtitle="কোন মাল কতটুকু আছে, গড়ে কত দামে কেনা"
+            :title="t('গুদাম / স্টক')"
+            :subtitle="t('কোন মাল কতটুকু আছে, গড়ে কত দামে কেনা')"
         >
             <template #actions>
                 <Button as-child variant="secondary"
                     ><Link href="/stock/move?mode=issue"
-                        ><Wheat /> খাওয়ানো</Link
+                        ><Wheat /> {{ t('খাওয়ানো') }}</Link
                     ></Button
                 >
                 <Button v-if="can['post-entries']" as-child variant="secondary"
                     ><Link href="/stock/move?mode=produce"
-                        ><Sprout /> উৎপাদন</Link
+                        ><Sprout /> {{ t('উৎপাদন') }}</Link
                     ></Button
                 >
                 <Button v-if="can['post-entries']" as-child
                     ><Link href="/stock/move?mode=purchase"
-                        ><Truck /> মাল কেনা</Link
+                        ><Truck /> {{ t('মাল কেনা') }}</Link
                     ></Button
                 >
             </template>
@@ -89,18 +91,23 @@ const item = useForm({
                 class="rounded-xl border border-border bg-card p-4"
             >
                 <div class="flex items-start justify-between gap-2">
-                    <p class="font-medium">{{ i.name }}</p>
+                    <p class="font-medium">{{ t(i.name) }}</p>
                     <span
                         class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
-                        >{{ kinds[i.kind] }}</span
+                        >{{ t(kinds[i.kind] ?? '') }}</span
                     >
                 </div>
-                <p class="num font-display mt-2 text-2xl">
-                    {{ qty(i.qty_on_hand, i.unit_label) }}
+                <p class="num mt-2 font-display text-2xl">
+                    {{ qty(i.qty_on_hand, t(i.unit_label)) }}
                 </p>
                 <p class="num text-sm text-muted-foreground">
-                    মূল্য {{ taka(i.value_on_hand) }} · গড়
-                    {{ taka(Math.round(i.average_cost)) }}/{{ i.unit_label }}
+                    {{
+                        t('মূল্য :value · গড় :avg/:unit', {
+                            value: taka(i.value_on_hand),
+                            avg: taka(Math.round(i.average_cost)),
+                            unit: t(i.unit_label),
+                        })
+                    }}
                 </p>
             </div>
         </div>
@@ -111,7 +118,7 @@ const item = useForm({
                 variant="ghost"
                 size="sm"
                 @click="adding = true"
-                ><Plus /> নতুন মাল (যেমন: খৈল, লবণ, ভিটামিন)</Button
+                ><Plus /> {{ t('নতুন মাল (যেমন: খৈল, লবণ, ভিটামিন)') }}</Button
             >
             <form
                 v-else
@@ -126,13 +133,13 @@ const item = useForm({
                     })
                 "
             >
-                <Field label="নাম" :error="item.errors.name"
+                <Field :label="t('নাম')" :error="item.errors.name"
                     ><Input v-model="item.name" required
                 /></Field>
-                <Field label="একক"
+                <Field :label="t('একক')"
                     ><NSelect v-model="item.unit"
                         ><option
-                            v-for="(label, key) in units"
+                            v-for="(label, key) in tAll(units)"
                             :key="key"
                             :value="key"
                         >
@@ -140,10 +147,10 @@ const item = useForm({
                         </option></NSelect
                     ></Field
                 >
-                <Field label="ধরন"
+                <Field :label="t('ধরন')"
                     ><NSelect v-model="item.kind"
                         ><option
-                            v-for="(label, key) in kinds"
+                            v-for="(label, key) in tAll(kinds)"
                             :key="key"
                             :value="key"
                         >
@@ -152,55 +159,55 @@ const item = useForm({
                     ></Field
                 >
                 <Field
-                    label="কোন স্টক খাতে"
+                    :label="t('কোন স্টক খাতে')"
                     :error="item.errors.inventory_account_id"
                     ><NSelect
                         v-model="item.inventory_account_id"
-                        placeholder="বাছুন"
+                        :placeholder="t('বাছুন')"
                         ><option
                             v-for="a in inventoryAccounts"
                             :key="a.id"
                             :value="a.id"
                         >
-                            {{ a.name }}
+                            {{ t(a.name) }}
                         </option></NSelect
                     ></Field
                 >
                 <Field
-                    label="ব্যবহারে কোন খরচ খাত"
+                    :label="t('ব্যবহারে কোন খরচ খাত')"
                     :error="item.errors.expense_account_id"
                     ><NSelect
                         v-model="item.expense_account_id"
-                        placeholder="বাছুন"
+                        :placeholder="t('বাছুন')"
                         ><option
                             v-for="a in expenseAccounts"
                             :key="a.id"
                             :value="a.id"
                         >
-                            {{ a.name }}
+                            {{ t(a.name) }}
                         </option></NSelect
                     ></Field
                 >
-                <Field label="কমলে সতর্ক করুন (পরিমাণ)"
+                <Field :label="t('কমলে সতর্ক করুন (পরিমাণ)')"
                     ><Input v-model="item.reorder_level" type="number" min="0"
                 /></Field>
                 <div class="flex gap-2 sm:col-span-3 lg:col-span-6">
-                    <Button type="submit" :disabled="item.processing"
-                        >যোগ করুন</Button
-                    >
+                    <Button type="submit" :disabled="item.processing">{{
+                        t('যোগ করুন')
+                    }}</Button>
                     <Button
                         type="button"
                         variant="ghost"
                         @click="adding = false"
-                        >বাদ</Button
+                        >{{ t('বাদ') }}</Button
                     >
                 </div>
             </form>
         </div>
 
         <section class="mt-6 rounded-xl border border-border bg-card">
-            <h2 class="font-display border-b border-border p-4 text-lg">
-                সাম্প্রতিক আনা-নেওয়া
+            <h2 class="border-b border-border p-4 font-display text-lg">
+                {{ t('সাম্প্রতিক আনা-নেওয়া') }}
             </h2>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[640px] text-sm">
@@ -224,16 +231,23 @@ const item = useForm({
                                             : 'bg-clay/15 text-clay',
                                     ]"
                                     >{{
-                                        m.direction === 'in' ? 'এল' : 'গেল'
+                                        m.direction === 'in'
+                                            ? t('এল')
+                                            : t('গেল')
                                     }}</span
                                 >
-                                {{ m.item }}
+                                {{ t(m.item) }}
+                                <span
+                                    v-if="m.session"
+                                    class="ml-1 text-xs text-muted-foreground"
+                                    >· {{ t(m.session) }}</span
+                                >
                             </td>
                             <td class="num px-4 py-2.5 text-right">
-                                {{ qty(m.qty, m.unit) }}
+                                {{ qty(m.qty, t(m.unit)) }}
                             </td>
                             <td class="px-4 py-2.5 text-muted-foreground">
-                                {{ m.center ?? 'স্টকে' }}
+                                {{ m.center ? t(m.center) : t('স্টকে') }}
                             </td>
                             <td class="num px-4 py-2.5 text-right">
                                 {{ taka(m.value) }}
@@ -250,7 +264,7 @@ const item = useForm({
                             <td
                                 class="px-4 py-8 text-center text-muted-foreground"
                             >
-                                এখনো কিছু নেই।
+                                {{ t('এখনো কিছু নেই।') }}
                             </td>
                         </tr>
                     </tbody>

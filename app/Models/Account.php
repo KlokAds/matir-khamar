@@ -42,8 +42,18 @@ class Account extends Model
         'expense' => 'ব্যয়',
     ];
 
-    /** Accounts money can be paid from or received into. */
-    public const MONEY_SUBTYPES = ['cash', 'bank', 'wallet'];
+    /**
+     * Places money can sit, and be paid from or received into: cash in hand, a bank, a mobile
+     * wallet, or money left with a person (an advance to the farm hand for daily costs).
+     */
+    public const MONEY_SUBTYPES = ['cash', 'bank', 'wallet', 'person'];
+
+    public const MONEY_PLACES = [
+        'cash' => 'নগদ (হাতে)',
+        'bank' => 'ব্যাংক',
+        'wallet' => 'মোবাইল ওয়ালেট (বিকাশ/নগদ/রকেট)',
+        'person' => 'কারো কাছে রাখা',
+    ];
 
     /**
      * Internal transfers (own grass valued and fed to own cattle) show inside

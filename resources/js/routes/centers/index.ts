@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\CostCenterController::index
-* @see app/Http/Controllers/CostCenterController.php:25
+* @see app/Http/Controllers/CostCenterController.php:145
 * @route '/centers'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 export const show = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 show.url = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -130,7 +130,7 @@ show.url = (args: { center: number | { id: number } } | [center: number | { id: 
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 show.get = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -140,7 +140,7 @@ show.get = (args: { center: number | { id: number } } | [center: number | { id: 
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 show.head = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -150,7 +150,7 @@ show.head = (args: { center: number | { id: number } } | [center: number | { id:
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 const showForm = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -160,7 +160,7 @@ const showForm = (args: { center: number | { id: number } } | [center: number | 
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 showForm.get = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -170,7 +170,7 @@ showForm.get = (args: { center: number | { id: number } } | [center: number | { 
 
 /**
 * @see \App\Http\Controllers\CostCenterController::show
-* @see app/Http/Controllers/CostCenterController.php:39
+* @see app/Http/Controllers/CostCenterController.php:159
 * @route '/centers/{center}'
 */
 showForm.head = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

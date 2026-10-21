@@ -4,6 +4,7 @@ import { Plus } from '@lucide/vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import { t, tAll } from '@/lib/i18n';
 import { day, taka, useCan } from '@/lib/khamar';
 
 defineOptions({
@@ -30,17 +31,21 @@ const can = useCan();
 </script>
 
 <template>
-    <Head title="গরুর তালিকা" />
+    <Head :title="t('গরুর তালিকা')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="গরুর তালিকা"
-            subtitle="প্রতিটি গরুর আলাদা কার্ড — কেনা দাম, কোন ক্যাটাগরিতে আছে, কত খরচ হলো, বিক্রিতে কত লাভ"
+            :title="t('গরুর তালিকা')"
+            :subtitle="
+                t(
+                    'প্রতিটি গরুর আলাদা কার্ড — কেনা দাম, কোন ক্যাটাগরিতে আছে, কত খরচ হলো, বিক্রিতে কত লাভ',
+                )
+            "
         >
             <template #actions>
                 <Button v-if="can['post-entries']" as-child
                     ><Link href="/animals/create"
-                        ><Plus /> গরু যোগ করুন</Link
+                        ><Plus /> {{ t('গরু যোগ করুন') }}</Link
                     ></Button
                 >
             </template>
@@ -48,7 +53,7 @@ const can = useCan();
 
         <div class="mb-4 flex gap-1.5">
             <Link
-                v-for="(label, key) in statuses"
+                v-for="(label, key) in tAll(statuses)"
                 :key="key"
                 :href="`/animals?status=${key}`"
                 :class="[
@@ -81,24 +86,31 @@ const can = useCan();
                             >
                         </p>
                         <p class="text-xs text-muted-foreground">
-                            {{ a.sex === 'female' ? 'গাভী/বকনা' : 'ষাঁড়/এঁড়ে'
+                            {{
+                                a.sex === 'female'
+                                    ? t('গাভী/বকনা')
+                                    : t('ষাঁড়/এঁড়ে')
                             }}<span v-if="a.breed"> · {{ a.breed }}</span>
                         </p>
                     </div>
                     <span class="rounded-full bg-accent px-2.5 py-1 text-xs">{{
-                        a.center
+                        t(a.center)
                     }}</span>
                 </div>
                 <div
                     class="mt-3 flex justify-between border-t border-dashed border-border pt-3 text-sm"
                 >
-                    <span class="text-muted-foreground"
-                        >{{ day(a.acquired_on) }} থেকে</span
-                    >
+                    <span class="text-muted-foreground">{{
+                        t(':date থেকে', { date: day(a.acquired_on) })
+                    }}</span>
                     <span class="num">{{
                         a.sale_amount !== null
-                            ? `বিক্রি ${taka(a.sale_amount)}`
-                            : `দাম ${taka(a.purchase_cost)}`
+                            ? t('বিক্রি :amount', {
+                                  amount: taka(a.sale_amount),
+                              })
+                            : t('দাম :amount', {
+                                  amount: taka(a.purchase_cost),
+                              })
                     }}</span>
                 </div>
             </Link>
@@ -106,7 +118,7 @@ const can = useCan();
                 v-if="!animals.length"
                 class="col-span-full rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground"
             >
-                এখানে কোনো গরু নেই।
+                {{ t('এখানে কোনো গরু নেই।') }}
             </p>
         </div>
     </div>

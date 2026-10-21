@@ -76,7 +76,7 @@ class PrepaidService
                 DB::transaction(function () use ($schedule, $month) {
                     $amount = $schedule->amountForMonth($schedule->amortized_months);
 
-                    $this->ledger->post('lease_amortization', $month->copy()->endOfMonth()->min(now())->toDateString(), "{$schedule->description} — ".BanglaDate::month($month), [
+                    $this->ledger->post('lease_amortization', $month->copy()->endOfMonth()->min(now())->toDateString(), "{$schedule->description} — ".BanglaDate::month($month, 'bn'), [
                         ['account_id' => $schedule->expense_account_id, 'debit' => $amount, 'cost_center_id' => $schedule->cost_center_id],
                         ['account_id' => $schedule->prepaid_account_id, 'credit' => $amount, 'cost_center_id' => $schedule->cost_center_id],
                     ], ['reference' => 'lease-'.$schedule->id.'-'.($schedule->amortized_months + 1)]);

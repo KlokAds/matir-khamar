@@ -67,17 +67,17 @@ class Ledger
     public function reverse(JournalEntry $entry, string $date, string $reason): JournalEntry
     {
         if ($entry->reversed_by_id !== null || $entry->type === 'reversal') {
-            throw ValidationException::withMessages(['entry' => 'এই এন্ট্রি আগেই বাতিল করা হয়েছে।']);
+            throw ValidationException::withMessages(['entry' => __('এই এন্ট্রি আগেই বাতিল করা হয়েছে।')]);
         }
 
         if (str_starts_with($entry->type, 'animal_')) {
-            throw ValidationException::withMessages(['entry' => 'পশুর এন্ট্রি এখান থেকে বাতিল হয় না। পশুর কার্ড থেকে ঠিক করুন।']);
+            throw ValidationException::withMessages(['entry' => __('পশুর এন্ট্রি এখান থেকে বাতিল হয় না। পশুর কার্ড থেকে ঠিক করুন।')]);
         }
 
         $schedule = PrepaidSchedule::query()->where('journal_entry_id', $entry->id)->first();
 
         if ($schedule && $schedule->amortized_months > 0) {
-            throw ValidationException::withMessages(['entry' => 'এই লিজের মাসিক খরচ ইতিমধ্যে বসেছে, তাই এটি বাতিল করা যাবে না।']);
+            throw ValidationException::withMessages(['entry' => __('এই লিজের মাসিক খরচ ইতিমধ্যে বসেছে, তাই এটি বাতিল করা যাবে না।')]);
         }
 
         $lines = array_values($entry->lines->map(fn ($line) => [
@@ -127,12 +127,12 @@ class Ledger
     {
         if (PeriodLock::isLocked($date)) {
             throw ValidationException::withMessages([
-                'date' => BanglaDate::month(Date::parse($date)).' মাসের হিসাব লক করা আছে। নতুন এন্ট্রি দেওয়া যাবে না।',
+                'date' => __(':month মাসের হিসাব লক করা আছে। নতুন এন্ট্রি দেওয়া যাবে না।', ['month' => BanglaDate::month(Date::parse($date))]),
             ]);
         }
 
         if (count($lines) < 2) {
-            throw ValidationException::withMessages(['lines' => 'একটি এন্ট্রিতে অন্তত দুটি লাইন লাগবে।']);
+            throw ValidationException::withMessages(['lines' => __('একটি এন্ট্রিতে অন্তত দুটি লাইন লাগবে।')]);
         }
 
         $debits = 0;
@@ -143,7 +143,7 @@ class Ledger
             $credit = (int) ($line['credit'] ?? 0);
 
             if ($debit < 0 || $credit < 0 || ($debit > 0) === ($credit > 0)) {
-                throw ValidationException::withMessages(['lines' => 'প্রতিটি লাইনে হয় ডেবিট, নয় ক্রেডিট থাকবে, এবং টাকা শূন্যের বেশি হবে।']);
+                throw ValidationException::withMessages(['lines' => __('প্রতিটি লাইনে হয় ডেবিট, নয় ক্রেডিট থাকবে, এবং টাকা শূন্যের বেশি হবে।')]);
             }
 
             $debits += $debit;
@@ -151,14 +151,14 @@ class Ledger
         }
 
         if ($debits !== $credits) {
-            throw ValidationException::withMessages(['lines' => 'ডেবিট ও ক্রেডিট সমান হয়নি।']);
+            throw ValidationException::withMessages(['lines' => __('ডেবিট ও ক্রেডিট সমান হয়নি।')]);
         }
 
         $accountIds = array_unique(array_column($lines, 'account_id'));
         $activeCount = Account::query()->whereIn('id', $accountIds)->where('is_active', true)->count();
 
         if ($activeCount !== count($accountIds)) {
-            throw ValidationException::withMessages(['lines' => 'একটি হিসাব খাত বন্ধ বা পাওয়া যায়নি।']);
+            throw ValidationException::withMessages(['lines' => __('একটি হিসাব খাত বন্ধ বা পাওয়া যায়নি।')]);
         }
     }
 

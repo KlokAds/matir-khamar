@@ -1,29 +1,18 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import {
-    ArrowLeftRight,
+    AlarmClock,
     Beef,
-    BookOpenText,
     ChartColumnBig,
-    CloudDownload,
     CloudOff,
-    FileClock,
     HandCoins,
-    Landmark,
     LayoutGrid,
-    LockKeyhole,
-    Milk,
-    Network,
-    PackageOpen,
-    RefreshCw,
-    Scale,
-    Users,
-    UsersRound,
+    Settings2,
     Wheat,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
-import NavMain from '@/components/NavMain.vue';
+import NavTree from '@/components/NavTree.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
     Sidebar,
@@ -34,6 +23,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { t } from '@/lib/i18n';
 import { useCan } from '@/lib/khamar';
 import { pendingCount } from '@/lib/offlineQueue';
 import { dashboard } from '@/routes';
@@ -41,99 +31,88 @@ import type { NavItem } from '@/types';
 
 const can = useCan();
 
-const groups = computed(() => {
-    const daily: NavItem[] = [
-        { title: 'আজকের খামার', href: dashboard(), icon: LayoutGrid },
-    ];
+/** A group with only the entries this user may open; a group left empty is dropped. */
+function group(
+    title: string,
+    icon: NavItem['icon'],
+    entries: [string, string, boolean][],
+): NavItem[] {
+    const children = entries
+        .filter(([, , allowed]) => allowed)
+        .map(([childTitle, href]) => ({ title: t(childTitle), href }));
 
-    if (can.value['post-daily']) {
-        daily.push(
-            { title: 'দুধের হিসাব', href: '/milk', icon: Milk },
-            {
-                title: 'খাবার ব্যবহার',
-                href: '/stock/move?mode=issue',
-                icon: Wheat,
-            },
-            {
-                title: 'অফলাইন এন্ট্রি',
-                href: '/offline',
-                icon: CloudOff,
-                reload: true,
-                badge: pendingCount.value,
-            },
-        );
-    }
+    return children.length
+        ? [{ title: t(title), href: children[0].href, icon, children }]
+        : [];
+}
 
-    const books: NavItem[] = [];
-
-    if (can.value['post-entries']) {
-        books.push(
-            { title: 'নতুন এন্ট্রি', href: '/entries/create', icon: HandCoins },
-            { title: 'খরচ ভাগ (মাস শেষে)', href: '/allocation', icon: Scale },
-        );
-    }
-
-    if (can.value['view-reports']) {
-        books.push(
-            { title: 'ক্যাটাগরি ও প্রজেক্ট', href: '/centers', icon: Network },
-            { title: 'গরুর তালিকা', href: '/animals', icon: Beef },
-            { title: 'স্টক (খাবার/ঔষধ)', href: '/stock', icon: PackageOpen },
-            {
-                title: 'খাতা (সব এন্ট্রি)',
-                href: '/entries',
-                icon: BookOpenText,
-            },
-            { title: 'রিপোর্ট', href: '/reports', icon: ChartColumnBig },
-            { title: 'উদ্যোগ বাজেট', href: '/reports/budget', icon: Landmark },
-        );
-    }
-
-    const setup: NavItem[] = [];
-
-    if (can.value['manage-setup']) {
-        setup.push(
-            {
-                title: 'হিসাব খাত',
-                href: '/setup/accounts',
-                icon: ArrowLeftRight,
-            },
-            {
-                title: 'ক্রেতা, বিনিয়োগকারী…',
-                href: '/setup/parties',
-                icon: UsersRound,
-            },
-            {
-                title: 'বিলিং থেকে আনা',
-                href: '/setup/import',
-                icon: CloudDownload,
-            },
-        );
-    }
-
-    if (can.value['manage-users']) {
-        setup.push(
-            { title: 'ব্যবহারকারী', href: '/setup/users', icon: Users },
-            { title: 'অ্যাপ আপডেট', href: '/setup/update', icon: RefreshCw },
-        );
-    }
-
-    if (can.value['lock-periods']) {
-        setup.push({
-            title: 'মাস লক',
-            href: '/setup/periods',
-            icon: LockKeyhole,
-        });
-    }
-
-    if (can.value['view-audit']) {
-        setup.push({ title: 'অডিট লগ', href: '/setup/audit', icon: FileClock });
-    }
+const items = computed<NavItem[]>(() => {
+    const c = can.value;
 
     return [
-        { label: 'প্রতিদিন', items: daily },
-        { label: 'হিসাব', items: books },
-        { label: 'সেটআপ ও নিরাপত্তা', items: setup },
-    ].filter((group) => group.items.length > 0);
+        { title: t('আজকের খামার'), href: dashboard(), icon: LayoutGrid },
+        ...(c['post-daily']
+            ? [
+                  {
+                      title: t('অফলাইন এন্ট্রি'),
+                      href: '/offline',
+                      icon: CloudOff,
+                      reload: true,
+                      badge: pendingCount.value,
+                  },
+              ]
+            : []),
+        {
+            title: t('মনে করিয়ে দিন'),
+            href: '/reminders',
+            icon: AlarmClock,
+        },
+        ...group('গরু', Beef, [
+            ['গরুর তালিকা', '/animals', !!c['view-reports']],
+            ['নতুন গরু', '/animals/create', !!c['post-entries']],
+            ['দুধের হিসাব', '/milk', !!c['post-daily']],
+            ['গর্ভ ও বাছুর', '/breeding', !!c['view-reports']],
+            ['টিকা ও কৃমি', '/health', !!c['view-reports']],
+            ['মোটাতাজা ব্যাচ', '/batches', !!c['view-reports']],
+            ['খামার ডায়েরি ও লক্ষ্য', '/diary', !!c['view-reports']],
+        ]),
+        ...group('খাবার ও স্টক', Wheat, [
+            ['গরুকে খাবার দেওয়া', '/stock/move?mode=issue', !!c['post-daily']],
+            ['মাল কেনা', '/stock/move?mode=purchase', !!c['post-entries']],
+            [
+                'নিজের উৎপাদন (ঘাস)',
+                '/stock/move?mode=produce',
+                !!c['post-entries'],
+            ],
+            ['স্টকে কী আছে', '/stock', !!c['view-reports']],
+            ['কোথায় কত কেজি গেল', '/reports/usage', !!c['view-reports']],
+        ]),
+        ...group('টাকার হিসাব', HandCoins, [
+            ['নতুন এন্ট্রি', '/entries/create', !!c['post-entries']],
+            ['টাকা কোথায় আছে', '/money', !!c['view-reports']],
+            ['খাতা (সব এন্ট্রি)', '/entries', !!c['view-reports']],
+            ['খরচ ভাগ (মাস শেষে)', '/allocation', !!c['post-entries']],
+        ]),
+        ...group('রিপোর্ট', ChartColumnBig, [
+            ['ক্যাটাগরি ও প্রজেক্ট', '/centers', !!c['view-reports']],
+            ['লাভ-ক্ষতি ও সম্পদ', '/reports', !!c['view-reports']],
+            ['মাসিক রিপোর্ট', '/reports/monthly', !!c['view-reports']],
+            ['উদ্যোগ বাজেট', '/reports/budget', !!c['view-reports']],
+            ['ভাগ কীভাবে হয় (উদাহরণ)', '/guide/split', !!c['view-reports']],
+            ['সাহায্য ও গাইড', '/guide', true],
+        ]),
+        ...group('সেটআপ ও নিরাপত্তা', Settings2, [
+            ['প্রজেক্ট সাজান', '/setup/centers', !!c['manage-setup']],
+            ['হিসাব খাত', '/setup/accounts', !!c['manage-setup']],
+            ['ক্রেতা, বিনিয়োগকারী…', '/setup/parties', !!c['manage-setup']],
+            ['বিলিং থেকে আনা', '/setup/import', !!c['manage-import']],
+            ['ব্যবহারকারী', '/setup/users', !!c['manage-users']],
+            ['রোল ও অনুমতি', '/setup/roles', !!c['manage-roles']],
+            ['মাস লক', '/setup/periods', !!c['lock-periods']],
+            ['অডিট লগ', '/setup/audit', !!c['view-audit']],
+            ['অ্যাপ আপডেট', '/setup/update', !!c['manage-update']],
+        ]),
+    ];
 });
 </script>
 
@@ -142,7 +121,7 @@ const groups = computed(() => {
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
+                    <SidebarMenuButton size="lg" class="h-14" as-child>
                         <Link :href="dashboard()">
                             <AppLogo />
                         </Link>
@@ -152,12 +131,7 @@ const groups = computed(() => {
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain
-                v-for="group in groups"
-                :key="group.label"
-                :label="group.label"
-                :items="group.items"
-            />
+            <NavTree :items="items" />
         </SidebarContent>
 
         <SidebarFooter>

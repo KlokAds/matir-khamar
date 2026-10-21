@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\ReportController::update
-* @see app/Http/Controllers/ReportController.php:60
+* @see app/Http/Controllers/ReportController.php:214
 * @route '/setup/budget/{head}'
 */
 export const update = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -16,7 +16,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\ReportController::update
-* @see app/Http/Controllers/ReportController.php:60
+* @see app/Http/Controllers/ReportController.php:214
 * @route '/setup/budget/{head}'
 */
 update.url = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ update.url = (args: { head: number | { id: number } } | [head: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\ReportController::update
-* @see app/Http/Controllers/ReportController.php:60
+* @see app/Http/Controllers/ReportController.php:214
 * @route '/setup/budget/{head}'
 */
 update.put = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -59,7 +59,7 @@ update.put = (args: { head: number | { id: number } } | [head: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\ReportController::update
-* @see app/Http/Controllers/ReportController.php:60
+* @see app/Http/Controllers/ReportController.php:214
 * @route '/setup/budget/{head}'
 */
 const updateForm = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -74,7 +74,7 @@ const updateForm = (args: { head: number | { id: number } } | [head: number | { 
 
 /**
 * @see \App\Http\Controllers\ReportController::update
-* @see app/Http/Controllers/ReportController.php:60
+* @see app/Http/Controllers/ReportController.php:214
 * @route '/setup/budget/{head}'
 */
 updateForm.put = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

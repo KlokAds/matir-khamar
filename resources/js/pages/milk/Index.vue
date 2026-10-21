@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Moon, Sun } from '@lucide/vue';
 import { computed } from 'vue';
 import Field from '@/components/khamar/Field.vue';
+import SessionPicker from '@/components/khamar/SessionPicker.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
-import { day, qty, today } from '@/lib/khamar';
+import { t, tAll } from '@/lib/i18n';
+import { currentSession, day, qty, today } from '@/lib/khamar';
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'দুধের হিসাব', href: '/milk' }] },
@@ -15,13 +17,13 @@ defineOptions({
 const props = defineProps<{
     sessions: Record<string, string>;
     cows: { id: number; tag: string; name: string | null }[];
-    days: { date: string; morning: number; evening: number }[];
+    days: { date: string; by: Record<string, number>; total: number }[];
     month: number;
 }>();
 
 const f = useForm({
     date: today(),
-    session: new Date().getHours() < 13 ? 'morning' : 'evening',
+    session: currentSession(),
     rows: props.cows.length
         ? props.cows.map((cow) => ({
               animal_id: cow.id as number | null,
@@ -38,17 +40,21 @@ const cowLabel = (id: number | null) => {
 
     return cow
         ? `${cow.tag}${cow.name ? ' · ' + cow.name : ''}`
-        : 'সব গাভী মিলিয়ে';
+        : t('সব গাভী মিলিয়ে');
 };
 </script>
 
 <template>
-    <Head title="দুধের হিসাব" />
+    <Head :title="t('দুধের হিসাব')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="দুধের হিসাব"
-            :subtitle="`এ মাসে মোট ${qty(month, 'লিটার')}। বিক্রি হলে 'নতুন এন্ট্রি → আয়' দিন।`"
+            :title="t('দুধের হিসাব')"
+            :subtitle="
+                t('এ মাসে মোট :total। বিক্রি হলে \'নতুন এন্ট্রি → আয়\' দিন।', {
+                    total: qty(month, t('লিটার')),
+                })
+            "
         />
 
         <div class="grid gap-6 lg:grid-cols-5">
@@ -61,35 +67,14 @@ const cowLabel = (id: number | null) => {
                     })
                 "
             >
-                <div class="grid grid-cols-2 gap-3">
-                    <Field label="তারিখ" :error="f.errors.date"
-                        ><Input v-model="f.date" type="date" :max="today()"
+                <div class="grid gap-3">
+                    <Field :label="t('তারিখ')" :error="f.errors.date"
+                        ><DateField v-model="f.date" :max="today()"
                     /></Field>
-                    <div class="grid gap-1.5">
-                        <span class="text-sm font-medium">বেলা</span>
-                        <div
-                            class="grid grid-cols-2 gap-1 rounded-md border border-input p-1"
-                        >
-                            <button
-                                v-for="(label, key) in sessions"
-                                :key="key"
-                                type="button"
-                                :class="[
-                                    'flex items-center justify-center gap-1 rounded py-1.5 text-sm',
-                                    f.session === key
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-accent',
-                                ]"
-                                @click="f.session = key"
-                            >
-                                <component
-                                    :is="key === 'morning' ? Sun : Moon"
-                                    class="size-4"
-                                />
-                                {{ label }}
-                            </button>
-                        </div>
-                    </div>
+                    <SessionPicker
+                        v-model="f.session"
+                        :sessions="tAll(sessions)"
+                    />
                 </div>
 
                 <div class="mt-4 space-y-2">
@@ -109,12 +94,12 @@ const cowLabel = (id: number | null) => {
                                 step="0.1"
                                 min="0"
                                 max="80"
-                                class="num h-11 pr-12 text-right text-lg"
+                                class="num h-12 pr-12 text-right text-lg"
                                 placeholder="0"
                             />
                             <span
                                 class="pointer-events-none absolute top-3 right-3 text-xs text-muted-foreground"
-                                >লি.</span
+                                >{{ t('লি.') }}</span
                             >
                         </div>
                     </div>
@@ -126,30 +111,37 @@ const cowLabel = (id: number | null) => {
                 <div
                     class="mt-4 flex items-center justify-between rounded-lg bg-pond/10 px-4 py-3"
                 >
-                    <span class="text-sm">মোট</span>
+                    <span class="text-sm">{{ t('মোট') }}</span>
                     <span class="num font-display text-2xl">{{
-                        qty(total, 'লিটার')
+                        qty(total, t('লিটার'))
                     }}</span>
                 </div>
                 <Button
                     type="submit"
                     class="mt-4 h-11 w-full text-base"
                     :disabled="f.processing || total <= 0"
-                    >রাখুন</Button
+                    >{{ t('রাখুন') }}</Button
                 >
             </form>
 
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-3"
             >
-                <h2 class="font-display mb-3 text-lg">গত ৩০ দিন</h2>
+                <h2 class="mb-3 font-display text-lg">{{ t('গত ৩০ দিন') }}</h2>
                 <table class="w-full text-sm">
                     <thead class="text-left text-xs text-muted-foreground">
                         <tr class="border-b border-border">
-                            <th class="pb-2 font-medium">তারিখ</th>
-                            <th class="pb-2 text-right font-medium">সকাল</th>
-                            <th class="pb-2 text-right font-medium">বিকাল</th>
-                            <th class="pb-2 text-right font-medium">মোট</th>
+                            <th class="pb-2 font-medium">{{ t('তারিখ') }}</th>
+                            <th
+                                v-for="(label, key) in sessions"
+                                :key="key"
+                                class="pb-2 text-right font-medium"
+                            >
+                                {{ t(label) }}
+                            </th>
+                            <th class="pb-2 text-right font-medium">
+                                {{ t('মোট') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -159,22 +151,26 @@ const cowLabel = (id: number | null) => {
                             class="border-b border-border/60"
                         >
                             <td class="py-2">{{ day(d.date) }}</td>
-                            <td class="num py-2 text-right">
-                                {{ qty(d.morning) }}
-                            </td>
-                            <td class="num py-2 text-right">
-                                {{ qty(d.evening) }}
+                            <td
+                                v-for="(label, key) in sessions"
+                                :key="key"
+                                :class="[
+                                    'num py-2 text-right',
+                                    !d.by[key] && 'text-muted-foreground/50',
+                                ]"
+                            >
+                                {{ d.by[key] ? qty(d.by[key]) : '—' }}
                             </td>
                             <td class="num py-2 text-right font-medium">
-                                {{ qty(d.morning + d.evening) }}
+                                {{ qty(d.total) }}
                             </td>
                         </tr>
                         <tr v-if="!days.length">
                             <td
-                                colspan="4"
+                                :colspan="Object.keys(sessions).length + 2"
                                 class="py-8 text-center text-muted-foreground"
                             >
-                                এখনো দুধের হিসাব নেই।
+                                {{ t('এখনো দুধের হিসাব নেই।') }}
                             </td>
                         </tr>
                     </tbody>

@@ -5,7 +5,9 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { centerLabel, taka } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 
@@ -31,6 +33,8 @@ watch(pick, () =>
         { preserveState: false },
     ),
 );
+
+const tCenter = (c: Center) => centerLabel({ ...c, name: t(c.name) });
 
 const hasAnimalDays = Object.keys(props.animalDays).length > 0;
 const f = useForm({
@@ -70,24 +74,28 @@ const share = (id: number) =>
 </script>
 
 <template>
-    <Head title="খরচ ভাগ" />
+    <Head :title="t('খরচ ভাগ')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="মাস শেষে সাধারণ খরচ ভাগ"
-            subtitle="বিদ্যুৎ, সবার জন্য রাখা শ্রমিক — যা কোনো এক ক্যাটাগরির নয়, তা এখান থেকে সঠিক অনুপাতে ভাগ হয়ে যায়।"
+            :title="t('মাস শেষে সাধারণ খরচ ভাগ')"
+            :subtitle="
+                t(
+                    'বিদ্যুৎ, সবার জন্য রাখা শ্রমিক — যা কোনো এক ক্যাটাগরির নয়, তা এখান থেকে সঠিক অনুপাতে ভাগ হয়ে যায়।',
+                )
+            "
         />
 
         <div class="mb-5 grid max-w-xl grid-cols-2 gap-3">
-            <Field label="কোন সাধারণ খাত">
+            <Field :label="t('কোন সাধারণ খাত')">
                 <NSelect v-model="pick.source"
                     ><option v-for="s in sources" :key="s.id" :value="s.id">
-                        {{ s.name }}
+                        {{ t(s.name) }}
                     </option></NSelect
                 >
             </Field>
-            <Field label="মাস"
-                ><Input v-model="pick.month" type="month"
+            <Field :label="t('মাস')"
+                ><DateField mode="month" v-model="pick.month"
             /></Field>
         </div>
 
@@ -95,21 +103,28 @@ const share = (id: number) =>
             v-if="done.length"
             class="mb-5 rounded-xl border border-paddy/40 bg-paddy/8 p-3 text-sm"
         >
-            এই মাস ইতিমধ্যে ভাগ করা হয়েছে:
+            {{ t('এই মাস ইতিমধ্যে ভাগ করা হয়েছে:') }}
             <Link
                 v-for="d in done"
                 :key="d.id"
                 :href="`/entries/${d.id}`"
                 class="ml-1 font-medium underline"
                 >{{ d.number }}</Link
-            >. পরে আরও সাধারণ খরচ এলে আবার ভাগ করলে শুধু নতুনটুকুই ভাগ হবে।
+            >.
+            {{
+                t(
+                    'পরে আরও সাধারণ খরচ এলে আবার ভাগ করলে শুধু নতুনটুকুই ভাগ হবে।',
+                )
+            }}
         </div>
 
         <div class="grid gap-6 lg:grid-cols-5">
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-2"
             >
-                <h2 class="font-display mb-3 text-lg">ভাগ করার মতো খরচ</h2>
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('ভাগ করার মতো খরচ') }}
+                </h2>
                 <table class="w-full text-sm">
                     <tbody>
                         <tr
@@ -117,20 +132,20 @@ const share = (id: number) =>
                             :key="row.account"
                             class="border-b border-border/60"
                         >
-                            <td class="py-2">{{ row.account }}</td>
+                            <td class="py-2">{{ t(row.account) }}</td>
                             <td class="num py-2 text-right">
                                 {{ taka(row.amount) }}
                             </td>
                         </tr>
                         <tr v-if="!pool.length">
                             <td class="py-6 text-center text-muted-foreground">
-                                এই মাসে ভাগ করার কিছু নেই।
+                                {{ t('এই মাসে ভাগ করার কিছু নেই।') }}
                             </td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr class="font-semibold">
-                            <td class="pt-2">মোট</td>
+                            <td class="pt-2">{{ t('মোট') }}</td>
                             <td class="num pt-2 text-right">
                                 {{ taka(poolTotal) }}
                             </td>
@@ -156,7 +171,7 @@ const share = (id: number) =>
                         ]"
                         @click="f.method = 'animal_days'"
                     >
-                        পশু-দিন অনুযায়ী
+                        {{ t('পশু-দিন অনুযায়ী') }}
                     </button>
                     <button
                         type="button"
@@ -168,14 +183,18 @@ const share = (id: number) =>
                         ]"
                         @click="f.method = 'percent'"
                     >
-                        নিজে অংশ দিন (%)
+                        {{ t('নিজে অংশ দিন (%)') }}
                     </button>
                 </div>
                 <p class="mb-3 text-xs text-muted-foreground">
                     {{
                         f.method === 'animal_days'
-                            ? 'যে ক্যাটাগরিতে যত গরু যতদিন ছিল, সে তত বেশি ভাগ পাবে। সংখ্যাগুলো চাইলে বদলাতে পারেন।'
-                            : 'যেমন বাগান ২০, গরু ৮০ — মোট যত হোক, অনুপাতে ভাগ হবে।'
+                            ? t(
+                                  'যে ক্যাটাগরিতে যত গরু যতদিন ছিল, সে তত বেশি ভাগ পাবে। সংখ্যাগুলো চাইলে বদলাতে পারেন।',
+                              )
+                            : t(
+                                  'যেমন বাগান ২০, গরু ৮০ — মোট যত হোক, অনুপাতে ভাগ হবে।',
+                              )
                     }}
                 </p>
                 <p
@@ -190,13 +209,13 @@ const share = (id: number) =>
                         :key="c.id"
                         class="grid grid-cols-[1fr_7rem_8rem] items-center gap-2 text-sm"
                     >
-                        <span>{{ centerLabel(c) }}</span>
+                        <span>{{ tCenter(c) }}</span>
                         <Input
                             v-model="f.weights[String(c.id)]"
                             type="number"
                             min="0"
                             step="0.01"
-                            class="num h-9 text-right"
+                            class="num text-right"
                         />
                         <span class="num text-right text-muted-foreground">{{
                             taka(share(c.id))
@@ -209,7 +228,7 @@ const share = (id: number) =>
                     :disabled="
                         f.processing || poolTotal === 0 || weightTotal === 0
                     "
-                    >ভাগ করে খাতায় লিখুন</Button
+                    >{{ t('ভাগ করে খাতায় লিখুন') }}</Button
                 >
             </form>
         </div>

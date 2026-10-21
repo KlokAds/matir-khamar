@@ -8,6 +8,7 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import UserInfo from '@/components/UserInfo.vue';
+import { t } from '@/lib/i18n';
 import { prepareLogout } from '@/lib/offline';
 import { pendingCount } from '@/lib/offlineQueue';
 import { logout } from '@/routes';
@@ -44,7 +45,7 @@ defineProps<Props>();
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
-                সেটিংস ও নিরাপত্তা
+                {{ t('সেটিংস ও নিরাপত্তা') }}
             </Link>
         </DropdownMenuItem>
     </DropdownMenuGroup>
@@ -57,7 +58,7 @@ defineProps<Props>();
             @click="handleLogout"
         >
             <LogOut class="mr-2 inline h-4 w-4" />
-            লগআউট
+            {{ t('লগআউট') }}
         </button>
     </DropdownMenuItem>
 </template>

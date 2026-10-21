@@ -8,6 +8,7 @@ use App\Models\ImportMapping;
 use App\Models\Setting;
 use App\Services\CraterImporter;
 use App\Support\Lookups;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -26,13 +27,13 @@ class ImportController extends Controller
             'configured' => $importer->configured(),
             'connection' => $this->connectionForm(),
             'status' => array_key_exists($status, ImportedRecord::STATUSES) ? $status : null,
-            'statuses' => ImportedRecord::STATUSES,
+            'statuses' => Tr::all(ImportedRecord::STATUSES),
             'counts' => ImportedRecord::query()->where('source', CraterImporter::SOURCE)->selectRaw('status, COUNT(*) as n, SUM(amount) as total')->groupBy('status')->get()->keyBy('status'),
             'mappings' => ImportMapping::query()->where('source', CraterImporter::SOURCE)->orderBy('kind')->orderBy('external_name')->get()->map(fn (ImportMapping $map) => [
                 ...$map->only(['id', 'kind', 'external_id', 'external_name', 'account_id', 'cost_center_id', 'item_id', 'ignore']),
                 'complete' => $map->isComplete(),
             ]),
-            'kinds' => ImportMapping::KINDS,
+            'kinds' => Tr::all(ImportMapping::KINDS),
             'accounts' => [
                 'expense_category' => CraterImporter::accountsFor('expense_category'),
                 'customer' => CraterImporter::accountsFor('customer'),
@@ -100,9 +101,9 @@ class ImportController extends Controller
             'company_id' => ['nullable', 'integer', 'min:1'],
             'current_password' => ['required', 'current_password'],
         ], [
-            'current_password.current_password' => 'আপনার নিজের লগইন পাসওয়ার্ড মেলেনি।',
-            'host.regex' => 'হোস্টে শুধু অক্ষর, সংখ্যা, ডট ও হাইফেন চলবে (যেমন localhost বা 127.0.0.1)।',
-            'database.regex' => 'ডাটাবেসের নামে শুধু অক্ষর, সংখ্যা, _ ও - চলবে।',
+            'current_password.current_password' => __('আপনার নিজের লগইন পাসওয়ার্ড মেলেনি।'),
+            'host.regex' => __('হোস্টে শুধু অক্ষর, সংখ্যা, ডট ও হাইফেন চলবে (যেমন localhost বা 127.0.0.1)।'),
+            'database.regex' => __('ডাটাবেসের নামে শুধু অক্ষর, সংখ্যা, _ ও - চলবে।'),
         ]);
 
         foreach (['host', 'port', 'database', 'username', 'company_id'] as $key) {
@@ -119,7 +120,7 @@ class ImportController extends Controller
         $importer->refreshSettings();
         $test = $importer->testConnection();
 
-        Inertia::flash('toast', ['type' => $test['ok'] ? 'success' : 'warning', 'message' => 'সংযোগের তথ্য রাখা হয়েছে। '.$test['message']]);
+        Inertia::flash('toast', ['type' => $test['ok'] ? 'success' : 'warning', 'message' => Tr::get('সংযোগের তথ্য রাখা হয়েছে।').' '.$test['message']]);
 
         return back()->with('connectionTest', $test);
     }
@@ -127,7 +128,7 @@ class ImportController extends Controller
     public function testConnection(CraterImporter $importer): RedirectResponse
     {
         if (! $importer->configured()) {
-            return back()->withErrors(['import' => 'আগে সংযোগের তথ্য দিন।']);
+            return back()->withErrors(['import' => __('আগে সংযোগের তথ্য দিন।')]);
         }
 
         return back()->with('connectionTest', $importer->testConnection());
@@ -135,12 +136,12 @@ class ImportController extends Controller
 
     public function forgetConnection(Request $request): RedirectResponse
     {
-        $request->validate(['current_password' => ['required', 'current_password']], ['current_password.current_password' => 'আপনার নিজের লগইন পাসওয়ার্ড মেলেনি।']);
+        $request->validate(['current_password' => ['required', 'current_password']], ['current_password.current_password' => __('আপনার নিজের লগইন পাসওয়ার্ড মেলেনি।')]);
 
         Setting::query()->where('key', 'like', 'crater.%')->delete();
         AuditLog::record('billing_connection_removed', null, null, null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'বিলিং সংযোগের তথ্য মুছে ফেলা হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('বিলিং সংযোগের তথ্য মুছে ফেলা হয়েছে।')]);
 
         return back();
     }
@@ -148,7 +149,7 @@ class ImportController extends Controller
     public function fetch(CraterImporter $importer): RedirectResponse
     {
         if (! $importer->configured()) {
-            return back()->withErrors(['import' => 'বিলিং ডাটাবেসের সংযোগ (.env-এ CRATER_DB_*) এখনো দেওয়া হয়নি।']);
+            return back()->withErrors(['import' => __('বিলিং ডাটাবেসের সংযোগ (.env-এ CRATER_DB_*) এখনো দেওয়া হয়নি।')]);
         }
 
         try {
@@ -156,10 +157,10 @@ class ImportController extends Controller
         } catch (Throwable $exception) {
             report($exception);
 
-            return back()->withErrors(['import' => 'বিলিং ডাটাবেসে সংযোগ হয়নি। সংযোগের তথ্য দেখুন।']);
+            return back()->withErrors(['import' => __('বিলিং ডাটাবেসে সংযোগ হয়নি। সংযোগের তথ্য দেখুন।')]);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "নতুন {$counts['new']}টি, বদলানো {$counts['changed']}টি, আগের মতো {$counts['unchanged']}টি।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন :newটি, বদলানো :changedটি, আগের মতো :unchangedটি।', ['new' => $counts['new'], 'changed' => $counts['changed'], 'unchanged' => $counts['unchanged']])]);
 
         return back();
     }
@@ -168,7 +169,7 @@ class ImportController extends Controller
     {
         $result = $importer->post();
 
-        Inertia::flash('toast', ['type' => $result['failed'] > 0 ? 'warning' : 'success', 'message' => "হিসাবে উঠেছে {$result['posted']}টি, ম্যাপিং বাকি {$result['waiting']}টি, বাদ {$result['ignored']}টি, সমস্যা {$result['failed']}টি।"]);
+        Inertia::flash('toast', ['type' => $result['failed'] > 0 ? 'warning' : 'success', 'message' => __('হিসাবে উঠেছে :postedটি, ম্যাপিং বাকি :waitingটি, বাদ :ignoredটি, সমস্যা :failedটি।', ['posted' => $result['posted'], 'waiting' => $result['waiting'], 'ignored' => $result['ignored'], 'failed' => $result['failed']])]);
 
         return back();
     }
@@ -194,7 +195,7 @@ class ImportController extends Controller
             ImportedRecord::query()->where('source', CraterImporter::SOURCE)->where('status', 'ignored')->update(['status' => 'pending']);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "\"{$mapping->external_name}\" ম্যাপিং রাখা হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('":name" ম্যাপিং রাখা হয়েছে।', ['name' => $mapping->external_name])]);
 
         return back();
     }
@@ -203,7 +204,7 @@ class ImportController extends Controller
     {
         $count = $importer->ignoreUndecided();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$count}টি ক্যাটাগরি/ক্রেতা \"খামারের নয়\" হিসেবে রাখা হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':countটি ক্যাটাগরি/ক্রেতা "খামারের নয়" হিসেবে রাখা হয়েছে।', ['count' => $count])]);
 
         return back();
     }
@@ -214,7 +215,7 @@ class ImportController extends Controller
         $data = $request->validate(['qty' => ['required', 'numeric', 'min:0.001', 'max:9999999']]);
 
         if ($record->status !== 'pending') {
-            return back()->withErrors(['import' => 'এই সারি আগেই হিসাবে উঠেছে।']);
+            return back()->withErrors(['import' => __('এই সারি আগেই হিসাবে উঠেছে।')]);
         }
 
         $record->update(['qty' => $data['qty'], 'problem' => null]);
@@ -233,7 +234,7 @@ class ImportController extends Controller
 
         if ($data['action'] === 'repost') {
             if ($record->entry && $record->entry->reversed_by_id === null) {
-                return back()->withErrors(['import' => 'আগে পুরনো এন্ট্রি '.$record->entry->number.' বাতিল করুন, তারপর আবার পোস্ট করুন।']);
+                return back()->withErrors(['import' => __('আগে পুরনো এন্ট্রি :number বাতিল করুন, তারপর আবার পোস্ট করুন।', ['number' => $record->entry->number])]);
             }
 
             $record->update(['status' => 'pending', 'problem' => null, 'journal_entry_id' => null, 'posted_at' => null]);

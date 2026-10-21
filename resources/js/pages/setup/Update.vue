@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ask } from '@/lib/dialog';
+import { currentLocale, t } from '@/lib/i18n';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { CircleCheck, CircleAlert, GitBranch, RefreshCw } from '@lucide/vue';
 import { computed } from 'vue';
@@ -38,17 +40,24 @@ const f = useForm({ current_password: '' });
 const short = (sha: string | null | undefined) => (sha ? sha.slice(0, 7) : '—');
 const when = (iso: string | null | undefined) =>
     iso
-        ? new Date(iso).toLocaleString('bn-BD', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-          })
+        ? new Date(iso).toLocaleString(
+              currentLocale() === 'en' ? 'en-GB' : 'bn-BD',
+              {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+              },
+          )
         : '—';
 
-function run() {
+async function run() {
     if (
-        window.confirm(
-            'সাইট ১-২ মিনিটের জন্য বন্ধ থাকবে (আগে ব্যাকআপ নেওয়া হবে)। আপডেট করবেন?',
-        )
+        await ask.confirm({
+            title: t('এখনই আপডেট করবেন?'),
+            body: t(
+                'সাইট ১-২ মিনিটের জন্য বন্ধ থাকবে। শুরুর আগে ডাটাবেসের ব্যাকআপ নেওয়া হবে।',
+            ),
+            confirmText: t('আপডেট করুন'),
+        })
     ) {
         f.post('/setup/update', {
             preserveScroll: true,
@@ -61,30 +70,36 @@ const state = computed(() => {
     if (!props.status.available) {
         return {
             tone: 'muted',
-            text: 'এই কপিটি git থেকে চলছে না (যেমন আপনার কম্পিউটার), তাই এখান থেকে আপডেট হয় না।',
+            text: t(
+                'এই কপিটি git থেকে চলছে না (যেমন আপনার কম্পিউটার), তাই এখান থেকে আপডেট হয় না।',
+            ),
         };
     }
 
     if (props.status.behind === null) {
         return {
             tone: 'clay',
-            text: 'GitHub-এ পৌঁছানো যায়নি — পরে আবার দেখুন।',
+            text: t('GitHub-এ পৌঁছানো যায়নি — পরে আবার দেখুন।'),
         };
     }
 
     return props.status.behind
-        ? { tone: 'turmeric', text: 'GitHub-এ নতুন সংস্করণ আছে।' }
-        : { tone: 'paddy', text: 'সাইট সর্বশেষ সংস্করণে আছে।' };
+        ? { tone: 'turmeric', text: t('GitHub-এ নতুন সংস্করণ আছে।') }
+        : { tone: 'paddy', text: t('সাইট সর্বশেষ সংস্করণে আছে।') };
 });
 </script>
 
 <template>
-    <Head title="অ্যাপ আপডেট" />
+    <Head :title="t('অ্যাপ আপডেট')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="অ্যাপ আপডেট"
-            subtitle="GitHub-এ কোড push হলে সেটা আগে তৈরি (build) হয়, তারপর এখান থেকে এক চাপে পুরো সাইট নতুন হয়।"
+            :title="t('অ্যাপ আপডেট')"
+            :subtitle="
+                t(
+                    'GitHub-এ কোড push হলে সেটা আগে তৈরি (build) হয়, তারপর এখান থেকে এক চাপে পুরো সাইট নতুন হয়।',
+                )
+            "
         />
 
         <div class="grid max-w-4xl gap-5">
@@ -109,21 +124,21 @@ const state = computed(() => {
                         class="mt-2 grid gap-1 text-sm text-muted-foreground sm:grid-cols-2"
                     >
                         <p>
-                            এখন চলছে:
+                            {{ t('এখন চলছে:') }}
                             <span class="num font-medium text-foreground">{{
                                 short(status.current?.sha)
                             }}</span>
                             · {{ when(status.current?.date) }}
                         </p>
                         <p>
-                            GitHub-এ সর্বশেষ:
+                            {{ t('GitHub-এ সর্বশেষ:') }}
                             <span class="num font-medium text-foreground">{{
                                 short(status.latest)
                             }}</span>
                         </p>
                         <p class="flex items-center gap-1 sm:col-span-2">
                             <GitBranch class="size-3.5" /> {{ repository }} ·
-                            শাখা {{ status.branch }}
+                            {{ t('শাখা :branch', { branch: status.branch }) }}
                         </p>
                     </div>
                     <p v-if="status.current" class="mt-2 truncate text-sm">
@@ -138,7 +153,7 @@ const state = computed(() => {
                 @submit.prevent="run"
             >
                 <Field
-                    label="নিশ্চিত করতে আপনার লগইন পাসওয়ার্ড"
+                    :label="t('নিশ্চিত করতে আপনার লগইন পাসওয়ার্ড')"
                     :error="f.errors.current_password || error"
                 >
                     <Input
@@ -151,14 +166,22 @@ const state = computed(() => {
                 </Field>
                 <Button type="submit" :disabled="f.processing">
                     <RefreshCw :class="f.processing && 'animate-spin'" />
-                    {{ f.processing ? 'আপডেট হচ্ছে…' : 'এখনই আপডেট করুন' }}
+                    {{
+                        f.processing ? t('আপডেট হচ্ছে…') : t('এখনই আপডেট করুন')
+                    }}
                 </Button>
                 <p class="w-full text-xs text-muted-foreground">
-                    ধাপ: ডাটাবেস ব্যাকআপ → GitHub থেকে নতুন build → সাইট সাময়িক
-                    বন্ধ → ডাটাবেস আপডেট (migrate) → ক্যাশ → সাইট চালু।
+                    {{
+                        t(
+                            'ধাপ: ডাটাবেস ব্যাকআপ → GitHub থেকে নতুন build → সাইট সাময়িক বন্ধ → ডাটাবেস আপডেট (migrate) → ক্যাশ → সাইট চালু।',
+                        )
+                    }}
                     <template v-if="auto">
-                        স্বয়ংক্রিয় আপডেট চালু আছে: প্রতি ১০ মিনিটে নিজে দেখে
-                        নেয়।</template
+                        {{
+                            t(
+                                'স্বয়ংক্রিয় আপডেট চালু আছে: প্রতি ১০ মিনিটে নিজে দেখে নেয়।',
+                            )
+                        }}</template
                     >
                 </p>
             </form>
@@ -170,7 +193,7 @@ const state = computed(() => {
                 <div
                     class="flex items-center justify-between border-b border-border p-4"
                 >
-                    <h2 class="font-display text-lg">শেষ আপডেট</h2>
+                    <h2 class="font-display text-lg">{{ t('শেষ আপডেট') }}</h2>
                     <span
                         :class="[
                             'rounded-full px-2.5 py-1 text-xs',
@@ -179,7 +202,7 @@ const state = computed(() => {
                                 : 'bg-destructive/10 text-destructive',
                         ]"
                     >
-                        {{ status.last_run.ok ? 'সফল' : 'ব্যর্থ' }} ·
+                        {{ status.last_run.ok ? t('সফল') : t('ব্যর্থ') }} ·
                         {{ when(status.last_run.at) }}
                     </span>
                 </div>

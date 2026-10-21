@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\Animal;
 use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\StockMovement;
@@ -10,6 +11,7 @@ use App\Services\AccountCodes;
 use App\Services\StockService;
 use App\Support\Lookups;
 use App\Support\Money;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -26,16 +28,17 @@ class StockController extends Controller
     {
         return Inertia::render('stock/Index', [
             'items' => Lookups::items(),
-            'kinds' => Item::KINDS,
-            'units' => Item::UNITS,
+            'kinds' => Tr::all(Item::KINDS),
+            'units' => Tr::all(Item::UNITS),
             'inventoryAccounts' => Account::query()->where('subtype', 'inventory')->orderBy('code')->get(['id', 'code', 'name']),
             'expenseAccounts' => Lookups::accounts('expense'),
             'recent' => StockMovement::query()->with(['item:id,name,unit', 'costCenter:id,name', 'entry:id,number'])->latest('id')->limit(30)->get()->map(fn (StockMovement $movement) => [
                 'id' => $movement->id,
                 'date' => $movement->date->toDateString(),
                 'item' => $movement->item->name,
-                'unit' => Item::UNITS[$movement->item->unit] ?? $movement->item->unit,
+                'unit' => __(Item::UNITS[$movement->item->unit] ?? $movement->item->unit),
                 'direction' => $movement->direction,
+                'session' => $movement->session ? Tr::all(StockMovement::SESSIONS)[$movement->session] ?? null : null,
                 'qty' => $movement->qty,
                 'value' => $movement->value,
                 'center' => $movement->costCenter?->name,
@@ -51,6 +54,7 @@ class StockController extends Controller
 
         return Inertia::render('stock/Move', [
             'mode' => $mode,
+            'sessions' => Tr::all(StockMovement::SESSIONS),
             'items' => Lookups::items(),
             'centers' => Lookups::centers(),
             'moneyAccounts' => Lookups::moneyAccounts(),
@@ -59,6 +63,8 @@ class StockController extends Controller
             'canPurchase' => $request->user()->can('post-entries'),
             'maxVoucherKb' => config('khamar.max_voucher_kb'),
             'grassCenterId' => CostCenter::query()->where('code', 'GHAS')->value('id'),
+            // Animals in each category today, shown next to the kilos so "for how many" is clear.
+            'herd' => (object) Animal::query()->where('status', 'active')->selectRaw('cost_center_id, COUNT(*) as n')->groupBy('cost_center_id')->pluck('n', 'cost_center_id')->map(fn ($n) => (int) $n)->all(),
         ]);
     }
 
@@ -86,7 +92,7 @@ class StockController extends Controller
             'attachments' => $this->attachments($request),
         ]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "স্টকে যোগ হয়েছে ({$entry->number})।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('স্টকে যোগ হয়েছে (:number)।', ['number' => $entry->number])]);
 
         return to_route('stock.index');
     }
@@ -99,12 +105,14 @@ class StockController extends Controller
             'splits' => ['required', 'array', 'min:1', 'max:20'],
             'splits.*.cost_center_id' => ['required', 'exists:cost_centers,id'],
             'splits.*.qty' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
+            'splits.*.land' => ['nullable', 'numeric', 'min:0', 'max:100000'],
             'note' => ['nullable', 'string', 'max:255'],
+            'session' => ['nullable', Rule::in(array_keys(StockMovement::SESSIONS))],
         ]);
 
-        $entry = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], $data['note'] ?? null);
+        $entry = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], $data['note'] ?? null, $data['session'] ?? null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "ব্যবহার লেখা হয়েছে ({$entry->number})।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ব্যবহার লেখা হয়েছে (:number)।', ['number' => $entry->number])]);
 
         return $request->boolean('stay') ? back() : to_route('stock.index');
     }
@@ -117,12 +125,13 @@ class StockController extends Controller
             'qty' => ['required', 'numeric', 'min:0.001', 'max:9999999'],
             'rate' => Money::rule(),
             'cost_center_id' => ['required', 'exists:cost_centers,id'],
+            'land_decimals' => ['nullable', 'numeric', 'min:0', 'max:100000'],
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $entry = $stock->produce(Item::query()->findOrFail((int) $data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['rate']), (int) $data['cost_center_id'], $data['note'] ?? null);
+        $entry = $stock->produce(Item::query()->findOrFail((int) $data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['rate']), (int) $data['cost_center_id'], $data['note'] ?? null, isset($data['land_decimals']) ? (float) $data['land_decimals'] : null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "উৎপাদন স্টকে উঠেছে ({$entry->number})।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('উৎপাদন স্টকে উঠেছে (:number)।', ['number' => $entry->number])]);
 
         return to_route('stock.index');
     }
@@ -140,7 +149,7 @@ class StockController extends Controller
 
         Item::query()->create($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'নতুন মাল যোগ হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন মাল যোগ হয়েছে।')]);
 
         return back();
     }
@@ -155,7 +164,7 @@ class StockController extends Controller
 
         $item->update($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'আপডেট হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('আপডেট হয়েছে।')]);
 
         return back();
     }

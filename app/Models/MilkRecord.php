@@ -23,7 +23,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['date', 'session', 'cost_center_id', 'animal_id', 'liters', 'recorded_by'])]
 class MilkRecord extends Model
 {
-    public const SESSIONS = ['morning' => 'সকাল', 'evening' => 'বিকাল'];
+    /** Milking times; most farms use two, some three or a night milking. */
+    public const SESSIONS = ['morning' => 'সকাল', 'noon' => 'দুপুর', 'evening' => 'বিকাল', 'night' => 'রাত'];
 
     protected function casts(): array
     {

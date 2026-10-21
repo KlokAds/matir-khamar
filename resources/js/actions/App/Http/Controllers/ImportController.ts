@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\ImportController::index
-* @see app/Http/Controllers/ImportController.php:21
+* @see app/Http/Controllers/ImportController.php:22
 * @route '/setup/import'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\ImportController::saveConnection
-* @see app/Http/Controllers/ImportController.php:92
+* @see app/Http/Controllers/ImportController.php:93
 * @route '/setup/import/connection'
 */
 export const saveConnection = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -97,7 +97,7 @@ saveConnection.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::saveConnection
-* @see app/Http/Controllers/ImportController.php:92
+* @see app/Http/Controllers/ImportController.php:93
 * @route '/setup/import/connection'
 */
 saveConnection.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ saveConnection.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::saveConnection
-* @see app/Http/Controllers/ImportController.php:92
+* @see app/Http/Controllers/ImportController.php:93
 * @route '/setup/import/connection'
 */
 saveConnection.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -116,7 +116,7 @@ saveConnection.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
 
 /**
 * @see \App\Http\Controllers\ImportController::saveConnection
-* @see app/Http/Controllers/ImportController.php:92
+* @see app/Http/Controllers/ImportController.php:93
 * @route '/setup/import/connection'
 */
 const saveConnectionForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -131,7 +131,7 @@ const saveConnectionForm = (options?: RouteQueryOptions): RouteFormDefinition<'p
 
 /**
 * @see \App\Http\Controllers\ImportController::saveConnection
-* @see app/Http/Controllers/ImportController.php:92
+* @see app/Http/Controllers/ImportController.php:93
 * @route '/setup/import/connection'
 */
 saveConnectionForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -148,7 +148,7 @@ saveConnection.form = saveConnectionForm
 
 /**
 * @see \App\Http\Controllers\ImportController::testConnection
-* @see app/Http/Controllers/ImportController.php:127
+* @see app/Http/Controllers/ImportController.php:128
 * @route '/setup/import/connection/test'
 */
 export const testConnection = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -163,7 +163,7 @@ testConnection.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::testConnection
-* @see app/Http/Controllers/ImportController.php:127
+* @see app/Http/Controllers/ImportController.php:128
 * @route '/setup/import/connection/test'
 */
 testConnection.url = (options?: RouteQueryOptions) => {
@@ -172,7 +172,7 @@ testConnection.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::testConnection
-* @see app/Http/Controllers/ImportController.php:127
+* @see app/Http/Controllers/ImportController.php:128
 * @route '/setup/import/connection/test'
 */
 testConnection.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -182,7 +182,7 @@ testConnection.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\ImportController::testConnection
-* @see app/Http/Controllers/ImportController.php:127
+* @see app/Http/Controllers/ImportController.php:128
 * @route '/setup/import/connection/test'
 */
 const testConnectionForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -192,7 +192,7 @@ const testConnectionForm = (options?: RouteQueryOptions): RouteFormDefinition<'p
 
 /**
 * @see \App\Http\Controllers\ImportController::testConnection
-* @see app/Http/Controllers/ImportController.php:127
+* @see app/Http/Controllers/ImportController.php:128
 * @route '/setup/import/connection/test'
 */
 testConnectionForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -204,7 +204,7 @@ testConnection.form = testConnectionForm
 
 /**
 * @see \App\Http\Controllers\ImportController::forgetConnection
-* @see app/Http/Controllers/ImportController.php:136
+* @see app/Http/Controllers/ImportController.php:137
 * @route '/setup/import/connection'
 */
 export const forgetConnection = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -219,7 +219,7 @@ forgetConnection.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::forgetConnection
-* @see app/Http/Controllers/ImportController.php:136
+* @see app/Http/Controllers/ImportController.php:137
 * @route '/setup/import/connection'
 */
 forgetConnection.url = (options?: RouteQueryOptions) => {
@@ -228,7 +228,7 @@ forgetConnection.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::forgetConnection
-* @see app/Http/Controllers/ImportController.php:136
+* @see app/Http/Controllers/ImportController.php:137
 * @route '/setup/import/connection'
 */
 forgetConnection.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -238,7 +238,7 @@ forgetConnection.delete = (options?: RouteQueryOptions): RouteDefinition<'delete
 
 /**
 * @see \App\Http\Controllers\ImportController::forgetConnection
-* @see app/Http/Controllers/ImportController.php:136
+* @see app/Http/Controllers/ImportController.php:137
 * @route '/setup/import/connection'
 */
 const forgetConnectionForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -253,7 +253,7 @@ const forgetConnectionForm = (options?: RouteQueryOptions): RouteFormDefinition<
 
 /**
 * @see \App\Http\Controllers\ImportController::forgetConnection
-* @see app/Http/Controllers/ImportController.php:136
+* @see app/Http/Controllers/ImportController.php:137
 * @route '/setup/import/connection'
 */
 forgetConnectionForm.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -270,7 +270,7 @@ forgetConnection.form = forgetConnectionForm
 
 /**
 * @see \App\Http\Controllers\ImportController::fetch
-* @see app/Http/Controllers/ImportController.php:148
+* @see app/Http/Controllers/ImportController.php:149
 * @route '/setup/import/fetch'
 */
 export const fetch = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -285,7 +285,7 @@ fetch.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::fetch
-* @see app/Http/Controllers/ImportController.php:148
+* @see app/Http/Controllers/ImportController.php:149
 * @route '/setup/import/fetch'
 */
 fetch.url = (options?: RouteQueryOptions) => {
@@ -294,7 +294,7 @@ fetch.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::fetch
-* @see app/Http/Controllers/ImportController.php:148
+* @see app/Http/Controllers/ImportController.php:149
 * @route '/setup/import/fetch'
 */
 fetch.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -304,7 +304,7 @@ fetch.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ImportController::fetch
-* @see app/Http/Controllers/ImportController.php:148
+* @see app/Http/Controllers/ImportController.php:149
 * @route '/setup/import/fetch'
 */
 const fetchForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -314,7 +314,7 @@ const fetchForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\ImportController::fetch
-* @see app/Http/Controllers/ImportController.php:148
+* @see app/Http/Controllers/ImportController.php:149
 * @route '/setup/import/fetch'
 */
 fetchForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -326,7 +326,7 @@ fetch.form = fetchForm
 
 /**
 * @see \App\Http\Controllers\ImportController::post
-* @see app/Http/Controllers/ImportController.php:167
+* @see app/Http/Controllers/ImportController.php:168
 * @route '/setup/import/post'
 */
 export const post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -341,7 +341,7 @@ post.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::post
-* @see app/Http/Controllers/ImportController.php:167
+* @see app/Http/Controllers/ImportController.php:168
 * @route '/setup/import/post'
 */
 post.url = (options?: RouteQueryOptions) => {
@@ -350,7 +350,7 @@ post.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::post
-* @see app/Http/Controllers/ImportController.php:167
+* @see app/Http/Controllers/ImportController.php:168
 * @route '/setup/import/post'
 */
 post.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -360,7 +360,7 @@ post.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ImportController::post
-* @see app/Http/Controllers/ImportController.php:167
+* @see app/Http/Controllers/ImportController.php:168
 * @route '/setup/import/post'
 */
 const postForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -370,7 +370,7 @@ const postForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 
 /**
 * @see \App\Http\Controllers\ImportController::post
-* @see app/Http/Controllers/ImportController.php:167
+* @see app/Http/Controllers/ImportController.php:168
 * @route '/setup/import/post'
 */
 postForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -382,7 +382,7 @@ post.form = postForm
 
 /**
 * @see \App\Http\Controllers\ImportController::updateMapping
-* @see app/Http/Controllers/ImportController.php:176
+* @see app/Http/Controllers/ImportController.php:177
 * @route '/setup/import/mappings/{mapping}'
 */
 export const updateMapping = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -397,7 +397,7 @@ updateMapping.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::updateMapping
-* @see app/Http/Controllers/ImportController.php:176
+* @see app/Http/Controllers/ImportController.php:177
 * @route '/setup/import/mappings/{mapping}'
 */
 updateMapping.url = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -430,7 +430,7 @@ updateMapping.url = (args: { mapping: number | { id: number } } | [mapping: numb
 
 /**
 * @see \App\Http\Controllers\ImportController::updateMapping
-* @see app/Http/Controllers/ImportController.php:176
+* @see app/Http/Controllers/ImportController.php:177
 * @route '/setup/import/mappings/{mapping}'
 */
 updateMapping.put = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -440,7 +440,7 @@ updateMapping.put = (args: { mapping: number | { id: number } } | [mapping: numb
 
 /**
 * @see \App\Http\Controllers\ImportController::updateMapping
-* @see app/Http/Controllers/ImportController.php:176
+* @see app/Http/Controllers/ImportController.php:177
 * @route '/setup/import/mappings/{mapping}'
 */
 const updateMappingForm = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -455,7 +455,7 @@ const updateMappingForm = (args: { mapping: number | { id: number } } | [mapping
 
 /**
 * @see \App\Http\Controllers\ImportController::updateMapping
-* @see app/Http/Controllers/ImportController.php:176
+* @see app/Http/Controllers/ImportController.php:177
 * @route '/setup/import/mappings/{mapping}'
 */
 updateMappingForm.put = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -472,7 +472,7 @@ updateMapping.form = updateMappingForm
 
 /**
 * @see \App\Http\Controllers\ImportController::resolve
-* @see app/Http/Controllers/ImportController.php:226
+* @see app/Http/Controllers/ImportController.php:227
 * @route '/setup/import/records/{record}/resolve'
 */
 export const resolve = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -487,7 +487,7 @@ resolve.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::resolve
-* @see app/Http/Controllers/ImportController.php:226
+* @see app/Http/Controllers/ImportController.php:227
 * @route '/setup/import/records/{record}/resolve'
 */
 resolve.url = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -520,7 +520,7 @@ resolve.url = (args: { record: number | { id: number } } | [record: number | { i
 
 /**
 * @see \App\Http\Controllers\ImportController::resolve
-* @see app/Http/Controllers/ImportController.php:226
+* @see app/Http/Controllers/ImportController.php:227
 * @route '/setup/import/records/{record}/resolve'
 */
 resolve.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -530,7 +530,7 @@ resolve.post = (args: { record: number | { id: number } } | [record: number | { 
 
 /**
 * @see \App\Http\Controllers\ImportController::resolve
-* @see app/Http/Controllers/ImportController.php:226
+* @see app/Http/Controllers/ImportController.php:227
 * @route '/setup/import/records/{record}/resolve'
 */
 const resolveForm = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -540,7 +540,7 @@ const resolveForm = (args: { record: number | { id: number } } | [record: number
 
 /**
 * @see \App\Http\Controllers\ImportController::resolve
-* @see app/Http/Controllers/ImportController.php:226
+* @see app/Http/Controllers/ImportController.php:227
 * @route '/setup/import/records/{record}/resolve'
 */
 resolveForm.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -552,7 +552,7 @@ resolve.form = resolveForm
 
 /**
 * @see \App\Http\Controllers\ImportController::setQty
-* @see app/Http/Controllers/ImportController.php:212
+* @see app/Http/Controllers/ImportController.php:213
 * @route '/setup/import/records/{record}/qty'
 */
 export const setQty = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -567,7 +567,7 @@ setQty.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::setQty
-* @see app/Http/Controllers/ImportController.php:212
+* @see app/Http/Controllers/ImportController.php:213
 * @route '/setup/import/records/{record}/qty'
 */
 setQty.url = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -600,7 +600,7 @@ setQty.url = (args: { record: number | { id: number } } | [record: number | { id
 
 /**
 * @see \App\Http\Controllers\ImportController::setQty
-* @see app/Http/Controllers/ImportController.php:212
+* @see app/Http/Controllers/ImportController.php:213
 * @route '/setup/import/records/{record}/qty'
 */
 setQty.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -610,7 +610,7 @@ setQty.post = (args: { record: number | { id: number } } | [record: number | { i
 
 /**
 * @see \App\Http\Controllers\ImportController::setQty
-* @see app/Http/Controllers/ImportController.php:212
+* @see app/Http/Controllers/ImportController.php:213
 * @route '/setup/import/records/{record}/qty'
 */
 const setQtyForm = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -620,7 +620,7 @@ const setQtyForm = (args: { record: number | { id: number } } | [record: number 
 
 /**
 * @see \App\Http\Controllers\ImportController::setQty
-* @see app/Http/Controllers/ImportController.php:212
+* @see app/Http/Controllers/ImportController.php:213
 * @route '/setup/import/records/{record}/qty'
 */
 setQtyForm.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -632,7 +632,7 @@ setQty.form = setQtyForm
 
 /**
 * @see \App\Http\Controllers\ImportController::ignoreUndecided
-* @see app/Http/Controllers/ImportController.php:202
+* @see app/Http/Controllers/ImportController.php:203
 * @route '/setup/import/ignore-undecided'
 */
 export const ignoreUndecided = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -647,7 +647,7 @@ ignoreUndecided.definition = {
 
 /**
 * @see \App\Http\Controllers\ImportController::ignoreUndecided
-* @see app/Http/Controllers/ImportController.php:202
+* @see app/Http/Controllers/ImportController.php:203
 * @route '/setup/import/ignore-undecided'
 */
 ignoreUndecided.url = (options?: RouteQueryOptions) => {
@@ -656,7 +656,7 @@ ignoreUndecided.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ImportController::ignoreUndecided
-* @see app/Http/Controllers/ImportController.php:202
+* @see app/Http/Controllers/ImportController.php:203
 * @route '/setup/import/ignore-undecided'
 */
 ignoreUndecided.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -666,7 +666,7 @@ ignoreUndecided.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =>
 
 /**
 * @see \App\Http\Controllers\ImportController::ignoreUndecided
-* @see app/Http/Controllers/ImportController.php:202
+* @see app/Http/Controllers/ImportController.php:203
 * @route '/setup/import/ignore-undecided'
 */
 const ignoreUndecidedForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -676,7 +676,7 @@ const ignoreUndecidedForm = (options?: RouteQueryOptions): RouteFormDefinition<'
 
 /**
 * @see \App\Http\Controllers\ImportController::ignoreUndecided
-* @see app/Http/Controllers/ImportController.php:202
+* @see app/Http/Controllers/ImportController.php:203
 * @route '/setup/import/ignore-undecided'
 */
 ignoreUndecidedForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

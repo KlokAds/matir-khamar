@@ -6,7 +6,9 @@ import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
+import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 
@@ -87,9 +89,6 @@ const total = computed(() =>
         (sum, line) => sum + Math.round((parseFloat(line.amount) || 0) * 100),
         0,
     ),
-);
-const usableCenters = computed(() =>
-    props.centers.filter((center) => center.kind !== 'group'),
 );
 
 const partyFilter = computed(() => {
@@ -181,37 +180,58 @@ function submit(stay = false) {
 const lineError = (index: number, key: string) =>
     (f.errors as Record<string, string>)[`lines.${index}.${key}`];
 
-const help: Record<string, string> = {
-    expense:
-        'একটা বিল কয়েক ক্যাটাগরিতে ভাগ হলে আলাদা লাইনে লিখুন। কোনটা কার বোঝা না গেলে "সাধারণ খরচ" দিন, মাস শেষে ভাগ হবে। খাবার/ঔষধ কিনলে এখানে নয়, স্টক → মাল ক্রয় দিন।',
-    income: 'দুধ, গোবর, সবজি বিক্রি — কোন ক্যাটাগরির আয় সেটা বাছুন। পশু বিক্রি হলে গরুর কার্ড থেকে করুন।',
-    asset: 'জমি কেনা, শেড বানানো, মেশিন কেনা খরচ নয়, খামারের সম্পদ। তাই লাভ-ক্ষতিতে আসে না, সম্পদে জমা থাকে।',
-    lease: 'পুরো লিজের টাকা একবারে দিলেও প্রতি মাসে তার ভাগ ওই জমির ক্যাটাগরিতে খরচ হিসেবে বসবে।',
-    investment:
+const formLabels = computed(() => tAll(props.forms));
+const partyTypeLabels = computed(() => tAll(props.partyTypes));
+const tCenter = (c: Center) => centerLabel({ ...c, name: t(c.name) });
+
+const help = computed<Record<string, string>>(() => ({
+    expense: t(
+        'একটা বিল কয়েক ক্যাটাগরিতে ভাগ হলে আলাদা লাইনে লিখুন। যে খরচ সব গরুর জন্য একসাথে (যেমন কারেন্ট বিল, রাখালের বেতন), সেটা "সাধারণ খরচ"-এ দিন — মাস শেষে "খরচ ভাগ" পাতায় এক চাপে গরুর সংখ্যা অনুযায়ী গাভী, বকনা, মোটাতাজায় ভাগ হয়ে যাবে। খাবার/ঔষধ কিনলে এখানে নয়, স্টক → মাল ক্রয় দিন।',
+    ),
+    income: t(
+        'দুধ, গোবর, সবজি বিক্রি — কোন ক্যাটাগরির আয় সেটা বাছুন। পশু বিক্রি হলে গরুর কার্ড থেকে করুন।',
+    ),
+    asset: t(
+        'জমি কেনা, শেড বানানো, মেশিন কেনা খরচ নয়, খামারের সম্পদ। তাই লাভ-ক্ষতিতে আসে না, সম্পদে জমা থাকে।',
+    ),
+    lease: t(
+        'পুরো লিজের টাকা একবারে দিলেও প্রতি মাসে তার ভাগ ওই জমির ক্যাটাগরিতে খরচ হিসেবে বসবে।',
+    ),
+    investment: t(
         'কে কত টাকা খামারে দিলেন — প্রত্যেক বিনিয়োগকারীর আলাদা মূলধন খাতা থাকে।',
-    withdrawal: 'বিনিয়োগকারী খামার থেকে টাকা তুলে নিলে।',
-    loan: 'ব্যাংক বা কারো কাছ থেকে ঋণ পেলে। ঋণদাতাকে আগে "ক্রেতা, বিনিয়োগকারী…" পাতায় যোগ করুন।',
-    loan_repayment: 'কিস্তিতে আসল ঋণ কমায়, সুদ খরচ হিসেবে যায়।',
-    grant: 'উদ্যোগ কর্মসূচির অনুদান। শর্ত পূরণ না হলে এটা ঋণে বদলে যেতে পারে, তাই আলাদা রাখা হয়।',
-    transfer:
+    ),
+    withdrawal: t('বিনিয়োগকারী খামার থেকে টাকা তুলে নিলে।'),
+    loan: t(
+        'ব্যাংক বা কারো কাছ থেকে ঋণ পেলে। ঋণদাতাকে আগে "ক্রেতা, বিনিয়োগকারী…" পাতায় যোগ করুন।',
+    ),
+    loan_repayment: t('কিস্তিতে আসল ঋণ কমায়, সুদ খরচ হিসেবে যায়।'),
+    grant: t(
+        'উদ্যোগ কর্মসূচির অনুদান। শর্ত পূরণ না হলে এটা ঋণে বদলে যেতে পারে, তাই আলাদা রাখা হয়।',
+    ),
+    transfer: t(
         'ক্যাশ থেকে ব্যাংকে, বিকাশ থেকে ক্যাশে — খামারের ভেতরেই টাকা সরানো।',
-    supplier_payment: 'আগে বাকিতে কেনা মালের টাকা পরিশোধ।',
-    customer_receipt: 'আগে বাকিতে বিক্রির টাকা পাওয়া।',
-};
+    ),
+    supplier_payment: t('আগে বাকিতে কেনা মালের টাকা পরিশোধ।'),
+    customer_receipt: t('আগে বাকিতে বিক্রির টাকা পাওয়া।'),
+}));
 </script>
 
 <template>
-    <Head title="নতুন এন্ট্রি" />
+    <Head :title="t('নতুন এন্ট্রি')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="নতুন এন্ট্রি"
-            subtitle="যা লিখবেন তা এক টাকাও না হারিয়ে খাতায় উঠবে — ভুল হলে মুছে নয়, উল্টো এন্ট্রি দিয়ে ঠিক হয়।"
+            :title="t('নতুন এন্ট্রি')"
+            :subtitle="
+                t(
+                    'যা লিখবেন তা এক টাকাও না হারিয়ে খাতায় উঠবে — ভুল হলে মুছে নয়, উল্টো এন্ট্রি দিয়ে ঠিক হয়।',
+                )
+            "
         />
 
         <div class="mb-5 flex flex-wrap gap-1.5">
             <button
-                v-for="(label, key) in forms"
+                v-for="(label, key) in formLabels"
                 :key="key"
                 type="button"
                 :class="[
@@ -238,10 +258,9 @@ const help: Record<string, string> = {
                     </p>
 
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <Field label="তারিখ" :error="f.errors.date">
-                            <Input
+                        <Field :label="t('তারিখ')" :error="f.errors.date">
+                            <DateField
                                 v-model="f.date"
-                                type="date"
                                 :max="today()"
                                 required
                             />
@@ -249,22 +268,22 @@ const help: Record<string, string> = {
 
                         <Field
                             v-if="isSplit"
-                            label="টাকা কীভাবে"
+                            :label="t('টাকা কীভাবে')"
                             :error="f.errors.settle"
                         >
                             <NSelect v-model="f.settle">
                                 <option value="money">
                                     {{
                                         f.form === 'expense'
-                                            ? 'নগদ/ব্যাংক থেকে দেওয়া হয়েছে'
-                                            : 'নগদ/ব্যাংকে পাওয়া গেছে'
+                                            ? t('নগদ/ব্যাংক থেকে দেওয়া হয়েছে')
+                                            : t('নগদ/ব্যাংকে পাওয়া গেছে')
                                     }}
                                 </option>
                                 <option value="credit">
                                     {{
                                         f.form === 'expense'
-                                            ? 'বাকিতে কেনা'
-                                            : 'বাকিতে বিক্রি'
+                                            ? t('বাকিতে কেনা')
+                                            : t('বাকিতে বিক্রি')
                                     }}
                                 </option>
                             </NSelect>
@@ -293,8 +312,8 @@ const help: Record<string, string> = {
                                     'grant',
                                     'customer_receipt',
                                 ].includes(f.form)
-                                    ? 'টাকা কোথায় এল'
-                                    : 'টাকা কোথা থেকে গেল'
+                                    ? t('টাকা কোথায় এল')
+                                    : t('টাকা কোথা থেকে গেল')
                             "
                             :error="f.errors.money_account_id"
                         >
@@ -304,14 +323,14 @@ const help: Record<string, string> = {
                                     :key="a.id"
                                     :value="a.id"
                                 >
-                                    {{ a.name }}
+                                    {{ t(a.name) }}
                                 </option>
                             </NSelect>
                         </Field>
 
                         <template v-if="f.form === 'transfer'">
                             <Field
-                                label="কোথা থেকে"
+                                :label="t('কোথা থেকে')"
                                 :error="f.errors.from_account_id"
                             >
                                 <NSelect v-model="f.from_account_id">
@@ -320,12 +339,12 @@ const help: Record<string, string> = {
                                         :key="a.id"
                                         :value="a.id"
                                     >
-                                        {{ a.name }}
+                                        {{ t(a.name) }}
                                     </option>
                                 </NSelect>
                             </Field>
                             <Field
-                                label="কোথায়"
+                                :label="t('কোথায়')"
                                 :error="f.errors.to_account_id"
                             >
                                 <NSelect v-model="f.to_account_id">
@@ -334,7 +353,7 @@ const help: Record<string, string> = {
                                         :key="a.id"
                                         :value="a.id"
                                     >
-                                        {{ a.name }}
+                                        {{ t(a.name) }}
                                     </option>
                                 </NSelect>
                             </Field>
@@ -344,14 +363,20 @@ const help: Record<string, string> = {
                             v-if="needsParty || isSplit"
                             :label="
                                 partyFilter
-                                    ? partyTypes[partyFilter]
-                                    : 'কার সাথে (ঐচ্ছিক)'
+                                    ? partyTypeLabels[partyFilter]
+                                    : t('কার সাথে (ঐচ্ছিক)')
                             "
                             :error="f.errors.party_id"
-                            hint="তালিকায় না থাকলে সেটআপ → ক্রেতা, বিনিয়োগকারী… থেকে যোগ করুন"
+                            :hint="
+                                t(
+                                    'তালিকায় না থাকলে সেটআপ → ক্রেতা, বিনিয়োগকারী… থেকে যোগ করুন',
+                                )
+                            "
                         >
                             <NSelect v-model="f.party_id">
-                                <option :value="null">— বাছুন —</option>
+                                <option :value="null">
+                                    {{ t('— বাছুন —') }}
+                                </option>
                                 <option
                                     v-for="p in partyOptions"
                                     :key="p.id"
@@ -364,7 +389,7 @@ const help: Record<string, string> = {
 
                         <Field
                             v-if="f.form === 'asset'"
-                            label="কী কেনা হলো"
+                            :label="t('কী কেনা হলো')"
                             :error="f.errors.asset_account_id"
                         >
                             <NSelect v-model="f.asset_account_id">
@@ -373,7 +398,7 @@ const help: Record<string, string> = {
                                     :key="a.id"
                                     :value="a.id"
                                 >
-                                    {{ a.name }}
+                                    {{ t(a.name) }}
                                 </option>
                             </NSelect>
                         </Field>
@@ -386,25 +411,26 @@ const help: Record<string, string> = {
                             "
                             :label="
                                 f.form === 'loan_repayment'
-                                    ? 'সুদ কোন ক্যাটাগরিতে'
-                                    : 'কোন ক্যাটাগরি / প্রজেক্ট'
+                                    ? t('সুদ কোন ক্যাটাগরিতে')
+                                    : t('কোন ক্যাটাগরি / প্রজেক্ট')
                             "
                             :error="f.errors.cost_center_id"
                         >
                             <NSelect v-model="f.cost_center_id">
                                 <option
-                                    v-for="c in usableCenters"
+                                    v-for="c in centers"
                                     :key="c.id"
                                     :value="c.id"
+                                    :disabled="c.kind === 'group'"
                                 >
-                                    {{ centerLabel(c) }}
+                                    {{ tCenter(c) }}
                                 </option>
                             </NSelect>
                         </Field>
 
                         <Field
                             v-if="!isSplit && f.form !== 'loan_repayment'"
-                            label="টাকা (৳)"
+                            :label="t('টাকা (৳)')"
                             :error="f.errors.amount"
                         >
                             <Input
@@ -420,7 +446,10 @@ const help: Record<string, string> = {
                         </Field>
 
                         <template v-if="f.form === 'loan_repayment'">
-                            <Field label="আসল (৳)" :error="f.errors.principal">
+                            <Field
+                                :label="t('আসল (৳)')"
+                                :error="f.errors.principal"
+                            >
                                 <Input
                                     v-model="f.principal"
                                     type="number"
@@ -429,7 +458,10 @@ const help: Record<string, string> = {
                                     class="num"
                                 />
                             </Field>
-                            <Field label="সুদ (৳)" :error="f.errors.interest">
+                            <Field
+                                :label="t('সুদ (৳)')"
+                                :error="f.errors.interest"
+                            >
                                 <Input
                                     v-model="f.interest"
                                     type="number"
@@ -442,7 +474,7 @@ const help: Record<string, string> = {
 
                         <template v-if="f.form === 'lease'">
                             <Field
-                                label="কত মাসের লিজ"
+                                :label="t('কত মাসের লিজ')"
                                 :error="f.errors.months"
                             >
                                 <Input
@@ -453,26 +485,28 @@ const help: Record<string, string> = {
                                 />
                             </Field>
                             <Field
-                                label="লিজ শুরুর মাস"
+                                :label="t('লিজ শুরুর মাস')"
                                 :error="f.errors.start_month"
                             >
-                                <Input v-model="f.start_month" type="date" />
+                                <DateField v-model="f.start_month" />
                             </Field>
                         </template>
 
                         <Field
                             v-if="['asset', 'lease'].includes(f.form)"
-                            label="উদ্যোগ বাজেটের খাত (থাকলে)"
+                            :label="t('উদ্যোগ বাজেটের খাত (থাকলে)')"
                             :error="f.errors.budget_head_id"
                         >
                             <NSelect v-model="f.budget_head_id">
-                                <option :value="null">— প্রযোজ্য নয় —</option>
+                                <option :value="null">
+                                    {{ t('— প্রযোজ্য নয় —') }}
+                                </option>
                                 <option
                                     v-for="b in budgetHeads"
                                     :key="b.id"
                                     :value="b.id"
                                 >
-                                    {{ b.code }} · {{ b.name }}
+                                    {{ b.code }} · {{ t(b.name) }}
                                 </option>
                             </NSelect>
                         </Field>
@@ -487,8 +521,8 @@ const help: Record<string, string> = {
                         <h2 class="font-display text-lg">
                             {{
                                 f.form === 'expense'
-                                    ? 'কোন খাতে, কোন ক্যাটাগরিতে খরচ'
-                                    : 'কোন খাতে, কোন ক্যাটাগরিতে আয়'
+                                    ? t('কোন খাতে, কোন ক্যাটাগরিতে খরচ')
+                                    : t('কোন খাতে, কোন ক্যাটাগরিতে আয়')
                             }}
                         </h2>
                         <Button
@@ -496,7 +530,7 @@ const help: Record<string, string> = {
                             size="sm"
                             variant="secondary"
                             @click="f.lines.push(blankLine())"
-                            ><Plus /> লাইন</Button
+                            ><Plus /> {{ t('লাইন') }}</Button
                         >
                     </div>
                     <p
@@ -528,38 +562,39 @@ const help: Record<string, string> = {
                                 class="grid gap-3 sm:grid-cols-2 md:grid-cols-4"
                             >
                                 <Field
-                                    label="খাত"
+                                    :label="t('খাত')"
                                     :error="lineError(index, 'account_id')"
                                 >
                                     <NSelect
                                         v-model="line.account_id"
-                                        placeholder="বাছুন"
+                                        :placeholder="t('বাছুন')"
                                     >
                                         <option
                                             v-for="a in lineAccounts"
                                             :key="a.id"
                                             :value="a.id"
                                         >
-                                            {{ a.name }}
+                                            {{ t(a.name) }}
                                         </option>
                                     </NSelect>
                                 </Field>
                                 <Field
-                                    label="ক্যাটাগরি"
+                                    :label="t('ক্যাটাগরি')"
                                     :error="lineError(index, 'cost_center_id')"
                                 >
                                     <NSelect v-model="line.cost_center_id">
                                         <option
-                                            v-for="c in usableCenters"
+                                            v-for="c in centers"
                                             :key="c.id"
                                             :value="c.id"
+                                            :disabled="c.kind === 'group'"
                                         >
-                                            {{ centerLabel(c) }}
+                                            {{ tCenter(c) }}
                                         </option>
                                     </NSelect>
                                 </Field>
                                 <Field
-                                    label="টাকা (৳)"
+                                    :label="t('টাকা (৳)')"
                                     :error="lineError(index, 'amount')"
                                 >
                                     <Input
@@ -574,17 +609,19 @@ const help: Record<string, string> = {
                                 </Field>
                                 <Field
                                     v-if="f.form === 'expense'"
-                                    label="উদ্যোগ বাজেট খাত"
+                                    :label="t('উদ্যোগ বাজেট খাত')"
                                     :error="lineError(index, 'budget_head_id')"
                                 >
                                     <NSelect v-model="line.budget_head_id">
-                                        <option :value="null">— নয় —</option>
+                                        <option :value="null">
+                                            {{ t('— নয় —') }}
+                                        </option>
                                         <option
                                             v-for="b in budgetHeads"
                                             :key="b.id"
                                             :value="b.id"
                                         >
-                                            {{ b.code }} · {{ b.name }}
+                                            {{ b.code }} · {{ t(b.name) }}
                                         </option>
                                     </NSelect>
                                 </Field>
@@ -592,10 +629,12 @@ const help: Record<string, string> = {
                                     v-if="
                                         animalsFor(line.cost_center_id).length
                                     "
-                                    label="নির্দিষ্ট গরু (ঐচ্ছিক)"
+                                    :label="t('নির্দিষ্ট গরু (ঐচ্ছিক)')"
                                 >
                                     <NSelect v-model="line.animal_id">
-                                        <option :value="null">— সব —</option>
+                                        <option :value="null">
+                                            {{ t('— সব —') }}
+                                        </option>
                                         <option
                                             v-for="a in animalsFor(
                                                 line.cost_center_id,
@@ -608,10 +647,14 @@ const help: Record<string, string> = {
                                     </NSelect>
                                 </Field>
                                 <div class="sm:col-span-2 md:col-span-3">
-                                    <Field label="নোট">
+                                    <Field :label="t('নোট')">
                                         <Input
                                             v-model="line.memo"
-                                            placeholder="যেমন: ডাক্তার ভিজিট, বকনা ২টি"
+                                            :placeholder="
+                                                t(
+                                                    'যেমন: ডাক্তার ভিজিট, বকনা ২টি',
+                                                )
+                                            "
                                         />
                                     </Field>
                                 </div>
@@ -626,27 +669,35 @@ const help: Record<string, string> = {
                     class="min-w-0 rounded-xl border border-border bg-card p-4"
                 >
                     <div class="grid gap-4">
-                        <Field label="বিবরণ" :error="f.errors.description">
+                        <Field
+                            :label="t('বিবরণ')"
+                            :error="f.errors.description"
+                        >
                             <Input
                                 v-model="f.description"
-                                :placeholder="forms[f.form]"
+                                :placeholder="formLabels[f.form]"
                             />
                         </Field>
                         <Field
-                            label="রসিদ / মেমো নম্বর"
+                            :label="t('রসিদ / মেমো নম্বর')"
                             :error="f.errors.reference"
                         >
                             <Input v-model="f.reference" />
                         </Field>
                         <Field
-                            label="ভাউচার / রসিদের ছবি"
+                            :label="t('ভাউচার / রসিদের ছবি')"
                             :error="
                                 f.errors.attachments ||
                                 (f.errors as Record<string, string>)[
                                     'attachments.0'
                                 ]
                             "
-                            :hint="`JPG, PNG বা PDF, প্রতিটি ${Math.round(maxVoucherKb / 1024)} MB পর্যন্ত। উদ্যোগের টাকার খরচে ভাউচার বাধ্যতামূলক।`"
+                            :hint="
+                                t(
+                                    'JPG, PNG বা PDF, প্রতিটি :mb MB পর্যন্ত। উদ্যোগের টাকার খরচে ভাউচার বাধ্যতামূলক।',
+                                    { mb: Math.round(maxVoucherKb / 1024) },
+                                )
+                            "
                         >
                             <label
                                 class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input bg-background px-3 py-2.5 text-sm hover:bg-accent"
@@ -659,7 +710,7 @@ const help: Record<string, string> = {
                                         ? f.attachments
                                               .map((file) => file.name)
                                               .join(', ')
-                                        : 'ছবি তুলুন বা ফাইল বাছুন'
+                                        : t('ছবি তুলুন বা ফাইল বাছুন')
                                 }}</span>
                                 <input
                                     type="file"
@@ -677,7 +728,7 @@ const help: Record<string, string> = {
                 <section
                     class="sticky top-4 rounded-xl border border-primary/30 bg-primary/5 p-4"
                 >
-                    <p class="text-sm text-muted-foreground">মোট</p>
+                    <p class="text-sm text-muted-foreground">{{ t('মোট') }}</p>
                     <p class="num font-display text-3xl">
                         {{
                             isSplit
@@ -698,15 +749,15 @@ const help: Record<string, string> = {
                         }}
                     </p>
                     <div class="mt-4 grid gap-2">
-                        <Button type="submit" :disabled="f.processing"
-                            >সংরক্ষণ করুন</Button
-                        >
+                        <Button type="submit" :disabled="f.processing">{{
+                            t('সংরক্ষণ করুন')
+                        }}</Button>
                         <Button
                             type="button"
                             variant="secondary"
                             :disabled="f.processing"
                             @click="submit(true)"
-                            >সংরক্ষণ করে আরেকটা</Button
+                            >{{ t('সংরক্ষণ করে আরেকটা') }}</Button
                         >
                     </div>
                 </section>

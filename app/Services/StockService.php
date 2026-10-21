@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\Account;
+use App\Models\AnimalPlacement;
+use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\JournalEntry;
 use App\Models\StockMovement;
+use App\Support\Tr;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -48,48 +51,53 @@ class StockService
      * the rate the owner sets and is credited to the producing center as
      * internal income, so that center shows whether growing beats buying.
      */
-    public function produce(Item $item, string $date, float $qty, int $ratePerUnit, int $producerCenterId, ?string $note): JournalEntry
+    public function produce(Item $item, string $date, float $qty, int $ratePerUnit, int $producerCenterId, ?string $note, ?float $landDecimals = null): JournalEntry
     {
         $qty = round($qty, 3);
         $amount = (int) round($qty * $ratePerUnit);
 
         if ($amount <= 0) {
-            throw ValidationException::withMessages(['rate' => 'পরিমাণ ও দর দিন।']);
+            throw ValidationException::withMessages(['rate' => __('পরিমাণ ও দর দিন।')]);
         }
 
-        return DB::transaction(function () use ($item, $date, $qty, $amount, $producerCenterId, $note) {
+        return DB::transaction(function () use ($item, $date, $qty, $amount, $producerCenterId, $note, $landDecimals) {
             $entry = $this->ledger->post('production', $date, $note ?: "{$item->name} উৎপাদন — ".$this->qtyLabel($item, $qty), [
                 ['account_id' => $item->inventory_account_id, 'debit' => $amount, 'memo' => $item->name],
                 ['account_id' => Account::byCode(AccountCodes::INTERNAL_INCOME)->id, 'credit' => $amount, 'cost_center_id' => $producerCenterId],
             ]);
 
-            $this->move($item, $entry, 'in', $qty, $amount, $producerCenterId, $date);
+            $this->move($item, $entry, 'in', $qty, $amount, $producerCenterId, $date, null, ['land_decimals' => $landDecimals ?: null]);
 
             return $entry;
         });
     }
 
     /**
-     * @param  list<array{cost_center_id:int, qty:float}>  $splits
+     * @param  list<array{cost_center_id:int, qty:float, land?:float|string|null}>  $splits  land = শতাংশ the fertiliser went on
+     * @param  string|null  $session  morning, noon or evening (StockMovement::SESSIONS)
      */
-    public function issue(Item $item, string $date, array $splits, ?string $note): JournalEntry
+    public function issue(Item $item, string $date, array $splits, ?string $note, ?string $session = null): JournalEntry
     {
         $splits = array_values(array_filter(
-            array_map(fn ($split) => ['cost_center_id' => (int) $split['cost_center_id'], 'qty' => round((float) $split['qty'], 3)], $splits),
+            array_map(fn ($split) => [
+                'cost_center_id' => (int) $split['cost_center_id'],
+                'qty' => round((float) $split['qty'], 3),
+                'land' => isset($split['land']) && (float) $split['land'] > 0 ? round((float) $split['land'], 2) : null,
+            ], $splits),
             fn ($split) => $split['qty'] > 0,
         ));
 
         if ($splits === []) {
-            throw ValidationException::withMessages(['splits' => 'অন্তত একটি ক্যাটাগরিতে পরিমাণ দিন।']);
+            throw ValidationException::withMessages(['splits' => __('অন্তত একটি ক্যাটাগরিতে পরিমাণ দিন।')]);
         }
 
-        return DB::transaction(function () use ($item, $date, $splits, $note) {
+        return DB::transaction(function () use ($item, $date, $splits, $note, $session) {
             $item = Item::query()->lockForUpdate()->findOrFail($item->id);
             $totalQty = round(array_sum(array_column($splits, 'qty')), 3);
 
             if ($totalQty > round($item->qty_on_hand, 3)) {
                 throw ValidationException::withMessages([
-                    'splits' => "স্টকে আছে {$this->qtyLabel($item, $item->qty_on_hand)}, কিন্তু চাওয়া হয়েছে {$this->qtyLabel($item, $totalQty)}।",
+                    'splits' => __('স্টকে আছে :have, কিন্তু চাওয়া হয়েছে :want।', ['have' => $this->qtyLabel($item, $item->qty_on_hand, true), 'want' => $this->qtyLabel($item, $totalQty, true)]),
                 ]);
             }
 
@@ -107,10 +115,14 @@ class StockService
 
             $lines[] = ['account_id' => $item->inventory_account_id, 'credit' => array_sum($values), 'memo' => $item->name];
 
-            $entry = $this->ledger->post('stock_issue', $date, $note ?: "{$item->name} ব্যবহার — ".$this->qtyLabel($item, $totalQty), $lines);
+            $when = $session !== null ? ' ('.(StockMovement::SESSIONS[$session] ?? $session).')' : '';
+            $entry = $this->ledger->post('stock_issue', $date, ($note ?: "{$item->name} ব্যবহার — ".$this->qtyLabel($item, $totalQty)).$when, $lines);
 
             foreach ($splits as $index => $split) {
-                $this->move($item, $entry, 'out', $split['qty'], $values[$index], $split['cost_center_id'], $date);
+                $this->move($item, $entry, 'out', $split['qty'], $values[$index], $split['cost_center_id'], $date, $session, [
+                    'land_decimals' => $split['land'],
+                    'head_count' => $this->headCount($split['cost_center_id'], $date),
+                ]);
             }
 
             return $entry;
@@ -152,7 +164,7 @@ class StockService
 
             if ($opposite === 'out' && round($item->qty_on_hand - $movement->qty, 3) < 0) {
                 throw ValidationException::withMessages([
-                    'entry' => "{$item->name} এর এই মাল ইতিমধ্যে ব্যবহার হয়েছে, তাই ক্রয়টি বাতিল করা যাবে না।",
+                    'entry' => __(':name এর এই মাল ইতিমধ্যে ব্যবহার হয়েছে, তাই ক্রয়টি বাতিল করা যাবে না।', ['name' => $item->name]),
                 ]);
             }
 
@@ -160,14 +172,43 @@ class StockService
         }
     }
 
-    private function move(Item $item, JournalEntry $entry, string $direction, float $qty, int $value, ?int $costCenterId, string $date): void
+    /**
+     * Animals standing in the category (and the ones under it) on that day, kept with the
+     * movement so later moves do not change what this feed covered. Null where no animals live.
+     */
+    public function headCount(int $costCenterId, string $date): ?int
+    {
+        $center = CostCenter::query()->find($costCenterId);
+
+        if ($center === null) {
+            return null;
+        }
+
+        $ids = $center->descendantIds();
+
+        if (! CostCenter::query()->whereIn('id', $ids)->where('holds_animals', true)->exists()) {
+            return null;
+        }
+
+        return AnimalPlacement::query()
+            ->whereIn('cost_center_id', $ids)
+            ->whereDate('from_date', '<=', $date)
+            ->where(fn ($query) => $query->whereNull('to_date')->orWhereDate('to_date', '>', $date))
+            ->distinct()
+            ->count('animal_id');
+    }
+
+    /** @param  array{land_decimals?: float|null, head_count?: int|null}  $extra */
+    private function move(Item $item, JournalEntry $entry, string $direction, float $qty, int $value, ?int $costCenterId, string $date, ?string $session = null, array $extra = []): void
     {
         StockMovement::query()->create([
+            ...$extra,
             'item_id' => $item->id,
             'journal_entry_id' => $entry->id,
             'cost_center_id' => $costCenterId,
             'date' => $date,
             'direction' => $direction,
+            'session' => $session,
             'qty' => $qty,
             'value' => $value,
         ]);
@@ -178,8 +219,11 @@ class StockService
         $item->save();
     }
 
-    private function qtyLabel(Item $item, float $qty): string
+    /** Messages show the unit in the reader's language; ledger descriptions keep it in Bangla. */
+    private function qtyLabel(Item $item, float $qty, bool $translated = false): string
     {
-        return rtrim(rtrim(number_format($qty, 3, '.', ''), '0'), '.').' '.(Item::UNITS[$item->unit] ?? $item->unit);
+        $unit = Item::UNITS[$item->unit] ?? $item->unit;
+
+        return rtrim(rtrim(number_format($qty, 3, '.', ''), '0'), '.').' '.($translated ? Tr::get($unit) : $unit);
     }
 }

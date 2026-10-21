@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Reminder;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -38,12 +39,17 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('khamar.name'),
+            'locale' => app()->getLocale(),
             'auth' => [
                 'user' => $request->user()?->only(['id', 'name', 'email', 'email_verified_at', 'two_factor_confirmed_at', 'created_at', 'updated_at']),
-                'role' => $request->user()?->role->value,
-                'roleLabel' => $request->user()?->role->label(),
-                'can' => $request->user()?->is_active ? array_fill_keys($request->user()->role->abilities(), true) : [],
+                'role' => $request->user()?->role,
+                'roleLabel' => $request->user() ? __($request->user()->roleLabel()) : null,
+                'can' => $request->user() ? array_fill_keys($request->user()->abilities(), true) : [],
             ],
+            // Open reminders due by the end of today, for the bell in the top bar.
+            'remindersDue' => fn () => $request->user()
+                ? Reminder::query()->visibleTo($request->user())->where('due_at', '<=', now()->endOfDay())->count()
+                : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

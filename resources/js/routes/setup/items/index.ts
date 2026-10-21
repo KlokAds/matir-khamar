@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\StockController::store
-* @see app/Http/Controllers/StockController.php:130
+* @see app/Http/Controllers/StockController.php:139
 * @route '/setup/items'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\StockController::store
-* @see app/Http/Controllers/StockController.php:130
+* @see app/Http/Controllers/StockController.php:139
 * @route '/setup/items'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\StockController::store
-* @see app/Http/Controllers/StockController.php:130
+* @see app/Http/Controllers/StockController.php:139
 * @route '/setup/items'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\StockController::store
-* @see app/Http/Controllers/StockController.php:130
+* @see app/Http/Controllers/StockController.php:139
 * @route '/setup/items'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\StockController::store
-* @see app/Http/Controllers/StockController.php:130
+* @see app/Http/Controllers/StockController.php:139
 * @route '/setup/items'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\StockController::update
-* @see app/Http/Controllers/StockController.php:148
+* @see app/Http/Controllers/StockController.php:157
 * @route '/setup/items/{item}'
 */
 export const update = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -72,7 +72,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\StockController::update
-* @see app/Http/Controllers/StockController.php:148
+* @see app/Http/Controllers/StockController.php:157
 * @route '/setup/items/{item}'
 */
 update.url = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -105,7 +105,7 @@ update.url = (args: { item: number | { id: number } } | [item: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\StockController::update
-* @see app/Http/Controllers/StockController.php:148
+* @see app/Http/Controllers/StockController.php:157
 * @route '/setup/items/{item}'
 */
 update.put = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -115,7 +115,7 @@ update.put = (args: { item: number | { id: number } } | [item: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\StockController::update
-* @see app/Http/Controllers/StockController.php:148
+* @see app/Http/Controllers/StockController.php:157
 * @route '/setup/items/{item}'
 */
 const updateForm = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -130,7 +130,7 @@ const updateForm = (args: { item: number | { id: number } } | [item: number | { 
 
 /**
 * @see \App\Http\Controllers\StockController::update
-* @see app/Http/Controllers/StockController.php:148
+* @see app/Http/Controllers/StockController.php:157
 * @route '/setup/items/{item}'
 */
 updateForm.put = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

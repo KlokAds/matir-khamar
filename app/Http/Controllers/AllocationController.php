@@ -55,13 +55,13 @@ class AllocationController extends Controller
         $month = Date::parse($data['month'].'-01');
 
         if ($month->greaterThan(now()->startOfMonth())) {
-            return back()->withErrors(['month' => 'ভবিষ্যতের মাসের খরচ ভাগ করা যায় না।']);
+            return back()->withErrors(['month' => __('ভবিষ্যতের মাসের খরচ ভাগ করা যায় না।')]);
         }
 
         $weights = collect((array) $data['weights'])->mapWithKeys(fn ($weight, $id) => [(int) $id => (float) $weight])->all();
         $entry = $allocation->post(CostCenter::query()->findOrFail((int) $data['source_id']), $month, $weights, $data['method']);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "খরচ ভাগ হয়েছে ({$entry->number})।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('খরচ ভাগ হয়েছে (:number)।', ['number' => $entry->number])]);
 
         return to_route('entries.show', $entry);
     }

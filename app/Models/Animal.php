@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $sex
  * @property string|null $breed
  * @property int $cost_center_id
+ * @property int|null $batch_id fattening round it came in with
  * @property int|null $mother_id
  * @property string $status
  * @property string $acquisition
@@ -34,10 +35,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CostCenter $costCenter
  * @property-read Animal|null $mother
  * @property-read Collection<int, AnimalPlacement> $placements
+ * @property-read Batch|null $batch
+ * @property-read Collection<int, AnimalWeight> $weights
+ * @property-read Collection<int, Breeding> $breedings
  * @property-read Collection<int, JournalLine> $lines
  */
 #[Fillable([
-    'tag', 'name', 'sex', 'breed', 'cost_center_id', 'mother_id', 'status', 'acquisition',
+    'tag', 'name', 'sex', 'breed', 'cost_center_id', 'batch_id', 'mother_id', 'status', 'acquisition',
     'acquired_on', 'birth_date', 'purchase_cost', 'book_value', 'disposed_on', 'sale_amount', 'notes',
 ])]
 class Animal extends Model
@@ -70,6 +74,24 @@ class Animal extends Model
     public function mother(): BelongsTo
     {
         return $this->belongsTo(self::class, 'mother_id');
+    }
+
+    /** @return BelongsTo<Batch, $this> */
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class);
+    }
+
+    /** @return HasMany<AnimalWeight, $this> */
+    public function weights(): HasMany
+    {
+        return $this->hasMany(AnimalWeight::class)->orderBy('date');
+    }
+
+    /** @return HasMany<Breeding, $this> */
+    public function breedings(): HasMany
+    {
+        return $this->hasMany(Breeding::class)->orderByDesc('served_on');
     }
 
     /** @return HasMany<AnimalPlacement, $this> */

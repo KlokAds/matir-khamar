@@ -160,3 +160,73 @@ self.addEventListener('fetch', (event) => {
     // Any other page: the network, and the saved offline page when there is none.
     event.respondWith(fetch(request).catch(() => offlinePage()));
 });
+
+/*
+ * Notifications. The server sends {title, body, url, tag, actions[{action, title, url}]};
+ * the action buttons ("হয়ে গেছে", "১ ঘণ্টা পরে") post to their signed link, no app needed.
+ */
+self.addEventListener('push', (event) => {
+    let data = {};
+
+    try {
+        data = event.data ? event.data.json() : {};
+    } catch {
+        data = { title: 'মাটির খামার', body: event.data ? event.data.text() : '' };
+    }
+
+    const actions = (data.actions || []).slice(0, 2);
+
+    event.waitUntil(
+        self.registration.showNotification(data.title || 'মাটির খামার', {
+            body: data.body || '',
+            tag: data.tag,
+            renotify: Boolean(data.tag),
+            requireInteraction: Boolean(data.requireInteraction),
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+            vibrate: [300, 120, 300, 120, 600],
+            lang: 'bn',
+            data: {
+                url: data.url || '/dashboard',
+                actions: Object.fromEntries(
+                    actions.map((a) => [a.action, a.url]),
+                ),
+            },
+            actions: actions.map((a) => ({ action: a.action, title: a.title })),
+        }),
+    );
+});
+
+self.addEventListener('notificationclick', (event) => {
+    const { url, actions } = event.notification.data || {};
+    event.notification.close();
+
+    if (event.action && actions && actions[event.action]) {
+        event.waitUntil(
+            fetch(actions[event.action], {
+                method: 'POST',
+                credentials: 'omit',
+            }).catch(() => undefined),
+        );
+
+        return;
+    }
+
+    event.waitUntil(
+        self.clients
+            .matchAll({ type: 'window', includeUncontrolled: true })
+            .then((windows) => {
+                const open = windows.find(
+                    (w) => new URL(w.url).origin === self.location.origin,
+                );
+
+                if (open) {
+                    open.focus();
+
+                    return open.navigate(url || '/dashboard');
+                }
+
+                return self.clients.openWindow(url || '/dashboard');
+            }),
+    );
+});

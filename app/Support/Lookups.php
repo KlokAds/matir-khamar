@@ -91,7 +91,7 @@ final class Lookups
             'id' => $item->id,
             'name' => $item->name,
             'unit' => $item->unit,
-            'unit_label' => Item::UNITS[$item->unit] ?? $item->unit,
+            'unit_label' => Tr::get(Item::UNITS[$item->unit] ?? $item->unit),
             'kind' => $item->kind,
             'qty_on_hand' => $item->qty_on_hand,
             'value_on_hand' => $item->value_on_hand,

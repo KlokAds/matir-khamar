@@ -27,17 +27,16 @@ class EnsureAccountIsSecure
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors(['email' => 'এই অ্যাকাউন্টটি বন্ধ করা হয়েছে।']);
+            return redirect()->route('login')->withErrors(['email' => __('এই অ্যাকাউন্টটি বন্ধ করা হয়েছে।')]);
         }
 
-        // The owner's super account is left to choose two-factor for itself.
+        // Each role says whether it needs two-factor; the owner's super account chooses for itself.
         $mustEnroll = config('khamar.require_two_factor')
-            && ! $user->is_super
-            && $user->role->requiresTwoFactor()
+            && $user->mustUseTwoFactor()
             && ! $user->hasTwoFactorEnabled();
 
         if ($mustEnroll && ! $request->routeIs('security.edit', 'two-factor.*', 'password.confirm*', 'logout', 'user-password.update', 'passkey*', 'appearance.edit')) {
-            Inertia::flash('toast', ['type' => 'warning', 'message' => 'হিসাব রক্ষার জন্য আগে ২-ধাপ যাচাই (2FA) চালু করুন।']);
+            Inertia::flash('toast', ['type' => 'warning', 'message' => __('হিসাব রক্ষার জন্য আগে ২-ধাপ যাচাই (2FA) চালু করুন।')]);
 
             return redirect()->route('security.edit');
         }

@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
+import { t } from '@/lib/i18n';
 
 defineOptions({
     layout: {
@@ -26,7 +27,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="লগইন" />
+    <Head :title="t('লগইন')" />
 
     <div
         v-if="status"
@@ -45,7 +46,7 @@ defineProps<{
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">ইমেইল</Label>
+                <Label for="email">{{ t('ইমেইল') }}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -61,14 +62,14 @@ defineProps<{
 
             <div class="grid gap-2">
                 <div class="flex items-center justify-between">
-                    <Label for="password">পাসওয়ার্ড</Label>
+                    <Label for="password">{{ t('পাসওয়ার্ড') }}</Label>
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
                         class="text-sm"
                         :tabindex="5"
                     >
-                        পাসওয়ার্ড ভুলে গেছেন?
+                        {{ t('পাসওয়ার্ড ভুলে গেছেন?') }}
                     </TextLink>
                 </div>
                 <PasswordInput
@@ -77,7 +78,7 @@ defineProps<{
                     required
                     :tabindex="2"
                     autocomplete="current-password"
-                    placeholder="পাসওয়ার্ড"
+                    :placeholder="t('পাসওয়ার্ড')"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -85,7 +86,7 @@ defineProps<{
             <div class="flex items-center justify-between">
                 <Label for="remember" class="flex items-center space-x-3">
                     <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>এই ফোন/কম্পিউটারে মনে রাখুন</span>
+                    <span>{{ t('এই ফোন/কম্পিউটারে মনে রাখুন') }}</span>
                 </Label>
             </div>
 
@@ -97,12 +98,12 @@ defineProps<{
                 data-test="login-button"
             >
                 <Spinner v-if="processing" />
-                প্রবেশ করুন
+                {{ t('প্রবেশ করুন') }}
             </Button>
         </div>
 
         <p class="text-center text-xs text-muted-foreground">
-            নতুন অ্যাকাউন্ট শুধু হিসাব অ্যাডমিন খুলে দিতে পারেন।
+            {{ t('নতুন অ্যাকাউন্ট শুধু হিসাব অ্যাডমিন খুলে দিতে পারেন।') }}
         </p>
     </Form>
 </template>

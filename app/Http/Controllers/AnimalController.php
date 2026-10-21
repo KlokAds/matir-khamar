@@ -4,16 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Models\Animal;
+use App\Models\Batch;
+use App\Models\Breeding;
+use App\Models\CostCenter;
+use App\Models\HealthEvent;
 use App\Models\JournalLine;
 use App\Models\MilkRecord;
 use App\Services\AllocationService;
 use App\Services\AnimalService;
+use App\Services\HerdCare;
 use App\Services\ReportService;
+use App\Support\CareGuide;
 use App\Support\Lookups;
 use App\Support\Money;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,7 +34,7 @@ class AnimalController extends Controller
 
         return Inertia::render('animals/Index', [
             'status' => $status,
-            'statuses' => Animal::STATUSES,
+            'statuses' => Tr::all(Animal::STATUSES),
             'animals' => Animal::query()->with('costCenter:id,name')->where('status', $status)->orderBy('tag')->get()->map(fn (Animal $animal) => [
                 'id' => $animal->id,
                 'tag' => $animal->tag,
@@ -41,22 +49,30 @@ class AnimalController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(AnimalService $animals): Response
     {
         return Inertia::render('animals/Create', [
             'centers' => array_values(array_filter(Lookups::centers(), fn ($center) => $center['holds_animals'])),
             'moneyAccounts' => Lookups::moneyAccounts(),
             'budgetHeads' => Lookups::budgetHeads(),
             'mothers' => Animal::query()->where('status', 'active')->where('sex', 'female')->orderBy('tag')->get(['id', 'tag', 'name']),
-            'acquisitions' => Animal::ACQUISITIONS,
+            'acquisitions' => Tr::all(Animal::ACQUISITIONS),
             'maxVoucherKb' => config('khamar.max_voucher_kb'),
+            'batches' => Batch::query()->whereNull('closed_on')->orderByDesc('number')->get()
+                ->map(fn (Batch $b) => ['id' => $b->id, 'label' => $b->label(), 'cost_center_id' => $b->cost_center_id, 'started_on' => $b->started_on->toDateString()]),
+            'nextTags' => (object) CostCenter::query()->where('holds_animals', true)->get()
+                ->mapWithKeys(fn (CostCenter $c) => [$c->id => $animals->nextTag($c)])->all(),
+            'nextBatchNumbers' => (object) CostCenter::query()->where('holds_animals', true)->pluck('id')
+                ->mapWithKeys(fn ($id) => [$id => Batch::nextNumber((int) $id)])->all(),
         ]);
     }
 
-    public function store(Request $request, AnimalService $animals): RedirectResponse
+    public function store(Request $request, AnimalService $animals, HerdCare $care): RedirectResponse
     {
         $data = $request->validate([
-            'tag' => ['required', 'string', 'max:30', 'unique:animals,tag'],
+            // Left empty, the next running tag of the category is given (M-04, G-02…).
+            'tag' => ['nullable', 'string', 'max:30', 'unique:animals,tag'],
+            'count' => ['nullable', 'integer', 'min:1', 'max:50'],
             'name' => ['nullable', 'string', 'max:60'],
             'sex' => ['required', Rule::in(['female', 'male'])],
             'breed' => ['nullable', 'string', 'max:60'],
@@ -65,6 +81,10 @@ class AnimalController extends Controller
             'acquired_on' => ['required', 'date', 'before_or_equal:today'],
             'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
             'mother_id' => ['nullable', 'exists:animals,id'],
+            // An existing fattening round, or "new" to open the next numbered one.
+            'batch' => ['nullable', Rule::in(['new', ...Batch::query()->whereNull('closed_on')->pluck('id')->map(fn ($id) => (string) $id)->all()])],
+            'weight_kg' => ['nullable', 'numeric', 'min:5', 'max:2000'],
+            'months_pregnant' => ['nullable', 'numeric', 'min:0.5', 'max:9.5'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'cost' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'paid_from_account_id' => ['required_if:acquisition,purchase', 'nullable', Rule::exists('accounts', 'id')->whereIn('subtype', Account::MONEY_SUBTYPES)],
@@ -74,23 +94,92 @@ class AnimalController extends Controller
         ]);
 
         $cost = $data['acquisition'] === 'born' ? 0 : Money::toPoisha($data['cost'] ?? 0);
+        $count = $data['acquisition'] === 'born' ? 1 : (int) ($data['count'] ?? 1);
 
-        $animal = $animals->register(
-            Arr::only($data, ['tag', 'name', 'sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'mother_id', 'notes']),
-            $cost,
-            $data['paid_from_account_id'] ?? null,
-            $data['budget_head_id'] ?? null,
-            $this->attachments($request),
-        );
+        if ($count > 1) {
+            return $this->storeGroup($request, $data, $count, $cost, $animals, $care);
+        }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag} খামারের তালিকায় যোগ হয়েছে।"]);
+        $data['tag'] = ($data['tag'] ?? '') ?: $animals->nextTag(CostCenter::query()->findOrFail((int) $data['cost_center_id']));
+
+        // The batch, the animal, its first weight and a known pregnancy are saved together or not at all.
+        $animal = DB::transaction(function () use ($data, $cost, $request, $animals, $care): Animal {
+            $batchId = $this->batchFor($data);
+
+            $animal = $animals->register(
+                [...Arr::only($data, ['tag', 'name', 'sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'mother_id', 'notes']), 'batch_id' => $batchId],
+                $cost,
+                $data['paid_from_account_id'] ?? null,
+                $data['budget_head_id'] ?? null,
+                $this->attachments($request),
+            );
+
+            if (! empty($data['weight_kg'])) {
+                $animal->weights()->create(['date' => $data['acquired_on'], 'kg' => $data['weight_kg'], 'note' => 'শুরুর ওজন', 'created_by' => $request->user()->id]);
+            }
+
+            if (! empty($data['months_pregnant']) && $animal->sex === 'female') {
+                $care->recordService($animal, ['months_pregnant' => $data['months_pregnant'], 'notes' => 'কেনার সময় গর্ভবতী']);
+            }
+
+            return $animal;
+        });
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':tag খামারের তালিকায় যোগ হয়েছে।', ['tag' => $animal->tag])]);
 
         return to_route('animals.show', $animal);
     }
 
-    public function show(Animal $animal, ReportService $reports, AllocationService $allocation): Response
+    /**
+     * Two or more bought together: one price shared, one entry, each animal its own card.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function storeGroup(Request $request, array $data, int $count, int $cost, AnimalService $animals, HerdCare $care): RedirectResponse
     {
-        $animal->load(['costCenter:id,name', 'mother:id,tag', 'placements.costCenter:id,name']);
+        $group = DB::transaction(function () use ($request, $data, $count, $cost, $animals, $care): array {
+            $group = $animals->registerGroup(
+                [...Arr::only($data, ['sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'notes']), 'batch_id' => $this->batchFor($data)],
+                $count,
+                $cost,
+                $data['paid_from_account_id'] ?? null,
+                $data['budget_head_id'] ?? null,
+                $this->attachments($request),
+            );
+
+            if (! empty($data['months_pregnant']) && $data['sex'] === 'female') {
+                foreach ($group as $animal) {
+                    $care->recordService($animal, ['months_pregnant' => $data['months_pregnant'], 'notes' => 'কেনার সময় গর্ভবতী']);
+                }
+            }
+
+            return $group;
+        });
+
+        $tags = implode(', ', array_map(fn (Animal $a) => $a->tag, $group));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':countটি গরু যোগ হয়েছে: :tags', ['count' => $count, 'tags' => $tags])]);
+
+        return to_route('animals.index');
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function batchFor(array $data): ?int
+    {
+        return match ($data['batch'] ?? null) {
+            null, '' => null,
+            'new' => Batch::query()->create([
+                'cost_center_id' => (int) $data['cost_center_id'],
+                'number' => Batch::nextNumber((int) $data['cost_center_id']),
+                'started_on' => $data['acquired_on'],
+            ])->id,
+            default => (int) $data['batch'],
+        };
+    }
+
+    public function show(Animal $animal, ReportService $reports, AllocationService $allocation, HerdCare $care): Response
+    {
+        $animal->load(['costCenter:id,name', 'mother:id,tag', 'placements.costCenter:id,name', 'batch', 'weights', 'breedings.animal:id,tag,name']);
+        $ageDays = $animal->birth_date ? (int) $animal->birth_date->diffInDays(now()->startOfDay()) : null;
 
         return Inertia::render('animals/Show', [
             'animal' => [
@@ -100,8 +189,8 @@ class AnimalController extends Controller
                 'disposed_on' => $animal->disposed_on?->toDateString(),
                 'center' => $animal->costCenter->name,
                 'mother' => $animal->mother?->tag,
-                'status_label' => Animal::STATUSES[$animal->status],
-                'acquisition_label' => Animal::ACQUISITIONS[$animal->acquisition],
+                'status_label' => __(Animal::STATUSES[$animal->status]),
+                'acquisition_label' => __(Animal::ACQUISITIONS[$animal->acquisition]),
             ],
             'placements' => $animal->placements->map(fn ($placement) => [
                 'center' => $placement->costCenter->name,
@@ -122,6 +211,26 @@ class AnimalController extends Controller
             'centers' => array_values(array_filter(Lookups::centers(), fn ($center) => $center['holds_animals'])),
             'moneyAccounts' => Lookups::moneyAccounts(),
             'customers' => Lookups::parties('customer'),
+            'batch' => $animal->batch ? ['id' => $animal->batch->id, 'label' => $animal->batch->label(), 'days' => $animal->batch->daysRunning(), 'target_days' => $animal->batch->target_days] : null,
+            'weights' => $animal->weights->map(fn ($w) => ['id' => $w->id, 'date' => $w->date->toDateString(), 'kg' => $w->kg, 'note' => $w->note])->values(),
+            'growth' => $care->growth($animal),
+            'breedings' => $animal->breedings->map(fn ($b) => $care->breedingCard($b))->values(),
+            'breedingOptions' => ['methods' => Tr::all(Breeding::METHODS), 'results' => Tr::all(Breeding::RESULTS), 'outcomes' => Tr::all(Breeding::OUTCOMES)],
+            'ageDays' => $ageDays,
+            'calfStage' => $ageDays !== null && $ageDays <= 540 ? CareGuide::stageFor(CareGuide::calf(), $ageDays) : null,
+            // Its own doses plus those given to its whole category or the whole farm.
+            'health' => HealthEvent::query()->with(['animal:id,tag', 'costCenter:id,name'])
+                ->where(fn ($q) => $q->where('animal_id', $animal->id)
+                    ->orWhere(fn ($w) => $w->whereNull('animal_id')->where(fn ($c) => $c->where('cost_center_id', $animal->cost_center_id)->orWhereNull('cost_center_id'))))
+                ->orderByDesc('given_on')->limit(20)->get()
+                ->map(fn (HealthEvent $e) => [
+                    'id' => $e->id,
+                    'kind_label' => __(HealthEvent::KINDS[$e->kind] ?? $e->kind),
+                    'name' => $e->name,
+                    'target' => $e->target(),
+                    'given_on' => $e->given_on->toDateString(),
+                    'next_due_on' => $e->next_due_on?->toDateString(),
+                ]),
         ]);
     }
 
@@ -134,7 +243,7 @@ class AnimalController extends Controller
 
         $animals->transfer($animal, (int) $data['cost_center_id'], $data['date']);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'ক্যাটাগরি বদল হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ক্যাটাগরি বদল হয়েছে।')]);
 
         return back();
     }
@@ -150,7 +259,7 @@ class AnimalController extends Controller
 
         $animals->sell($animal, $data['date'], Money::toPoisha($data['amount']), (int) $data['money_account_id'], $data['party_id'] ?? null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag} বিক্রি লেখা হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':tag বিক্রি লেখা হয়েছে।', ['tag' => $animal->tag])]);
 
         return back();
     }
@@ -164,7 +273,7 @@ class AnimalController extends Controller
 
         $animals->recordDeath($animal, $data['date'], $data['note'] ?? null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'মৃত্যু লেখা হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('মৃত্যু লেখা হয়েছে।')]);
 
         return back();
     }

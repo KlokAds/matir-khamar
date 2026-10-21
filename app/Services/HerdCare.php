@@ -1,0 +1,354 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Animal;
+use App\Models\AnimalWeight;
+use App\Models\Batch;
+use App\Models\Breeding;
+use App\Models\FarmNote;
+use App\Models\HealthEvent;
+use App\Models\MilkRecord;
+use App\Support\BanglaDate;
+use App\Support\CareGuide;
+use App\Support\Tr;
+use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * The herd beyond money: services and pregnancies, fattening rounds, weights, and the
+ * reminders that come out of them.
+ */
+class HerdCare
+{
+    public function __construct(private ReportService $reports, private AllocationService $allocation) {}
+
+    /**
+     * Record a service. When only "how many months along" is known (a cow bought already
+     * carrying), the service day is worked back from it and marked as an estimate.
+     *
+     * @param  array{served_on?:string|null, months_pregnant?:float|int|string|null, method?:string|null, sire?:string|null, by_whom?:string|null, notes?:string|null}  $data
+     */
+    public function recordService(Animal $animal, array $data): Breeding
+    {
+        if ($animal->sex !== 'female') {
+            throw ValidationException::withMessages(['animal' => __('শুধু গাভী বা বকনার গর্ভের হিসাব রাখা যায়।')]);
+        }
+
+        if (Breeding::query()->where('animal_id', $animal->id)->whereNull('calved_on')->where('result', '!=', 'empty')->exists()) {
+            throw ValidationException::withMessages(['served_on' => __('এই গরুর আগের গর্ভের হিসাব এখনো খোলা — আগে সেটা শেষ করুন।')]);
+        }
+
+        $months = (float) ($data['months_pregnant'] ?? 0);
+        $estimated = $months > 0;
+        if (! $estimated && empty($data['served_on'])) {
+            throw ValidationException::withMessages(['served_on' => __('বীজ দেওয়ার তারিখ, নয়তো কত মাস চলছে — একটি দিন।')]);
+        }
+
+        $served = $estimated
+            ? now()->startOfDay()->subDays((int) round($months * 30.4))
+            : Date::parse((string) ($data['served_on'] ?? ''));
+
+        return Breeding::query()->create([
+            'animal_id' => $animal->id,
+            'served_on' => $served->toDateString(),
+            'served_on_estimated' => $estimated,
+            'method' => $data['method'] ?? 'ai',
+            'sire' => $data['sire'] ?? null,
+            'by_whom' => $data['by_whom'] ?? null,
+            // Bought already carrying: the pregnancy is known, not waiting for a check.
+            'result' => $estimated ? 'pregnant' : 'pending',
+            'expected_on' => $served->addDays(Breeding::GESTATION_DAYS)->toDateString(),
+            'notes' => $data['notes'] ?? null,
+            'created_by' => auth()->id(),
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function breedingCard(Breeding $breeding): array
+    {
+        $day = $breeding->daysCarried();
+        $open = $breeding->isOpen();
+        $stage = $open ? CareGuide::stageFor(CareGuide::pregnancy(), $day) : null;
+
+        return [
+            'id' => $breeding->id,
+            'animal_id' => $breeding->animal_id,
+            'tag' => $breeding->animal->tag ?? null,
+            'name' => $breeding->animal->name ?? null,
+            'served_on' => $breeding->served_on->toDateString(),
+            'estimated' => $breeding->served_on_estimated,
+            'method' => Tr::get(Breeding::METHODS[$breeding->method] ?? $breeding->method),
+            'sire' => $breeding->sire,
+            'by_whom' => $breeding->by_whom,
+            'result' => $breeding->result,
+            'result_label' => Tr::get(Breeding::RESULTS[$breeding->result] ?? $breeding->result),
+            'checked_on' => $breeding->checked_on?->toDateString(),
+            'expected_on' => $breeding->expected_on->toDateString(),
+            'calved_on' => $breeding->calved_on?->toDateString(),
+            'outcome' => $breeding->outcome,
+            'outcome_label' => $breeding->outcome ? Tr::get(Breeding::OUTCOMES[$breeding->outcome] ?? $breeding->outcome) : null,
+            'calf_id' => $breeding->calf_id,
+            'notes' => $breeding->notes,
+            'open' => $open,
+            'day' => $day,
+            'months' => BanglaDate::span($day),
+            'days_left' => $open ? (int) now()->startOfDay()->diffInDays($breeding->expected_on, false) : null,
+            'progress' => min(100, (int) round($day / Breeding::GESTATION_DAYS * 100)),
+            'stage' => $stage,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function batchCard(Batch $batch): array
+    {
+        $batch->loadMissing(['animals.placements', 'animals.weights', 'costCenter:id,name']);
+        $days = $batch->daysRunning();
+        $cost = ['purchase' => 0, 'direct' => 0, 'shared' => 0, 'sale' => 0];
+        $gains = [];
+        $animals = [];
+
+        foreach ($batch->animals as $animal) {
+            $c = $this->reports->animalCost($animal, $this->allocation);
+            $cost['purchase'] += $c['purchase'];
+            $cost['direct'] += $c['direct'];
+            $cost['shared'] += $c['shared'];
+            $cost['sale'] += (int) $c['sale'];
+            $growth = $this->growth($animal);
+
+            if ($growth['per_day'] !== null) {
+                $gains[] = $growth['per_day'];
+            }
+
+            $animals[] = [
+                'id' => $animal->id,
+                'tag' => $animal->tag,
+                'name' => $animal->name,
+                'status' => $animal->status,
+                'purchase_cost' => $animal->purchase_cost,
+                ...$growth,
+            ];
+        }
+
+        $spent = $cost['purchase'] + $cost['direct'] + $cost['shared'];
+        $soldAll = $batch->animals->isNotEmpty() && $batch->animals->every(fn (Animal $a) => $a->status !== 'active');
+
+        return [
+            'id' => $batch->id,
+            'label' => $batch->label(),
+            'name' => $batch->name,
+            'number' => $batch->number,
+            'center' => $batch->costCenter->name,
+            'cost_center_id' => $batch->cost_center_id,
+            'started_on' => $batch->started_on->toDateString(),
+            'closed_on' => $batch->closed_on?->toDateString(),
+            'days' => $days,
+            'span' => BanglaDate::span($days),
+            'target_days' => $batch->target_days,
+            'target_on' => $batch->started_on->addDays($batch->target_days)->toDateString(),
+            'target_gain_kg' => $batch->target_gain_kg,
+            'progress' => min(100, (int) round($days / max(1, $batch->target_days) * 100)),
+            'notes' => $batch->notes,
+            'animals' => $animals,
+            'head' => count($animals),
+            'avg_gain' => $gains === [] ? null : round(array_sum($gains) / count($gains), 2),
+            'cost' => $cost,
+            'spent' => $spent,
+            'profit' => $soldAll ? $cost['sale'] - $spent : null,
+            'stage' => $batch->closed_on ? null : CareGuide::stageFor(CareGuide::fattening(), $days),
+        ];
+    }
+
+    /**
+     * First and last weight and the gain per day between them.
+     *
+     * @return array{first_kg:?float, last_kg:?float, last_on:?string, per_day:?float}
+     */
+    public function growth(Animal $animal): array
+    {
+        /** @var AnimalWeight|null $first */
+        $first = $animal->weights->first();
+        /** @var AnimalWeight|null $last */
+        $last = $animal->weights->last();
+        $perDay = null;
+
+        if ($first !== null && $last !== null) {
+            $days = (int) $first->date->diffInDays($last->date);
+            $perDay = $days > 0 ? round(($last->kg - $first->kg) / $days, 2) : null;
+        }
+
+        return [
+            'first_kg' => $first?->kg,
+            'last_kg' => $last?->kg,
+            'last_on' => $last?->date->toDateString(),
+            'per_day' => $perDay,
+        ];
+    }
+
+    /**
+     * Vaccines and dewormings due within a week (or overdue), unless a newer dose of the same
+     * thing was already given to the same animal or category.
+     *
+     * @return list<array{kind:string, title:string, detail:string, href:string, when:string, urgent:bool}>
+     */
+    public function healthDue(CarbonInterface $today, int $withinDays = 7): array
+    {
+        $items = [];
+        $events = HealthEvent::query()->with(['animal:id,tag,status', 'costCenter:id,name'])
+            ->whereNotNull('next_due_on')
+            ->whereDate('next_due_on', '<=', $today->addDays($withinDays))
+            ->get();
+
+        foreach ($events as $event) {
+            if ($event->animal && $event->animal->status !== 'active') {
+                continue;
+            }
+
+            $newer = HealthEvent::query()->where('name', $event->name)
+                ->where('animal_id', $event->animal_id)->where('cost_center_id', $event->cost_center_id)
+                ->whereDate('given_on', '>', $event->given_on)->exists();
+
+            if ($newer) {
+                continue;
+            }
+
+            /** @var CarbonInterface $due */
+            $due = $event->next_due_on;
+            $left = (int) $today->diffInDays($due, false);
+            $what = $event->target().': '.Tr::get($event->name);
+            $items[] = [
+                'kind' => 'health',
+                'title' => match (true) {
+                    $left < 0 => Tr::get(':what — :days দিন পার', ['what' => $what, 'days' => abs($left)]),
+                    $left === 0 => Tr::get(':what আজ', ['what' => $what]),
+                    default => Tr::get(':what :days দিন পর', ['what' => $what, 'days' => $left]),
+                },
+                'detail' => Tr::get(':kind · আগেরটা :date', ['kind' => Tr::all(HealthEvent::KINDS)[$event->kind] ?? '', 'date' => BanglaDate::day($event->given_on)]),
+                'href' => $event->animal_id ? "/animals/{$event->animal_id}" : '/health',
+                'when' => $due->toDateString(),
+                'urgent' => $left <= 0,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * A cow giving clearly less milk than her own recent days is often the first sign of
+     * illness: the last 3 days against the 7 before them, per cow, when she gives at least 2 L.
+     *
+     * @return list<array{kind:string, title:string, detail:string, href:string, when:string, urgent:bool}>
+     */
+    public function milkDrops(CarbonInterface $today): array
+    {
+        $recentFrom = $today->subDays(3)->toDateString();
+        $baseFrom = $today->subDays(10)->toDateString();
+        $rows = MilkRecord::query()->whereNotNull('animal_id')
+            ->where('date', '>=', $baseFrom)->where('date', '<', $today->toDateString())
+            ->selectRaw('animal_id, SUM(CASE WHEN date >= ? THEN liters ELSE 0 END) as recent, SUM(CASE WHEN date < ? THEN liters ELSE 0 END) as base', [$recentFrom, $recentFrom])
+            ->groupBy('animal_id')->get();
+        $items = [];
+
+        foreach ($rows as $row) {
+            $recent = (float) $row->getAttribute('recent') / 3;
+            $base = (float) $row->getAttribute('base') / 7;
+
+            if ($base >= 2 && $recent < $base * 0.8) {
+                $animal = Animal::query()->whereKey((int) $row->getAttribute('animal_id'))->first();
+
+                if ($animal === null || $animal->status !== 'active') {
+                    continue;
+                }
+
+                $drop = (int) round((1 - $recent / $base) * 100);
+                $items[] = [
+                    'kind' => 'milk',
+                    'title' => Tr::get(':tag: দুধ :drop% কমেছে — শরীর দেখুন', ['tag' => $animal->tag, 'drop' => $drop]),
+                    'detail' => Tr::get('আগে দিনে :base লি., এখন :recent লি.', ['base' => round($base, 1), 'recent' => round($recent, 1)]),
+                    'href' => "/animals/{$animal->id}",
+                    'when' => $today->toDateString(),
+                    'urgent' => $drop >= 35,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    /** Whether the farm has cows in the dairy category, so missing milk is worth a nudge. */
+    public function hasMilkingCows(): bool
+    {
+        return Animal::query()->where('status', 'active')
+            ->whereHas('costCenter', fn ($query) => $query->where('code', 'GAVI'))
+            ->exists();
+    }
+
+    /**
+     * What needs doing soon, newest concern first: heat checks, pregnancy checks, calvings,
+     * fattening rounds past their target, and diary follow-ups.
+     *
+     * @return list<array{kind:string, title:string, detail:string, href:string, when:string, urgent:bool}>
+     */
+    public function reminders(?CarbonInterface $today = null): array
+    {
+        $today = ($today ?? now())->startOfDay();
+        $items = [];
+
+        $open = Breeding::query()->with('animal:id,tag,name,status')
+            ->whereNull('calved_on')->where('result', '!=', 'empty')
+            ->whereHas('animal', fn ($query) => $query->where('status', 'active'))
+            ->get();
+
+        foreach ($open as $breeding) {
+            $day = (int) $breeding->served_on->diffInDays($today);
+            $tag = $breeding->animal->tag;
+            $href = "/animals/{$breeding->animal_id}";
+
+            if ($breeding->result === 'pending' && $day >= 18 && $day <= 24) {
+                $items[] = ['kind' => 'heat', 'title' => Tr::get(':tag: আবার গরম আসছে কি না দেখুন', ['tag' => $tag]), 'detail' => Tr::get('বীজ দেওয়ার :day দিন', ['day' => $day]), 'href' => $href, 'when' => $today->toDateString(), 'urgent' => false];
+            }
+
+            if ($breeding->result === 'pending' && $day >= 60) {
+                $items[] = ['kind' => 'check', 'title' => Tr::get(':tag: গর্ভ পরীক্ষা করান', ['tag' => $tag]), 'detail' => Tr::get('বীজ দেওয়ার :day দিন হলো, ফল লেখা হয়নি', ['day' => $day]), 'href' => $href, 'when' => $today->toDateString(), 'urgent' => $day > 90];
+            }
+
+            $left = (int) $today->diffInDays($breeding->expected_on, false);
+
+            if ($left <= 30) {
+                $items[] = ['kind' => 'calving', 'title' => $left >= 0 ? Tr::get(':tag: :left দিনের মধ্যে বাচ্চা হবে', ['tag' => $tag, 'left' => $left]) : Tr::get(':tag: বাচ্চা হওয়ার দিন :days দিন পার', ['tag' => $tag, 'days' => abs($left)]), 'detail' => Tr::get('আনুমানিক :date', ['date' => BanglaDate::day($breeding->expected_on)]), 'href' => $href, 'when' => $breeding->expected_on->toDateString(), 'urgent' => $left <= 7];
+            }
+
+            if ($breeding->result === 'pregnant' && $day >= 218 && $day <= 230) {
+                $items[] = ['kind' => 'dry', 'title' => Tr::get(':tag: দুধ বন্ধ করার সময় (শুষ্ক সময়)', ['tag' => $tag]), 'detail' => Tr::get('গর্ভের :day দিন', ['day' => $day]), 'href' => $href, 'when' => $today->toDateString(), 'urgent' => false];
+            }
+        }
+
+        foreach (Batch::query()->whereNull('closed_on')->get() as $batch) {
+            $days = $batch->daysRunning();
+
+            if ($days >= $batch->target_days) {
+                $items[] = ['kind' => 'batch', 'title' => Tr::get(':batch: লক্ষ্যের :target দিন পূর্ণ', ['batch' => $batch->label(), 'target' => $batch->target_days]), 'detail' => Tr::get('চলছে :days দিন — বিক্রির কথা ভাবুন', ['days' => $days]), 'href' => '/batches', 'when' => $today->toDateString(), 'urgent' => $days > $batch->target_days + 14];
+            }
+        }
+
+        foreach ($this->healthDue($today) as $due) {
+            $items[] = $due;
+        }
+
+        foreach ($this->milkDrops($today) as $drop) {
+            $items[] = $drop;
+        }
+
+        $notes = FarmNote::query()->whereNull('done_at')->whereNotNull('follow_up_on')
+            ->whereDate('follow_up_on', '<=', $today->addDays(3))->orderBy('follow_up_on')->get();
+
+        foreach ($notes as $note) {
+            $items[] = ['kind' => 'note', 'title' => $note->title, 'detail' => Tr::get('ডায়েরির কাজ · :date', ['date' => BanglaDate::day($note->follow_up_on)]), 'href' => '/diary', 'when' => $note->follow_up_on->toDateString(), 'urgent' => $note->follow_up_on->lessThan($today)];
+        }
+
+        usort($items, fn ($a, $b) => [$b['urgent'], $a['when']] <=> [$a['urgent'], $b['when']]);
+
+        return $items;
+    }
+}
