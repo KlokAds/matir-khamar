@@ -21,7 +21,9 @@ class ReportController extends Controller
         $to = $request->filled('to') ? Date::parse($request->string('to')) : now()->endOfMonth();
 
         $balances = $reports->balances()->filter(fn ($row) => $row['balance'] !== 0 && in_array($row['type'], ['asset', 'liability', 'equity'], true))->values();
-        $result = $reports->farmTotals(Date::parse('2000-01-01'), now()->endOfDay());
+        // Every income and expense ever posted, own produce included, so the balance sheet always balances.
+        $result = $reports->accountTotals(Date::parse('2000-01-01'), now()->endOfDay(), null);
+        $result['profit'] = $result['income'] - $result['expense'];
 
         return Inertia::render('reports/Index', [
             'from' => $from->toDateString(),

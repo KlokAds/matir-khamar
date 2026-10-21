@@ -10,6 +10,7 @@ use App\Models\Party;
 use App\Models\PeriodLock;
 use App\Models\User;
 use App\Services\AccountCodes;
+use App\Support\BanglaDate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -217,7 +218,7 @@ class SetupController extends Controller
             'locks' => PeriodLock::query()->with('locker:id,name')->orderByDesc('month')->get()->map(fn (PeriodLock $lock) => [
                 'id' => $lock->id,
                 'month' => $lock->month->format('Y-m'),
-                'label' => $lock->month->format('F Y'),
+                'label' => BanglaDate::month($lock->month),
                 'by' => $lock->locker?->name,
                 'at' => $lock->created_at?->toDateTimeString(),
             ]),
@@ -235,7 +236,7 @@ class SetupController extends Controller
 
         PeriodLock::query()->firstOrCreate(['month' => $month->toDateString()], ['locked_by' => $request->user()->id]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => $month->format('F Y').' লক হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => BanglaDate::month($month).' লক হয়েছে।']);
 
         return back();
     }

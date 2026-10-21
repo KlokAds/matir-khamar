@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
-
-const name = usePage().props.name;
 </script>
 
 <template>
     <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
+        class="flex aspect-square size-9 items-center justify-center rounded-lg bg-[oklch(0.97_0.02_85)] ring-1 ring-sidebar-border"
     >
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
+        <AppLogoIcon class="size-7" />
     </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold">{{
-            name
-        }}</span>
+    <div class="ml-1 grid flex-1 text-left leading-tight">
+        <span class="truncate font-display text-[15px] text-sidebar-foreground">
+            মাটির খামার
+        </span>
+        <span class="truncate text-[11px] tracking-wide text-sidebar-foreground/60 uppercase">
+            Klok Agro · হিসাব
+        </span>
     </div>
 </template>

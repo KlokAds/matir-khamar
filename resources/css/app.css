@@ -9,9 +9,14 @@
 
 @theme inline {
     --font-sans:
-        Instrument Sans, ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
+    --color-income: var(--income);
+    --color-expense: var(--expense);
+    --color-soil: var(--soil);
+    --color-paddy: var(--paddy);
+    --color-clay: var(--clay);
+    --color-turmeric: var(--turmeric);
+    --color-pond: var(--pond);
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -75,98 +80,151 @@
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
+        border-color: var(--border, currentColor);
     }
 }
 
 @layer utilities {
     body,
     html {
+        /* Noto Sans Bengali sits centred in buttons and stays clear at small
+           sizes; Tiro Bangla gives headings the feel of a printed khata. */
         --font-sans:
-            'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-            'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-            'Noto Color Emoji';
+            'Noto Sans Bengali', ui-sans-serif, system-ui, sans-serif;
+        --font-display: 'Tiro Bangla', 'Noto Sans Bengali', Georgia, serif;
+    }
+
+    .font-display {
+        font-family: var(--font-display);
+        letter-spacing: 0.005em;
+    }
+
+    /* Figures in ledgers line up digit under digit. */
+    .num {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum';
+    }
+
+    /* Ploughed-field stripes, used under page titles and on the login page. */
+    .furrows {
+        background-image: repeating-linear-gradient(
+            -8deg,
+            transparent 0 14px,
+            color-mix(in oklab, var(--soil) 4%, transparent) 14px 15px
+        );
+    }
+
+    /* Hand-ruled khata paper for tables of money. */
+    .khata {
+        background-image: linear-gradient(
+            to right,
+            transparent 2.25rem,
+            color-mix(in oklab, var(--clay) 35%, transparent) 2.25rem
+                calc(2.25rem + 1px),
+            transparent calc(2.25rem + 1px)
+        );
     }
 }
 
+/*
+ * Matir Khamar palette: soil, paddy, clay, turmeric and the cream of
+ * old khata paper. Light mode is daytime in the field; dark is evening.
+ */
 :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 92.1%);
-    --secondary-foreground: hsl(0 0% 9%);
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 92.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
-    --chart-1: hsl(12 76% 61%);
-    --chart-2: hsl(173 58% 39%);
-    --chart-3: hsl(197 37% 24%);
-    --chart-4: hsl(43 74% 66%);
-    --chart-5: hsl(27 87% 67%);
-    --radius: 0.5rem;
-    --sidebar-background: hsl(0 0% 98%);
-    --sidebar-foreground: hsl(240 5.3% 26.1%);
-    --sidebar-primary: hsl(0 0% 10%);
-    --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(0 0% 94%);
-    --sidebar-accent-foreground: hsl(0 0% 30%);
-    --sidebar-border: hsl(0 0% 91%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(0 0% 98%);
+    --soil: oklch(0.32 0.045 55);
+    --paddy: oklch(0.52 0.12 135);
+    --clay: oklch(0.6 0.13 45);
+    --turmeric: oklch(0.8 0.14 85);
+    --pond: oklch(0.55 0.07 220);
+
+    --background: oklch(0.975 0.014 85);
+    --foreground: oklch(0.27 0.035 55);
+    --card: oklch(0.993 0.008 85);
+    --card-foreground: oklch(0.27 0.035 55);
+    --popover: oklch(0.993 0.008 85);
+    --popover-foreground: oklch(0.27 0.035 55);
+    --primary: oklch(0.46 0.11 138);
+    --primary-foreground: oklch(0.98 0.015 95);
+    --secondary: oklch(0.93 0.03 85);
+    --secondary-foreground: oklch(0.3 0.04 55);
+    --muted: oklch(0.945 0.02 85);
+    --muted-foreground: oklch(0.5 0.035 60);
+    --accent: oklch(0.93 0.045 75);
+    --accent-foreground: oklch(0.32 0.06 45);
+    --destructive: oklch(0.55 0.19 28);
+    --destructive-foreground: oklch(0.98 0.01 85);
+    --border: oklch(0.88 0.03 80);
+    --input: oklch(0.86 0.03 80);
+    --ring: oklch(0.52 0.12 135);
+    --chart-1: oklch(0.52 0.12 135);
+    --chart-2: oklch(0.62 0.14 45);
+    --chart-3: oklch(0.78 0.14 85);
+    --chart-4: oklch(0.55 0.07 220);
+    --chart-5: oklch(0.42 0.06 55);
+    --radius: 0.65rem;
+    --sidebar-background: oklch(0.29 0.04 55);
+    --sidebar-foreground: oklch(0.92 0.03 85);
+    --sidebar-primary: oklch(0.8 0.14 85);
+    --sidebar-primary-foreground: oklch(0.25 0.04 55);
+    --sidebar-accent: oklch(0.36 0.05 55);
+    --sidebar-accent-foreground: oklch(0.97 0.02 90);
+    --sidebar-border: oklch(0.38 0.04 55);
+    --sidebar-ring: oklch(0.8 0.14 85);
+    --sidebar: oklch(0.29 0.04 55);
+
+    --income: oklch(0.48 0.12 140);
+    --expense: oklch(0.55 0.15 38);
 }
 
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 84% 60%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
-    --chart-1: hsl(220 70% 50%);
-    --chart-2: hsl(160 60% 45%);
-    --chart-3: hsl(30 80% 55%);
-    --chart-4: hsl(280 65% 60%);
-    --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(0 0% 7%);
-    --sidebar-foreground: hsl(0 0% 95.9%);
-    --sidebar-primary: hsl(360, 100%, 100%);
-    --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(0 0% 15.9%);
-    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(240 5.9% 10%);
+    --soil: oklch(0.82 0.04 80);
+    --background: oklch(0.185 0.012 110);
+    --foreground: oklch(0.93 0.015 90);
+    --card: oklch(0.225 0.014 110);
+    --card-foreground: oklch(0.93 0.015 90);
+    --popover: oklch(0.24 0.014 110);
+    --popover-foreground: oklch(0.93 0.015 90);
+    --primary: oklch(0.7 0.13 138);
+    --primary-foreground: oklch(0.17 0.03 140);
+    --secondary: oklch(0.27 0.014 110);
+    --secondary-foreground: oklch(0.93 0.015 90);
+    --muted: oklch(0.26 0.012 110);
+    --muted-foreground: oklch(0.72 0.02 95);
+    --accent: oklch(0.29 0.02 110);
+    --accent-foreground: oklch(0.95 0.015 90);
+    --destructive: oklch(0.66 0.17 28);
+    --destructive-foreground: oklch(0.98 0.01 85);
+    --border: oklch(0.32 0.014 110);
+    --input: oklch(0.36 0.014 110);
+    --ring: oklch(0.7 0.13 138);
+    --chart-1: oklch(0.7 0.13 138);
+    --chart-2: oklch(0.72 0.13 50);
+    --chart-3: oklch(0.83 0.13 88);
+    --chart-4: oklch(0.72 0.08 220);
+    --chart-5: oklch(0.78 0.04 80);
+    --sidebar-background: oklch(0.15 0.012 110);
+    --sidebar-foreground: oklch(0.9 0.015 90);
+    --sidebar-primary: oklch(0.83 0.13 88);
+    --sidebar-primary-foreground: oklch(0.2 0.03 80);
+    --sidebar-accent: oklch(0.23 0.016 110);
+    --sidebar-accent-foreground: oklch(0.96 0.015 90);
+    --sidebar-border: oklch(0.25 0.012 110);
+    --sidebar-ring: oklch(0.83 0.13 88);
+    --sidebar: oklch(0.15 0.012 110);
+
+    --income: oklch(0.76 0.13 140);
+    --expense: oklch(0.74 0.13 45);
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
+    html {
+        font-size: 15.5px;
+    }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased;
+        line-height: 1.6;
     }
 }

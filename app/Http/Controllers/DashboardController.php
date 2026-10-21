@@ -24,7 +24,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'canSeeMoney' => $canSeeMoney,
-            'month' => $from->format('F Y'),
+            'month' => $from->format('Y-m'),
             'farm' => $canSeeMoney ? $reports->farmTotals($from, $to) : null,
             'farmYear' => $canSeeMoney ? $reports->farmTotals(now()->startOfYear(), $to) : null,
             'tree' => $canSeeMoney ? $reports->centerTree($from, $to) : [],

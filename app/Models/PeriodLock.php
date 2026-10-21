@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 
 /** A closed month: nothing can be posted into it any more. */
