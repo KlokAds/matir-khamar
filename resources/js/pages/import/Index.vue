@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { CircleAlert, CloudDownload, ListChecks, Send } from '@lucide/vue';
-import { computed, reactive } from 'vue';
+import { CloudDownload, KeyRound, ListChecks, PlugZap, Send, ShieldAlert, ShieldCheck } from '@lucide/vue';
+import { computed, reactive, ref } from 'vue';
+import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
@@ -15,8 +16,12 @@ defineOptions({
 
 type Mapping = { id: number; kind: string; external_id: string; external_name: string; account_id: number | null; cost_center_id: number | null; item_id: number | null; ignore: boolean; complete: boolean };
 
+type ConnectionTest = { ok: boolean; message: string; can_write: boolean | null; counts: Record<string, number> };
+
 const props = defineProps<{
     configured: boolean;
+    connection: { source: 'app' | 'env' | 'none'; host: string; port: string; database: string; username: string; company_id: string; password_set: boolean; updated_at: string | null };
+    connectionTest: ConnectionTest | null;
     status: string | null;
     statuses: Record<string, string>;
     counts: Record<string, { n: number; total: number }>;
@@ -53,6 +58,24 @@ function save(map: Mapping) {
 }
 
 const action = useForm({});
+const showConnection = ref(props.connection.source === 'none');
+const conn = useForm({
+    host: props.connection.host || 'localhost',
+    port: props.connection.port || '3306',
+    database: props.connection.database,
+    username: props.connection.username,
+    password: '',
+    company_id: props.connection.company_id,
+    current_password: '',
+});
+const saveConnection = () => conn.put('/setup/import/connection', { preserveScroll: true, onSuccess: () => conn.reset('password', 'current_password') });
+const forget = useForm({ current_password: '' });
+const forgetConnection = () => {
+    if (window.confirm('বিলিং সংযোগের তথ্য মুছে ফেলবেন? আগে আনা সারিগুলো থাকবে।')) {
+        forget.delete('/setup/import/connection', { preserveScroll: true });
+    }
+};
+const tables: Record<string, string> = { expenses: 'খরচ', payments: 'পেমেন্ট', expense_categories: 'খরচের ক্যাটাগরি', customers: 'ক্রেতা' };
 const run = (url: string) => action.post(url, { preserveScroll: true });
 const saveQty = (id: number) => router.post(`/setup/import/records/${id}/qty`, { qty: qtyDraft[id] }, { preserveScroll: true });
 const resolve = (id: number, value: 'repost' | 'keep') => router.post(`/setup/import/records/${id}/resolve`, { action: value }, { preserveScroll: true });
@@ -70,10 +93,62 @@ const stockCategoryIds = computed(() => props.mappings.filter((m) => m.kind === 
             </template>
         </PageTitle>
 
-        <div v-if="!configured" class="mb-5 flex gap-3 rounded-xl border border-clay/40 bg-clay/8 p-4 text-sm">
-            <CircleAlert class="mt-0.5 size-4 shrink-0 text-clay" />
-            <p>বিলিং ডাটাবেসের সংযোগ এখনো দেওয়া হয়নি। সার্ভারের <code>.env</code>-এ <code>CRATER_DB_*</code> লিখতে হবে — শুধু পড়ার (SELECT) অনুমতিসহ আলাদা MySQL ইউজার দিয়ে।</p>
-        </div>
+        <section class="mb-6 min-w-0 rounded-xl border border-border bg-card p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span :class="['rounded-lg p-2', configured ? 'bg-paddy/15 text-paddy' : 'bg-clay/15 text-clay']"><PlugZap class="size-5" /></span>
+                    <div>
+                        <h2 class="font-display text-lg">বিলিং ডাটাবেসের সংযোগ</h2>
+                        <p class="text-sm text-muted-foreground">
+                            <template v-if="connection.source === 'app'">{{ connection.username }}@{{ connection.host }} / {{ connection.database }} · পাসওয়ার্ড এনক্রিপ্ট করে রাখা<span v-if="connection.updated_at"> · {{ connection.updated_at }}</span></template>
+                            <template v-else-if="connection.source === 'env'">সার্ভারের .env থেকে নেওয়া হচ্ছে</template>
+                            <template v-else>এখনো দেওয়া হয়নি</template>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <Button v-if="configured" variant="secondary" size="sm" :disabled="action.processing" @click="run('/setup/import/connection/test')">সংযোগ পরীক্ষা</Button>
+                    <Button variant="secondary" size="sm" @click="showConnection = !showConnection"><KeyRound /> {{ connection.source === 'app' ? 'বদলান' : 'তথ্য দিন' }}</Button>
+                </div>
+            </div>
+
+            <div v-if="connectionTest" :class="['mt-4 rounded-lg p-3 text-sm', connectionTest.ok ? 'bg-paddy/10' : 'bg-destructive/10 text-destructive']">
+                <p class="font-medium">{{ connectionTest.message }}</p>
+                <p v-if="connectionTest.ok" class="mt-1 text-muted-foreground">
+                    বিলিং-এ আছে: <span v-for="(n, t) in connectionTest.counts" :key="t" class="mr-3">{{ tables[t] ?? t }} <b class="num text-foreground">{{ n }}</b></span>
+                </p>
+                <p v-if="connectionTest.can_write === true" class="mt-2 flex items-start gap-2 text-clay"><ShieldAlert class="mt-0.5 size-4 shrink-0" /> এই ডাটাবেস ইউজারের লেখার/মোছার অনুমতি আছে। এই অ্যাপ শুধু পড়ে, তবু নিরাপত্তার জন্য hPanel-এ শুধু SELECT অনুমতির আলাদা ইউজার বানিয়ে সেটা দিন।</p>
+                <p v-if="connectionTest.can_write === false" class="mt-2 flex items-center gap-2 text-paddy"><ShieldCheck class="size-4" /> ইউজারটির শুধু পড়ার অনুমতি — ঠিক আছে।</p>
+            </div>
+
+            <form v-if="showConnection" class="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2 lg:grid-cols-3" autocomplete="off" @submit.prevent="saveConnection">
+                <Field label="হোস্ট" :error="conn.errors.host" hint="একই Hostinger সার্ভারে হলে localhost"><Input v-model="conn.host" required /></Field>
+                <Field label="পোর্ট" :error="conn.errors.port"><Input v-model="conn.port" type="number" required /></Field>
+                <Field label="ডাটাবেসের নাম" :error="conn.errors.database"><Input v-model="conn.database" required /></Field>
+                <Field label="ডাটাবেস ইউজার" :error="conn.errors.username" hint="শুধু SELECT অনুমতির ইউজার দিন"><Input v-model="conn.username" required autocomplete="off" /></Field>
+                <Field label="ডাটাবেস পাসওয়ার্ড" :error="conn.errors.password" :hint="connection.password_set ? 'রাখা আছে — বদলাতে চাইলেই শুধু লিখুন' : ''">
+                    <Input v-model="conn.password" type="password" autocomplete="new-password" :placeholder="connection.password_set ? '••••••••' : ''" :required="!connection.password_set" />
+                </Field>
+                <Field label="Crater কোম্পানি নম্বর (ঐচ্ছিক)" :error="conn.errors.company_id" hint="খামারের আলাদা কোম্পানি থাকলে শুধু সেটা পড়া হবে"><Input v-model="conn.company_id" type="number" min="1" /></Field>
+                <div class="sm:col-span-2 lg:col-span-3">
+                    <Field label="নিশ্চিত করতে আপনার নিজের লগইন পাসওয়ার্ড" :error="conn.errors.current_password">
+                        <Input v-model="conn.current_password" type="password" autocomplete="current-password" required class="sm:max-w-sm" />
+                    </Field>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-3">
+                    <Button type="submit" :disabled="conn.processing">রাখুন ও পরীক্ষা করুন</Button>
+                    <p class="text-xs text-muted-foreground">পাসওয়ার্ড APP_KEY দিয়ে এনক্রিপ্ট হয়ে থাকে, কোনো পাতায় আর দেখানো হয় না।</p>
+                </div>
+            </form>
+
+            <form v-if="showConnection && connection.source === 'app'" class="mt-3 flex flex-wrap items-end gap-2 border-t border-dashed border-border pt-3" @submit.prevent="forgetConnection">
+                <Field label="সংযোগ মুছতে নিজের পাসওয়ার্ড" :error="forget.errors.current_password">
+                    <Input v-model="forget.current_password" type="password" autocomplete="current-password" required class="w-56" />
+                </Field>
+                <Button type="submit" variant="ghost" size="sm" class="text-destructive" :disabled="forget.processing">সংযোগ মুছে ফেলুন</Button>
+            </form>
+        </section>
+
         <p v-for="(e, i) in errors" :key="i" class="mb-3 text-sm text-destructive">{{ e }}</p>
 
         <div class="mb-5 flex flex-wrap gap-2">

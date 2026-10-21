@@ -77,6 +77,8 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => env('CRATER_DB_PREFIX', ''),
             'strict' => true,
+            // A wrong host should fail in seconds, not hang the page.
+            'options' => [PDO::ATTR_TIMEOUT => 5],
         ],
 
         'mariadb' => [
