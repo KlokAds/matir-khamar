@@ -1,0 +1,10 @@
+# The hostinger-dist branch carries vendor/ and public/build/ (the host can't build them). Only
+# what the server itself makes stays out of git, so an update never touches it: settings,
+# uploaded vouchers and backups (storage/ keeps its own .gitignore files), caches.
+/.env
+/.env.*
+/public/storage
+/public/hot
+/storage/*.key
+/bootstrap/cache/*.php
+/database/*.sqlite
