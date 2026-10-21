@@ -78,12 +78,12 @@ class StockController extends Controller
             'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:'.config('khamar.max_voucher_kb')],
         ]);
 
-        $entry = $stock->purchase(Item::query()->findOrFail($data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['amount']), [
+        $entry = $stock->purchase(Item::query()->findOrFail((int) $data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['amount']), [
             'credit_account_id' => $data['settle'] === 'money' ? (int) $data['money_account_id'] : Account::byCode(AccountCodes::PAYABLE)->id,
             'party_id' => $data['party_id'] ?? null,
             'budget_head_id' => $data['budget_head_id'] ?? null,
             'description' => $data['description'] ?? null,
-            'attachments' => $request->file('attachments', []),
+            'attachments' => $this->attachments($request),
         ]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "স্টকে যোগ হয়েছে ({$entry->number})।"]);
@@ -102,7 +102,7 @@ class StockController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $entry = $stock->issue(Item::query()->findOrFail($data['item_id']), $data['date'], $data['splits'], $data['note'] ?? null);
+        $entry = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], $data['note'] ?? null);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "ব্যবহার লেখা হয়েছে ({$entry->number})।"]);
 
@@ -120,7 +120,7 @@ class StockController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $entry = $stock->produce(Item::query()->findOrFail($data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['rate']), (int) $data['cost_center_id'], $data['note'] ?? null);
+        $entry = $stock->produce(Item::query()->findOrFail((int) $data['item_id']), $data['date'], (float) $data['qty'], Money::toPoisha($data['rate']), (int) $data['cost_center_id'], $data['note'] ?? null);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "উৎপাদন স্টকে উঠেছে ({$entry->number})।"]);
 

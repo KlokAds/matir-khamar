@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::index
-* @see app/Http/Controllers/AnimalController.php:22
+* @see app/Http/Controllers/AnimalController.php:23
 * @route '/animals'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,10 +82,10 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-export const show = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -97,10 +97,10 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-show.url = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { animal: args }
     }
@@ -130,50 +130,50 @@ show.url = (args: { animal: string | number | { id: string | number } } | [anima
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-show.get = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-show.head = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-const showForm = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-showForm.get = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::show
-* @see app/Http/Controllers/AnimalController.php:90
+* @see app/Http/Controllers/AnimalController.php:91
 * @route '/animals/{animal}'
 */
-showForm.head = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -187,7 +187,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -202,7 +202,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -211,7 +211,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -221,7 +221,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -231,7 +231,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -241,7 +241,7 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -251,7 +251,7 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::create
-* @see app/Http/Controllers/AnimalController.php:43
+* @see app/Http/Controllers/AnimalController.php:44
 * @route '/animals/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -268,7 +268,7 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\AnimalController::store
-* @see app/Http/Controllers/AnimalController.php:55
+* @see app/Http/Controllers/AnimalController.php:56
 * @route '/animals'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -283,7 +283,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::store
-* @see app/Http/Controllers/AnimalController.php:55
+* @see app/Http/Controllers/AnimalController.php:56
 * @route '/animals'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -292,7 +292,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AnimalController::store
-* @see app/Http/Controllers/AnimalController.php:55
+* @see app/Http/Controllers/AnimalController.php:56
 * @route '/animals'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -302,7 +302,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\AnimalController::store
-* @see app/Http/Controllers/AnimalController.php:55
+* @see app/Http/Controllers/AnimalController.php:56
 * @route '/animals'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -312,7 +312,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\AnimalController::store
-* @see app/Http/Controllers/AnimalController.php:55
+* @see app/Http/Controllers/AnimalController.php:56
 * @route '/animals'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -324,10 +324,10 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\AnimalController::transfer
-* @see app/Http/Controllers/AnimalController.php:127
+* @see app/Http/Controllers/AnimalController.php:128
 * @route '/animals/{animal}/transfer'
 */
-export const transfer = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const transfer = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: transfer.url(args, options),
     method: 'post',
 })
@@ -339,10 +339,10 @@ transfer.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::transfer
-* @see app/Http/Controllers/AnimalController.php:127
+* @see app/Http/Controllers/AnimalController.php:128
 * @route '/animals/{animal}/transfer'
 */
-transfer.url = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+transfer.url = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { animal: args }
     }
@@ -372,30 +372,30 @@ transfer.url = (args: { animal: string | number | { id: string | number } } | [a
 
 /**
 * @see \App\Http\Controllers\AnimalController::transfer
-* @see app/Http/Controllers/AnimalController.php:127
+* @see app/Http/Controllers/AnimalController.php:128
 * @route '/animals/{animal}/transfer'
 */
-transfer.post = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+transfer.post = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: transfer.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::transfer
-* @see app/Http/Controllers/AnimalController.php:127
+* @see app/Http/Controllers/AnimalController.php:128
 * @route '/animals/{animal}/transfer'
 */
-const transferForm = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const transferForm = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: transfer.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::transfer
-* @see app/Http/Controllers/AnimalController.php:127
+* @see app/Http/Controllers/AnimalController.php:128
 * @route '/animals/{animal}/transfer'
 */
-transferForm.post = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+transferForm.post = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: transfer.url(args, options),
     method: 'post',
 })
@@ -404,10 +404,10 @@ transfer.form = transferForm
 
 /**
 * @see \App\Http\Controllers\AnimalController::sell
-* @see app/Http/Controllers/AnimalController.php:141
+* @see app/Http/Controllers/AnimalController.php:142
 * @route '/animals/{animal}/sell'
 */
-export const sell = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const sell = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sell.url(args, options),
     method: 'post',
 })
@@ -419,10 +419,10 @@ sell.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::sell
-* @see app/Http/Controllers/AnimalController.php:141
+* @see app/Http/Controllers/AnimalController.php:142
 * @route '/animals/{animal}/sell'
 */
-sell.url = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+sell.url = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { animal: args }
     }
@@ -452,30 +452,30 @@ sell.url = (args: { animal: string | number | { id: string | number } } | [anima
 
 /**
 * @see \App\Http\Controllers\AnimalController::sell
-* @see app/Http/Controllers/AnimalController.php:141
+* @see app/Http/Controllers/AnimalController.php:142
 * @route '/animals/{animal}/sell'
 */
-sell.post = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+sell.post = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sell.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::sell
-* @see app/Http/Controllers/AnimalController.php:141
+* @see app/Http/Controllers/AnimalController.php:142
 * @route '/animals/{animal}/sell'
 */
-const sellForm = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const sellForm = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: sell.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::sell
-* @see app/Http/Controllers/AnimalController.php:141
+* @see app/Http/Controllers/AnimalController.php:142
 * @route '/animals/{animal}/sell'
 */
-sellForm.post = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+sellForm.post = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: sell.url(args, options),
     method: 'post',
 })
@@ -484,10 +484,10 @@ sell.form = sellForm
 
 /**
 * @see \App\Http\Controllers\AnimalController::death
-* @see app/Http/Controllers/AnimalController.php:157
+* @see app/Http/Controllers/AnimalController.php:158
 * @route '/animals/{animal}/death'
 */
-export const death = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const death = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: death.url(args, options),
     method: 'post',
 })
@@ -499,10 +499,10 @@ death.definition = {
 
 /**
 * @see \App\Http\Controllers\AnimalController::death
-* @see app/Http/Controllers/AnimalController.php:157
+* @see app/Http/Controllers/AnimalController.php:158
 * @route '/animals/{animal}/death'
 */
-death.url = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+death.url = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { animal: args }
     }
@@ -532,30 +532,30 @@ death.url = (args: { animal: string | number | { id: string | number } } | [anim
 
 /**
 * @see \App\Http\Controllers\AnimalController::death
-* @see app/Http/Controllers/AnimalController.php:157
+* @see app/Http/Controllers/AnimalController.php:158
 * @route '/animals/{animal}/death'
 */
-death.post = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+death.post = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: death.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::death
-* @see app/Http/Controllers/AnimalController.php:157
+* @see app/Http/Controllers/AnimalController.php:158
 * @route '/animals/{animal}/death'
 */
-const deathForm = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const deathForm = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: death.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\AnimalController::death
-* @see app/Http/Controllers/AnimalController.php:157
+* @see app/Http/Controllers/AnimalController.php:158
 * @route '/animals/{animal}/death'
 */
-deathForm.post = (args: { animal: string | number | { id: string | number } } | [animal: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+deathForm.post = (args: { animal: number | { id: number } } | [animal: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: death.url(args, options),
     method: 'post',
 })

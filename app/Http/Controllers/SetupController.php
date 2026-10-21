@@ -89,7 +89,7 @@ class SetupController extends Controller
 
     public function accounts(): Response
     {
-        $sums = JournalLine::query()->groupBy('account_id')->selectRaw('account_id, SUM(debit) as d, SUM(credit) as c')->get()->keyBy('account_id');
+        $sums = JournalLine::query()->toBase()->groupBy('account_id')->selectRaw('account_id, SUM(debit) as d, SUM(credit) as c')->get()->keyBy('account_id');
 
         return Inertia::render('setup/Accounts', [
             'accounts' => Account::query()->orderBy('code')->get()->map(function (Account $account) use ($sums) {
@@ -116,7 +116,7 @@ class SetupController extends Controller
             'subtype' => ['nullable', Rule::in(['cash', 'bank', 'wallet', 'inventory', 'fixed_asset', 'land'])],
         ]);
 
-        $parent = Account::query()->findOrFail($data['parent_id']);
+        $parent = Account::query()->findOrFail((int) $data['parent_id']);
 
         Account::query()->create([...$data, 'type' => $parent->type, 'is_system' => false]);
 
@@ -151,6 +151,7 @@ class SetupController extends Controller
         $receivable = Account::byCode(AccountCodes::RECEIVABLE)->id;
 
         $dues = JournalLine::query()
+            ->toBase()
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->whereIn('journal_lines.account_id', [$payable, $receivable])
             ->whereNotNull('journal_entries.party_id')
@@ -219,7 +220,7 @@ class SetupController extends Controller
                 'id' => $lock->id,
                 'month' => $lock->month->format('Y-m'),
                 'label' => BanglaDate::month($lock->month),
-                'by' => $lock->locker?->name,
+                'by' => $lock->locker->name,
                 'at' => $lock->created_at?->toDateTimeString(),
             ]),
         ]);
@@ -258,7 +259,7 @@ class SetupController extends Controller
         return Inertia::render('setup/Audit', [
             'logs' => AuditLog::query()->with('user:id,name')->latest('id')->paginate(50)->through(fn (AuditLog $log) => [
                 'id' => $log->id,
-                'at' => $log->created_at?->toDateTimeString(),
+                'at' => $log->created_at->toDateTimeString(),
                 'user' => $log->user?->name,
                 'action' => $log->action,
                 'model' => $log->auditable_type,

@@ -26,6 +26,7 @@ class ReportService
     public function centerTotals(CarbonInterface $from, CarbonInterface $to): array
     {
         $rows = JournalLine::query()
+            ->toBase()
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->join('accounts', 'accounts.id', '=', 'journal_lines.account_id')
             ->whereIn('accounts.type', ['income', 'expense'])
@@ -133,6 +134,7 @@ class ReportService
     public function accountTotals(CarbonInterface $from, CarbonInterface $to, ?array $centerIds, bool $onlyUnassigned = false): array
     {
         $query = JournalLine::query()
+            ->toBase()
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->join('accounts', 'accounts.id', '=', 'journal_lines.account_id')
             ->whereIn('accounts.type', ['income', 'expense'])
@@ -231,11 +233,13 @@ class ReportService
     /**
      * Balances of every money, asset, loan and capital account.
      *
+     * @param  list<string>|null  $types
      * @return Collection<int, array{id:int, code:string, name:string, type:string, subtype:?string, balance:int}>
      */
     public function balances(?array $types = null): Collection
     {
         $sums = JournalLine::query()
+            ->toBase()
             ->groupBy('account_id')
             ->selectRaw('account_id, SUM(debit) as d, SUM(credit) as c')
             ->get()
@@ -263,7 +267,7 @@ class ReportService
     /**
      * Udyog budget heads: approved vs spent, and how many spends lack a voucher.
      *
-     * @return list<array<string, mixed>>
+     * @return array<int, array{id:int, code:string, name:string, details:?string, approved:int, spent:int, remaining:int, missing_vouchers:int}>
      */
     public function budget(): array
     {

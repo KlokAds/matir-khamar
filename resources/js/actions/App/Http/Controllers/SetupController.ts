@@ -141,7 +141,7 @@ storeAccount.form = storeAccountForm
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-export const updateAccount = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const updateAccount = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateAccount.url(args, options),
     method: 'put',
 })
@@ -156,7 +156,7 @@ updateAccount.definition = {
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-updateAccount.url = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+updateAccount.url = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { account: args }
     }
@@ -189,7 +189,7 @@ updateAccount.url = (args: { account: string | number | { id: string | number } 
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-updateAccount.put = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+updateAccount.put = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateAccount.url(args, options),
     method: 'put',
 })
@@ -199,7 +199,7 @@ updateAccount.put = (args: { account: string | number | { id: string | number } 
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-const updateAccountForm = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateAccountForm = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateAccount.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -214,7 +214,7 @@ const updateAccountForm = (args: { account: string | number | { id: string | num
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-updateAccountForm.put = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateAccountForm.put = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateAccount.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -309,7 +309,7 @@ parties.form = partiesForm
 
 /**
 * @see \App\Http\Controllers\SetupController::storeParty
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 export const storeParty = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -324,7 +324,7 @@ storeParty.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::storeParty
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 storeParty.url = (options?: RouteQueryOptions) => {
@@ -333,7 +333,7 @@ storeParty.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::storeParty
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 storeParty.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -343,7 +343,7 @@ storeParty.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::storeParty
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 const storePartyForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -353,7 +353,7 @@ const storePartyForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'
 
 /**
 * @see \App\Http\Controllers\SetupController::storeParty
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 storePartyForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -365,10 +365,10 @@ storeParty.form = storePartyForm
 
 /**
 * @see \App\Http\Controllers\SetupController::updateParty
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-export const updateParty = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const updateParty = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateParty.url(args, options),
     method: 'put',
 })
@@ -380,10 +380,10 @@ updateParty.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::updateParty
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-updateParty.url = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+updateParty.url = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { party: args }
     }
@@ -413,20 +413,20 @@ updateParty.url = (args: { party: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\SetupController::updateParty
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-updateParty.put = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+updateParty.put = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateParty.url(args, options),
     method: 'put',
 })
 
 /**
 * @see \App\Http\Controllers\SetupController::updateParty
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-const updatePartyForm = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updatePartyForm = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateParty.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -438,10 +438,10 @@ const updatePartyForm = (args: { party: string | number | { id: string | number 
 
 /**
 * @see \App\Http\Controllers\SetupController::updateParty
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-updatePartyForm.put = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updatePartyForm.put = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateParty.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -682,7 +682,7 @@ updateUser.form = updateUserForm
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 export const periods = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -697,7 +697,7 @@ periods.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periods.url = (options?: RouteQueryOptions) => {
@@ -706,7 +706,7 @@ periods.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periods.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -716,7 +716,7 @@ periods.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periods.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -726,7 +726,7 @@ periods.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 const periodsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -736,7 +736,7 @@ const periodsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periodsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -746,7 +746,7 @@ periodsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periodsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -763,7 +763,7 @@ periods.form = periodsForm
 
 /**
 * @see \App\Http\Controllers\SetupController::lockPeriod
-* @see app/Http/Controllers/SetupController.php:228
+* @see app/Http/Controllers/SetupController.php:229
 * @route '/setup/periods'
 */
 export const lockPeriod = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -778,7 +778,7 @@ lockPeriod.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::lockPeriod
-* @see app/Http/Controllers/SetupController.php:228
+* @see app/Http/Controllers/SetupController.php:229
 * @route '/setup/periods'
 */
 lockPeriod.url = (options?: RouteQueryOptions) => {
@@ -787,7 +787,7 @@ lockPeriod.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::lockPeriod
-* @see app/Http/Controllers/SetupController.php:228
+* @see app/Http/Controllers/SetupController.php:229
 * @route '/setup/periods'
 */
 lockPeriod.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -797,7 +797,7 @@ lockPeriod.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::lockPeriod
-* @see app/Http/Controllers/SetupController.php:228
+* @see app/Http/Controllers/SetupController.php:229
 * @route '/setup/periods'
 */
 const lockPeriodForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -807,7 +807,7 @@ const lockPeriodForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'
 
 /**
 * @see \App\Http\Controllers\SetupController::lockPeriod
-* @see app/Http/Controllers/SetupController.php:228
+* @see app/Http/Controllers/SetupController.php:229
 * @route '/setup/periods'
 */
 lockPeriodForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -819,10 +819,10 @@ lockPeriod.form = lockPeriodForm
 
 /**
 * @see \App\Http\Controllers\SetupController::unlockPeriod
-* @see app/Http/Controllers/SetupController.php:244
+* @see app/Http/Controllers/SetupController.php:245
 * @route '/setup/periods/{lock}'
 */
-export const unlockPeriod = (args: { lock: string | number | { id: string | number } } | [lock: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const unlockPeriod = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: unlockPeriod.url(args, options),
     method: 'delete',
 })
@@ -834,10 +834,10 @@ unlockPeriod.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::unlockPeriod
-* @see app/Http/Controllers/SetupController.php:244
+* @see app/Http/Controllers/SetupController.php:245
 * @route '/setup/periods/{lock}'
 */
-unlockPeriod.url = (args: { lock: string | number | { id: string | number } } | [lock: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+unlockPeriod.url = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { lock: args }
     }
@@ -867,20 +867,20 @@ unlockPeriod.url = (args: { lock: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\SetupController::unlockPeriod
-* @see app/Http/Controllers/SetupController.php:244
+* @see app/Http/Controllers/SetupController.php:245
 * @route '/setup/periods/{lock}'
 */
-unlockPeriod.delete = (args: { lock: string | number | { id: string | number } } | [lock: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+unlockPeriod.delete = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: unlockPeriod.url(args, options),
     method: 'delete',
 })
 
 /**
 * @see \App\Http\Controllers\SetupController::unlockPeriod
-* @see app/Http/Controllers/SetupController.php:244
+* @see app/Http/Controllers/SetupController.php:245
 * @route '/setup/periods/{lock}'
 */
-const unlockPeriodForm = (args: { lock: string | number | { id: string | number } } | [lock: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const unlockPeriodForm = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: unlockPeriod.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'DELETE',
@@ -892,10 +892,10 @@ const unlockPeriodForm = (args: { lock: string | number | { id: string | number 
 
 /**
 * @see \App\Http\Controllers\SetupController::unlockPeriod
-* @see app/Http/Controllers/SetupController.php:244
+* @see app/Http/Controllers/SetupController.php:245
 * @route '/setup/periods/{lock}'
 */
-unlockPeriodForm.delete = (args: { lock: string | number | { id: string | number } } | [lock: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+unlockPeriodForm.delete = (args: { lock: number | { id: number } } | [lock: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: unlockPeriod.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'DELETE',
@@ -909,7 +909,7 @@ unlockPeriod.form = unlockPeriodForm
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 export const audit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -924,7 +924,7 @@ audit.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 audit.url = (options?: RouteQueryOptions) => {
@@ -933,7 +933,7 @@ audit.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 audit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -943,7 +943,7 @@ audit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 audit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -953,7 +953,7 @@ audit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 const auditForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -963,7 +963,7 @@ const auditForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 auditForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -973,7 +973,7 @@ auditForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 auditForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

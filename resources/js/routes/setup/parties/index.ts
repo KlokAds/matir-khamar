@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\SetupController::store
-* @see app/Http/Controllers/SetupController.php:183
+* @see app/Http/Controllers/SetupController.php:184
 * @route '/setup/parties'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,10 +57,10 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-export const update = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -72,10 +72,10 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-update.url = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { party: args }
     }
@@ -105,20 +105,20 @@ update.url = (args: { party: string | number | { id: string | number } } | [part
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-update.put = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-const updateForm = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateForm = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -130,10 +130,10 @@ const updateForm = (args: { party: string | number | { id: string | number } } |
 
 /**
 * @see \App\Http\Controllers\SetupController::update
-* @see app/Http/Controllers/SetupController.php:200
+* @see app/Http/Controllers/SetupController.php:201
 * @route '/setup/parties/{party}'
 */
-updateForm.put = (args: { party: string | number | { id: string | number } } | [party: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.put = (args: { party: number | { id: number } } | [party: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',

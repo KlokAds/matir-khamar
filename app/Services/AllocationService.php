@@ -76,7 +76,7 @@ class AllocationService
      * target absorbs the rounding so the source empties to the poisha.
      *
      * @param  array<int, float|int>  $weights  cost_center_id => weight
-     * @return array{lines: list<array<string, int|null>>, shares: array<int, int>, total: int}
+     * @return array{lines: list<array{account_id: int, cost_center_id: int, debit?: int, credit?: int}>, shares: array<int, int>, total: int}
      */
     public function preview(CostCenter $source, CarbonInterface $month, array $weights): array
     {

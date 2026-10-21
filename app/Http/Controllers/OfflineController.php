@@ -119,7 +119,7 @@ class OfflineController extends Controller
                             'splits.*.qty' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
                             'note' => ['nullable', 'string', 'max:255'],
                         ])->validate();
-                        $entryId = $stock->issue(Item::query()->findOrFail($data['item_id']), $data['date'], $data['splits'], trim(($data['note'] ?? '').' (অফলাইন)'))->id;
+                        $entryId = $stock->issue(Item::query()->findOrFail((int) $data['item_id']), $data['date'], $data['splits'], trim(($data['note'] ?? '').' (অফলাইন)'))->id;
                         break;
 
                     case 'expense':

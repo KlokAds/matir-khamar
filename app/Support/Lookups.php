@@ -41,7 +41,7 @@ final class Lookups
         return $flat;
     }
 
-    /** @return list<array{id:int, name:string, code:string, subtype:?string}> */
+    /** @return array<int, Account> id, name, code, subtype */
     public static function accounts(string ...$types): array
     {
         // Accounts the system posts to by itself (internal, animal cost) stay out of hand entry.
@@ -55,25 +55,25 @@ final class Lookups
             ->all();
     }
 
-    /** @return list<array{id:int, name:string, code:string, subtype:?string}> */
+    /** @return array<int, Account> id, name, code, subtype */
     public static function moneyAccounts(): array
     {
         return Account::query()->money()->orderBy('code')->get(['id', 'name', 'code', 'subtype'])->all();
     }
 
-    /** @return list<array{id:int, name:string, code:string, subtype:?string}> */
+    /** @return array<int, Account> id, name, code, subtype */
     public static function assetAccounts(): array
     {
         return Account::query()->whereIn('subtype', ['land', 'fixed_asset'])->where('is_active', true)->orderBy('code')->get(['id', 'name', 'code', 'subtype'])->all();
     }
 
-    /** @return list<array{id:int, code:string, name:string}> */
+    /** @return array<int, BudgetHead> id, code, name */
     public static function budgetHeads(): array
     {
         return BudgetHead::query()->orderBy('sort')->get(['id', 'code', 'name'])->all();
     }
 
-    /** @return list<array{id:int, name:string, type:string}> */
+    /** @return array<int, Party> id, name, type */
     public static function parties(?string $type = null): array
     {
         return Party::query()
@@ -84,7 +84,7 @@ final class Lookups
             ->all();
     }
 
-    /** @return list<array<string, mixed>> */
+    /** @return array<int, array{id:int, name:string, unit:string, unit_label:string, kind:string, qty_on_hand:float, value_on_hand:int, average_cost:float}> */
     public static function items(): array
     {
         return Item::query()->where('is_active', true)->orderBy('kind')->orderBy('name')->get()->map(fn (Item $item) => [
@@ -99,7 +99,7 @@ final class Lookups
         ])->all();
     }
 
-    /** @return list<array{id:int, tag:string, name:?string, cost_center_id:int}> */
+    /** @return array<int, Animal> id, tag, name, cost_center_id */
     public static function activeAnimals(): array
     {
         return Animal::query()->where('status', 'active')->orderBy('tag')->get(['id', 'tag', 'name', 'cost_center_id'])->all();

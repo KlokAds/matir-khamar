@@ -385,7 +385,7 @@ post.form = postForm
 * @see app/Http/Controllers/ImportController.php:176
 * @route '/setup/import/mappings/{mapping}'
 */
-export const updateMapping = (args: { mapping: string | number | { id: string | number } } | [mapping: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const updateMapping = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateMapping.url(args, options),
     method: 'put',
 })
@@ -400,7 +400,7 @@ updateMapping.definition = {
 * @see app/Http/Controllers/ImportController.php:176
 * @route '/setup/import/mappings/{mapping}'
 */
-updateMapping.url = (args: { mapping: string | number | { id: string | number } } | [mapping: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+updateMapping.url = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { mapping: args }
     }
@@ -433,7 +433,7 @@ updateMapping.url = (args: { mapping: string | number | { id: string | number } 
 * @see app/Http/Controllers/ImportController.php:176
 * @route '/setup/import/mappings/{mapping}'
 */
-updateMapping.put = (args: { mapping: string | number | { id: string | number } } | [mapping: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+updateMapping.put = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateMapping.url(args, options),
     method: 'put',
 })
@@ -443,7 +443,7 @@ updateMapping.put = (args: { mapping: string | number | { id: string | number } 
 * @see app/Http/Controllers/ImportController.php:176
 * @route '/setup/import/mappings/{mapping}'
 */
-const updateMappingForm = (args: { mapping: string | number | { id: string | number } } | [mapping: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateMappingForm = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateMapping.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -458,7 +458,7 @@ const updateMappingForm = (args: { mapping: string | number | { id: string | num
 * @see app/Http/Controllers/ImportController.php:176
 * @route '/setup/import/mappings/{mapping}'
 */
-updateMappingForm.put = (args: { mapping: string | number | { id: string | number } } | [mapping: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateMappingForm.put = (args: { mapping: number | { id: number } } | [mapping: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateMapping.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -475,7 +475,7 @@ updateMapping.form = updateMappingForm
 * @see app/Http/Controllers/ImportController.php:226
 * @route '/setup/import/records/{record}/resolve'
 */
-export const resolve = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const resolve = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resolve.url(args, options),
     method: 'post',
 })
@@ -490,7 +490,7 @@ resolve.definition = {
 * @see app/Http/Controllers/ImportController.php:226
 * @route '/setup/import/records/{record}/resolve'
 */
-resolve.url = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+resolve.url = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { record: args }
     }
@@ -523,7 +523,7 @@ resolve.url = (args: { record: string | number | { id: string | number } } | [re
 * @see app/Http/Controllers/ImportController.php:226
 * @route '/setup/import/records/{record}/resolve'
 */
-resolve.post = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+resolve.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resolve.url(args, options),
     method: 'post',
 })
@@ -533,7 +533,7 @@ resolve.post = (args: { record: string | number | { id: string | number } } | [r
 * @see app/Http/Controllers/ImportController.php:226
 * @route '/setup/import/records/{record}/resolve'
 */
-const resolveForm = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const resolveForm = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: resolve.url(args, options),
     method: 'post',
 })
@@ -543,7 +543,7 @@ const resolveForm = (args: { record: string | number | { id: string | number } }
 * @see app/Http/Controllers/ImportController.php:226
 * @route '/setup/import/records/{record}/resolve'
 */
-resolveForm.post = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+resolveForm.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: resolve.url(args, options),
     method: 'post',
 })
@@ -555,7 +555,7 @@ resolve.form = resolveForm
 * @see app/Http/Controllers/ImportController.php:212
 * @route '/setup/import/records/{record}/qty'
 */
-export const setQty = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const setQty = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: setQty.url(args, options),
     method: 'post',
 })
@@ -570,7 +570,7 @@ setQty.definition = {
 * @see app/Http/Controllers/ImportController.php:212
 * @route '/setup/import/records/{record}/qty'
 */
-setQty.url = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+setQty.url = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { record: args }
     }
@@ -603,7 +603,7 @@ setQty.url = (args: { record: string | number | { id: string | number } } | [rec
 * @see app/Http/Controllers/ImportController.php:212
 * @route '/setup/import/records/{record}/qty'
 */
-setQty.post = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+setQty.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: setQty.url(args, options),
     method: 'post',
 })
@@ -613,7 +613,7 @@ setQty.post = (args: { record: string | number | { id: string | number } } | [re
 * @see app/Http/Controllers/ImportController.php:212
 * @route '/setup/import/records/{record}/qty'
 */
-const setQtyForm = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const setQtyForm = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: setQty.url(args, options),
     method: 'post',
 })
@@ -623,7 +623,7 @@ const setQtyForm = (args: { record: string | number | { id: string | number } } 
 * @see app/Http/Controllers/ImportController.php:212
 * @route '/setup/import/records/{record}/qty'
 */
-setQtyForm.post = (args: { record: string | number | { id: string | number } } | [record: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+setQtyForm.post = (args: { record: number | { id: number } } | [record: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: setQty.url(args, options),
     method: 'post',
 })

@@ -80,7 +80,7 @@ class Ledger
             throw ValidationException::withMessages(['entry' => 'এই লিজের মাসিক খরচ ইতিমধ্যে বসেছে, তাই এটি বাতিল করা যাবে না।']);
         }
 
-        $lines = $entry->lines->map(fn ($line) => [
+        $lines = array_values($entry->lines->map(fn ($line) => [
             'account_id' => $line->account_id,
             'cost_center_id' => $line->cost_center_id,
             'animal_id' => $line->animal_id,
@@ -88,7 +88,7 @@ class Ledger
             'debit' => $line->credit,
             'credit' => $line->debit,
             'memo' => $line->memo,
-        ])->all();
+        ])->all());
 
         return DB::transaction(function () use ($entry, $date, $reason, $lines, $schedule) {
             $reversal = $this->post('reversal', $date, "বাতিল: {$entry->number} — {$reason}", $lines, [

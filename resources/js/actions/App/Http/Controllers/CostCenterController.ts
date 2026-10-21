@@ -85,7 +85,7 @@ index.form = indexForm
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-export const show = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -100,7 +100,7 @@ show.definition = {
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-show.url = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { center: args }
     }
@@ -133,7 +133,7 @@ show.url = (args: { center: string | number | { id: string | number } } | [cente
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-show.get = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -143,7 +143,7 @@ show.get = (args: { center: string | number | { id: string | number } } | [cente
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-show.head = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -153,7 +153,7 @@ show.head = (args: { center: string | number | { id: string | number } } | [cent
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-const showForm = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -163,7 +163,7 @@ const showForm = (args: { center: string | number | { id: string | number } } | 
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-showForm.get = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -173,7 +173,7 @@ showForm.get = (args: { center: string | number | { id: string | number } } | [c
 * @see app/Http/Controllers/CostCenterController.php:39
 * @route '/centers/{center}'
 */
-showForm.head = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -246,7 +246,7 @@ store.form = storeForm
 * @see app/Http/Controllers/CostCenterController.php:96
 * @route '/setup/centers/{center}'
 */
-export const update = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -261,7 +261,7 @@ update.definition = {
 * @see app/Http/Controllers/CostCenterController.php:96
 * @route '/setup/centers/{center}'
 */
-update.url = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { center: args }
     }
@@ -294,7 +294,7 @@ update.url = (args: { center: string | number | { id: string | number } } | [cen
 * @see app/Http/Controllers/CostCenterController.php:96
 * @route '/setup/centers/{center}'
 */
-update.put = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -304,7 +304,7 @@ update.put = (args: { center: string | number | { id: string | number } } | [cen
 * @see app/Http/Controllers/CostCenterController.php:96
 * @route '/setup/centers/{center}'
 */
-const updateForm = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateForm = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -319,7 +319,7 @@ const updateForm = (args: { center: string | number | { id: string | number } } 
 * @see app/Http/Controllers/CostCenterController.php:96
 * @route '/setup/centers/{center}'
 */
-updateForm.put = (args: { center: string | number | { id: string | number } } | [center: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.put = (args: { center: number | { id: number } } | [center: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',

@@ -166,7 +166,7 @@ budget.form = budgetForm
 * @see app/Http/Controllers/ReportController.php:60
 * @route '/setup/budget/{head}'
 */
-export const updateBudgetHead = (args: { head: string | number | { id: string | number } } | [head: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const updateBudgetHead = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateBudgetHead.url(args, options),
     method: 'put',
 })
@@ -181,7 +181,7 @@ updateBudgetHead.definition = {
 * @see app/Http/Controllers/ReportController.php:60
 * @route '/setup/budget/{head}'
 */
-updateBudgetHead.url = (args: { head: string | number | { id: string | number } } | [head: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+updateBudgetHead.url = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { head: args }
     }
@@ -214,7 +214,7 @@ updateBudgetHead.url = (args: { head: string | number | { id: string | number } 
 * @see app/Http/Controllers/ReportController.php:60
 * @route '/setup/budget/{head}'
 */
-updateBudgetHead.put = (args: { head: string | number | { id: string | number } } | [head: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+updateBudgetHead.put = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateBudgetHead.url(args, options),
     method: 'put',
 })
@@ -224,7 +224,7 @@ updateBudgetHead.put = (args: { head: string | number | { id: string | number } 
 * @see app/Http/Controllers/ReportController.php:60
 * @route '/setup/budget/{head}'
 */
-const updateBudgetHeadForm = (args: { head: string | number | { id: string | number } } | [head: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateBudgetHeadForm = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateBudgetHead.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -239,7 +239,7 @@ const updateBudgetHeadForm = (args: { head: string | number | { id: string | num
 * @see app/Http/Controllers/ReportController.php:60
 * @route '/setup/budget/{head}'
 */
-updateBudgetHeadForm.put = (args: { head: string | number | { id: string | number } } | [head: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateBudgetHeadForm.put = (args: { head: number | { id: number } } | [head: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateBudgetHead.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',

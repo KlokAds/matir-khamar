@@ -390,7 +390,7 @@ storeItem.form = storeItemForm
 * @see app/Http/Controllers/StockController.php:148
 * @route '/setup/items/{item}'
 */
-export const updateItem = (args: { item: string | number | { id: string | number } } | [item: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const updateItem = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateItem.url(args, options),
     method: 'put',
 })
@@ -405,7 +405,7 @@ updateItem.definition = {
 * @see app/Http/Controllers/StockController.php:148
 * @route '/setup/items/{item}'
 */
-updateItem.url = (args: { item: string | number | { id: string | number } } | [item: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+updateItem.url = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { item: args }
     }
@@ -438,7 +438,7 @@ updateItem.url = (args: { item: string | number | { id: string | number } } | [i
 * @see app/Http/Controllers/StockController.php:148
 * @route '/setup/items/{item}'
 */
-updateItem.put = (args: { item: string | number | { id: string | number } } | [item: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+updateItem.put = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: updateItem.url(args, options),
     method: 'put',
 })
@@ -448,7 +448,7 @@ updateItem.put = (args: { item: string | number | { id: string | number } } | [i
 * @see app/Http/Controllers/StockController.php:148
 * @route '/setup/items/{item}'
 */
-const updateItemForm = (args: { item: string | number | { id: string | number } } | [item: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateItemForm = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateItem.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -463,7 +463,7 @@ const updateItemForm = (args: { item: string | number | { id: string | number } 
 * @see app/Http/Controllers/StockController.php:148
 * @route '/setup/items/{item}'
 */
-updateItemForm.put = (args: { item: string | number | { id: string | number } } | [item: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateItemForm.put = (args: { item: number | { id: number } } | [item: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: updateItem.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',

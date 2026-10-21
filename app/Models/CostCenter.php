@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +13,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * A category or project of the farm (Gavi, Bokna, Motataja, Ghas jomi ...).
  * Centers nest, so a report on "Goru project" includes every child center.
+ *
+ * @property int $id
+ * @property int|null $parent_id
+ * @property string $code
+ * @property string $name
+ * @property string $kind
+ * @property bool $holds_animals
+ * @property bool $is_active
+ * @property int $sort
+ * @property string|null $description
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read CostCenter|null $parent
+ * @property-read Collection<int, CostCenter> $children
+ * @property-read Collection<int, Animal> $animals
  */
 #[Fillable(['parent_id', 'code', 'name', 'kind', 'holds_animals', 'is_active', 'sort', 'description'])]
 class CostCenter extends Model
@@ -36,16 +53,19 @@ class CostCenter extends Model
         ];
     }
 
+    /** @return BelongsTo<CostCenter, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    /** @return HasMany<CostCenter, $this> */
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort');
     }
 
+    /** @return HasMany<Animal, $this> */
     public function animals(): HasMany
     {
         return $this->hasMany(Animal::class);

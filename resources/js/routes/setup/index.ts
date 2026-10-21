@@ -415,7 +415,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 export const periods = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -430,7 +430,7 @@ periods.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periods.url = (options?: RouteQueryOptions) => {
@@ -439,7 +439,7 @@ periods.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periods.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -449,7 +449,7 @@ periods.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periods.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -459,7 +459,7 @@ periods.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 const periodsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -469,7 +469,7 @@ const periodsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periodsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -479,7 +479,7 @@ periodsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\SetupController::periods
-* @see app/Http/Controllers/SetupController.php:215
+* @see app/Http/Controllers/SetupController.php:216
 * @route '/setup/periods'
 */
 periodsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -496,7 +496,7 @@ periods.form = periodsForm
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 export const audit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -511,7 +511,7 @@ audit.definition = {
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 audit.url = (options?: RouteQueryOptions) => {
@@ -520,7 +520,7 @@ audit.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 audit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -530,7 +530,7 @@ audit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 audit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -540,7 +540,7 @@ audit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 const auditForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -550,7 +550,7 @@ const auditForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 auditForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -560,7 +560,7 @@ auditForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\SetupController::audit
-* @see app/Http/Controllers/SetupController.php:256
+* @see app/Http/Controllers/SetupController.php:257
 * @route '/setup/audit'
 */
 auditForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

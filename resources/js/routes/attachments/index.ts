@@ -1,10 +1,10 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-export const show = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -16,10 +16,10 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-show.url = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { attachment: args }
     }
@@ -49,50 +49,50 @@ show.url = (args: { attachment: string | number | { id: string | number } } | [a
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-show.get = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-show.head = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-const showForm = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-showForm.get = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-showForm.head = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',

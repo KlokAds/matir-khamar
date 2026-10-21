@@ -3,7 +3,6 @@
 namespace App\Models\Concerns;
 
 use App\Models\AuditLog;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Writes an audit row for every create, update and delete, so the owner can
@@ -13,11 +12,11 @@ trait Auditable
 {
     public static function bootAuditable(): void
     {
-        static::created(function (Model $model) {
+        static::created(function (self $model) {
             AuditLog::record('created', $model, null, $model->auditValues($model->getAttributes()));
         });
 
-        static::updated(function (Model $model) {
+        static::updated(function (self $model) {
             $changed = $model->getChanges();
             unset($changed['updated_at']);
 
@@ -29,7 +28,7 @@ trait Auditable
             AuditLog::record('updated', $model, $model->auditValues($old), $model->auditValues($changed));
         });
 
-        static::deleted(function (Model $model) {
+        static::deleted(function (self $model) {
             AuditLog::record('deleted', $model, $model->auditValues($model->getAttributes()), null);
         });
     }

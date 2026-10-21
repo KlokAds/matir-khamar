@@ -13,6 +13,7 @@ use App\Support\Lookups;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -75,11 +76,11 @@ class AnimalController extends Controller
         $cost = $data['acquisition'] === 'born' ? 0 : Money::toPoisha($data['cost'] ?? 0);
 
         $animal = $animals->register(
-            collect($data)->only(['tag', 'name', 'sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'mother_id', 'notes'])->all(),
+            Arr::only($data, ['tag', 'name', 'sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'mother_id', 'notes']),
             $cost,
             $data['paid_from_account_id'] ?? null,
             $data['budget_head_id'] ?? null,
-            $request->file('attachments', []),
+            $this->attachments($request),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag} খামারের তালিকায় যোগ হয়েছে।"]);

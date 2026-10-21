@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::index
-* @see app/Http/Controllers/EntryController.php:47
+* @see app/Http/Controllers/EntryController.php:48
 * @route '/entries'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,10 +82,10 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-export const show = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -97,10 +97,10 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-show.url = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { entry: args }
     }
@@ -130,50 +130,50 @@ show.url = (args: { entry: string | number | { id: string | number } } | [entry:
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-show.get = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-show.head = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-const showForm = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-showForm.get = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::show
-* @see app/Http/Controllers/EntryController.php:93
+* @see app/Http/Controllers/EntryController.php:94
 * @route '/entries/{entry}'
 */
-showForm.head = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -187,10 +187,10 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-export const attachment = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const attachment = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: attachment.url(args, options),
     method: 'get',
 })
@@ -202,10 +202,10 @@ attachment.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-attachment.url = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+attachment.url = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { attachment: args }
     }
@@ -235,50 +235,50 @@ attachment.url = (args: { attachment: string | number | { id: string | number } 
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-attachment.get = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+attachment.get = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: attachment.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-attachment.head = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+attachment.head = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: attachment.url(args, options),
     method: 'head',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-const attachmentForm = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const attachmentForm = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: attachment.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-attachmentForm.get = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+attachmentForm.get = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: attachment.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::attachment
-* @see app/Http/Controllers/EntryController.php:372
+* @see app/Http/Controllers/EntryController.php:376
 * @route '/attachments/{attachment}'
 */
-attachmentForm.head = (args: { attachment: string | number | { id: string | number } } | [attachment: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+attachmentForm.head = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: attachment.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -292,7 +292,7 @@ attachment.form = attachmentForm
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -307,7 +307,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -316,7 +316,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -326,7 +326,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -336,7 +336,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -346,7 +346,7 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -356,7 +356,7 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::create
-* @see app/Http/Controllers/EntryController.php:132
+* @see app/Http/Controllers/EntryController.php:133
 * @route '/entries/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -373,7 +373,7 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\EntryController::store
-* @see app/Http/Controllers/EntryController.php:153
+* @see app/Http/Controllers/EntryController.php:154
 * @route '/entries'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -388,7 +388,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::store
-* @see app/Http/Controllers/EntryController.php:153
+* @see app/Http/Controllers/EntryController.php:154
 * @route '/entries'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -397,7 +397,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\EntryController::store
-* @see app/Http/Controllers/EntryController.php:153
+* @see app/Http/Controllers/EntryController.php:154
 * @route '/entries'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -407,7 +407,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\EntryController::store
-* @see app/Http/Controllers/EntryController.php:153
+* @see app/Http/Controllers/EntryController.php:154
 * @route '/entries'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -417,7 +417,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\EntryController::store
-* @see app/Http/Controllers/EntryController.php:153
+* @see app/Http/Controllers/EntryController.php:154
 * @route '/entries'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -429,10 +429,10 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\EntryController::attach
-* @see app/Http/Controllers/EntryController.php:356
+* @see app/Http/Controllers/EntryController.php:360
 * @route '/entries/{entry}/attachments'
 */
-export const attach = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const attach = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: attach.url(args, options),
     method: 'post',
 })
@@ -444,10 +444,10 @@ attach.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::attach
-* @see app/Http/Controllers/EntryController.php:356
+* @see app/Http/Controllers/EntryController.php:360
 * @route '/entries/{entry}/attachments'
 */
-attach.url = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+attach.url = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { entry: args }
     }
@@ -477,30 +477,30 @@ attach.url = (args: { entry: string | number | { id: string | number } } | [entr
 
 /**
 * @see \App\Http\Controllers\EntryController::attach
-* @see app/Http/Controllers/EntryController.php:356
+* @see app/Http/Controllers/EntryController.php:360
 * @route '/entries/{entry}/attachments'
 */
-attach.post = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+attach.post = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: attach.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::attach
-* @see app/Http/Controllers/EntryController.php:356
+* @see app/Http/Controllers/EntryController.php:360
 * @route '/entries/{entry}/attachments'
 */
-const attachForm = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const attachForm = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: attach.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::attach
-* @see app/Http/Controllers/EntryController.php:356
+* @see app/Http/Controllers/EntryController.php:360
 * @route '/entries/{entry}/attachments'
 */
-attachForm.post = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+attachForm.post = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: attach.url(args, options),
     method: 'post',
 })
@@ -509,10 +509,10 @@ attach.form = attachForm
 
 /**
 * @see \App\Http\Controllers\EntryController::reverse
-* @see app/Http/Controllers/EntryController.php:342
+* @see app/Http/Controllers/EntryController.php:346
 * @route '/entries/{entry}/reverse'
 */
-export const reverse = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const reverse = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: reverse.url(args, options),
     method: 'post',
 })
@@ -524,10 +524,10 @@ reverse.definition = {
 
 /**
 * @see \App\Http\Controllers\EntryController::reverse
-* @see app/Http/Controllers/EntryController.php:342
+* @see app/Http/Controllers/EntryController.php:346
 * @route '/entries/{entry}/reverse'
 */
-reverse.url = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+reverse.url = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { entry: args }
     }
@@ -557,30 +557,30 @@ reverse.url = (args: { entry: string | number | { id: string | number } } | [ent
 
 /**
 * @see \App\Http\Controllers\EntryController::reverse
-* @see app/Http/Controllers/EntryController.php:342
+* @see app/Http/Controllers/EntryController.php:346
 * @route '/entries/{entry}/reverse'
 */
-reverse.post = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+reverse.post = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: reverse.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::reverse
-* @see app/Http/Controllers/EntryController.php:342
+* @see app/Http/Controllers/EntryController.php:346
 * @route '/entries/{entry}/reverse'
 */
-const reverseForm = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const reverseForm = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: reverse.url(args, options),
     method: 'post',
 })
 
 /**
 * @see \App\Http\Controllers\EntryController::reverse
-* @see app/Http/Controllers/EntryController.php:342
+* @see app/Http/Controllers/EntryController.php:346
 * @route '/entries/{entry}/reverse'
 */
-reverseForm.post = (args: { entry: string | number | { id: string | number } } | [entry: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+reverseForm.post = (args: { entry: number | { id: number } } | [entry: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: reverse.url(args, options),
     method: 'post',
 })

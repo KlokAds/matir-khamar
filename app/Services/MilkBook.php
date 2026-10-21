@@ -18,13 +18,15 @@ class MilkBook
         $saved = 0;
 
         foreach ($rows as $row) {
-            if ((float) ($row['liters'] ?? 0) <= 0) {
+            $liters = $row['liters'] ?? 0;
+
+            if ((float) $liters <= 0) {
                 continue;
             }
 
             MilkRecord::query()->updateOrCreate(
                 ['date' => $date, 'session' => $session, 'animal_id' => $row['animal_id'] ?? null],
-                ['liters' => $row['liters'], 'cost_center_id' => $gavi, 'recorded_by' => $userId],
+                ['liters' => $liters, 'cost_center_id' => $gavi, 'recorded_by' => $userId],
             );
             $saved++;
         }

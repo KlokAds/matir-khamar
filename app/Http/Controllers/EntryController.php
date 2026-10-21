@@ -21,6 +21,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use LogicException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -62,7 +63,7 @@ class EntryController extends Controller
             ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('date', '<=', $to))
             ->when($filters['q'] ?? null, fn ($query, $q) => $query->where(fn ($inner) => $inner->where('description', 'like', "%{$q}%")->orWhere('number', 'like', "%{$q}%")))
             ->when($filters['center'] ?? null, function ($query, $centerId) {
-                $ids = CostCenter::query()->findOrFail($centerId)->descendantIds();
+                $ids = CostCenter::query()->findOrFail((int) $centerId)->descendantIds();
                 $query->whereHas('lines', fn ($lines) => $lines->whereIn('cost_center_id', $ids));
             })
             ->orderByDesc('date')
@@ -77,7 +78,7 @@ class EntryController extends Controller
                 'type_label' => JournalEntry::TYPES[$entry->type] ?? $entry->type,
                 'description' => $entry->description,
                 'amount' => (int) $entry->lines->sum('debit'),
-                'creator' => $entry->creator?->name,
+                'creator' => $entry->creator->name,
                 'attachments' => $entry->attachments_count,
                 'reversed' => $entry->reversed_by_id !== null,
             ]);
@@ -104,7 +105,7 @@ class EntryController extends Controller
                 'description' => $entry->description,
                 'reference' => $entry->reference,
                 'party' => $entry->party?->name,
-                'creator' => $entry->creator?->name,
+                'creator' => $entry->creator->name,
                 'created_at' => $entry->created_at?->toDateTimeString(),
                 'reversal_of' => $entry->reversalOf?->only(['id', 'number']),
                 'reversed_by' => $entry->reversedBy?->only(['id', 'number']),
@@ -167,7 +168,7 @@ class EntryController extends Controller
         $options = [
             'party_id' => $common['party_id'] ?? null,
             'reference' => $common['reference'] ?? null,
-            'attachments' => $request->file('attachments', []),
+            'attachments' => $this->attachments($request),
         ];
         $describe = fn (string $fallback) => $common['description'] ?? null ?: $fallback;
         $money = ['required', Rule::exists('accounts', 'id')->whereIn('subtype', Account::MONEY_SUBTYPES)];
@@ -228,7 +229,7 @@ class EntryController extends Controller
 
             'investment', 'withdrawal' => (function () use ($request, $ledger, $partyAccounts, $form, $date, $describe, $options, $money) {
                 $data = $request->validate(['party_id' => ['required', Rule::exists('parties', 'id')->where('type', 'investor')], 'money_account_id' => $money, 'amount' => Money::rule()]);
-                $party = Party::query()->findOrFail($data['party_id']);
+                $party = Party::query()->findOrFail((int) $data['party_id']);
                 $capital = $partyAccounts->capitalFor($party)->id;
                 $amount = Money::toPoisha($data['amount']);
 
@@ -241,7 +242,7 @@ class EntryController extends Controller
 
             'loan' => (function () use ($request, $ledger, $partyAccounts, $date, $describe, $options, $money) {
                 $data = $request->validate(['party_id' => ['required', Rule::exists('parties', 'id')->where('type', 'lender')], 'money_account_id' => $money, 'amount' => Money::rule()]);
-                $party = Party::query()->findOrFail($data['party_id']);
+                $party = Party::query()->findOrFail((int) $data['party_id']);
                 $amount = Money::toPoisha($data['amount']);
 
                 return $ledger->post('loan', $date, $describe('ঋণ গ্রহণ — '.$party->name), [
@@ -258,7 +259,7 @@ class EntryController extends Controller
                     'interest' => Money::rule(false),
                     'cost_center_id' => ['nullable', 'exists:cost_centers,id'],
                 ]);
-                $party = Party::query()->findOrFail($data['party_id']);
+                $party = Party::query()->findOrFail((int) $data['party_id']);
                 $principal = Money::toPoisha($data['principal'] ?? 0);
                 $interest = Money::toPoisha($data['interest'] ?? 0);
 
@@ -283,6 +284,9 @@ class EntryController extends Controller
                     ['account_id' => Account::byCode(AccountCodes::GRANT)->id, 'credit' => $amount],
                 ], $options);
             })(),
+
+            // FORMS and this match list the same keys; validation keeps anything else out.
+            default => throw new LogicException("Unknown entry form {$form}."),
         };
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "এন্ট্রি {$entry->number} সংরক্ষিত হয়েছে।"]);
@@ -360,7 +364,7 @@ class EntryController extends Controller
             'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:'.config('khamar.max_voucher_kb')],
         ]);
 
-        foreach ($request->file('attachments') as $file) {
+        foreach ($this->attachments($request) as $file) {
             $ledger->attach($entry, $file);
         }
 

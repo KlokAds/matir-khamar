@@ -25,7 +25,7 @@ class AllocationController extends Controller
         ]);
 
         $source = isset($data['source'])
-            ? CostCenter::query()->findOrFail($data['source'])
+            ? CostCenter::query()->findOrFail((int) $data['source'])
             : CostCenter::query()->where('kind', 'overhead')->first();
         $month = Date::parse(($data['month'] ?? now()->format('Y-m')).'-01');
         $pool = $source ? $allocation->pool($source, $month) : [];
@@ -38,7 +38,7 @@ class AllocationController extends Controller
             'centers' => array_values(array_filter(Lookups::centers(), fn ($center) => ! in_array($center['kind'], ['group', 'overhead'], true))),
             'pool' => collect($pool)->map(fn ($amount, $accountId) => ['account' => $names[$accountId] ?? '', 'amount' => $amount])->values(),
             'animalDays' => (object) $allocation->animalDays($month),
-            'done' => JournalEntry::query()->where('reference', 'like', 'alloc-'.($source?->id ?? 0).'-'.$month->format('Y-m'))->whereNull('reversed_by_id')->get(['id', 'number', 'description']),
+            'done' => JournalEntry::query()->where('reference', 'like', 'alloc-'.($source->id ?? 0).'-'.$month->format('Y-m'))->whereNull('reversed_by_id')->get(['id', 'number', 'description']),
         ]);
     }
 
@@ -58,8 +58,8 @@ class AllocationController extends Controller
             return back()->withErrors(['month' => 'ভবিষ্যতের মাসের খরচ ভাগ করা যায় না।']);
         }
 
-        $weights = collect($data['weights'])->mapWithKeys(fn ($weight, $id) => [(int) $id => (float) $weight])->all();
-        $entry = $allocation->post(CostCenter::query()->findOrFail($data['source_id']), $month, $weights, $data['method']);
+        $weights = collect((array) $data['weights'])->mapWithKeys(fn ($weight, $id) => [(int) $id => (float) $weight])->all();
+        $entry = $allocation->post(CostCenter::query()->findOrFail((int) $data['source_id']), $month, $weights, $data['method']);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "খরচ ভাগ হয়েছে ({$entry->number})।"]);
 

@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +14,25 @@ use LogicException;
 /**
  * A posted voucher. Posted entries are never edited or deleted: a mistake is
  * fixed by posting a reversal, so the books always show what happened.
+ *
+ * @property int $id
+ * @property string $number
+ * @property CarbonImmutable $date
+ * @property string $type
+ * @property string $description
+ * @property int|null $party_id
+ * @property string|null $reference
+ * @property int|null $reversal_of_id
+ * @property int|null $reversed_by_id
+ * @property int $created_by
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Collection<int, JournalLine> $lines
+ * @property-read Collection<int, Attachment> $attachments
+ * @property-read Party|null $party
+ * @property-read User $creator
+ * @property-read JournalEntry|null $reversalOf
+ * @property-read JournalEntry|null $reversedBy
  */
 #[Fillable(['number', 'date', 'type', 'description', 'party_id', 'reference', 'reversal_of_id', 'reversed_by_id', 'created_by'])]
 class JournalEntry extends Model
@@ -62,31 +83,37 @@ class JournalEntry extends Model
         });
     }
 
+    /** @return HasMany<JournalLine, $this> */
     public function lines(): HasMany
     {
         return $this->hasMany(JournalLine::class);
     }
 
+    /** @return HasMany<Attachment, $this> */
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
     }
 
+    /** @return BelongsTo<Party, $this> */
     public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** @return BelongsTo<JournalEntry, $this> */
     public function reversalOf(): BelongsTo
     {
         return $this->belongsTo(self::class, 'reversal_of_id');
     }
 
+    /** @return BelongsTo<JournalEntry, $this> */
     public function reversedBy(): BelongsTo
     {
         return $this->belongsTo(self::class, 'reversed_by_id');

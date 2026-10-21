@@ -60,7 +60,7 @@ store.form = storeForm
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-export const update = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -75,7 +75,7 @@ update.definition = {
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-update.url = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { account: args }
     }
@@ -108,7 +108,7 @@ update.url = (args: { account: string | number | { id: string | number } } | [ac
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-update.put = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -118,7 +118,7 @@ update.put = (args: { account: string | number | { id: string | number } } | [ac
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-const updateForm = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateForm = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -133,7 +133,7 @@ const updateForm = (args: { account: string | number | { id: string | number } }
 * @see app/Http/Controllers/SetupController.php:128
 * @route '/setup/accounts/{account}'
 */
-updateForm.put = (args: { account: string | number | { id: string | number } } | [account: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.put = (args: { account: number | { id: number } } | [account: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',

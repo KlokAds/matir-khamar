@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +14,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Chart of accounts. Asset and expense accounts grow with debits; liability,
  * equity and income accounts grow with credits.
+ *
+ * @property int $id
+ * @property int|null $parent_id
+ * @property string $code
+ * @property string $name
+ * @property string $type
+ * @property string|null $subtype
+ * @property int|null $party_id
+ * @property bool $is_system
+ * @property bool $is_active
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Party|null $party
+ * @property-read Collection<int, JournalLine> $lines
  */
 #[Fillable(['parent_id', 'code', 'name', 'type', 'subtype', 'party_id', 'is_system', 'is_active'])]
 class Account extends Model
@@ -43,11 +59,13 @@ class Account extends Model
         ];
     }
 
+    /** @return BelongsTo<Party, $this> */
     public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
     }
 
+    /** @return HasMany<JournalLine, $this> */
     public function lines(): HasMany
     {
         return $this->hasMany(JournalLine::class);
@@ -61,17 +79,19 @@ class Account extends Model
     /** Balance in poisha, positive in the account's normal direction. */
     public function balance(): int
     {
-        $totals = $this->lines()->selectRaw('COALESCE(SUM(debit),0) as d, COALESCE(SUM(credit),0) as c')->first();
-        $net = (int) $totals->d - (int) $totals->c;
+        $totals = $this->lines()->toBase()->selectRaw('COALESCE(SUM(debit),0) as d, COALESCE(SUM(credit),0) as c')->first();
+        $net = (int) data_get($totals, 'd') - (int) data_get($totals, 'c');
 
         return $this->isDebitNormal() ? $net : -$net;
     }
 
+    /** @param  Builder<self>  $query */
     public function scopeMoney(Builder $query): void
     {
         $query->whereIn('subtype', self::MONEY_SUBTYPES)->where('is_active', true);
     }
 
+    /** @param  Builder<self>  $query */
     public function scopeOfType(Builder $query, string $type): void
     {
         $query->where('type', $type)->where('is_active', true);
