@@ -8,6 +8,7 @@ use App\Models\Breeding;
 use App\Models\CostCenter;
 use App\Models\FarmNote;
 use App\Models\Goal;
+use App\Models\JournalEntry;
 use App\Models\User;
 use App\Services\HerdCare;
 use Database\Seeders\KhamarSetupSeeder;
@@ -119,7 +120,7 @@ it('adds animals bought together under one entry with running tags', function ()
     ($this->addAnimal)(['tag' => null, 'count' => 2, 'cost' => '180000.01', 'batch' => 'new'])->assertRedirect('/animals');
 
     $pair = Animal::query()->whereIn('tag', ['M-04', 'M-05'])->orderBy('tag')->get();
-    $entry = App\Models\JournalEntry::query()->where('description', 'like', '2টি পশু%')->firstOrFail();
+    $entry = JournalEntry::query()->where('description', 'like', '2টি পশু%')->firstOrFail();
 
     expect($pair)->toHaveCount(2)
         ->and($pair->sum('purchase_cost'))->toBe(18000001)

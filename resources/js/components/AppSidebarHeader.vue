@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { ChevronRight, CloudOff, Plus, RefreshCw } from '@lucide/vue';
+import { Bell, ChevronRight, CloudOff, Plus, RefreshCw } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useSidebar } from '@/components/ui/sidebar';
 import { currentLocale, t } from '@/lib/i18n';
@@ -87,6 +87,8 @@ onBeforeUnmount(() => {
     window.removeEventListener('offline', setOnline);
 });
 
+const remindersDue = computed(() => Number(page.props.remindersDue ?? 0));
+
 const locale = computed(() => (page.props.locale as string) ?? 'bn');
 const switchTo = (next: 'bn' | 'en') => {
     if (next !== locale.value) {
@@ -170,6 +172,19 @@ const switchTo = (next: 'bn' | 'en') => {
                 <b v-if="pendingCount > 0" class="num">{{ pendingCount }}</b>
             </Link>
 
+            <Link
+                href="/reminders"
+                class="bell relative"
+                :aria-label="t('মনে করিয়ে দিন')"
+            >
+                <Bell class="size-4" />
+                <span
+                    v-if="remindersDue > 0"
+                    class="num absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white"
+                    >{{ remindersDue }}</span
+                >
+            </Link>
+
             <div
                 class="lang flex items-center rounded-full border border-border bg-card p-0.5 text-xs font-semibold"
                 role="group"
@@ -227,6 +242,10 @@ const switchTo = (next: 'bn' | 'en') => {
 
 .stall-btn {
     @apply flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-paddy shadow-xs transition-colors hover:bg-paddy hover:text-primary-foreground;
+}
+
+.bell {
+    @apply flex size-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground;
 }
 
 .pill {

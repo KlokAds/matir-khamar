@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Reminder;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -45,6 +46,10 @@ class HandleInertiaRequests extends Middleware
                 'roleLabel' => $request->user()?->roleLabel(),
                 'can' => $request->user() ? array_fill_keys($request->user()->abilities(), true) : [],
             ],
+            // Open reminders due by the end of today, for the bell in the top bar.
+            'remindersDue' => fn () => $request->user()
+                ? Reminder::query()->visibleTo($request->user())->where('due_at', '<=', now()->endOfDay())->count()
+                : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

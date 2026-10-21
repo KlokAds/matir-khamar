@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import {
+    AlarmClock,
     Beef,
     ChartColumnBig,
     CloudOff,
@@ -60,6 +61,11 @@ const items = computed<NavItem[]>(() => {
                   },
               ]
             : []),
+        {
+            title: 'মনে করিয়ে দিন',
+            href: '/reminders',
+            icon: AlarmClock,
+        },
         ...group('গরু', Beef, [
             ['গরুর তালিকা', '/animals', !!c['view-reports']],
             ['নতুন গরু', '/animals/create', !!c['post-entries']],

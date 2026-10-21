@@ -183,6 +183,14 @@ class HerdCare
         ];
     }
 
+    /** Whether the farm has cows in the dairy category, so missing milk is worth a nudge. */
+    public function hasMilkingCows(): bool
+    {
+        return Animal::query()->where('status', 'active')
+            ->whereHas('costCenter', fn ($query) => $query->where('code', 'GAVI'))
+            ->exists();
+    }
+
     /**
      * What needs doing soon, newest concern first: heat checks, pregnancy checks, calvings,
      * fattening rounds past their target, and diary follow-ups.

@@ -12,6 +12,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SetupController;
@@ -24,8 +25,21 @@ Route::redirect('/', '/dashboard')->name('home');
 // The বাংলা | English switch works before login too.
 Route::post('locale', LocaleController::class)->middleware('throttle:30,1')->name('locale');
 
+// "হয়ে গেছে" / "১ ঘণ্টা পরে" pressed on a notification: the link itself is signed, no session needed.
+Route::post('reminders/{reminder}/act/{action}', [ReminderController::class, 'act'])
+    ->middleware(['signed', 'throttle:30,1'])->name('reminders.act');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+
+    // Reminders and phone notifications: everyone signed in can set and receive their own.
+    Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');
+    Route::post('reminders', [ReminderController::class, 'store'])->middleware('throttle:60,1')->name('reminders.store');
+    Route::put('reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
+    Route::post('push/subscribe', [ReminderController::class, 'subscribe'])->middleware('throttle:20,1')->name('push.subscribe');
+    Route::post('push/unsubscribe', [ReminderController::class, 'unsubscribe'])->name('push.unsubscribe');
+    Route::post('push/test', [ReminderController::class, 'test'])->middleware('throttle:10,1')->name('push.test');
+    Route::put('notify-prefs', [ReminderController::class, 'prefs'])->name('notify.prefs');
 
     // Daily work: milk and feed use. Open to the entry role.
     Route::middleware('can:post-daily')->group(function () {

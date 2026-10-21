@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // Notification buttons post from the service worker with a signed link instead of a form token.
+        $middleware->validateCsrfTokens(except: ['reminders/*/act/*']);
+
         // Every request (pages, /up pings) may start the scheduler once a minute: no hPanel cron needed.
         $middleware->append(RunWebCron::class);
 

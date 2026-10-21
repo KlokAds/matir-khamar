@@ -25,6 +25,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property bool $is_active
  * @property bool $is_super
  * @property string $locale bn or en
+ * @property array{morning?:bool, evening?:bool, reminders?:bool}|null $notify_prefs which notifications this user wants
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -58,6 +59,7 @@ class User extends Authenticatable implements PasskeyUser
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',
             'is_super' => 'boolean',
+            'notify_prefs' => 'array',
         ];
     }
 
@@ -94,6 +96,12 @@ class User extends Authenticatable implements PasskeyUser
         }
 
         return $this->accessRole?->grantedAbilities() ?? [];
+    }
+
+    /** Notification wishes, everything on unless turned off. */
+    public function wantsNotification(string $kind): bool
+    {
+        return (bool) ($this->notify_prefs[$kind] ?? true);
     }
 
     public function hasAbility(string $ability): bool
