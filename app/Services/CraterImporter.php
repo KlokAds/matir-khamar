@@ -6,9 +6,11 @@ use App\Models\Account;
 use App\Models\ImportedRecord;
 use App\Models\ImportMapping;
 use App\Models\Setting;
+use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 use Throwable;
 
 /**
@@ -62,7 +64,7 @@ class CraterImporter
         return config('database.connections.crater.database') !== '' && config('database.connections.crater.username') !== '';
     }
 
-    public function connection(): ConnectionInterface
+    public function connection(): Connection
     {
         $this->applySettings();
 
@@ -345,10 +347,10 @@ class CraterImporter
     }
 
     /** @param  array{new:int, unchanged:int, changed:int}  $counts */
-    private function store(string $table, object $row, ?string $number, string $date, int $amount, array &$counts): void
+    private function store(string $table, stdClass $row, ?string $number, string $date, int $amount, array &$counts): void
     {
         $raw = (array) $row;
-        $checksum = hash('sha256', json_encode($raw, JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION));
+        $checksum = hash('sha256', json_encode($raw, JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR));
         $existing = ImportedRecord::query()->where('source', self::SOURCE)->where('external_table', $table)->where('external_id', (string) $row->id)->first();
 
         if (! $existing) {
@@ -405,7 +407,11 @@ class CraterImporter
         }
     }
 
-    /** Account choices a mapping of this kind may point at. */
+    /**
+     * Account choices a mapping of this kind may point at.
+     *
+     * @return array<int, Account>
+     */
     public static function accountsFor(string $kind): array
     {
         return match ($kind) {

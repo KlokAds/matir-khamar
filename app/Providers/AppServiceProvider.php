@@ -75,19 +75,22 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureLoginAudit(): void
     {
+        // The guard hands over the auth contract; every user here is an Eloquent User.
         Event::listen(function (Login $event) {
-            $event->user->forceFill(['last_login_at' => now(), 'last_login_ip' => request()->ip()])->saveQuietly();
-            AuditLog::record('login', $event->user, null, null);
+            if ($event->user instanceof User) {
+                $event->user->forceFill(['last_login_at' => now(), 'last_login_ip' => request()->ip()])->saveQuietly();
+                AuditLog::record('login', $event->user, null, null);
+            }
         });
 
         Event::listen(function (Logout $event) {
-            if ($event->user) {
+            if ($event->user instanceof User) {
                 AuditLog::record('logout', $event->user, null, null);
             }
         });
 
         Event::listen(function (Failed $event) {
-            AuditLog::record('login_failed', $event->user, null, ['email' => request()->input('email')]);
+            AuditLog::record('login_failed', $event->user instanceof User ? $event->user : null, null, ['email' => request()->input('email')]);
         });
     }
 }

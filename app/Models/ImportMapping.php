@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * How a billing-side label lands in the farm books, e.g. Crater expense
  * category "Goru khabar" -> account Danadar khaddo, category Bokna.
+ *
+ * @property int $id
+ * @property string $source
+ * @property string $kind
+ * @property string $external_id
+ * @property string $external_name
+ * @property int|null $account_id
+ * @property int|null $cost_center_id
+ * @property int|null $item_id
+ * @property bool $ignore
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Account|null $account
+ * @property-read CostCenter|null $costCenter
+ * @property-read Item|null $item
  */
 #[Fillable(['source', 'kind', 'external_id', 'external_name', 'account_id', 'cost_center_id', 'item_id', 'ignore'])]
 class ImportMapping extends Model
@@ -27,16 +43,19 @@ class ImportMapping extends Model
         return ['ignore' => 'boolean'];
     }
 
+    /** @return BelongsTo<Account, $this> */
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
     }
 
+    /** @return BelongsTo<CostCenter, $this> */
     public function costCenter(): BelongsTo
     {
         return $this->belongsTo(CostCenter::class);
     }
 
+    /** @return BelongsTo<Item, $this> */
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);

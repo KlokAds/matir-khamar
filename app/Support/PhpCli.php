@@ -17,7 +17,8 @@ final class PhpCli
 
         $binary = PHP_BINARY;
 
-        if ($binary === '') {
+        // PHP_BINARY is empty when PHP cannot tell its own path.
+        if (blank($binary)) {
             return 'php';
         }
 

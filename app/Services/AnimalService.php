@@ -7,6 +7,7 @@ use App\Models\Animal;
 use App\Models\AnimalPlacement;
 use App\Models\CostCenter;
 use App\Models\JournalEntry;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,10 +22,11 @@ class AnimalService
 
     /**
      * @param  array<string, mixed>  $data  tag, name, sex, breed, cost_center_id, acquisition, acquired_on, birth_date, mother_id, notes
+     * @param  list<UploadedFile>  $attachments
      */
     public function register(array $data, int $cost, ?int $paidFromAccountId, ?int $budgetHeadId = null, array $attachments = []): Animal
     {
-        $center = CostCenter::query()->findOrFail($data['cost_center_id']);
+        $center = CostCenter::query()->findOrFail((int) $data['cost_center_id']);
 
         if (! $center->holds_animals) {
             throw ValidationException::withMessages(['cost_center_id' => 'এই ক্যাটাগরিতে পশু রাখা যায় না।']);
@@ -104,6 +106,7 @@ class AnimalService
         });
     }
 
+    /** @param  list<UploadedFile>  $attachments */
     public function sell(Animal $animal, string $date, int $amount, int $receivedIntoAccountId, ?int $partyId, array $attachments = []): JournalEntry
     {
         $this->assertActive($animal);

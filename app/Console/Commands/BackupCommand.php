@@ -38,7 +38,16 @@ class BackupCommand extends Command
         File::ensureDirectoryExists($directory, 0700);
         $path = $directory.'/khamar-'.now()->format('Y-m-d-His').'.bak';
 
-        File::put($path, Crypt::encryptString(base64_encode(gzencode($dump, 9))));
+        $compressed = gzencode($dump, 9);
+
+        // An empty file here would look like a backup and be trusted later.
+        if ($compressed === false) {
+            $this->error('backup failed: could not compress the dump');
+
+            return self::FAILURE;
+        }
+
+        File::put($path, Crypt::encryptString(base64_encode($compressed)));
         chmod($path, 0600);
 
         $files = collect(File::files($directory))->sortByDesc(fn ($file) => $file->getMTime())->values();

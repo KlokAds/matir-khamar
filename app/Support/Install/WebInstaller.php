@@ -114,13 +114,25 @@ class WebInstaller
             );
             $pdo->query('SELECT 1');
 
-            $hasTable = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'journal_entries'")->fetchColumn() > 0;
-            $hasEntries = $hasTable && (int) $pdo->query('SELECT COUNT(*) FROM journal_entries')->fetchColumn() > 0;
+            $hasTable = $this->count($pdo, "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'journal_entries'") > 0;
+            $hasEntries = $hasTable && $this->count($pdo, 'SELECT COUNT(*) FROM journal_entries') > 0;
 
             return $hasEntries ? 'এই ডাটাবেসে আগে থেকেই খামারের হিসাব আছে। খালি ডাটাবেস দিন — পুরনো হিসাব মুছে যাওয়ার ঝুঁকি নেওয়া হবে না।' : null;
         } catch (Throwable $exception) {
             return 'ডাটাবেসে সংযোগ হয়নি: '.$exception->getMessage();
         }
+    }
+
+    private function count(PDO $pdo, string $sql): int
+    {
+        $statement = $pdo->query($sql);
+
+        // Only reachable if the connection was opened without ERRMODE_EXCEPTION.
+        if ($statement === false) {
+            throw new RuntimeException('Query failed: '.$sql);
+        }
+
+        return (int) $statement->fetchColumn();
     }
 
     /**

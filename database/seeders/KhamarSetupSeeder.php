@@ -88,17 +88,14 @@ class KhamarSetupSeeder extends Seeder
             ['5990', 'অন্যান্য খরচ', 'expense', null, '5000'],
         ];
 
-        $ids = [];
-
         foreach ($accounts as [$code, $name, $type, $subtype, $parent]) {
-            $account = Account::query()->firstOrCreate(['code' => $code], [
+            Account::query()->firstOrCreate(['code' => $code], [
                 'name' => $name,
                 'type' => $type,
                 'subtype' => $subtype,
-                'parent_id' => $parent ? $ids[$parent] : null,
+                'parent_id' => $parent ? Account::byCode($parent)->id : null,
                 'is_system' => true,
             ]);
-            $ids[$code] = $account->id;
         }
     }
 
@@ -121,18 +118,15 @@ class KhamarSetupSeeder extends Seeder
             ['SHADHARON', 'সাধারণ খরচ (পরে ভাগ হবে)', 'overhead', false, 'FARM', true, 90],
         ];
 
-        $ids = [];
-
         foreach ($centers as [$code, $name, $kind, $holdsAnimals, $parent, $active, $sort]) {
-            $center = CostCenter::query()->firstOrCreate(['code' => $code], [
+            CostCenter::query()->firstOrCreate(['code' => $code], [
                 'name' => $name,
                 'kind' => $kind,
                 'holds_animals' => $holdsAnimals,
-                'parent_id' => $parent ? $ids[$parent] : null,
+                'parent_id' => $parent ? CostCenter::query()->where('code', $parent)->firstOrFail()->id : null,
                 'is_active' => $active,
                 'sort' => $sort,
             ]);
-            $ids[$code] = $center->id;
         }
     }
 
