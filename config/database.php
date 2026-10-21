@@ -64,6 +64,21 @@ return [
             ]) : [],
         ],
 
+        // billing.klokads.com (Crater). Use a MySQL user with SELECT rights only:
+        // this app reads from it and never writes.
+        'crater' => [
+            'driver' => env('CRATER_DB_DRIVER', 'mysql'),
+            'host' => env('CRATER_DB_HOST', '127.0.0.1'),
+            'port' => env('CRATER_DB_PORT', '3306'),
+            'database' => env('CRATER_DB_DATABASE', ''),
+            'username' => env('CRATER_DB_USERNAME', ''),
+            'password' => env('CRATER_DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => env('CRATER_DB_PREFIX', ''),
+            'strict' => true,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

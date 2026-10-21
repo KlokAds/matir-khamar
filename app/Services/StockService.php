@@ -20,7 +20,7 @@ class StockService
     public function __construct(private Ledger $ledger) {}
 
     /**
-     * @param  array{credit_account_id:int, party_id?:int|null, budget_head_id?:int|null, description?:string|null, attachments?:list<UploadedFile>}  $payment
+     * @param  array{credit_account_id:int, party_id?:int|null, budget_head_id?:int|null, description?:string|null, reference?:string|null, attachments?:list<UploadedFile>}  $payment
      */
     public function purchase(Item $item, string $date, float $qty, int $amount, array $payment): JournalEntry
     {
@@ -33,6 +33,7 @@ class StockService
                 ['account_id' => $payment['credit_account_id'], 'credit' => $amount],
             ], [
                 'party_id' => $payment['party_id'] ?? null,
+                'reference' => $payment['reference'] ?? null,
                 'attachments' => $payment['attachments'] ?? [],
             ]);
 

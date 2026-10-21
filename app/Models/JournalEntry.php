@@ -24,6 +24,8 @@ class JournalEntry extends Model
         'stock_purchase' => 'মাল ক্রয় (স্টকে)',
         'stock_issue' => 'স্টক থেকে ব্যবহার',
         'production' => 'নিজস্ব উৎপাদন',
+        'payment' => 'বাকি পরিশোধ',
+        'receipt' => 'বাকি আদায়',
         'transfer' => 'টাকা স্থানান্তর',
         'asset' => 'সম্পদ ক্রয়',
         'lease' => 'লিজ অগ্রিম',
