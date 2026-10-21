@@ -71,6 +71,102 @@ class AnimalService
         });
     }
 
+    /**
+     * The next free tag for a category: M-04 after M-03 in মোটাতাজা, G-… for গাভী, and so on.
+     * Owners rarely name every animal; a short running number is enough to tell them apart.
+     */
+    public function nextTag(CostCenter $center, int $offset = 0): string
+    {
+        $prefix = match ($center->code) {
+            'GAVI' => 'G',
+            'BOKNA' => 'B',
+            'MOTATAJA' => 'M',
+            'BACHUR' => 'C',
+            default => mb_strtoupper(mb_substr($center->code, 0, 1)),
+        };
+
+        $highest = Animal::query()->where('tag', 'like', "{$prefix}-%")->pluck('tag')
+            ->map(fn (string $tag) => (int) preg_replace('/\D/', '', substr($tag, strlen($prefix) + 1)))
+            ->max() ?? 0;
+
+        return sprintf('%s-%02d', $prefix, $highest + 1 + $offset);
+    }
+
+    /**
+     * Several animals bought together (two motataja from one haat, one price): each gets its own
+     * card and running tag, the price is shared equally, and the books get one entry with one
+     * receipt — the way the purchase really happened.
+     *
+     * @param  array<string, mixed>  $data  sex, breed, cost_center_id, batch_id, acquisition, acquired_on, notes
+     * @param  list<UploadedFile>  $attachments
+     * @return list<Animal>
+     */
+    public function registerGroup(array $data, int $count, int $totalCost, ?int $paidFromAccountId, ?int $budgetHeadId = null, array $attachments = []): array
+    {
+        $center = CostCenter::query()->findOrFail((int) $data['cost_center_id']);
+
+        if (! $center->holds_animals) {
+            throw ValidationException::withMessages(['cost_center_id' => 'এই ক্যাটাগরিতে পশু রাখা যায় না।']);
+        }
+
+        if ($count < 1) {
+            throw ValidationException::withMessages(['count' => 'অন্তত একটি গরু।']);
+        }
+
+        return DB::transaction(function () use ($data, $count, $totalCost, $paidFromAccountId, $budgetHeadId, $attachments, $center) {
+            $share = intdiv($totalCost, $count);
+            $animals = [];
+            $lines = [];
+
+            for ($i = 0; $i < $count; $i++) {
+                // The last one takes the leftover poisha so the cards add up to the price paid.
+                $cost = $i === $count - 1 ? $totalCost - $share * ($count - 1) : $share;
+
+                $animal = Animal::query()->create([
+                    ...$data,
+                    'tag' => $this->nextTag($center),
+                    'status' => 'active',
+                    'purchase_cost' => $cost,
+                    'book_value' => $cost,
+                ]);
+
+                AnimalPlacement::query()->create([
+                    'animal_id' => $animal->id,
+                    'cost_center_id' => $animal->cost_center_id,
+                    'from_date' => $animal->acquired_on,
+                ]);
+
+                $animals[] = $animal;
+
+                if ($cost > 0) {
+                    $lines[] = ['account_id' => Account::byCode(AccountCodes::LIVESTOCK)->id, 'debit' => $cost, 'cost_center_id' => $animal->cost_center_id, 'animal_id' => $animal->id, 'budget_head_id' => $budgetHeadId];
+                }
+            }
+
+            if ($totalCost > 0) {
+                $opening = ($data['acquisition'] ?? 'purchase') === 'opening';
+                $creditAccountId = $opening ? Account::byCode(AccountCodes::OPENING)->id : $paidFromAccountId;
+
+                if (! $creditAccountId) {
+                    throw ValidationException::withMessages(['paid_from_account_id' => 'কোন হিসাব থেকে টাকা গেছে তা বাছুন।']);
+                }
+
+                $tags = implode(', ', array_map(fn (Animal $a) => $a->tag, $animals));
+                $lines[] = ['account_id' => $creditAccountId, 'credit' => $totalCost];
+
+                $this->ledger->post(
+                    $opening ? 'opening' : 'animal_purchase',
+                    $animals[0]->acquired_on->toDateString(),
+                    "{$count}টি পশু একসাথে: {$tags}",
+                    $lines,
+                    ['attachments' => $attachments],
+                );
+            }
+
+            return $animals;
+        });
+    }
+
     /** E.g. a bokna calves and becomes a gavi. */
     public function transfer(Animal $animal, int $toCenterId, string $date): ?JournalEntry
     {

@@ -448,8 +448,26 @@ const rules = [
             </div>
 
             <section class="min-w-0 lg:col-span-3">
-                <div class="-mx-4 mb-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-                    <div class="flex w-max gap-1.5">
+                <!-- Phone: one tidy dropdown. Wider screens: the chips fit in a row. -->
+                <Field label="কোন ধরনের লেখা দেখবেন" class="mb-4 md:hidden">
+                    <NSelect
+                        :model-value="kind ?? ''"
+                        @update:model-value="
+                            (v) => filter(v ? String(v) : null)
+                        "
+                    >
+                        <option value="">সব ({{ totalCount }})</option>
+                        <option
+                            v-for="(label, key) in kinds"
+                            :key="key"
+                            :value="key"
+                        >
+                            {{ label }} ({{ counts[key] ?? 0 }})
+                        </option>
+                    </NSelect>
+                </Field>
+                <div class="mb-4 hidden md:block">
+                    <div class="flex flex-wrap gap-1.5">
                         <button
                             type="button"
                             :class="[

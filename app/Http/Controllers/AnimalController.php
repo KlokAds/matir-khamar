@@ -47,7 +47,7 @@ class AnimalController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(AnimalService $animals): Response
     {
         return Inertia::render('animals/Create', [
             'centers' => array_values(array_filter(Lookups::centers(), fn ($center) => $center['holds_animals'])),
@@ -58,6 +58,8 @@ class AnimalController extends Controller
             'maxVoucherKb' => config('khamar.max_voucher_kb'),
             'batches' => Batch::query()->whereNull('closed_on')->orderByDesc('number')->get()
                 ->map(fn (Batch $b) => ['id' => $b->id, 'label' => $b->label(), 'cost_center_id' => $b->cost_center_id, 'started_on' => $b->started_on->toDateString()]),
+            'nextTags' => (object) CostCenter::query()->where('holds_animals', true)->get()
+                ->mapWithKeys(fn (CostCenter $c) => [$c->id => $animals->nextTag($c)])->all(),
             'nextBatchNumbers' => (object) CostCenter::query()->where('holds_animals', true)->pluck('id')
                 ->mapWithKeys(fn ($id) => [$id => Batch::nextNumber((int) $id)])->all(),
         ]);
@@ -66,7 +68,9 @@ class AnimalController extends Controller
     public function store(Request $request, AnimalService $animals, HerdCare $care): RedirectResponse
     {
         $data = $request->validate([
-            'tag' => ['required', 'string', 'max:30', 'unique:animals,tag'],
+            // Left empty, the next running tag of the category is given (M-04, G-02…).
+            'tag' => ['nullable', 'string', 'max:30', 'unique:animals,tag'],
+            'count' => ['nullable', 'integer', 'min:1', 'max:50'],
             'name' => ['nullable', 'string', 'max:60'],
             'sex' => ['required', Rule::in(['female', 'male'])],
             'breed' => ['nullable', 'string', 'max:60'],
@@ -88,17 +92,17 @@ class AnimalController extends Controller
         ]);
 
         $cost = $data['acquisition'] === 'born' ? 0 : Money::toPoisha($data['cost'] ?? 0);
+        $count = $data['acquisition'] === 'born' ? 1 : (int) ($data['count'] ?? 1);
+
+        if ($count > 1) {
+            return $this->storeGroup($request, $data, $count, $cost, $animals, $care);
+        }
+
+        $data['tag'] = ($data['tag'] ?? '') ?: $animals->nextTag(CostCenter::query()->findOrFail((int) $data['cost_center_id']));
+
         // The batch, the animal, its first weight and a known pregnancy are saved together or not at all.
         $animal = DB::transaction(function () use ($data, $cost, $request, $animals, $care): Animal {
-            $batchId = match ($data['batch'] ?? null) {
-                null, '' => null,
-                'new' => Batch::query()->create([
-                    'cost_center_id' => (int) $data['cost_center_id'],
-                    'number' => Batch::nextNumber((int) $data['cost_center_id']),
-                    'started_on' => $data['acquired_on'],
-                ])->id,
-                default => (int) $data['batch'],
-            };
+            $batchId = $this->batchFor($data);
 
             $animal = $animals->register(
                 [...Arr::only($data, ['tag', 'name', 'sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'mother_id', 'notes']), 'batch_id' => $batchId],
@@ -122,6 +126,52 @@ class AnimalController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag} খামারের তালিকায় যোগ হয়েছে।"]);
 
         return to_route('animals.show', $animal);
+    }
+
+    /**
+     * Two or more bought together: one price shared, one entry, each animal its own card.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function storeGroup(Request $request, array $data, int $count, int $cost, AnimalService $animals, HerdCare $care): RedirectResponse
+    {
+        $group = DB::transaction(function () use ($request, $data, $count, $cost, $animals, $care): array {
+            $group = $animals->registerGroup(
+                [...Arr::only($data, ['sex', 'breed', 'cost_center_id', 'acquisition', 'acquired_on', 'birth_date', 'notes']), 'batch_id' => $this->batchFor($data)],
+                $count,
+                $cost,
+                $data['paid_from_account_id'] ?? null,
+                $data['budget_head_id'] ?? null,
+                $this->attachments($request),
+            );
+
+            if (! empty($data['months_pregnant']) && $data['sex'] === 'female') {
+                foreach ($group as $animal) {
+                    $care->recordService($animal, ['months_pregnant' => $data['months_pregnant'], 'notes' => 'কেনার সময় গর্ভবতী']);
+                }
+            }
+
+            return $group;
+        });
+
+        $tags = implode(', ', array_map(fn (Animal $a) => $a->tag, $group));
+        Inertia::flash('toast', ['type' => 'success', 'message' => "{$count}টি গরু যোগ হয়েছে: {$tags}"]);
+
+        return to_route('animals.index');
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function batchFor(array $data): ?int
+    {
+        return match ($data['batch'] ?? null) {
+            null, '' => null,
+            'new' => Batch::query()->create([
+                'cost_center_id' => (int) $data['cost_center_id'],
+                'number' => Batch::nextNumber((int) $data['cost_center_id']),
+                'started_on' => $data['acquired_on'],
+            ])->id,
+            default => (int) $data['batch'],
+        };
     }
 
     public function show(Animal $animal, ReportService $reports, AllocationService $allocation, HerdCare $care): Response

@@ -113,3 +113,21 @@ it('lets the daily role write the diary but not open a batch', function () {
     $this->actingAs($worker)->post('/diary/notes', ['date' => now()->toDateString(), 'kind' => 'daily', 'title' => 'সব ঠিক'])->assertRedirect();
     $this->actingAs($worker)->post('/batches', ['cost_center_id' => ($this->center)('MOTATAJA')->id, 'started_on' => now()->toDateString(), 'target_days' => 120])->assertForbidden();
 });
+
+it('adds animals bought together under one entry with running tags', function () {
+    ($this->addAnimal)(['tag' => 'M-03'])->assertRedirect();
+    ($this->addAnimal)(['tag' => null, 'count' => 2, 'cost' => '180000.01', 'batch' => 'new'])->assertRedirect('/animals');
+
+    $pair = Animal::query()->whereIn('tag', ['M-04', 'M-05'])->orderBy('tag')->get();
+    $entry = App\Models\JournalEntry::query()->where('description', 'like', '2টি পশু%')->firstOrFail();
+
+    expect($pair)->toHaveCount(2)
+        ->and($pair->sum('purchase_cost'))->toBe(18000001)
+        ->and($pair->pluck('batch_id')->unique()->count())->toBe(1)
+        ->and($entry->lines()->where('credit', 18000001)->count())->toBe(1)
+        ->and($this->cash->balance())->toBe(-27000001);
+
+    // Left blank, a single animal gets the next number too.
+    ($this->addAnimal)(['tag' => ''])->assertRedirect();
+    expect(Animal::query()->where('tag', 'M-06')->exists())->toBeTrue();
+});

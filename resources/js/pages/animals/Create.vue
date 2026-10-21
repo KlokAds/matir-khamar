@@ -33,6 +33,7 @@ const props = defineProps<{
         started_on: string;
     }[];
     nextBatchNumbers: Record<string, number>;
+    nextTags: Record<string, string>;
 }>();
 
 // Coming from a calving ("বাছুরটি তালিকায় যোগ করুন"): the mother is already known.
@@ -58,6 +59,16 @@ const f = useForm({
     paid_from_account_id: props.moneyAccounts[0]?.id ?? null,
     budget_head_id: null as number | null,
     attachments: [] as File[],
+    count: '1',
+});
+
+const many = computed(() => (parseInt(f.count) || 1) > 1);
+const nextTag = computed(() => props.nextTags[String(f.cost_center_id)] ?? '');
+const perHead = computed(() => {
+    const n = parseInt(f.count) || 1;
+    const total = parseFloat(f.cost) || 0;
+
+    return n > 1 && total > 0 ? Math.round(total / n) : 0;
 });
 
 const center = computed(() =>
@@ -96,13 +107,32 @@ watch(
             @submit.prevent="f.post('/animals', { forceFormData: true })"
         >
             <Field
-                label="ট্যাগ / নম্বর"
-                :error="f.errors.tag"
-                hint="কানের ট্যাগ বা নিজের দেওয়া নম্বর, যেমন B-01"
+                v-if="f.acquisition !== 'born'"
+                label="কয়টি গরু"
+                :error="f.errors.count"
+                :hint="
+                    many
+                        ? `একসাথে কেনা — দাম সমান ভাগ হবে, নম্বর ${nextTag} থেকে শুরু`
+                        : 'একসাথে কয়েকটি কিনলে সংখ্যা দিন'
+                "
             >
-                <Input v-model="f.tag" required />
+                <Input
+                    v-model="f.count"
+                    type="number"
+                    min="1"
+                    max="50"
+                    class="num"
+                />
             </Field>
-            <Field label="নাম (ঐচ্ছিক)" :error="f.errors.name"
+            <Field
+                v-if="!many"
+                label="নম্বর (ঐচ্ছিক)"
+                :error="f.errors.tag"
+                hint="খালি রাখলে অ্যাপ নিজে পরের নম্বর দেবে"
+            >
+                <Input v-model="f.tag" :placeholder="nextTag" />
+            </Field>
+            <Field v-if="!many" label="নাম (ঐচ্ছিক)" :error="f.errors.name"
                 ><Input v-model="f.name" placeholder="যেমন: লালী"
             /></Field>
             <Field label="লিঙ্গ">
@@ -169,6 +199,7 @@ watch(
                 </NSelect>
             </Field>
             <Field
+                v-if="!many"
                 label="ওজন (কেজি, ঐচ্ছিক)"
                 :error="f.errors.weight_kg"
                 hint="শুরুর ওজন থাকলে পরে দিনে কত বাড়লো দেখা যাবে"
@@ -208,11 +239,17 @@ watch(
             <template v-if="f.acquisition !== 'born'">
                 <Field
                     :label="
-                        f.acquisition === 'opening'
+                        (many ? 'মোট ' : '') +
+                        (f.acquisition === 'opening'
                             ? 'কেনা দাম / আজকের মূল্য (৳)'
-                            : 'কেনা দাম (৳)'
+                            : 'কেনা দাম (৳)')
                     "
                     :error="f.errors.cost"
+                    :hint="
+                        perHead
+                            ? `প্রতিটি ৳ ${perHead.toLocaleString('en-IN')}`
+                            : undefined
+                    "
                 >
                     <Input
                         v-model="f.cost"
@@ -291,9 +328,9 @@ watch(
                 /></Field>
             </div>
             <div class="sm:col-span-2 lg:col-span-3">
-                <Button type="submit" :disabled="f.processing"
-                    >গরু যোগ করুন</Button
-                >
+                <Button type="submit" :disabled="f.processing">{{
+                    many ? `${f.count}টি গরু যোগ করুন` : 'গরু যোগ করুন'
+                }}</Button>
             </div>
         </form>
     </div>
