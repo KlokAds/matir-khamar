@@ -193,7 +193,8 @@ $logo = '<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48
     .labels .on { color: var(--paddy); font-weight: 600; }
     section { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
     .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 4px; }
-    .field { display: grid; gap: 4px; font-size: .93rem; font-weight: 600; }
+    /* align-content: start keeps a field's label and box together when its neighbour has a hint and is taller. */
+    .field { display: grid; gap: 4px; align-content: start; font-size: .93rem; font-weight: 600; }
     .field small { font-weight: 400; color: var(--muted); }
     input { font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); width: 100%; }
     input:focus { outline: 3px solid color-mix(in oklab, var(--paddy) 35%, transparent); border-color: var(--paddy); }
