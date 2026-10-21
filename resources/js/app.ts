@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
+import { initializeOffline } from '@/lib/offline';
 
 const appName = 'মাটির খামার';
 
@@ -38,3 +39,7 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+// Installable app + offline entries: the service worker keeps the offline
+// page on the phone, and waiting entries are sent whenever the net returns.
+initializeOffline();

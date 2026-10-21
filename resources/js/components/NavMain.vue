@@ -31,7 +31,12 @@ const { isCurrentUrl } = useCurrentUrl();
                     :is-active="isCurrentUrl(item.href)"
                     :tooltip="item.title"
                 >
-                    <Link :href="item.href">
+                    <a v-if="item.reload" :href="String(item.href)">
+                        <component :is="item.icon" />
+                        <span>{{ item.title }}</span>
+                        <span v-if="item.badge" class="num ml-auto rounded-full bg-sidebar-primary px-1.5 text-[11px] font-semibold text-sidebar-primary-foreground">{{ item.badge }}</span>
+                    </a>
+                    <Link v-else :href="item.href">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                     </Link>

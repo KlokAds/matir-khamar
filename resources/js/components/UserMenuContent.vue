@@ -8,6 +8,8 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import UserInfo from '@/components/UserInfo.vue';
+import { prepareLogout } from '@/lib/offline';
+import { pendingCount } from '@/lib/offlineQueue';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
@@ -16,8 +18,16 @@ type Props = {
     user: User;
 };
 
-const handleLogout = () => {
+const handleLogout = async (event: MouseEvent) => {
+    // Entries still on this phone survive logout; the saved offline page does not.
+    event.preventDefault();
+
+    if (!(await prepareLogout(pendingCount.value))) {
+        return;
+    }
+
     router.flushAll();
+    router.post(logout().url);
 };
 
 defineProps<Props>();
@@ -34,21 +44,20 @@ defineProps<Props>();
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
-                Settings
+                সেটিংস ও নিরাপত্তা
             </Link>
         </DropdownMenuItem>
     </DropdownMenuGroup>
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">
-        <Link
-            class="block w-full cursor-pointer"
-            :href="logout()"
-            @click="handleLogout"
-            as="button"
+        <button
+            type="button"
+            class="block w-full cursor-pointer text-left"
             data-test="logout-button"
+            @click="handleLogout"
         >
-            <LogOut class="mr-2 h-4 w-4" />
-            Log out
-        </Link>
+            <LogOut class="mr-2 inline h-4 w-4" />
+            লগআউট
+        </button>
     </DropdownMenuItem>
 </template>
