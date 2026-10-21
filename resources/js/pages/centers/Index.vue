@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
@@ -39,6 +39,15 @@ const center = useForm({
     sort: 100,
     description: '',
 });
+
+const showClosed = ref(false);
+const countClosed = (nodes: TreeNode[]): number =>
+    nodes.reduce(
+        (sum, node) =>
+            sum + (node.is_active ? 0 : 1) + countClosed(node.children),
+        0,
+    );
+const closed = computed(() => countClosed(props.tree));
 
 const applyRange = () =>
     router.get('/centers', { ...range }, { preserveState: true });
@@ -162,6 +171,7 @@ const applyRange = () =>
                     <CenterRows
                         :nodes="tree"
                         :query="`?from=${from}&to=${to}`"
+                        :show-closed="showClosed"
                     />
                 </tbody>
                 <tfoot>
@@ -184,6 +194,18 @@ const applyRange = () =>
                     </tr>
                 </tfoot>
             </table>
+            <button
+                v-if="closed > 0"
+                type="button"
+                class="mt-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                @click="showClosed = !showClosed"
+            >
+                {{
+                    showClosed
+                        ? 'বন্ধ প্রজেক্টগুলো লুকান'
+                        : `বন্ধ প্রজেক্ট দেখুন (${closed}টি)`
+                }}
+            </button>
         </div>
     </div>
 </template>

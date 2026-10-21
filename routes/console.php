@@ -30,7 +30,6 @@ Schedule::command('khamar:backup')->everyMinute()->withoutOverlapping(30)
         && Cache::add('khamar:schedule:backup-try', true, 900));
 
 Schedule::command('khamar:amortize')->everyMinute()->when($oncePer('amortize', 3600));
-Schedule::command('khamar:crater-sync')->everyMinute()->withoutOverlapping(30)->when($oncePer('crater-sync', 3600));
 
 if (config('khamar.updates.auto')) {
     Schedule::command('khamar:update --if-behind')->everyMinute()->withoutOverlapping(20)->when($oncePer('update', 600));
