@@ -37,9 +37,12 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => config('khamar.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user()?->only(['id', 'name', 'email', 'email_verified_at', 'two_factor_confirmed_at', 'created_at', 'updated_at']),
+                'role' => $request->user()?->role->value,
+                'roleLabel' => $request->user()?->role->label(),
+                'can' => $request->user()?->is_active ? array_fill_keys($request->user()->role->abilities(), true) : [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
