@@ -12,6 +12,7 @@ use App\Models\PeriodLock;
 use App\Models\User;
 use App\Services\AccountCodes;
 use App\Support\BanglaDate;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -39,7 +40,7 @@ class SetupController extends Controller
                 'last_login_at' => $user->last_login_at?->toDateTimeString(),
                 'last_login_ip' => $user->last_login_ip,
             ]),
-            'roles' => AccessRole::options(),
+            'roles' => Tr::all(AccessRole::options()),
         ]);
     }
 
@@ -54,7 +55,7 @@ class SetupController extends Controller
 
         User::query()->create([...$data, 'is_active' => true])->forceFill(['email_verified_at' => now()])->save();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'নতুন ব্যবহারকারী যোগ হয়েছে। প্রথম লগইনে পাসওয়ার্ড বদলাতে বলুন।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন ব্যবহারকারী যোগ হয়েছে। প্রথম লগইনে পাসওয়ার্ড বদলাতে বলুন।')]);
 
         return back();
     }
@@ -71,7 +72,7 @@ class SetupController extends Controller
         ]);
 
         if ($user->is($request->user()) && ($data['role'] !== Role::Admin->value || ! $data['is_active'])) {
-            return back()->withErrors(['role' => 'নিজের অ্যাডমিন ক্ষমতা নিজে সরানো যাবে না।']);
+            return back()->withErrors(['role' => __('নিজের অ্যাডমিন ক্ষমতা নিজে সরানো যাবে না।')]);
         }
 
         $user->role = $data['role'];
@@ -87,7 +88,7 @@ class SetupController extends Controller
 
         $user->save();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'ব্যবহারকারী আপডেট হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ব্যবহারকারী আপডেট হয়েছে।')]);
 
         return back();
     }
@@ -107,7 +108,7 @@ class SetupController extends Controller
                     'used' => $row !== null,
                 ];
             }),
-            'types' => Account::TYPES,
+            'types' => Tr::all(Account::TYPES),
             'parents' => Account::query()->whereNull('parent_id')->orderBy('code')->get(['id', 'code', 'name', 'type']),
         ]);
     }
@@ -125,7 +126,7 @@ class SetupController extends Controller
 
         Account::query()->create([...$data, 'type' => $parent->type, 'is_system' => false]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'নতুন হিসাব খাত যোগ হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন হিসাব খাত যোগ হয়েছে।')]);
 
         return back();
     }
@@ -140,12 +141,12 @@ class SetupController extends Controller
         $protected = [AccountCodes::CASH, AccountCodes::PAYABLE, AccountCodes::RECEIVABLE, AccountCodes::LIVESTOCK, AccountCodes::INTERNAL_INCOME];
 
         if (! $data['is_active'] && in_array($account->code, $protected, true)) {
-            return back()->withErrors(['is_active' => 'এই খাতটি সিস্টেম নিজে ব্যবহার করে, বন্ধ করা যাবে না।']);
+            return back()->withErrors(['is_active' => __('এই খাতটি সিস্টেম নিজে ব্যবহার করে, বন্ধ করা যাবে না।')]);
         }
 
         $account->update($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'হিসাব খাত আপডেট হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('হিসাব খাত আপডেট হয়েছে।')]);
 
         return back();
     }
@@ -175,14 +176,14 @@ class SetupController extends Controller
 
                 return [
                     ...$party->only(['id', 'type', 'name', 'phone', 'address', 'notes', 'is_active']),
-                    'type_label' => Party::TYPES[$party->type] ?? $party->type,
+                    'type_label' => __(Party::TYPES[$party->type] ?? $party->type),
                     'we_owe' => $weOwe,
                     'they_owe' => $theyOwe,
                     'linked_balance' => $linked?->balance(),
-                    'linked_label' => $linked ? ($linked->subtype === 'capital' ? 'মোট মূলধন' : 'ঋণ বাকি') : null,
+                    'linked_label' => $linked ? ($linked->subtype === 'capital' ? __('মোট মূলধন') : __('ঋণ বাকি')) : null,
                 ];
             }),
-            'types' => Party::TYPES,
+            'types' => Tr::all(Party::TYPES),
         ]);
     }
 
@@ -198,7 +199,7 @@ class SetupController extends Controller
 
         $party = Party::query()->create($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$party->name} যোগ হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':name যোগ হয়েছে।', ['name' => $party->name])]);
 
         return back();
     }
@@ -213,7 +214,7 @@ class SetupController extends Controller
             'is_active' => ['required', 'boolean'],
         ]));
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'আপডেট হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('আপডেট হয়েছে।')]);
 
         return back();
     }
@@ -237,12 +238,12 @@ class SetupController extends Controller
         $month = Date::parse($data['month'].'-01');
 
         if ($month->greaterThanOrEqualTo(now()->startOfMonth())) {
-            return back()->withErrors(['month' => 'চলতি বা ভবিষ্যৎ মাস লক করা যায় না; মাস শেষ হলে লক করুন।']);
+            return back()->withErrors(['month' => __('চলতি বা ভবিষ্যৎ মাস লক করা যায় না; মাস শেষ হলে লক করুন।')]);
         }
 
         PeriodLock::query()->firstOrCreate(['month' => $month->toDateString()], ['locked_by' => $request->user()->id]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => BanglaDate::month($month).' লক হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':month লক হয়েছে।', ['month' => BanglaDate::month($month)])]);
 
         return back();
     }
@@ -254,7 +255,7 @@ class SetupController extends Controller
         AuditLog::record('period_unlocked', $lock, ['month' => $lock->month->toDateString()], ['reason' => $request->string('reason')->toString()]);
         $lock->delete();
 
-        Inertia::flash('toast', ['type' => 'warning', 'message' => 'মাসের লক খোলা হয়েছে। কারণ অডিট লগে রাখা আছে।']);
+        Inertia::flash('toast', ['type' => 'warning', 'message' => __('মাসের লক খোলা হয়েছে। কারণ অডিট লগে রাখা আছে।')]);
 
         return back();
     }

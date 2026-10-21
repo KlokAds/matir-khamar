@@ -11,6 +11,7 @@ use App\Models\HealthEvent;
 use App\Models\MilkRecord;
 use App\Support\BanglaDate;
 use App\Support\CareGuide;
+use App\Support\Tr;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
@@ -32,17 +33,17 @@ class HerdCare
     public function recordService(Animal $animal, array $data): Breeding
     {
         if ($animal->sex !== 'female') {
-            throw ValidationException::withMessages(['animal' => 'শুধু গাভী বা বকনার গর্ভের হিসাব রাখা যায়।']);
+            throw ValidationException::withMessages(['animal' => __('শুধু গাভী বা বকনার গর্ভের হিসাব রাখা যায়।')]);
         }
 
         if (Breeding::query()->where('animal_id', $animal->id)->whereNull('calved_on')->where('result', '!=', 'empty')->exists()) {
-            throw ValidationException::withMessages(['served_on' => 'এই গরুর আগের গর্ভের হিসাব এখনো খোলা — আগে সেটা শেষ করুন।']);
+            throw ValidationException::withMessages(['served_on' => __('এই গরুর আগের গর্ভের হিসাব এখনো খোলা — আগে সেটা শেষ করুন।')]);
         }
 
         $months = (float) ($data['months_pregnant'] ?? 0);
         $estimated = $months > 0;
         if (! $estimated && empty($data['served_on'])) {
-            throw ValidationException::withMessages(['served_on' => 'বীজ দেওয়ার তারিখ, নয়তো কত মাস চলছে — একটি দিন।']);
+            throw ValidationException::withMessages(['served_on' => __('বীজ দেওয়ার তারিখ, নয়তো কত মাস চলছে — একটি দিন।')]);
         }
 
         $served = $estimated
@@ -78,16 +79,16 @@ class HerdCare
             'name' => $breeding->animal->name ?? null,
             'served_on' => $breeding->served_on->toDateString(),
             'estimated' => $breeding->served_on_estimated,
-            'method' => Breeding::METHODS[$breeding->method] ?? $breeding->method,
+            'method' => Tr::get(Breeding::METHODS[$breeding->method] ?? $breeding->method),
             'sire' => $breeding->sire,
             'by_whom' => $breeding->by_whom,
             'result' => $breeding->result,
-            'result_label' => Breeding::RESULTS[$breeding->result] ?? $breeding->result,
+            'result_label' => Tr::get(Breeding::RESULTS[$breeding->result] ?? $breeding->result),
             'checked_on' => $breeding->checked_on?->toDateString(),
             'expected_on' => $breeding->expected_on->toDateString(),
             'calved_on' => $breeding->calved_on?->toDateString(),
             'outcome' => $breeding->outcome,
-            'outcome_label' => $breeding->outcome ? (Breeding::OUTCOMES[$breeding->outcome] ?? $breeding->outcome) : null,
+            'outcome_label' => $breeding->outcome ? Tr::get(Breeding::OUTCOMES[$breeding->outcome] ?? $breeding->outcome) : null,
             'calf_id' => $breeding->calf_id,
             'notes' => $breeding->notes,
             'open' => $open,
@@ -215,10 +216,15 @@ class HerdCare
             /** @var CarbonInterface $due */
             $due = $event->next_due_on;
             $left = (int) $today->diffInDays($due, false);
+            $what = $event->target().': '.Tr::get($event->name);
             $items[] = [
                 'kind' => 'health',
-                'title' => "{$event->target()}: {$event->name}".($left < 0 ? ' — '.abs($left).' দিন পার' : ($left === 0 ? ' আজ' : " {$left} দিন পর")),
-                'detail' => (HealthEvent::KINDS[$event->kind] ?? '').' · আগেরটা '.BanglaDate::day($event->given_on),
+                'title' => match (true) {
+                    $left < 0 => Tr::get(':what — :days দিন পার', ['what' => $what, 'days' => abs($left)]),
+                    $left === 0 => Tr::get(':what আজ', ['what' => $what]),
+                    default => Tr::get(':what :days দিন পর', ['what' => $what, 'days' => $left]),
+                },
+                'detail' => Tr::get(':kind · আগেরটা :date', ['kind' => Tr::all(HealthEvent::KINDS)[$event->kind] ?? '', 'date' => BanglaDate::day($event->given_on)]),
                 'href' => $event->animal_id ? "/animals/{$event->animal_id}" : '/health',
                 'when' => $due->toDateString(),
                 'urgent' => $left <= 0,
@@ -258,8 +264,8 @@ class HerdCare
                 $drop = (int) round((1 - $recent / $base) * 100);
                 $items[] = [
                     'kind' => 'milk',
-                    'title' => "{$animal->tag}: দুধ {$drop}% কমেছে — শরীর দেখুন",
-                    'detail' => 'আগে দিনে '.round($base, 1).' লি., এখন '.round($recent, 1).' লি.',
+                    'title' => Tr::get(':tag: দুধ :drop% কমেছে — শরীর দেখুন', ['tag' => $animal->tag, 'drop' => $drop]),
+                    'detail' => Tr::get('আগে দিনে :base লি., এখন :recent লি.', ['base' => round($base, 1), 'recent' => round($recent, 1)]),
                     'href' => "/animals/{$animal->id}",
                     'when' => $today->toDateString(),
                     'urgent' => $drop >= 35,
@@ -300,21 +306,21 @@ class HerdCare
             $href = "/animals/{$breeding->animal_id}";
 
             if ($breeding->result === 'pending' && $day >= 18 && $day <= 24) {
-                $items[] = ['kind' => 'heat', 'title' => "{$tag}: আবার গরম আসছে কি না দেখুন", 'detail' => "বীজ দেওয়ার {$day} দিন", 'href' => $href, 'when' => $today->toDateString(), 'urgent' => false];
+                $items[] = ['kind' => 'heat', 'title' => Tr::get(':tag: আবার গরম আসছে কি না দেখুন', ['tag' => $tag]), 'detail' => Tr::get('বীজ দেওয়ার :day দিন', ['day' => $day]), 'href' => $href, 'when' => $today->toDateString(), 'urgent' => false];
             }
 
             if ($breeding->result === 'pending' && $day >= 60) {
-                $items[] = ['kind' => 'check', 'title' => "{$tag}: গর্ভ পরীক্ষা করান", 'detail' => "বীজ দেওয়ার {$day} দিন হলো, ফল লেখা হয়নি", 'href' => $href, 'when' => $today->toDateString(), 'urgent' => $day > 90];
+                $items[] = ['kind' => 'check', 'title' => Tr::get(':tag: গর্ভ পরীক্ষা করান', ['tag' => $tag]), 'detail' => Tr::get('বীজ দেওয়ার :day দিন হলো, ফল লেখা হয়নি', ['day' => $day]), 'href' => $href, 'when' => $today->toDateString(), 'urgent' => $day > 90];
             }
 
             $left = (int) $today->diffInDays($breeding->expected_on, false);
 
             if ($left <= 30) {
-                $items[] = ['kind' => 'calving', 'title' => $left >= 0 ? "{$tag}: {$left} দিনের মধ্যে বাচ্চা হবে" : "{$tag}: বাচ্চা হওয়ার দিন ".abs($left).' দিন পার', 'detail' => 'আনুমানিক '.BanglaDate::day($breeding->expected_on), 'href' => $href, 'when' => $breeding->expected_on->toDateString(), 'urgent' => $left <= 7];
+                $items[] = ['kind' => 'calving', 'title' => $left >= 0 ? Tr::get(':tag: :left দিনের মধ্যে বাচ্চা হবে', ['tag' => $tag, 'left' => $left]) : Tr::get(':tag: বাচ্চা হওয়ার দিন :days দিন পার', ['tag' => $tag, 'days' => abs($left)]), 'detail' => Tr::get('আনুমানিক :date', ['date' => BanglaDate::day($breeding->expected_on)]), 'href' => $href, 'when' => $breeding->expected_on->toDateString(), 'urgent' => $left <= 7];
             }
 
             if ($breeding->result === 'pregnant' && $day >= 218 && $day <= 230) {
-                $items[] = ['kind' => 'dry', 'title' => "{$tag}: দুধ বন্ধ করার সময় (শুষ্ক সময়)", 'detail' => "গর্ভের {$day} দিন", 'href' => $href, 'when' => $today->toDateString(), 'urgent' => false];
+                $items[] = ['kind' => 'dry', 'title' => Tr::get(':tag: দুধ বন্ধ করার সময় (শুষ্ক সময়)', ['tag' => $tag]), 'detail' => Tr::get('গর্ভের :day দিন', ['day' => $day]), 'href' => $href, 'when' => $today->toDateString(), 'urgent' => false];
             }
         }
 
@@ -322,7 +328,7 @@ class HerdCare
             $days = $batch->daysRunning();
 
             if ($days >= $batch->target_days) {
-                $items[] = ['kind' => 'batch', 'title' => "{$batch->label()}: লক্ষ্যের {$batch->target_days} দিন পূর্ণ", 'detail' => "চলছে {$days} দিন — বিক্রির কথা ভাবুন", 'href' => '/batches', 'when' => $today->toDateString(), 'urgent' => $days > $batch->target_days + 14];
+                $items[] = ['kind' => 'batch', 'title' => Tr::get(':batch: লক্ষ্যের :target দিন পূর্ণ', ['batch' => $batch->label(), 'target' => $batch->target_days]), 'detail' => Tr::get('চলছে :days দিন — বিক্রির কথা ভাবুন', ['days' => $days]), 'href' => '/batches', 'when' => $today->toDateString(), 'urgent' => $days > $batch->target_days + 14];
             }
         }
 
@@ -338,7 +344,7 @@ class HerdCare
             ->whereDate('follow_up_on', '<=', $today->addDays(3))->orderBy('follow_up_on')->get();
 
         foreach ($notes as $note) {
-            $items[] = ['kind' => 'note', 'title' => $note->title, 'detail' => 'ডায়েরির কাজ · '.BanglaDate::day($note->follow_up_on), 'href' => '/diary', 'when' => $note->follow_up_on->toDateString(), 'urgent' => $note->follow_up_on->lessThan($today)];
+            $items[] = ['kind' => 'note', 'title' => $note->title, 'detail' => Tr::get('ডায়েরির কাজ · :date', ['date' => BanglaDate::day($note->follow_up_on)]), 'href' => '/diary', 'when' => $note->follow_up_on->toDateString(), 'urgent' => $note->follow_up_on->lessThan($today)];
         }
 
         usort($items, fn ($a, $b) => [$b['urgent'], $a['when']] <=> [$a['urgent'], $b['when']]);

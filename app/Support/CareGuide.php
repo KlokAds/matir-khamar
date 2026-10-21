@@ -16,7 +16,7 @@ final class CareGuide
      */
     public static function pregnancy(): array
     {
-        return [
+        return self::stages([
             ['from' => 0, 'to' => 24, 'title' => 'বীজ দেওয়ার পর প্রথম ৩ সপ্তাহ', 'tasks' => [
                 '১৮–২৪ দিনের মাথায় আবার গরম (হিট) আসে কি না খেয়াল রাখুন — এলে গর্ভ হয়নি, আবার বীজ দিন।',
                 'দৌড়ঝাঁপ, মারামারি, দূরে হাঁটানো, হঠাৎ খাবার বদল — এড়িয়ে চলুন।',
@@ -49,7 +49,7 @@ final class CareGuide
                 'বাচ্চা হওয়ার পর গাভীকে কুসুম গরম পানিতে গুড় মিশিয়ে খেতে দিন।',
                 'ফুল (গর্ভফুল) ১২ ঘণ্টার মধ্যে না পড়লে টানবেন না — ডাক্তার ডাকুন।',
             ]],
-        ];
+        ]);
     }
 
     /**
@@ -59,7 +59,7 @@ final class CareGuide
      */
     public static function calf(): array
     {
-        return [
+        return self::stages([
             ['from' => 0, 'to' => 3, 'title' => 'প্রথম ৩ দিন', 'tasks' => [
                 'জন্মের ১ ঘণ্টার মধ্যে শাল দুধ (কাঁচলা দুধ) খাওয়ান — প্রথম দিনে শরীরের ওজনের ~১০%।',
                 'নাক-মুখ পরিষ্কার করুন; নাভি আয়োডিনে ডুবিয়ে দিন, শুকনো জায়গায় রাখুন।',
@@ -86,7 +86,7 @@ final class CareGuide
                 'এঁড়ে হলে মোটাতাজা ব্যাচে নেওয়ার কথা ভাবুন।',
                 'ওজন বাড়া থেমে গেলে খাবার ও কৃমির কথা আগে ভাবুন।',
             ]],
-        ];
+        ]);
     }
 
     /**
@@ -96,7 +96,7 @@ final class CareGuide
      */
     public static function fattening(): array
     {
-        return [
+        return self::stages([
             ['from' => 1, 'to' => 14, 'title' => 'প্রথম ২ সপ্তাহ — মানিয়ে নেওয়া', 'tasks' => [
                 'নতুন গরু ৭–১৪ দিন পুরনোদের থেকে আলাদা রাখুন।',
                 'প্রথম সপ্তাহে কৃমিনাশক, তারপর টিকা — ডাক্তারের পরামর্শে।',
@@ -113,7 +113,7 @@ final class CareGuide
                 'হাট/ক্রেতার দাম খোঁজ নিন; কোরবানির সময় মাথায় রাখুন।',
                 'বিক্রির পর এই ব্যাচের লাভ দেখে পরের ব্যাচের খাবার ও সময় ঠিক করুন।',
             ]],
-        ];
+        ]);
     }
 
     /**
@@ -123,7 +123,7 @@ final class CareGuide
      */
     public static function routine(): array
     {
-        return [
+        return self::checklist([
             ['title' => 'প্রতিদিন', 'items' => [
                 'সকাল-বিকাল খাবার আর দুধের হিসাব সাথে সাথে অ্যাপে লিখুন (অফলাইনেও হয়)।',
                 'প্রতিটি গরুর খাওয়া, জাবর কাটা, পায়খানা, চলাফেরা একবার দেখুন — অস্বাভাবিক হলে ডায়েরিতে লিখুন।',
@@ -146,7 +146,7 @@ final class CareGuide
                 'উদ্যোগ বাজেটের সাথে আসল খরচ মিলিয়ে দেখুন।',
                 'কোন ক্যাটাগরি লাভে, কোনটা ক্ষতিতে — পরের বছরের পরিকল্পনা করুন।',
             ]],
-        ];
+        ]);
     }
 
     /**
@@ -164,5 +164,25 @@ final class CareGuide
         }
 
         return $day > 0 ? ($stages[array_key_last($stages)] ?? null) : null;
+    }
+
+    /**
+     * Stages in the reader's language (lang/en.json, keyed by the Bangla).
+     *
+     * @param  list<array{from:int, to:int, title:string, tasks:list<string>}>  $stages
+     * @return list<array{from:int, to:int, title:string, tasks:list<string>}>
+     */
+    private static function stages(array $stages): array
+    {
+        return array_map(fn (array $stage) => [...$stage, 'title' => Tr::get($stage['title']), 'tasks' => array_values(Tr::all($stage['tasks']))], $stages);
+    }
+
+    /**
+     * @param  list<array{title:string, items:list<string>}>  $groups
+     * @return list<array{title:string, items:list<string>}>
+     */
+    private static function checklist(array $groups): array
+    {
+        return array_map(fn (array $group) => ['title' => Tr::get($group['title']), 'items' => array_values(Tr::all($group['items']))], $groups);
     }
 }

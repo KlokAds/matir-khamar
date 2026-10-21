@@ -17,6 +17,7 @@ use App\Services\ReportService;
 use App\Support\CareGuide;
 use App\Support\Lookups;
 use App\Support\Money;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -33,7 +34,7 @@ class AnimalController extends Controller
 
         return Inertia::render('animals/Index', [
             'status' => $status,
-            'statuses' => Animal::STATUSES,
+            'statuses' => Tr::all(Animal::STATUSES),
             'animals' => Animal::query()->with('costCenter:id,name')->where('status', $status)->orderBy('tag')->get()->map(fn (Animal $animal) => [
                 'id' => $animal->id,
                 'tag' => $animal->tag,
@@ -55,7 +56,7 @@ class AnimalController extends Controller
             'moneyAccounts' => Lookups::moneyAccounts(),
             'budgetHeads' => Lookups::budgetHeads(),
             'mothers' => Animal::query()->where('status', 'active')->where('sex', 'female')->orderBy('tag')->get(['id', 'tag', 'name']),
-            'acquisitions' => Animal::ACQUISITIONS,
+            'acquisitions' => Tr::all(Animal::ACQUISITIONS),
             'maxVoucherKb' => config('khamar.max_voucher_kb'),
             'batches' => Batch::query()->whereNull('closed_on')->orderByDesc('number')->get()
                 ->map(fn (Batch $b) => ['id' => $b->id, 'label' => $b->label(), 'cost_center_id' => $b->cost_center_id, 'started_on' => $b->started_on->toDateString()]),
@@ -124,7 +125,7 @@ class AnimalController extends Controller
             return $animal;
         });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag} খামারের তালিকায় যোগ হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':tag খামারের তালিকায় যোগ হয়েছে।', ['tag' => $animal->tag])]);
 
         return to_route('animals.show', $animal);
     }
@@ -156,7 +157,7 @@ class AnimalController extends Controller
         });
 
         $tags = implode(', ', array_map(fn (Animal $a) => $a->tag, $group));
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$count}টি গরু যোগ হয়েছে: {$tags}"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':countটি গরু যোগ হয়েছে: :tags', ['count' => $count, 'tags' => $tags])]);
 
         return to_route('animals.index');
     }
@@ -188,8 +189,8 @@ class AnimalController extends Controller
                 'disposed_on' => $animal->disposed_on?->toDateString(),
                 'center' => $animal->costCenter->name,
                 'mother' => $animal->mother?->tag,
-                'status_label' => Animal::STATUSES[$animal->status],
-                'acquisition_label' => Animal::ACQUISITIONS[$animal->acquisition],
+                'status_label' => __(Animal::STATUSES[$animal->status]),
+                'acquisition_label' => __(Animal::ACQUISITIONS[$animal->acquisition]),
             ],
             'placements' => $animal->placements->map(fn ($placement) => [
                 'center' => $placement->costCenter->name,
@@ -214,7 +215,7 @@ class AnimalController extends Controller
             'weights' => $animal->weights->map(fn ($w) => ['id' => $w->id, 'date' => $w->date->toDateString(), 'kg' => $w->kg, 'note' => $w->note])->values(),
             'growth' => $care->growth($animal),
             'breedings' => $animal->breedings->map(fn ($b) => $care->breedingCard($b))->values(),
-            'breedingOptions' => ['methods' => Breeding::METHODS, 'results' => Breeding::RESULTS, 'outcomes' => Breeding::OUTCOMES],
+            'breedingOptions' => ['methods' => Tr::all(Breeding::METHODS), 'results' => Tr::all(Breeding::RESULTS), 'outcomes' => Tr::all(Breeding::OUTCOMES)],
             'ageDays' => $ageDays,
             'calfStage' => $ageDays !== null && $ageDays <= 540 ? CareGuide::stageFor(CareGuide::calf(), $ageDays) : null,
             // Its own doses plus those given to its whole category or the whole farm.
@@ -224,7 +225,7 @@ class AnimalController extends Controller
                 ->orderByDesc('given_on')->limit(20)->get()
                 ->map(fn (HealthEvent $e) => [
                     'id' => $e->id,
-                    'kind_label' => HealthEvent::KINDS[$e->kind] ?? $e->kind,
+                    'kind_label' => __(HealthEvent::KINDS[$e->kind] ?? $e->kind),
                     'name' => $e->name,
                     'target' => $e->target(),
                     'given_on' => $e->given_on->toDateString(),
@@ -242,7 +243,7 @@ class AnimalController extends Controller
 
         $animals->transfer($animal, (int) $data['cost_center_id'], $data['date']);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'ক্যাটাগরি বদল হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ক্যাটাগরি বদল হয়েছে।')]);
 
         return back();
     }
@@ -258,7 +259,7 @@ class AnimalController extends Controller
 
         $animals->sell($animal, $data['date'], Money::toPoisha($data['amount']), (int) $data['money_account_id'], $data['party_id'] ?? null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag} বিক্রি লেখা হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':tag বিক্রি লেখা হয়েছে।', ['tag' => $animal->tag])]);
 
         return back();
     }
@@ -272,7 +273,7 @@ class AnimalController extends Controller
 
         $animals->recordDeath($animal, $data['date'], $data['note'] ?? null);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'মৃত্যু লেখা হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('মৃত্যু লেখা হয়েছে।')]);
 
         return back();
     }

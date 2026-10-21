@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Moon, Sun, Sunrise, Sunset } from '@lucide/vue';
+import { t } from '@/lib/i18n';
 
 /** সকাল / দুপুর / বিকাল / রাত buttons for feeding (and any other time-of-day entry). */
 defineProps<{ sessions: Record<string, string>; label?: string }>();
@@ -15,7 +16,7 @@ const icons: Record<string, typeof Sun> = {
 
 <template>
     <div class="grid gap-1.5">
-        <span class="text-sm font-medium">{{ label ?? 'বেলা' }}</span>
+        <span class="text-sm font-medium">{{ t(label ?? 'বেলা') }}</span>
         <div
             class="grid gap-1 rounded-md border border-input p-1"
             :style="{
@@ -34,7 +35,7 @@ const icons: Record<string, typeof Sun> = {
                 ]"
                 @click="model = String(key)"
             >
-                <component :is="icons[key]" class="size-4" /> {{ text }}
+                <component :is="icons[key]" class="size-4" /> {{ t(text) }}
             </button>
         </div>
     </div>

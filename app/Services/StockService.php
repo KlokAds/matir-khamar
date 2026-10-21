@@ -8,6 +8,7 @@ use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\JournalEntry;
 use App\Models\StockMovement;
+use App\Support\Tr;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -56,7 +57,7 @@ class StockService
         $amount = (int) round($qty * $ratePerUnit);
 
         if ($amount <= 0) {
-            throw ValidationException::withMessages(['rate' => 'পরিমাণ ও দর দিন।']);
+            throw ValidationException::withMessages(['rate' => __('পরিমাণ ও দর দিন।')]);
         }
 
         return DB::transaction(function () use ($item, $date, $qty, $amount, $producerCenterId, $note, $landDecimals) {
@@ -87,7 +88,7 @@ class StockService
         ));
 
         if ($splits === []) {
-            throw ValidationException::withMessages(['splits' => 'অন্তত একটি ক্যাটাগরিতে পরিমাণ দিন।']);
+            throw ValidationException::withMessages(['splits' => __('অন্তত একটি ক্যাটাগরিতে পরিমাণ দিন।')]);
         }
 
         return DB::transaction(function () use ($item, $date, $splits, $note, $session) {
@@ -96,7 +97,7 @@ class StockService
 
             if ($totalQty > round($item->qty_on_hand, 3)) {
                 throw ValidationException::withMessages([
-                    'splits' => "স্টকে আছে {$this->qtyLabel($item, $item->qty_on_hand)}, কিন্তু চাওয়া হয়েছে {$this->qtyLabel($item, $totalQty)}।",
+                    'splits' => __('স্টকে আছে :have, কিন্তু চাওয়া হয়েছে :want।', ['have' => $this->qtyLabel($item, $item->qty_on_hand, true), 'want' => $this->qtyLabel($item, $totalQty, true)]),
                 ]);
             }
 
@@ -163,7 +164,7 @@ class StockService
 
             if ($opposite === 'out' && round($item->qty_on_hand - $movement->qty, 3) < 0) {
                 throw ValidationException::withMessages([
-                    'entry' => "{$item->name} এর এই মাল ইতিমধ্যে ব্যবহার হয়েছে, তাই ক্রয়টি বাতিল করা যাবে না।",
+                    'entry' => __(':name এর এই মাল ইতিমধ্যে ব্যবহার হয়েছে, তাই ক্রয়টি বাতিল করা যাবে না।', ['name' => $item->name]),
                 ]);
             }
 
@@ -218,8 +219,11 @@ class StockService
         $item->save();
     }
 
-    private function qtyLabel(Item $item, float $qty): string
+    /** Messages show the unit in the reader's language; ledger descriptions keep it in Bangla. */
+    private function qtyLabel(Item $item, float $qty, bool $translated = false): string
     {
-        return rtrim(rtrim(number_format($qty, 3, '.', ''), '0'), '.').' '.(Item::UNITS[$item->unit] ?? $item->unit);
+        $unit = Item::UNITS[$item->unit] ?? $item->unit;
+
+        return rtrim(rtrim(number_format($qty, 3, '.', ''), '0'), '.').' '.($translated ? Tr::get($unit) : $unit);
     }
 }

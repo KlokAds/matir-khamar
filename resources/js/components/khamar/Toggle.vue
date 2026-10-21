@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { t } from '@/lib/i18n';
+
 /** An on/off switch with its state written next to it, so nobody has to guess. */
 const props = withDefaults(
     defineProps<{
@@ -39,7 +41,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
             :class="
                 props.modelValue ? 'text-foreground' : 'text-muted-foreground'
             "
-            >{{ props.modelValue ? onText : offText }}</span
+            >{{ t(props.modelValue ? onText : offText) }}</span
         >
     </button>
 </template>

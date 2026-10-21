@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import PageTitle from '@/components/khamar/PageTitle.vue';
+import { t } from '@/lib/i18n';
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'অডিট লগ', href: '/setup/audit' }] },
@@ -55,12 +56,16 @@ const short = (values: Record<string, unknown> | null) =>
 </script>
 
 <template>
-    <Head title="অডিট লগ" />
+    <Head :title="t('অডিট লগ')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="অডিট লগ"
-            subtitle="কে, কখন, কোথা থেকে, কী করেছেন — সব লেখা থাকে, এখান থেকে কিছু মোছা যায় না।"
+            :title="t('অডিট লগ')"
+            :subtitle="
+                t(
+                    'কে, কখন, কোথা থেকে, কী করেছেন — সব লেখা থাকে, এখান থেকে কিছু মোছা যায় না।',
+                )
+            "
         />
 
         <div class="overflow-x-auto rounded-xl border border-border bg-card">
@@ -77,7 +82,7 @@ const short = (values: Record<string, unknown> | null) =>
                             {{ log.at }}
                         </td>
                         <td class="px-4 py-2.5 whitespace-nowrap">
-                            {{ log.user ?? 'সিস্টেম' }}
+                            {{ log.user ?? t('সিস্টেম') }}
                         </td>
                         <td class="px-4 py-2.5">
                             <span
@@ -85,7 +90,11 @@ const short = (values: Record<string, unknown> | null) =>
                                     'rounded px-1.5 py-0.5 text-[11px]',
                                     tone(log.action),
                                 ]"
-                                >{{ actions[log.action] ?? log.action }}</span
+                                >{{
+                                    actions[log.action]
+                                        ? t(actions[log.action])
+                                        : log.action
+                                }}</span
                             >
                         </td>
                         <td class="px-4 py-2.5 whitespace-nowrap">

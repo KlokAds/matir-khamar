@@ -16,6 +16,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, day, today, useCan } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 
@@ -132,9 +133,9 @@ watch(
 );
 
 const targets: { key: Target; label: string }[] = [
-    { key: 'animals', label: 'কয়েকটি গরু' },
-    { key: 'center', label: 'পুরো ক্যাটাগরি' },
-    { key: 'farm', label: 'পুরো খামার' },
+    { key: 'animals', label: t('কয়েকটি গরু') },
+    { key: 'center', label: t('পুরো ক্যাটাগরি') },
+    { key: 'farm', label: t('পুরো খামার') },
 ];
 
 const groups = computed(() =>
@@ -157,7 +158,7 @@ const allGroups = computed(() =>
         ? [
               ...groups.value,
               {
-                  center: { id: 0, name: 'অন্যান্য' } as Center,
+                  center: { id: 0, name: t('অন্যান্য') } as Center,
                   animals: others.value,
               },
           ]
@@ -219,9 +220,13 @@ const removing = ref<number | null>(null);
 async function remove(row: HistoryRow) {
     if (
         !(await ask.confirm({
-            title: 'লেখাটি মুছবেন?',
-            body: `${row.name} — ${row.target} (${day(row.given_on)})। শুধু আজকের লেখা মোছা যায়।`,
-            confirmText: 'হ্যাঁ, মুছুন',
+            title: t('লেখাটি মুছবেন?'),
+            body: t(':name — :target (:date)। শুধু আজকের লেখা মোছা যায়।', {
+                name: t(row.name),
+                target: t(row.target),
+                date: day(row.given_on),
+            }),
+            confirmText: t('হ্যাঁ, মুছুন'),
             danger: true,
         }))
     ) {
@@ -238,12 +243,16 @@ async function remove(row: HistoryRow) {
 </script>
 
 <template>
-    <Head title="টিকা ও কৃমি" />
+    <Head :title="t('টিকা ও কৃমি')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="টিকা ও কৃমি"
-            subtitle="কোন গরুকে কবে কী দেওয়া হলো, পরেরটা কবে — সময় হলে নিজেই মনে করিয়ে দেবে।"
+            :title="t('টিকা ও কৃমি')"
+            :subtitle="
+                t(
+                    'কোন গরুকে কবে কী দেওয়া হলো, পরেরটা কবে — সময় হলে নিজেই মনে করিয়ে দেবে।',
+                )
+            "
         />
 
         <div class="grid gap-6 lg:grid-cols-5">
@@ -253,7 +262,8 @@ async function remove(row: HistoryRow) {
                     <h2
                         class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
-                        <CalendarClock class="size-5 text-clay" /> সামনে যা আছে
+                        <CalendarClock class="size-5 text-clay" />
+                        {{ t('সামনে যা আছে') }}
                     </h2>
 
                     <ul v-if="due.length" class="divide-y divide-border/70">
@@ -271,11 +281,11 @@ async function remove(row: HistoryRow) {
                                             'block truncate text-sm font-medium',
                                             d.urgent && 'text-destructive',
                                         ]"
-                                        >{{ d.title }}</span
+                                        >{{ t(d.title) }}</span
                                     >
                                     <span
                                         class="block truncate text-xs text-muted-foreground"
-                                        >{{ d.detail }}</span
+                                        >{{ t(d.detail) }}</span
                                     >
                                 </span>
                                 <span
@@ -295,7 +305,7 @@ async function remove(row: HistoryRow) {
                         class="flex items-center justify-center gap-2 py-8 text-center text-sm text-muted-foreground"
                     >
                         <Check class="size-4 text-paddy" />
-                        ৩০ দিনের মধ্যে কিছু বাকি নেই
+                        {{ t('৩০ দিনের মধ্যে কিছু বাকি নেই') }}
                     </p>
                 </section>
 
@@ -308,7 +318,8 @@ async function remove(row: HistoryRow) {
                     <h2
                         class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
-                        <Syringe class="size-5 text-paddy" /> নতুন লিখুন
+                        <Syringe class="size-5 text-paddy" />
+                        {{ t('নতুন লিখুন') }}
                     </h2>
 
                     <div class="grid gap-3">
@@ -326,18 +337,18 @@ async function remove(row: HistoryRow) {
                                 ]"
                                 @click="pickPreset(p)"
                             >
-                                {{ p.name }}
+                                {{ t(p.name) }}
                                 <span v-if="p.months" class="num opacity-70"
-                                    >· {{ p.months }} মাস</span
+                                    >· {{ t(':n মাস', { n: p.months }) }}</span
                                 >
                             </button>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <Field label="ধরন" :error="form.errors.kind">
+                            <Field :label="t('ধরন')" :error="form.errors.kind">
                                 <NSelect v-model="form.kind">
                                     <option
-                                        v-for="(label, key) in kinds"
+                                        v-for="(label, key) in tAll(kinds)"
                                         :key="key"
                                         :value="key"
                                     >
@@ -345,18 +356,18 @@ async function remove(row: HistoryRow) {
                                     </option>
                                 </NSelect>
                             </Field>
-                            <Field label="নাম" :error="form.errors.name">
+                            <Field :label="t('নাম')" :error="form.errors.name">
                                 <Input
                                     v-model="form.name"
                                     class="h-10"
-                                    placeholder="যেমন: ক্ষুরা রোগ"
+                                    :placeholder="t('যেমন: ক্ষুরা রোগ')"
                                     required
                                 />
                             </Field>
                         </div>
 
                         <Field
-                            label="কাকে"
+                            :label="t('কাকে')"
                             :error="
                                 form.errors.target ||
                                 form.errors.animal_ids ||
@@ -367,18 +378,18 @@ async function remove(row: HistoryRow) {
                                 class="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1"
                             >
                                 <button
-                                    v-for="t in targets"
-                                    :key="t.key"
+                                    v-for="tg in targets"
+                                    :key="tg.key"
                                     type="button"
                                     :class="[
                                         'h-9 rounded-md text-xs font-medium transition-colors sm:text-sm',
-                                        form.target === t.key
+                                        form.target === tg.key
                                             ? 'bg-card text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground',
                                     ]"
-                                    @click="form.target = t.key"
+                                    @click="form.target = tg.key"
                                 >
-                                    {{ t.label }}
+                                    {{ tg.label }}
                                 </button>
                             </div>
                         </Field>
@@ -391,10 +402,14 @@ async function remove(row: HistoryRow) {
                                 class="flex items-center justify-between border-b border-border px-3 py-2 text-xs text-muted-foreground"
                             >
                                 <span
-                                    >বাছাই:
+                                    >{{ t('বাছাই:') }}
                                     <span
                                         class="num font-medium text-foreground"
-                                        >{{ form.animal_ids.length }}টি</span
+                                        >{{
+                                            t(':nটি', {
+                                                n: form.animal_ids.length,
+                                            })
+                                        }}</span
                                     ></span
                                 >
                                 <button
@@ -403,7 +418,7 @@ async function remove(row: HistoryRow) {
                                     class="underline-offset-4 hover:underline"
                                     @click="form.animal_ids = []"
                                 >
-                                    সব বাদ
+                                    {{ t('সব বাদ') }}
                                 </button>
                             </p>
                             <div
@@ -420,7 +435,7 @@ async function remove(row: HistoryRow) {
                                     >
                                         <span
                                             class="truncate text-xs font-semibold text-muted-foreground"
-                                            >{{ g.center.name }}
+                                            >{{ t(g.center.name) }}
                                             <span class="num"
                                                 >({{ g.animals.length }})</span
                                             ></span
@@ -432,8 +447,8 @@ async function remove(row: HistoryRow) {
                                         >
                                             {{
                                                 allPicked(g.animals)
-                                                    ? 'সব বাদ দিন'
-                                                    : 'সব বাছুন'
+                                                    ? t('সব বাদ দিন')
+                                                    : t('সব বাছুন')
                                             }}
                                         </button>
                                     </div>
@@ -465,17 +480,17 @@ async function remove(row: HistoryRow) {
                                 v-else
                                 class="px-3 py-6 text-center text-sm text-muted-foreground"
                             >
-                                কোনো সক্রিয় গরু নেই।
+                                {{ t('কোনো সক্রিয় গরু নেই।') }}
                             </p>
                         </div>
 
                         <Field
                             v-else-if="form.target === 'center'"
-                            label="ক্যাটাগরি"
+                            :label="t('ক্যাটাগরি')"
                         >
                             <NSelect
                                 v-model="form.cost_center_id"
-                                placeholder="ক্যাটাগরি বাছুন"
+                                :placeholder="t('ক্যাটাগরি বাছুন')"
                             >
                                 <option
                                     v-for="c in centers"
@@ -483,7 +498,7 @@ async function remove(row: HistoryRow) {
                                     :value="c.id"
                                     :disabled="!c.is_active"
                                 >
-                                    {{ centerLabel(c) }}
+                                    {{ centerLabel({ ...c, name: t(c.name) }) }}
                                 </option>
                             </NSelect>
                         </Field>
@@ -492,12 +507,12 @@ async function remove(row: HistoryRow) {
                             v-else
                             class="rounded-lg bg-pond/8 px-3 py-2 text-xs text-muted-foreground"
                         >
-                            খামারের সব গরুর জন্য একটি লেখা হবে।
+                            {{ t('খামারের সব গরুর জন্য একটি লেখা হবে।') }}
                         </p>
 
                         <div class="grid grid-cols-2 gap-3">
                             <Field
-                                label="দেওয়ার তারিখ"
+                                :label="t('দেওয়ার তারিখ')"
                                 :error="form.errors.given_on"
                             >
                                 <DateField
@@ -508,9 +523,9 @@ async function remove(row: HistoryRow) {
                                 />
                             </Field>
                             <Field
-                                label="পরেরটা কবে"
+                                :label="t('পরেরটা কবে')"
                                 :error="form.errors.next_due_on"
-                                hint="ফাঁকা রাখলে মনে করাবে না"
+                                :hint="t('ফাঁকা রাখলে মনে করাবে না')"
                             >
                                 <DateField
                                     v-model="form.next_due_on"
@@ -522,27 +537,32 @@ async function remove(row: HistoryRow) {
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <Field label="মাত্রা" :error="form.errors.dose">
+                            <Field
+                                :label="t('মাত্রা')"
+                                :error="form.errors.dose"
+                            >
                                 <Input
                                     v-model="form.dose"
                                     class="h-10"
-                                    placeholder="যেমন: ২ মিলি"
+                                    :placeholder="t('যেমন: ২ মিলি')"
                                 />
                             </Field>
                             <Field
-                                label="কে দিয়েছেন"
+                                :label="t('কে দিয়েছেন')"
                                 :error="form.errors.by_whom"
                             >
                                 <Input
                                     v-model="form.by_whom"
                                     class="h-10"
-                                    placeholder="যেমন: উপজেলা প্রাণিসম্পদ অফিস"
+                                    :placeholder="
+                                        t('যেমন: উপজেলা প্রাণিসম্পদ অফিস')
+                                    "
                                 />
                             </Field>
                         </div>
 
                         <Field
-                            label="নোট (ইচ্ছামতো)"
+                            :label="t('নোট (ইচ্ছামতো)')"
                             :error="form.errors.notes"
                         >
                             <Input v-model="form.notes" class="h-10" />
@@ -550,7 +570,7 @@ async function remove(row: HistoryRow) {
 
                         <Button type="submit" :disabled="!canSubmit">
                             <Check class="size-4" />
-                            লিখুন
+                            {{ t('লিখুন') }}
                         </Button>
                     </div>
                 </form>
@@ -561,7 +581,7 @@ async function remove(row: HistoryRow) {
                 class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-3"
             >
                 <h2 class="mb-3 flex items-center gap-2 font-display text-lg">
-                    <History class="size-5 text-pond" /> আগের লেখা
+                    <History class="size-5 text-pond" /> {{ t('আগের লেখা') }}
                 </h2>
 
                 <ul v-if="history.length" class="divide-y divide-border/70">
@@ -575,27 +595,27 @@ async function remove(row: HistoryRow) {
                                 'mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium',
                                 toneFor(r.kind),
                             ]"
-                            >{{ r.kind_label }}</span
+                            >{{ t(r.kind_label) }}</span
                         >
                         <div class="min-w-0 flex-1">
                             <p class="text-sm leading-snug font-medium">
-                                {{ r.name }}
+                                {{ t(r.name) }}
                             </p>
                             <p class="text-xs text-foreground/80">
                                 <Link
                                     v-if="r.animal_id"
                                     :href="`/animals/${r.animal_id}`"
                                     class="hover:underline"
-                                    >{{ r.target }}</Link
+                                    >{{ t(r.target) }}</Link
                                 >
-                                <template v-else>{{ r.target }}</template>
+                                <template v-else>{{ t(r.target) }}</template>
                                 · <span class="num">{{ day(r.given_on) }}</span>
                             </p>
                             <p
                                 v-if="r.next_due_on"
                                 class="mt-0.5 text-xs text-pond"
                             >
-                                পরেরটা:
+                                {{ t('পরেরটা:') }}
                                 <span class="num font-medium">{{
                                     day(r.next_due_on)
                                 }}</span>
@@ -604,9 +624,9 @@ async function remove(row: HistoryRow) {
                                 v-if="r.dose || r.by_whom || r.notes"
                                 class="mt-0.5 text-xs text-muted-foreground"
                             >
-                                <template v-if="r.dose"
-                                    >মাত্রা: {{ r.dose }}</template
-                                >
+                                <template v-if="r.dose">{{
+                                    t('মাত্রা: :dose', { dose: r.dose })
+                                }}</template>
                                 <template v-if="r.dose && r.by_whom">
                                     ·
                                 </template>
@@ -626,7 +646,7 @@ async function remove(row: HistoryRow) {
                             type="button"
                             class="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
                             :disabled="removing === r.id"
-                            aria-label="মুছুন"
+                            :aria-label="t('মুছুন')"
                             @click="remove(r)"
                         >
                             <Trash2 class="size-4" />
@@ -638,13 +658,17 @@ async function remove(row: HistoryRow) {
                     class="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted-foreground"
                 >
                     <ClipboardList class="size-6 opacity-60" />
-                    এখনো কিছু লেখা হয়নি।
+                    {{ t('এখনো কিছু লেখা হয়নি।') }}
                 </p>
             </section>
         </div>
 
         <p class="mt-6 px-1 text-xs text-muted-foreground">
-            ঔষধ, মাত্রা ও টিকার তারিখ অবশ্যই প্রাণিসম্পদ ডাক্তারের পরামর্শে।
+            {{
+                t(
+                    'ঔষধ, মাত্রা ও টিকার তারিখ অবশ্যই প্রাণিসম্পদ ডাক্তারের পরামর্শে।',
+                )
+            }}
         </p>
     </div>
 </template>

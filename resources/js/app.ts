@@ -4,12 +4,13 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
+import { t } from '@/lib/i18n';
 import { initializeOffline } from '@/lib/offline';
 
 const appName = 'মাটির খামার';
 
 void createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => (title ? `${t(title)} - ${t(appName)}` : t(appName)),
     layout: (name) => {
         switch (true) {
             case name.startsWith('auth/'):

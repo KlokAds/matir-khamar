@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ask } from '@/lib/dialog';
+import { t } from '@/lib/i18n';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ShieldCheck, ShieldOff, UserPlus } from '@lucide/vue';
 import { ref } from 'vue';
@@ -48,12 +49,12 @@ async function resetPassword(user: {
     is_active: boolean;
 }) {
     const password = await ask.prompt({
-        title: 'নতুন পাসওয়ার্ড',
-        body: 'অক্ষর ও সংখ্যা মিলিয়ে। ব্যবহারকারীকে নিজে জানিয়ে দিন।',
-        label: 'পাসওয়ার্ড',
+        title: t('নতুন পাসওয়ার্ড'),
+        body: t('অক্ষর ও সংখ্যা মিলিয়ে। ব্যবহারকারীকে নিজে জানিয়ে দিন।'),
+        label: t('পাসওয়ার্ড'),
         inputType: 'password',
         minLength: 10,
-        confirmText: 'বদলান',
+        confirmText: t('বদলান'),
     });
 
     if (password) {
@@ -63,16 +64,20 @@ async function resetPassword(user: {
 </script>
 
 <template>
-    <Head title="ব্যবহারকারী" />
+    <Head :title="t('ব্যবহারকারী')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="কে কী করতে পারবেন"
-            subtitle="অ্যাডমিন ও ম্যানেজারের ২-ধাপ যাচাই (2FA) চালু না করলে হিসাব খুলবে না। কাউকে মোছা যায় না — বন্ধ করা যায়, যাতে তাঁর লেখা এন্ট্রির ইতিহাস থাকে।"
+            :title="t('কে কী করতে পারবেন')"
+            :subtitle="
+                t(
+                    'অ্যাডমিন ও ম্যানেজারের ২-ধাপ যাচাই (2FA) চালু না করলে হিসাব খুলবে না। কাউকে মোছা যায় না — বন্ধ করা যায়, যাতে তাঁর লেখা এন্ট্রির ইতিহাস থাকে।',
+                )
+            "
         >
             <template #actions
                 ><Button @click="adding = !adding"
-                    ><UserPlus /> নতুন ব্যবহারকারী</Button
+                    ><UserPlus /> {{ t('নতুন ব্যবহারকারী') }}</Button
                 ></template
             >
         </PageTitle>
@@ -89,33 +94,35 @@ async function resetPassword(user: {
                 })
             "
         >
-            <Field label="নাম" :error="create.errors.name"
+            <Field :label="t('নাম')" :error="create.errors.name"
                 ><Input v-model="create.name" required
             /></Field>
-            <Field label="ইমেইল" :error="create.errors.email"
+            <Field :label="t('ইমেইল')" :error="create.errors.email"
                 ><Input v-model="create.email" type="email" required
             /></Field>
-            <Field label="ভূমিকা"
+            <Field :label="t('ভূমিকা')"
                 ><NSelect v-model="create.role"
                     ><option
                         v-for="(label, key) in roles"
                         :key="key"
                         :value="key"
                     >
-                        {{ label }}
+                        {{ t(label) }}
                     </option></NSelect
                 ></Field
             >
-            <Field label="প্রথম পাসওয়ার্ড" :error="create.errors.password"
+            <Field
+                :label="t('প্রথম পাসওয়ার্ড')"
+                :error="create.errors.password"
                 ><Input
                     v-model="create.password"
                     type="password"
                     required
                     autocomplete="new-password"
             /></Field>
-            <Button type="submit" :disabled="create.processing"
-                >যোগ করুন</Button
-            >
+            <Button type="submit" :disabled="create.processing">{{
+                t('যোগ করুন')
+            }}</Button>
         </form>
 
         <div class="grid gap-3 lg:grid-cols-2">
@@ -134,7 +141,8 @@ async function resetPassword(user: {
                             {{ u.email }}
                         </p>
                         <p class="mt-1 text-xs text-muted-foreground">
-                            শেষ লগইন: {{ u.last_login_at ?? 'কখনো না'
+                            {{ t('শেষ লগইন:') }}
+                            {{ u.last_login_at ?? t('কখনো না')
                             }}<span v-if="u.last_login_ip">
                                 · {{ u.last_login_ip }}</span
                             >
@@ -152,7 +160,7 @@ async function resetPassword(user: {
                             :is="u.two_factor ? ShieldCheck : ShieldOff"
                             class="size-3.5"
                         />
-                        {{ u.two_factor ? '2FA চালু' : '2FA নেই' }}
+                        {{ u.two_factor ? t('2FA চালু') : t('2FA নেই') }}
                     </span>
                 </div>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -166,24 +174,29 @@ async function resetPassword(user: {
                             :key="key"
                             :value="key"
                         >
-                            {{ label }}
+                            {{ t(label) }}
                         </option>
                     </NSelect>
                     <Button
                         size="sm"
                         variant="secondary"
                         @click="update(u, { is_active: !u.is_active })"
-                        >{{ u.is_active ? 'বন্ধ করুন' : 'চালু করুন' }}</Button
+                        >{{
+                            u.is_active ? t('বন্ধ করুন') : t('চালু করুন')
+                        }}</Button
                     >
-                    <Button size="sm" variant="ghost" @click="resetPassword(u)"
-                        >পাসওয়ার্ড বদল</Button
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        @click="resetPassword(u)"
+                        >{{ t('পাসওয়ার্ড বদল') }}</Button
                     >
                     <Button
                         v-if="u.two_factor"
                         size="sm"
                         variant="ghost"
                         @click="update(u, { reset_two_factor: true })"
-                        >2FA রিসেট (ফোন হারালে)</Button
+                        >{{ t('2FA রিসেট (ফোন হারালে)') }}</Button
                     >
                 </div>
             </div>

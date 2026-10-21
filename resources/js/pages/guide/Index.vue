@@ -37,6 +37,7 @@ import {
 import type { Component } from 'vue';
 import { computed, ref } from 'vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
+import { currentLocale, t } from '@/lib/i18n';
 
 defineOptions({
     layout: {
@@ -502,32 +503,65 @@ function matches(...texts: string[]): boolean {
     return texts.join(' ').toLowerCase().includes(needle.value);
 }
 
+// Everything is translated first, so the search looks through the text on screen.
 const visibleSteps = computed(() =>
     firstDay
-        .map((step, i) => ({ ...step, n: i + 1 }))
+        .map((step, i) => ({
+            ...step,
+            title: t(step.title),
+            body: t(step.body),
+            label: t(step.label),
+            n: i + 1,
+        }))
         .filter((s) => matches(s.title, s.body, s.label)),
 );
 
 const visibleGroups = computed(() =>
     groups
-        .map((g) => ({
-            ...g,
-            topics: g.topics.filter((t) =>
-                matches(
-                    g.title,
-                    t.title,
-                    ...t.body,
-                    ...t.links.map((l) => l.label),
-                ),
-            ),
-        }))
+        .map((g) => {
+            const title = t(g.title);
+
+            return {
+                ...g,
+                title,
+                topics: g.topics
+                    .map((topic) => ({
+                        ...topic,
+                        title: t(topic.title),
+                        body: topic.body.map((line) => t(line)),
+                        links: topic.links.map((l) => ({
+                            ...l,
+                            label: t(l.label),
+                        })),
+                    }))
+                    .filter((topic) =>
+                        matches(
+                            title,
+                            topic.title,
+                            ...topic.body,
+                            ...topic.links.map((l) => l.label),
+                        ),
+                    ),
+            };
+        })
         .filter((g) => g.topics.length > 0),
 );
 
-const visibleFaqs = computed(() => faqs.filter((f) => matches(f.q, f.a)));
+const visibleFaqs = computed(() =>
+    faqs
+        .map((f) => ({ q: t(f.q), a: t(f.a) }))
+        .filter((f) => matches(f.q, f.a)),
+);
 
 const visibleRoadmap = computed(() =>
-    roadmap.filter((r) => matches(r.title, r.why, r.status)),
+    roadmap
+        .map((r) => ({
+            ...r,
+            title: t(r.title),
+            why: t(r.why),
+            statusLabel: t(r.status),
+        }))
+        .filter((r) => matches(r.title, r.why, r.statusLabel)),
 );
 
 const nothingFound = computed(
@@ -539,31 +573,36 @@ const nothingFound = computed(
         !visibleRoadmap.value.length,
 );
 
-const bn = (n: number) => n.toLocaleString('bn-BD');
+const bn = (n: number) =>
+    currentLocale() === 'en' ? String(n) : n.toLocaleString('bn-BD');
 </script>
 
 <template>
     <div class="flex flex-col gap-8 p-4 md:p-6">
         <PageTitle
-            title="সাহায্য ও গাইড"
-            subtitle="কোন কাজ কোথায় করবেন — সহজ ভাষায়। নিচে খুঁজুন অথবা ঘুরে দেখুন।"
+            :title="t('সাহায্য ও গাইড')"
+            :subtitle="
+                t(
+                    'কোন কাজ কোথায় করবেন — সহজ ভাষায়। নিচে খুঁজুন অথবা ঘুরে দেখুন।',
+                )
+            "
         >
             <label class="relative mt-4 block max-w-xl">
-                <span class="sr-only">গাইডে খুঁজুন</span>
+                <span class="sr-only">{{ t('গাইডে খুঁজুন') }}</span>
                 <Search
                     class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                 />
                 <input
                     v-model="query"
                     type="search"
-                    placeholder="যেমন: দুধ, ভুসি, বাতিল, নোটিফিকেশন…"
+                    :placeholder="t('যেমন: দুধ, ভুসি, বাতিল, নোটিফিকেশন…')"
                     class="h-11 w-full rounded-xl border border-border bg-card pr-10 pl-9 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-paddy focus-visible:ring-2 focus-visible:ring-paddy/25"
                 />
                 <button
                     v-if="query"
                     type="button"
                     class="absolute top-1/2 right-2 grid size-7 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-muted"
-                    aria-label="খোঁজা মুছুন"
+                    :aria-label="t('খোঁজা মুছুন')"
                     @click="query = ''"
                 >
                     <X class="size-4" />
@@ -575,8 +614,12 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
             v-if="nothingFound"
             class="rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground"
         >
-            "{{ query }}" দিয়ে কিছু পাওয়া যায়নি। অন্য শব্দে খুঁজুন, যেমন
-            "খাবার" বা "টাকা"।
+            {{
+                t(
+                    '":query" দিয়ে কিছু পাওয়া যায়নি। অন্য শব্দে খুঁজুন, যেমন "খাবার" বা "টাকা"।',
+                    { query },
+                )
+            }}
         </p>
 
         <!-- 1. First day -->
@@ -586,7 +629,7 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                 class="mb-3 flex items-center gap-2 font-display text-xl"
             >
                 <Lightbulb class="size-5 text-turmeric" />
-                প্রথম দিনের কাজ
+                {{ t('প্রথম দিনের কাজ') }}
             </h2>
             <ol class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 <li
@@ -610,7 +653,7 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                             :href="step.href"
                             class="mt-2 inline-block text-sm font-medium text-paddy hover:underline"
                         >
-                            {{ step.label }} খুলুন →
+                            {{ t(':label খুলুন →', { label: step.label }) }}
                         </Link>
                     </div>
                 </li>
@@ -624,7 +667,7 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                 class="mb-3 flex items-center gap-2 font-display text-xl"
             >
                 <Wheat class="size-5 text-paddy" />
-                প্রতিদিন কোথায় কী করবেন
+                {{ t('প্রতিদিন কোথায় কী করবেন') }}
             </h2>
             <div class="flex flex-col gap-6">
                 <div v-for="g in visibleGroups" :key="g.title">
@@ -635,8 +678,8 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                     </h3>
                     <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                         <article
-                            v-for="t in g.topics"
-                            :key="t.title"
+                            v-for="topic in g.topics"
+                            :key="topic.title"
                             class="flex flex-col rounded-xl border border-border bg-card p-4"
                         >
                             <div class="flex items-center gap-3">
@@ -644,17 +687,20 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                                     class="grid size-9 shrink-0 place-items-center rounded-lg"
                                     :class="toneClass[g.tone]"
                                 >
-                                    <component :is="t.icon" class="size-5" />
+                                    <component
+                                        :is="topic.icon"
+                                        class="size-5"
+                                    />
                                 </span>
                                 <h4 class="font-display text-base leading-snug">
-                                    {{ t.title }}
+                                    {{ topic.title }}
                                 </h4>
                             </div>
                             <ul
                                 class="mt-3 flex flex-1 flex-col gap-1.5 text-sm leading-relaxed text-muted-foreground"
                             >
                                 <li
-                                    v-for="(line, i) in t.body"
+                                    v-for="(line, i) in topic.body"
                                     :key="i"
                                     class="flex gap-2"
                                 >
@@ -668,15 +714,15 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                                 class="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border/70 pt-3"
                             >
                                 <Link
-                                    v-for="l in t.links"
+                                    v-for="l in topic.links"
                                     :key="l.href"
                                     :href="l.href"
                                     class="text-sm font-medium text-paddy hover:underline"
                                 >
                                     {{
-                                        t.links.length > 1
+                                        topic.links.length > 1
                                             ? `${l.label} →`
-                                            : 'খুলুন →'
+                                            : t('খুলুন →')
                                     }}
                                 </Link>
                             </div>
@@ -693,7 +739,7 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                 class="mb-3 flex items-center gap-2 font-display text-xl"
             >
                 <CircleHelp class="size-5 text-pond" />
-                প্রশ্ন ও উত্তর
+                {{ t('প্রশ্ন ও উত্তর') }}
             </h2>
             <div
                 class="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card"
@@ -730,10 +776,10 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                 class="mb-1 flex items-center gap-2 font-display text-xl"
             >
                 <Sprout class="size-5 text-paddy" />
-                সামনে যা যোগ করা যায়
+                {{ t('সামনে যা যোগ করা যায়') }}
             </h2>
             <p class="mb-3 text-sm text-muted-foreground">
-                আপনার কোনটা আগে দরকার, হিসাব অ্যাডমিনকে জানান।
+                {{ t('আপনার কোনটা আগে দরকার, হিসাব অ্যাডমিনকে জানান।') }}
             </p>
             <ul class="grid gap-3 md:grid-cols-2">
                 <li
@@ -757,7 +803,7 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
                                         : 'bg-turmeric/25 text-soil'
                                 "
                             >
-                                {{ r.status }}
+                                {{ r.statusLabel }}
                             </span>
                         </div>
                         <p class="mt-1 text-sm text-muted-foreground">
@@ -774,21 +820,23 @@ const bn = (n: number) => n.toLocaleString('bn-BD');
         >
             <p class="flex gap-2">
                 <Syringe class="mt-0.5 size-4 shrink-0 text-clay" />
-                <span
-                    >ঔষধ, মাত্রা ও টিকার তারিখ সবসময় প্রাণিসম্পদ ডাক্তারের
-                    পরামর্শে।</span
-                >
+                <span>{{
+                    t(
+                        'ঔষধ, মাত্রা ও টিকার তারিখ সবসময় প্রাণিসম্পদ ডাক্তারের পরামর্শে।',
+                    )
+                }}</span>
             </p>
             <p class="flex gap-2 text-muted-foreground">
                 <LifeBuoy class="mt-0.5 size-4 shrink-0 text-pond" />
-                <span>সমস্যা হলে: হিসাব অ্যাডমিন (Klok Ads)</span>
+                <span>{{ t('সমস্যা হলে: হিসাব অ্যাডমিন (Klok Ads)') }}</span>
             </p>
             <p class="flex gap-2 text-muted-foreground">
                 <Bell class="mt-0.5 size-4 shrink-0 text-turmeric" />
-                <span
-                    >সকাল ৭টায় দিনের তালিকা, সন্ধ্যা ৭টায় বাকি কাজের কথা —
-                    ফোনে নোটিফিকেশন চালু রাখুন।</span
-                >
+                <span>{{
+                    t(
+                        'সকাল ৭টায় দিনের তালিকা, সন্ধ্যা ৭টায় বাকি কাজের কথা — ফোনে নোটিফিকেশন চালু রাখুন।',
+                    )
+                }}</span>
             </p>
         </footer>
     </div>

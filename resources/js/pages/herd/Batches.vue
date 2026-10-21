@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
+import { t } from '@/lib/i18n';
 import { centerLabel, day, taka, today, useCan } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 
@@ -74,14 +75,16 @@ const props = defineProps<{
 const can = useCan();
 
 const statusLabels: Record<string, string> = {
-    sold: 'বিক্রি হয়েছে',
-    dead: 'মৃত',
+    sold: t('বিক্রি হয়েছে'),
+    dead: t('মৃত'),
 };
 
 const kg = (value: number | null | undefined): string =>
     value === null || value === undefined
         ? '—'
-        : `${value.toLocaleString('en-IN', { maximumFractionDigits: 2 })} কেজি`;
+        : t(':n কেজি', {
+              n: value.toLocaleString('en-IN', { maximumFractionDigits: 2 }),
+          });
 
 const perHead = (batch: BatchCard): number =>
     batch.head > 0 ? Math.round(batch.spent / batch.head) : 0;
@@ -95,8 +98,17 @@ const gainOk = (batch: BatchCard): boolean =>
 const customName = (batch: BatchCard): string =>
     batch.label === `ব্যাচ-${batch.number}` ? '' : batch.label;
 
+/** What the batch is called on screen: its custom name, or "ব্যাচ-N" in the reader's language. */
+const batchName = (batch: BatchCard): string =>
+    customName(batch) || t('ব্যাচ-:n', { n: batch.number });
+
 const toNumberOrNull = (value: string | number): number | null =>
     value === '' || value === null ? null : Number(value);
+
+// "দিনে গড়ে X বাড়ছে" as one phrase; the amount keeps its own styled span.
+const gainParts = t('দিনে গড়ে :kg বাড়ছে')
+    .split(':kg')
+    .map((part) => part.trim());
 
 // New batch
 const adding = ref(false);
@@ -177,9 +189,11 @@ const saveEdit = (card: BatchCard) =>
 
 async function closeBatch(card: BatchCard) {
     const ok = await ask.confirm({
-        title: `${card.label} শেষ করবেন?`,
-        body: 'আজকের তারিখে এই দফা বন্ধ হবে। পরে সম্পাদনা থেকে আবার দেখা যাবে।',
-        confirmText: 'হ্যাঁ, শেষ করুন',
+        title: t(':batch শেষ করবেন?', { batch: batchName(card) }),
+        body: t(
+            'আজকের তারিখে এই দফা বন্ধ হবে। পরে সম্পাদনা থেকে আবার দেখা যাবে।',
+        ),
+        confirmText: t('হ্যাঁ, শেষ করুন'),
     });
 
     if (!ok) {
@@ -198,16 +212,20 @@ async function closeBatch(card: BatchCard) {
 </script>
 
 <template>
-    <Head title="মোটাতাজা ব্যাচ" />
+    <Head :title="t('মোটাতাজা ব্যাচ')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="মোটাতাজা ব্যাচ"
-            subtitle="প্রতিটি দফা আলাদা নম্বরে — কবে শুরু, কত দিন চলছে, কত খরচ, কত বাড়লো।"
+            :title="t('মোটাতাজা ব্যাচ')"
+            :subtitle="
+                t(
+                    'প্রতিটি দফা আলাদা নম্বরে — কবে শুরু, কত দিন চলছে, কত খরচ, কত বাড়লো।',
+                )
+            "
         >
             <template #actions>
                 <Button v-if="can['post-entries']" @click="adding = !adding"
-                    ><Plus /> নতুন ব্যাচ</Button
+                    ><Plus /> {{ t('নতুন ব্যাচ') }}</Button
                 >
             </template>
         </PageTitle>
@@ -218,29 +236,34 @@ async function closeBatch(card: BatchCard) {
             @submit.prevent="create"
         >
             <p class="text-sm text-muted-foreground sm:col-span-2">
-                নতুন দফা খুলুন। গরু নিবন্ধনের সময় ব্যাচে যুক্ত হয় — নতুন গরু
-                ফর্মে ব্যাচ বেছে নিন।
+                {{
+                    t(
+                        'নতুন দফা খুলুন। গরু নিবন্ধনের সময় ব্যাচে যুক্ত হয় — নতুন গরু ফর্মে ব্যাচ বেছে নিন।',
+                    )
+                }}
             </p>
-            <Field label="ক্যাটাগরি" :error="batch.errors.cost_center_id"
+            <Field :label="t('ক্যাটাগরি')" :error="batch.errors.cost_center_id"
                 ><NSelect v-model="batch.cost_center_id"
                     ><option v-for="c in centers" :key="c.id" :value="c.id">
-                        {{ centerLabel(c) }}
+                        {{ centerLabel({ ...c, name: t(c.name) }) }}
                     </option></NSelect
                 ></Field
             >
             <Field
-                label="নাম (ইচ্ছা হলে)"
+                :label="t('নাম (ইচ্ছা হলে)')"
                 :error="batch.errors.name"
-                hint="না দিলে নম্বর দিয়ে চেনা যাবে"
-                ><Input v-model="batch.name" placeholder="যেমন: কোরবানি ২০২৭"
+                :hint="t('না দিলে নম্বর দিয়ে চেনা যাবে')"
+                ><Input
+                    v-model="batch.name"
+                    :placeholder="t('যেমন: কোরবানি ২০২৭')"
             /></Field>
-            <Field label="শুরুর তারিখ" :error="batch.errors.started_on"
+            <Field :label="t('শুরুর তারিখ')" :error="batch.errors.started_on"
                 ><DateField v-model="batch.started_on" required
             /></Field>
             <Field
-                label="লক্ষ্য (দিন)"
+                :label="t('লক্ষ্য (দিন)')"
                 :error="batch.errors.target_days"
-                hint="কত দিনে বিক্রির উপযোগী হবে"
+                :hint="t('কত দিনে বিক্রির উপযোগী হবে')"
                 ><Input
                     v-model="batch.target_days"
                     type="number"
@@ -249,9 +272,9 @@ async function closeBatch(card: BatchCard) {
                     required
             /></Field>
             <Field
-                label="দৈনিক ওজন বৃদ্ধির লক্ষ্য (কেজি)"
+                :label="t('দৈনিক ওজন বৃদ্ধির লক্ষ্য (কেজি)')"
                 :error="batch.errors.target_gain_kg"
-                hint="প্রতি গরু দিনে কত কেজি বাড়বে, যেমন 0.8"
+                :hint="t('প্রতি গরু দিনে কত কেজি বাড়বে, যেমন 0.8')"
                 ><Input
                     v-model="batch.target_gain_kg"
                     type="number"
@@ -259,16 +282,18 @@ async function closeBatch(card: BatchCard) {
                     min="0"
                     inputmode="decimal"
             /></Field>
-            <Field label="নোট" :error="batch.errors.notes"
-                ><Input v-model="batch.notes" placeholder="যেমন: হাট থেকে কেনা"
+            <Field :label="t('নোট')" :error="batch.errors.notes"
+                ><Input
+                    v-model="batch.notes"
+                    :placeholder="t('যেমন: হাট থেকে কেনা')"
             /></Field>
             <div class="flex gap-2 sm:col-span-2 sm:justify-end">
-                <Button type="submit" :disabled="batch.processing"
-                    >ব্যাচ খুলুন</Button
-                >
-                <Button type="button" variant="ghost" @click="adding = false"
-                    >বাদ</Button
-                >
+                <Button type="submit" :disabled="batch.processing">{{
+                    t('ব্যাচ খুলুন')
+                }}</Button>
+                <Button type="button" variant="ghost" @click="adding = false">{{
+                    t('বাদ')
+                }}</Button>
             </div>
         </form>
 
@@ -279,10 +304,13 @@ async function closeBatch(card: BatchCard) {
             <span class="mb-3 rounded-full bg-paddy/12 p-3 text-paddy"
                 ><Sprout class="size-6"
             /></span>
-            <p class="font-display text-lg">এখনো কোনো ব্যাচ নেই</p>
+            <p class="font-display text-lg">{{ t('এখনো কোনো ব্যাচ নেই') }}</p>
             <p class="mt-1 max-w-sm text-sm text-muted-foreground">
-                প্রথম দফা খুলুন, তারপর নতুন গরু নিবন্ধনের সময় সেই ব্যাচ বেছে
-                নিন। খরচ, ওজন আর লাভ এখানে নিজে থেকেই জমবে।
+                {{
+                    t(
+                        'প্রথম দফা খুলুন, তারপর নতুন গরু নিবন্ধনের সময় সেই ব্যাচ বেছে নিন। খরচ, ওজন আর লাভ এখানে নিজে থেকেই জমবে।',
+                    )
+                }}
             </p>
         </div>
 
@@ -298,10 +326,10 @@ async function closeBatch(card: BatchCard) {
                 <header class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <h2 class="truncate font-display text-xl leading-tight">
-                            {{ b.label }}
+                            {{ batchName(b) }}
                         </h2>
                         <p class="truncate text-sm text-muted-foreground">
-                            {{ b.center }}
+                            {{ t(b.center) }}
                         </p>
                     </div>
                     <span
@@ -311,13 +339,17 @@ async function closeBatch(card: BatchCard) {
                                 ? 'bg-soil/10 text-soil'
                                 : 'bg-paddy/12 text-paddy',
                         ]"
-                        >{{ b.closed_on ? 'শেষ' : 'চলছে' }}</span
+                        >{{ b.closed_on ? t('শেষ') : t('চলছে') }}</span
                     >
                 </header>
 
                 <div class="mt-4">
                     <p class="font-display text-2xl">
-                        {{ b.span }} {{ b.closed_on ? 'ছিল' : 'চলছে' }}
+                        {{
+                            b.closed_on
+                                ? t(':span ছিল', { span: b.span })
+                                : t(':span চলছে', { span: b.span })
+                        }}
                     </p>
                     <div
                         class="mt-2 h-2 overflow-hidden rounded-full bg-muted"
@@ -340,25 +372,32 @@ async function closeBatch(card: BatchCard) {
                         class="mt-1.5 flex flex-wrap justify-between gap-x-3 text-xs text-muted-foreground"
                     >
                         <span class="inline-flex items-center gap-1"
-                            ><CalendarDays class="size-3.5" /> শুরু
-                            {{ day(b.started_on) }}
+                            ><CalendarDays class="size-3.5" />
+                            {{ t('শুরু :date', { date: day(b.started_on) }) }}
                             <template v-if="b.closed_on">
-                                · শেষ {{ day(b.closed_on) }}</template
+                                ·
+                                {{
+                                    t('শেষ :date', { date: day(b.closed_on) })
+                                }}</template
                             ></span
                         >
-                        <span
-                            >লক্ষ্য: {{ day(b.target_on) }} ({{
-                                b.target_days
-                            }}
-                            দিন)</span
-                        >
+                        <span>{{
+                            t('লক্ষ্য: :date (:n দিন)', {
+                                date: day(b.target_on),
+                                n: b.target_days,
+                            })
+                        }}</span>
                     </p>
                 </div>
 
                 <div class="mt-4 grid grid-cols-2 gap-2">
                     <div class="rounded-lg bg-muted/50 p-3">
-                        <p class="text-xs text-muted-foreground">গরু</p>
-                        <p class="num text-xl font-semibold">{{ b.head }}টি</p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ t('গরু') }}
+                        </p>
+                        <p class="num text-xl font-semibold">
+                            {{ t(':nটি', { n: b.head }) }}
+                        </p>
                     </div>
                     <div
                         :class="[
@@ -373,7 +412,7 @@ async function closeBatch(card: BatchCard) {
                         <p
                             class="flex items-center gap-1 text-xs text-muted-foreground"
                         >
-                            <Scale class="size-3.5" /> ওজন বৃদ্ধি
+                            <Scale class="size-3.5" /> {{ t('ওজন বৃদ্ধি') }}
                         </p>
                         <p
                             v-if="b.avg_gain !== null"
@@ -383,58 +422,60 @@ async function closeBatch(card: BatchCard) {
                                     (gainOk(b) ? 'text-income' : 'text-soil'),
                             ]"
                         >
-                            দিনে গড়ে
+                            {{ gainParts[0] }}
                             <span class="num">{{ kg(b.avg_gain) }}</span>
-                            বাড়ছে
+                            {{ gainParts[1] }}
                         </p>
                         <p v-else class="text-sm text-muted-foreground">
-                            ওজন মাপা হয়নি
+                            {{ t('ওজন মাপা হয়নি') }}
                         </p>
                         <p
                             v-if="b.target_gain_kg !== null"
                             class="text-xs text-muted-foreground"
                         >
-                            লক্ষ্য {{ kg(b.target_gain_kg) }}
+                            {{ t('লক্ষ্য :kg', { kg: kg(b.target_gain_kg) }) }}
                         </p>
                     </div>
                 </div>
 
                 <dl class="mt-4 grid gap-1.5 text-sm">
                     <div class="flex justify-between gap-3">
-                        <dt class="text-muted-foreground">কেনা</dt>
+                        <dt class="text-muted-foreground">{{ t('কেনা') }}</dt>
                         <dd class="num">{{ taka(b.cost.purchase) }}</dd>
                     </div>
                     <div class="flex justify-between gap-3">
-                        <dt class="text-muted-foreground">সরাসরি খরচ</dt>
+                        <dt class="text-muted-foreground">
+                            {{ t('সরাসরি খরচ') }}
+                        </dt>
                         <dd class="num">{{ taka(b.cost.direct) }}</dd>
                     </div>
                     <div class="flex justify-between gap-3">
                         <dt class="text-muted-foreground">
-                            ক্যাটাগরির খরচের ভাগ
-                            <span class="block text-[11px] leading-tight"
-                                >খাবার-ঘাস ইত্যাদি পশু-দিন অনুযায়ী</span
-                            >
+                            {{ t('ক্যাটাগরির খরচের ভাগ') }}
+                            <span class="block text-[11px] leading-tight">{{
+                                t('খাবার-ঘাস ইত্যাদি পশু-দিন অনুযায়ী')
+                            }}</span>
                         </dt>
                         <dd class="num">{{ taka(b.cost.shared) }}</dd>
                     </div>
                     <div
                         class="flex justify-between gap-3 border-t border-border pt-1.5 font-semibold"
                     >
-                        <dt>মোট খরচ</dt>
+                        <dt>{{ t('মোট খরচ') }}</dt>
                         <dd class="num text-expense">{{ taka(b.spent) }}</dd>
                     </div>
                     <div
                         v-if="b.head > 0"
                         class="flex justify-between gap-3 text-xs text-muted-foreground"
                     >
-                        <dt>প্রতি গরু খরচ</dt>
+                        <dt>{{ t('প্রতি গরু খরচ') }}</dt>
                         <dd class="num">{{ taka(perHead(b)) }}</dd>
                     </div>
                     <div
                         v-if="b.cost.sale > 0"
                         class="flex justify-between gap-3"
                     >
-                        <dt class="text-muted-foreground">বিক্রি</dt>
+                        <dt class="text-muted-foreground">{{ t('বিক্রি') }}</dt>
                         <dd class="num text-income">
                             {{ taka(b.cost.sale) }}
                         </dd>
@@ -443,7 +484,7 @@ async function closeBatch(card: BatchCard) {
                         v-if="b.profit !== null"
                         class="flex justify-between gap-3 font-semibold"
                     >
-                        <dt>{{ b.profit < 0 ? 'ক্ষতি' : 'লাভ' }}</dt>
+                        <dt>{{ b.profit < 0 ? t('ক্ষতি') : t('লাভ') }}</dt>
                         <dd
                             :class="[
                                 'num',
@@ -458,7 +499,9 @@ async function closeBatch(card: BatchCard) {
                 </dl>
 
                 <div v-if="b.animals.length" class="mt-4">
-                    <h3 class="mb-1.5 text-sm font-medium">গরুগুলো</h3>
+                    <h3 class="mb-1.5 text-sm font-medium">
+                        {{ t('গরুগুলো') }}
+                    </h3>
                     <ul
                         class="divide-y divide-border/70 rounded-lg border border-border/70"
                     >
@@ -493,22 +536,28 @@ async function closeBatch(card: BatchCard) {
                                         >{{ kg(a.first_kg) }} →
                                         {{ kg(a.last_kg) }}</template
                                     >
-                                    <span v-else class="text-muted-foreground"
-                                        >ওজন নেই</span
+                                    <span
+                                        v-else
+                                        class="text-muted-foreground"
+                                        >{{ t('ওজন নেই') }}</span
                                     >
                                 </p>
                                 <p
                                     v-if="a.per_day !== null"
                                     class="num text-[11px] text-muted-foreground"
                                 >
-                                    দিনে {{ kg(a.per_day) }}
+                                    {{ t('দিনে :kg', { kg: kg(a.per_day) }) }}
                                 </p>
                             </div>
                         </li>
                     </ul>
                 </div>
                 <p v-else class="mt-4 text-sm text-muted-foreground">
-                    এই ব্যাচে এখনো গরু নেই — নতুন গরু ফর্মে ব্যাচ বেছে নিন।
+                    {{
+                        t(
+                            'এই ব্যাচে এখনো গরু নেই — নতুন গরু ফর্মে ব্যাচ বেছে নিন।',
+                        )
+                    }}
                 </p>
 
                 <div
@@ -516,7 +565,12 @@ async function closeBatch(card: BatchCard) {
                     class="mt-4 rounded-lg border border-turmeric/50 bg-turmeric/12 p-3"
                 >
                     <p class="text-xs text-muted-foreground">
-                        এখনকার ধাপ · দিন {{ b.stage.from }}–{{ b.stage.to }}
+                        {{
+                            t('এখনকার ধাপ · দিন :from–:to', {
+                                from: b.stage.from,
+                                to: b.stage.to,
+                            })
+                        }}
                     </p>
                     <p class="font-display text-base">{{ b.stage.title }}</p>
                     <ul class="mt-1 list-disc space-y-0.5 pl-5 text-sm">
@@ -538,15 +592,19 @@ async function closeBatch(card: BatchCard) {
                     class="mt-4 grid gap-3 rounded-lg border border-border bg-muted/30 p-3 sm:grid-cols-2"
                     @submit.prevent="saveEdit(b)"
                 >
-                    <Field label="নাম" :error="editErrors.name"
+                    <Field :label="t('নাম')" :error="editErrors.name"
                         ><Input
                             v-model="edit.name"
-                            :placeholder="`ব্যাচ-${b.number}`"
+                            :placeholder="t('ব্যাচ-:n', { n: b.number })"
                     /></Field>
-                    <Field label="শুরুর তারিখ" :error="editErrors.started_on"
+                    <Field
+                        :label="t('শুরুর তারিখ')"
+                        :error="editErrors.started_on"
                         ><DateField v-model="edit.started_on" required
                     /></Field>
-                    <Field label="লক্ষ্য (দিন)" :error="editErrors.target_days"
+                    <Field
+                        :label="t('লক্ষ্য (দিন)')"
+                        :error="editErrors.target_days"
                         ><Input
                             v-model="edit.target_days"
                             type="number"
@@ -555,7 +613,7 @@ async function closeBatch(card: BatchCard) {
                             required
                     /></Field>
                     <Field
-                        label="দৈনিক বৃদ্ধির লক্ষ্য (কেজি)"
+                        :label="t('দৈনিক বৃদ্ধির লক্ষ্য (কেজি)')"
                         :error="editErrors.target_gain_kg"
                         ><Input
                             v-model="edit.target_gain_kg"
@@ -565,21 +623,21 @@ async function closeBatch(card: BatchCard) {
                             inputmode="decimal"
                     /></Field>
                     <Field
-                        label="নোট"
+                        :label="t('নোট')"
                         :error="editErrors.notes"
                         class="sm:col-span-2"
                         ><Input v-model="edit.notes"
                     /></Field>
                     <div class="flex gap-2 sm:col-span-2 sm:justify-end">
-                        <Button type="submit" size="sm" :disabled="busy"
-                            >সংরক্ষণ</Button
-                        >
+                        <Button type="submit" size="sm" :disabled="busy">{{
+                            t('সংরক্ষণ')
+                        }}</Button>
                         <Button
                             type="button"
                             size="sm"
                             variant="ghost"
                             @click="editingId = null"
-                            >বাদ</Button
+                            >{{ t('বাদ') }}</Button
                         >
                     </div>
                 </form>
@@ -594,10 +652,10 @@ async function closeBatch(card: BatchCard) {
                         variant="secondary"
                         :disabled="busy"
                         @click="closeBatch(b)"
-                        ><Flag /> ব্যাচ শেষ</Button
+                        ><Flag /> {{ t('ব্যাচ শেষ') }}</Button
                     >
                     <Button size="sm" variant="ghost" @click="startEdit(b)"
-                        ><Pencil /> সম্পাদনা</Button
+                        ><Pencil /> {{ t('সম্পাদনা') }}</Button
                     >
                 </footer>
             </article>
@@ -611,7 +669,7 @@ async function closeBatch(card: BatchCard) {
                 class="flex cursor-pointer list-none items-center gap-2 font-display text-lg"
             >
                 <BookOpen class="size-5 text-paddy" />
-                মোটাতাজার গাইড — দিন অনুযায়ী
+                {{ t('মোটাতাজার গাইড — দিন অনুযায়ী') }}
             </summary>
             <ol class="mt-3 grid gap-3">
                 <li
@@ -620,7 +678,12 @@ async function closeBatch(card: BatchCard) {
                     class="border-l-2 border-paddy/40 pl-3"
                 >
                     <p class="text-xs text-muted-foreground">
-                        দিন {{ stage.from }}–{{ stage.to }}
+                        {{
+                            t('দিন :from–:to', {
+                                from: stage.from,
+                                to: stage.to,
+                            })
+                        }}
                     </p>
                     <p class="font-medium">{{ stage.title }}</p>
                     <ul
@@ -633,7 +696,7 @@ async function closeBatch(card: BatchCard) {
                 </li>
             </ol>
             <p class="mt-4 text-xs text-muted-foreground">
-                ঔষধ ও টিকা ডাক্তারের পরামর্শে দিন।
+                {{ t('ঔষধ ও টিকা ডাক্তারের পরামর্শে দিন।') }}
             </p>
         </details>
     </div>

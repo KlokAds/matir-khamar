@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user()?->only(['id', 'name', 'email', 'email_verified_at', 'two_factor_confirmed_at', 'created_at', 'updated_at']),
                 'role' => $request->user()?->role,
-                'roleLabel' => $request->user()?->roleLabel(),
+                'roleLabel' => $request->user() ? __($request->user()->roleLabel()) : null,
                 'can' => $request->user() ? array_fill_keys($request->user()->abilities(), true) : [],
             ],
             // Open reminders due by the end of today, for the bell in the top bar.

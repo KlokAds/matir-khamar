@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { Milk, Pencil, Scale, TrendingDown, TrendingUp } from '@lucide/vue';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
 import Field from '@/components/khamar/Field.vue';
@@ -12,6 +12,7 @@ import TrendBars from '@/components/khamar/TrendBars.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, day, qty, taka, useCan } from '@/lib/khamar';
 import type { Center, TreeNode } from '@/lib/khamar';
 
@@ -81,6 +82,8 @@ defineOptions({
 });
 
 const can = useCan();
+const kindLabels = computed(() => tAll(props.kinds));
+const tCenter = (c: Center) => centerLabel({ ...c, name: t(c.name) });
 const range = reactive({ from: props.from, to: props.to });
 const editing = ref(false);
 const edit = useForm({
@@ -96,12 +99,12 @@ const applyRange = () =>
 </script>
 
 <template>
-    <Head :title="center.name" />
+    <Head :title="t(center.name)" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            :title="center.name"
-            :subtitle="`${kindLabel}${center.is_active ? '' : ' · এখনো চালু হয়নি'}${center.description ? ' · ' + center.description : ''}`"
+            :title="t(center.name)"
+            :subtitle="`${t(kindLabel)}${center.is_active ? '' : ' · ' + t('এখনো চালু হয়নি')}${center.description ? ' · ' + center.description : ''}`"
         >
             <template #actions>
                 <form
@@ -111,16 +114,16 @@ const applyRange = () =>
                     <DateField v-model="range.from" class="w-36" />
                     <span class="text-muted-foreground">—</span>
                     <DateField v-model="range.to" class="w-36" />
-                    <Button type="submit" size="sm" variant="secondary"
-                        >দেখুন</Button
-                    >
+                    <Button type="submit" size="sm" variant="secondary">{{
+                        t('দেখুন')
+                    }}</Button>
                 </form>
                 <Button
                     v-if="can['manage-setup']"
                     size="sm"
                     variant="ghost"
                     @click="editing = !editing"
-                    ><Pencil /> বদলান</Button
+                    ><Pencil /> {{ t('বদলান') }}</Button
                 >
             </template>
         </PageTitle>
@@ -134,16 +137,16 @@ const applyRange = () =>
                 })
             "
         >
-            <Field label="নাম" :error="edit.errors.name"
+            <Field :label="t('নাম')" :error="edit.errors.name"
                 ><Input v-model="edit.name" required
             /></Field>
-            <Field label="কোড" :error="edit.errors.code"
+            <Field :label="t('কোড')" :error="edit.errors.code"
                 ><Input v-model="edit.code" required
             /></Field>
-            <Field label="ধরন"
+            <Field :label="t('ধরন')"
                 ><NSelect v-model="edit.kind"
                     ><option
-                        v-for="(label, key) in kinds"
+                        v-for="(label, key) in kindLabels"
                         :key="key"
                         :value="key"
                     >
@@ -151,26 +154,30 @@ const applyRange = () =>
                     </option></NSelect
                 ></Field
             >
-            <Field label="কোন প্রজেক্টের ভেতরে" :error="edit.errors.parent_id"
+            <Field
+                :label="t('কোন প্রজেক্টের ভেতরে')"
+                :error="edit.errors.parent_id"
                 ><NSelect v-model="edit.parent_id"
-                    ><option :value="null">— সবার উপরে —</option>
+                    ><option :value="null">{{ t('— সবার উপরে —') }}</option>
                     <option
                         v-for="p in parents.filter((p) => p.id !== center.id)"
                         :key="p.id"
                         :value="p.id"
                     >
-                        {{ centerLabel(p) }}
+                        {{ tCenter(p) }}
                     </option></NSelect
                 ></Field
             >
-            <Field label="বিবরণ"><Input v-model="edit.description" /></Field>
+            <Field :label="t('বিবরণ')"
+                ><Input v-model="edit.description"
+            /></Field>
             <label class="flex items-center gap-2 text-sm"
                 ><input
                     v-model="edit.holds_animals"
                     type="checkbox"
                     class="size-4"
                 />
-                এখানে পশু থাকে</label
+                {{ t('এখানে পশু থাকে') }}</label
             >
             <label class="flex items-center gap-2 text-sm"
                 ><input
@@ -178,7 +185,7 @@ const applyRange = () =>
                     type="checkbox"
                     class="size-4"
                 />
-                চালু</label
+                {{ t('চালু') }}</label
             >
             <p
                 v-if="edit.errors.holds_animals"
@@ -187,43 +194,49 @@ const applyRange = () =>
                 {{ edit.errors.holds_animals }}
             </p>
             <div class="flex gap-2">
-                <Button type="submit" :disabled="edit.processing">রাখুন</Button>
+                <Button type="submit" :disabled="edit.processing">{{
+                    t('রাখুন')
+                }}</Button>
             </div>
         </form>
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatTile
-                label="আয়"
+                :label="t('আয়')"
                 :value="taka(totals.income)"
                 :icon="TrendingUp"
                 tone="paddy"
             />
             <StatTile
-                label="খরচ"
+                :label="t('খরচ')"
                 :value="taka(totals.expense)"
                 :icon="TrendingDown"
                 tone="clay"
             />
             <StatTile
-                label="লাভ / ক্ষতি"
+                :label="t('লাভ / ক্ষতি')"
                 :value="taka(totals.income - totals.expense)"
                 :icon="Scale"
                 :tone="totals.income - totals.expense < 0 ? 'clay' : 'turmeric'"
             />
             <StatTile
                 v-if="milk > 0"
-                label="দুধ / লিটারে খরচ"
-                :value="qty(milk, 'লি.')"
+                :label="t('দুধ / লিটারে খরচ')"
+                :value="qty(milk, t('লি.'))"
                 :hint="
-                    costPerLiter ? `প্রতি লিটারে খরচ ${taka(costPerLiter)}` : ''
+                    costPerLiter
+                        ? t('প্রতি লিটারে খরচ :amount', {
+                              amount: taka(costPerLiter),
+                          })
+                        : ''
                 "
                 :icon="Milk"
                 tone="pond"
             />
             <StatTile
                 v-else-if="center.holds_animals"
-                label="এখানে গরু"
-                :value="`${animals.length}টি`"
+                :label="t('এখানে গরু')"
+                :value="t(':nটি', { n: animals.length })"
                 tone="soil"
             />
         </div>
@@ -232,7 +245,9 @@ const applyRange = () =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 xl:col-span-3"
             >
-                <h2 class="mb-3 font-display text-lg">খাত অনুযায়ী</h2>
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('খাত অনুযায়ী') }}
+                </h2>
                 <table class="w-full text-sm">
                     <tbody>
                         <tr
@@ -241,11 +256,11 @@ const applyRange = () =>
                             class="border-b border-border/60"
                         >
                             <td class="py-2">
-                                {{ a.name }}
+                                {{ t(a.name) }}
                                 <span
                                     v-if="a.internal"
                                     class="ml-1 rounded bg-turmeric/25 px-1.5 text-[11px]"
-                                    >নিজস্ব</span
+                                    >{{ t('নিজস্ব') }}</span
                                 >
                             </td>
                             <td
@@ -262,7 +277,7 @@ const applyRange = () =>
                         </tr>
                         <tr v-if="!totals.accounts.length">
                             <td class="py-6 text-center text-muted-foreground">
-                                এই সময়ে কোনো লেনদেন নেই।
+                                {{ t('এই সময়ে কোনো লেনদেন নেই।') }}
                             </td>
                         </tr>
                     </tbody>
@@ -270,7 +285,7 @@ const applyRange = () =>
 
                 <template v-if="node && node.children.length">
                     <h2 class="mt-6 mb-2 font-display text-lg">
-                        ভেতরের ক্যাটাগরি
+                        {{ t('ভেতরের ক্যাটাগরি') }}
                     </h2>
                     <table class="w-full text-sm">
                         <tbody>
@@ -286,7 +301,7 @@ const applyRange = () =>
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 xl:col-span-2"
             >
-                <h2 class="mb-4 font-display text-lg">গত ৬ মাস</h2>
+                <h2 class="mb-4 font-display text-lg">{{ t('গত ৬ মাস') }}</h2>
                 <TrendBars :months="trend" />
             </section>
         </div>
@@ -295,7 +310,7 @@ const applyRange = () =>
             v-if="animals.length"
             class="mt-6 rounded-xl border border-border bg-card p-4"
         >
-            <h2 class="mb-3 font-display text-lg">এখানকার গরু</h2>
+            <h2 class="mb-3 font-display text-lg">{{ t('এখানকার গরু') }}</h2>
             <div class="flex flex-wrap gap-2">
                 <Link
                     v-for="a in animals"
@@ -314,7 +329,7 @@ const applyRange = () =>
 
         <section class="mt-6 rounded-xl border border-border bg-card">
             <h2 class="border-b border-border p-4 font-display text-lg">
-                লেনদেন
+                {{ t('লেনদেন') }}
             </h2>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[640px] text-sm">
@@ -332,13 +347,13 @@ const applyRange = () =>
                             <td class="px-4 py-2.5">
                                 {{ l.description }}
                                 <p class="text-xs text-muted-foreground">
-                                    {{ l.account
+                                    {{ t(l.account)
                                     }}<span
                                         v-if="
                                             l.center && l.center !== center.name
                                         "
                                     >
-                                        · {{ l.center }}</span
+                                        · {{ t(l.center) }}</span
                                     ><span v-if="l.animal">
                                         · {{ l.animal }}</span
                                     >
@@ -367,7 +382,7 @@ const applyRange = () =>
                             <td
                                 class="px-4 py-8 text-center text-muted-foreground"
                             >
-                                কিছু নেই।
+                                {{ t('কিছু নেই।') }}
                             </td>
                         </tr>
                     </tbody>

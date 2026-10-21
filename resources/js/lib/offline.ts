@@ -1,4 +1,5 @@
 import { ask } from '@/lib/dialog';
+import { t } from '@/lib/i18n';
 import { router } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
 import { watchQueue } from '@/lib/offlineQueue';
@@ -85,10 +86,10 @@ export function initializeOffline(): void {
     window.addEventListener('offline', () => {
         if (location.pathname !== '/offline') {
             toast.warning(
-                'নেট চলে গেছে। দুধ/খাবারের এন্ট্রি "অফলাইন এন্ট্রি" পাতায় দিন।',
+                t('নেট চলে গেছে। দুধ/খাবারের এন্ট্রি "অফলাইন এন্ট্রি" পাতায় দিন।'),
                 {
                     action: {
-                        label: 'খুলুন',
+                        label: t('খুলুন'),
                         onClick: () => (window.location.href = '/offline'),
                     },
                     duration: 10000,
@@ -103,9 +104,12 @@ export async function prepareLogout(pending: number): Promise<boolean> {
     if (
         pending > 0 &&
         !(await ask.confirm({
-            title: 'লগআউট করবেন?',
-            body: `এই ফোনে ${pending}টি এন্ট্রি এখনো পাঠানো হয়নি। লগআউট করলেও এগুলো ফোনে থাকবে, আবার লগইন করলে যাবে।`,
-            confirmText: 'লগআউট',
+            title: t('লগআউট করবেন?'),
+            body: t(
+                'এই ফোনে :nটি এন্ট্রি এখনো পাঠানো হয়নি। লগআউট করলেও এগুলো ফোনে থাকবে, আবার লগইন করলে যাবে।',
+                { n: pending },
+            ),
+            confirmText: t('লগআউট'),
         }))
     ) {
         return false;

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Paperclip, Plus, Search } from '@lucide/vue';
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, day, taka, useCan } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 
@@ -37,6 +38,8 @@ const props = defineProps<{
 }>();
 
 const can = useCan();
+const typeLabels = computed(() => tAll(props.types));
+const tCenter = (c: Center) => centerLabel({ ...c, name: t(c.name) });
 const filter = reactive({
     q: props.filters.q ?? '',
     type: props.filters.type ?? '',
@@ -59,16 +62,23 @@ function apply() {
 </script>
 
 <template>
-    <Head title="খাতা" />
+    <Head :title="t('খাতা')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="খাতা"
-            :subtitle="`মোট ${entries.total}টি এন্ট্রি — প্রতিটির নম্বর ধারাবাহিক, কোনোটা মোছা যায় না`"
+            :title="t('খাতা')"
+            :subtitle="
+                t(
+                    'মোট :nটি এন্ট্রি — প্রতিটির নম্বর ধারাবাহিক, কোনোটা মোছা যায় না',
+                    { n: entries.total },
+                )
+            "
         >
             <template #actions>
                 <Button v-if="can['post-entries']" as-child>
-                    <Link href="/entries/create"><Plus /> নতুন এন্ট্রি</Link>
+                    <Link href="/entries/create"
+                        ><Plus /> {{ t('নতুন এন্ট্রি') }}</Link
+                    >
                 </Button>
             </template>
         </PageTitle>
@@ -83,26 +93,30 @@ function apply() {
                 />
                 <Input
                     v-model="filter.q"
-                    placeholder="বিবরণ বা নম্বর খুঁজুন"
+                    :placeholder="t('বিবরণ বা নম্বর খুঁজুন')"
                     class="pl-8"
                 />
             </div>
             <NSelect v-model="filter.type">
-                <option value="">সব ধরন</option>
-                <option v-for="(label, key) in types" :key="key" :value="key">
+                <option value="">{{ t('সব ধরন') }}</option>
+                <option
+                    v-for="(label, key) in typeLabels"
+                    :key="key"
+                    :value="key"
+                >
                     {{ label }}
                 </option>
             </NSelect>
             <NSelect v-model="filter.center">
-                <option value="">সব ক্যাটাগরি</option>
+                <option value="">{{ t('সব ক্যাটাগরি') }}</option>
                 <option v-for="c in centers" :key="c.id" :value="String(c.id)">
-                    {{ centerLabel(c) }}
+                    {{ tCenter(c) }}
                 </option>
             </NSelect>
             <DateField clearable v-model="filter.from" class="h-10" />
             <div class="flex gap-2">
                 <DateField clearable v-model="filter.to" class="h-10" />
-                <Button type="submit" class="h-10">খুঁজুন</Button>
+                <Button type="submit" class="h-10">{{ t('খুঁজুন') }}</Button>
             </div>
         </form>
 
@@ -112,12 +126,22 @@ function apply() {
                     class="bg-muted/60 text-left text-xs text-muted-foreground"
                 >
                     <tr>
-                        <th class="px-3 py-2.5 font-medium">নম্বর</th>
-                        <th class="px-3 py-2.5 font-medium">তারিখ</th>
-                        <th class="px-3 py-2.5 font-medium">ধরন</th>
-                        <th class="px-3 py-2.5 font-medium">বিবরণ</th>
-                        <th class="px-3 py-2.5 text-right font-medium">টাকা</th>
-                        <th class="px-3 py-2.5 font-medium">যিনি লিখেছেন</th>
+                        <th class="px-3 py-2.5 font-medium">
+                            {{ t('নম্বর') }}
+                        </th>
+                        <th class="px-3 py-2.5 font-medium">
+                            {{ t('তারিখ') }}
+                        </th>
+                        <th class="px-3 py-2.5 font-medium">{{ t('ধরন') }}</th>
+                        <th class="px-3 py-2.5 font-medium">
+                            {{ t('বিবরণ') }}
+                        </th>
+                        <th class="px-3 py-2.5 text-right font-medium">
+                            {{ t('টাকা') }}
+                        </th>
+                        <th class="px-3 py-2.5 font-medium">
+                            {{ t('যিনি লিখেছেন') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -139,7 +163,7 @@ function apply() {
                             {{ day(entry.date) }}
                         </td>
                         <td class="px-3 py-2.5 whitespace-nowrap">
-                            {{ entry.type_label }}
+                            {{ t(entry.type_label) }}
                         </td>
                         <td class="max-w-80 px-3 py-2.5">
                             <span
@@ -158,7 +182,7 @@ function apply() {
                             <span
                                 v-if="entry.reversed"
                                 class="ml-1 rounded bg-destructive/10 px-1.5 text-[11px] text-destructive"
-                                >বাতিল</span
+                                >{{ t('বাতিল') }}</span
                             >
                         </td>
                         <td class="num px-3 py-2.5 text-right font-medium">
@@ -173,7 +197,7 @@ function apply() {
                             colspan="6"
                             class="px-3 py-10 text-center text-muted-foreground"
                         >
-                            এখনো কোনো এন্ট্রি নেই।
+                            {{ t('এখনো কোনো এন্ট্রি নেই।') }}
                         </td>
                     </tr>
                 </tbody>

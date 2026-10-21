@@ -7,6 +7,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { currentSession, day, qty, today } from '@/lib/khamar';
 
 defineOptions({
@@ -39,17 +40,21 @@ const cowLabel = (id: number | null) => {
 
     return cow
         ? `${cow.tag}${cow.name ? ' · ' + cow.name : ''}`
-        : 'সব গাভী মিলিয়ে';
+        : t('সব গাভী মিলিয়ে');
 };
 </script>
 
 <template>
-    <Head title="দুধের হিসাব" />
+    <Head :title="t('দুধের হিসাব')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="দুধের হিসাব"
-            :subtitle="`এ মাসে মোট ${qty(month, 'লিটার')}। বিক্রি হলে 'নতুন এন্ট্রি → আয়' দিন।`"
+            :title="t('দুধের হিসাব')"
+            :subtitle="
+                t('এ মাসে মোট :total। বিক্রি হলে \'নতুন এন্ট্রি → আয়\' দিন।', {
+                    total: qty(month, t('লিটার')),
+                })
+            "
         />
 
         <div class="grid gap-6 lg:grid-cols-5">
@@ -63,10 +68,13 @@ const cowLabel = (id: number | null) => {
                 "
             >
                 <div class="grid gap-3">
-                    <Field label="তারিখ" :error="f.errors.date"
+                    <Field :label="t('তারিখ')" :error="f.errors.date"
                         ><DateField v-model="f.date" :max="today()"
                     /></Field>
-                    <SessionPicker v-model="f.session" :sessions="sessions" />
+                    <SessionPicker
+                        v-model="f.session"
+                        :sessions="tAll(sessions)"
+                    />
                 </div>
 
                 <div class="mt-4 space-y-2">
@@ -91,7 +99,7 @@ const cowLabel = (id: number | null) => {
                             />
                             <span
                                 class="pointer-events-none absolute top-3 right-3 text-xs text-muted-foreground"
-                                >লি.</span
+                                >{{ t('লি.') }}</span
                             >
                         </div>
                     </div>
@@ -103,35 +111,37 @@ const cowLabel = (id: number | null) => {
                 <div
                     class="mt-4 flex items-center justify-between rounded-lg bg-pond/10 px-4 py-3"
                 >
-                    <span class="text-sm">মোট</span>
+                    <span class="text-sm">{{ t('মোট') }}</span>
                     <span class="num font-display text-2xl">{{
-                        qty(total, 'লিটার')
+                        qty(total, t('লিটার'))
                     }}</span>
                 </div>
                 <Button
                     type="submit"
                     class="mt-4 h-11 w-full text-base"
                     :disabled="f.processing || total <= 0"
-                    >রাখুন</Button
+                    >{{ t('রাখুন') }}</Button
                 >
             </form>
 
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-3"
             >
-                <h2 class="mb-3 font-display text-lg">গত ৩০ দিন</h2>
+                <h2 class="mb-3 font-display text-lg">{{ t('গত ৩০ দিন') }}</h2>
                 <table class="w-full text-sm">
                     <thead class="text-left text-xs text-muted-foreground">
                         <tr class="border-b border-border">
-                            <th class="pb-2 font-medium">তারিখ</th>
+                            <th class="pb-2 font-medium">{{ t('তারিখ') }}</th>
                             <th
                                 v-for="(label, key) in sessions"
                                 :key="key"
                                 class="pb-2 text-right font-medium"
                             >
-                                {{ label }}
+                                {{ t(label) }}
                             </th>
-                            <th class="pb-2 text-right font-medium">মোট</th>
+                            <th class="pb-2 text-right font-medium">
+                                {{ t('মোট') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,7 +170,7 @@ const cowLabel = (id: number | null) => {
                                 :colspan="Object.keys(sessions).length + 2"
                                 class="py-8 text-center text-muted-foreground"
                             >
-                                এখনো দুধের হিসাব নেই।
+                                {{ t('এখনো দুধের হিসাব নেই।') }}
                             </td>
                         </tr>
                     </tbody>

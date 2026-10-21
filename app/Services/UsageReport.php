@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\StockMovement;
+use App\Support\Tr;
 use Carbon\CarbonInterface;
 
 /**
@@ -71,7 +72,7 @@ class UsageReport
                 'id' => $item->id,
                 'name' => $item->name,
                 'kind' => $item->kind,
-                'unit' => Item::UNITS[$item->unit] ?? $item->unit,
+                'unit' => Tr::get(Item::UNITS[$item->unit] ?? $item->unit),
                 'produced' => $produced->isEmpty() ? null : [
                     'qty' => $producedQty,
                     'value' => (int) $produced->sum('value'),

@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\CostCenter;
 use App\Models\MilkRecord;
 use App\Services\MilkBook;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class MilkController extends Controller
         $gavi = CostCenter::query()->where('code', 'GAVI')->first();
 
         return Inertia::render('milk/Index', [
-            'sessions' => MilkRecord::SESSIONS,
+            'sessions' => Tr::all(MilkRecord::SESSIONS),
             'cows' => Animal::query()->where('status', 'active')->where('sex', 'female')->when($gavi, fn ($query) => $query->where('cost_center_id', $gavi->id))->orderBy('tag')->get(['id', 'tag', 'name']),
             'days' => MilkRecord::query()
                 ->whereDate('date', '>=', now()->subDays(30))
@@ -48,12 +49,12 @@ class MilkController extends Controller
             'rows.*.animal_id' => ['nullable', 'exists:animals,id'],
             'rows.*.liters' => ['nullable', 'numeric', 'min:0', 'max:80'],
         ], [
-            'date.after_or_equal' => 'এক সপ্তাহের বেশি পুরনো দুধের হিসাব অ্যাডমিন ঠিক করবেন।',
+            'date.after_or_equal' => __('এক সপ্তাহের বেশি পুরনো দুধের হিসাব অ্যাডমিন ঠিক করবেন।'),
         ]);
 
         $saved = $milk->record($data['date'], $data['session'], $data['rows'], $request->user()->id);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => $saved > 0 ? 'দুধের হিসাব রাখা হয়েছে।' : 'কোনো লিটার দেওয়া হয়নি।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => $saved > 0 ? __('দুধের হিসাব রাখা হয়েছে।') : __('কোনো লিটার দেওয়া হয়নি।')]);
 
         return back();
     }

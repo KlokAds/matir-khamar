@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
+import { t } from '@/lib/i18n';
 import { taka } from '@/lib/khamar';
 import type { TreeNode } from '@/lib/khamar';
 
@@ -46,12 +47,12 @@ const visible = (node: TreeNode): boolean =>
                                 ? 'font-semibold'
                                 : ''
                         "
-                        >{{ node.name }}</span
+                        >{{ t(node.name) }}</span
                     >
                     <span
                         v-if="!node.is_active"
                         class="rounded bg-muted px-1.5 text-[11px] text-muted-foreground"
-                        >বন্ধ</span
+                        >{{ t('বন্ধ') }}</span
                     >
                 </Link>
             </td>

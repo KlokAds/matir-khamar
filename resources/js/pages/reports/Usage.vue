@@ -6,6 +6,7 @@ import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { qty, taka } from '@/lib/khamar';
 
 defineOptions({
@@ -62,28 +63,28 @@ const sections = computed(() =>
     [
         {
             key: 'grass',
-            title: 'ঘাস — কোন জমি থেকে, কোন গরুকে',
+            title: t('ঘাস — কোন জমি থেকে, কোন গরুকে'),
             icon: Sprout,
             kinds: ['green'],
             land: false,
         },
         {
             key: 'feed',
-            title: 'খাবার — খড়, ভুসি, দানাদার',
+            title: t('খাবার — খড়, ভুসি, দানাদার'),
             icon: Wheat,
             kinds: ['roughage', 'concentrate'],
             land: false,
         },
         {
             key: 'field',
-            title: 'সার ও বীজ — কোন জমিতে কত',
+            title: t('সার ও বীজ — কোন জমিতে কত'),
             icon: Leaf,
             kinds: ['crop_input'],
             land: true,
         },
         {
             key: 'other',
-            title: 'ঔষধ ও অন্যান্য',
+            title: t('ঔষধ ও অন্যান্য'),
             icon: Pill,
             kinds: ['medicine', 'product', 'other'],
             land: false,
@@ -101,15 +102,19 @@ const share = (row: Row, used: Used) =>
 </script>
 
 <template>
-    <Head title="কোথায় কত কেজি গেল" />
+    <Head :title="t('কোথায় কত কেজি গেল')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="কোথায় কত কেজি গেল"
-            subtitle="ঘাস কত শতাংশ জমি থেকে এলো, খাবার কোন ক্যাটাগরির কতটি গরু খেলো, সার কোন জমিতে কত পড়লো — টাকার হিসাব খাতার সাথে মিলিয়ে।"
+            :title="t('কোথায় কত কেজি গেল')"
+            :subtitle="
+                t(
+                    'ঘাস কত শতাংশ জমি থেকে এলো, খাবার কোন ক্যাটাগরির কতটি গরু খেলো, সার কোন জমিতে কত পড়লো — টাকার হিসাব খাতার সাথে মিলিয়ে।',
+                )
+            "
         >
             <template #actions>
-                <Field label="মাস" class="w-44">
+                <Field :label="t('মাস')" class="w-44">
                     <DateField mode="month" v-model="month" />
                 </Field>
             </template>
@@ -119,7 +124,7 @@ const share = (row: Row, used: Used) =>
             v-if="sections.length === 0"
             class="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground"
         >
-            এই মাসে স্টক থেকে কিছু দেওয়া বা কাটা হয়নি।
+            {{ t('এই মাসে স্টক থেকে কিছু দেওয়া বা কাটা হয়নি।') }}
         </p>
 
         <section v-for="section in sections" :key="section.key" class="mb-8">
@@ -137,10 +142,12 @@ const share = (row: Row, used: Used) =>
                     <header
                         class="mb-3 flex items-baseline justify-between gap-3"
                     >
-                        <h3 class="text-lg font-semibold">{{ row.name }}</h3>
-                        <span class="num text-sm text-muted-foreground"
-                            >স্টকে বাকি {{ qty(row.on_hand, row.unit) }}</span
-                        >
+                        <h3 class="text-lg font-semibold">{{ t(row.name) }}</h3>
+                        <span class="num text-sm text-muted-foreground">{{
+                            t('স্টকে বাকি :qty', {
+                                qty: qty(row.on_hand, t(row.unit)),
+                            })
+                        }}</span>
                     </header>
 
                     <div class="mb-3 grid gap-2 text-sm sm:grid-cols-2">
@@ -149,32 +156,45 @@ const share = (row: Row, used: Used) =>
                             class="rounded-lg bg-paddy/10 p-3"
                         >
                             <p class="text-xs text-muted-foreground">
-                                নিজের জমি থেকে কাটা ({{
-                                    row.produced.from.join(', ')
-                                }})
+                                {{
+                                    t('নিজের জমি থেকে কাটা (:from)', {
+                                        from: row.produced.from
+                                            .map((name) => t(name))
+                                            .join(', '),
+                                    })
+                                }}
                             </p>
                             <p class="num text-base font-semibold">
-                                {{ qty(row.produced.qty, row.unit) }}
+                                {{ qty(row.produced.qty, t(row.unit)) }}
                             </p>
                             <p
                                 v-if="row.produced.land"
                                 class="num text-xs text-muted-foreground"
                             >
-                                {{ row.produced.land }} শতাংশ জমি থেকে · প্রতি
-                                শতাংশে {{ row.produced.per_land }}
-                                {{ row.unit }}
+                                {{
+                                    t(
+                                        ':land শতাংশ জমি থেকে · প্রতি শতাংশে :per :unit',
+                                        {
+                                            land: row.produced.land,
+                                            per: row.produced.per_land ?? '',
+                                            unit: t(row.unit),
+                                        },
+                                    )
+                                }}
                             </p>
                             <p v-else class="text-xs text-muted-foreground">
-                                জমির মাপ লেখা হয়নি
+                                {{ t('জমির মাপ লেখা হয়নি') }}
                             </p>
                         </div>
                         <div
                             v-if="row.bought"
                             class="rounded-lg bg-muted/60 p-3"
                         >
-                            <p class="text-xs text-muted-foreground">কেনা</p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ t('কেনা') }}
+                            </p>
                             <p class="num text-base font-semibold">
-                                {{ qty(row.bought.qty, row.unit) }}
+                                {{ qty(row.bought.qty, t(row.unit)) }}
                             </p>
                             <p class="num text-xs text-muted-foreground">
                                 {{ taka(row.bought.value) }}
@@ -186,7 +206,7 @@ const share = (row: Row, used: Used) =>
                         v-if="row.used.length === 0"
                         class="text-sm text-muted-foreground"
                     >
-                        এই মাসে কোথাও দেওয়া হয়নি।
+                        {{ t('এই মাসে কোথাও দেওয়া হয়নি।') }}
                     </p>
 
                     <ul v-else class="divide-y divide-border/60">
@@ -199,10 +219,10 @@ const share = (row: Row, used: Used) =>
                                 class="flex items-baseline justify-between gap-3"
                             >
                                 <span class="font-medium">{{
-                                    used.center
+                                    t(used.center)
                                 }}</span>
                                 <span class="num font-semibold">{{
-                                    qty(used.qty, row.unit)
+                                    qty(used.qty, t(row.unit))
                                 }}</span>
                             </div>
                             <div
@@ -217,21 +237,36 @@ const share = (row: Row, used: Used) =>
                                 class="num mt-1.5 flex flex-wrap justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground"
                             >
                                 <span v-if="section.land">
-                                    <template v-if="used.land"
-                                        >{{ used.land }} শতাংশ জমিতে · প্রতি
-                                        শতাংশে {{ used.per_land }}
-                                        {{ row.unit }}</template
-                                    >
-                                    <template v-else
-                                        >জমির মাপ লেখা হয়নি</template
-                                    >
+                                    <template v-if="used.land">{{
+                                        t(
+                                            ':land শতাংশ জমিতে · প্রতি শতাংশে :per :unit',
+                                            {
+                                                land: used.land,
+                                                per: used.per_land ?? '',
+                                                unit: t(row.unit),
+                                            },
+                                        )
+                                    }}</template>
+                                    <template v-else>{{
+                                        t('জমির মাপ লেখা হয়নি')
+                                    }}</template>
                                 </span>
                                 <span v-else-if="used.animals">
-                                    গড়ে {{ used.animals }}টি গরু ·
-                                    {{ used.days }} দিন · প্রতি গরু দিনে
-                                    {{ used.per_animal_day }} {{ row.unit }}
+                                    {{
+                                        t(
+                                            'গড়ে :animalsটি গরু · :days দিন · প্রতি গরু দিনে :per :unit',
+                                            {
+                                                animals: used.animals,
+                                                days: used.days,
+                                                per: used.per_animal_day ?? '',
+                                                unit: t(row.unit),
+                                            },
+                                        )
+                                    }}
                                 </span>
-                                <span v-else>{{ used.days }} দিন</span>
+                                <span v-else>{{
+                                    t(':days দিন', { days: used.days })
+                                }}</span>
                                 <span
                                     >{{ share(row, used) }}% ·
                                     {{ taka(used.value) }}</span
@@ -241,9 +276,9 @@ const share = (row: Row, used: Used) =>
                         <li
                             class="num flex justify-between pt-2.5 text-sm font-semibold"
                         >
-                            <span>মোট দেওয়া</span>
+                            <span>{{ t('মোট দেওয়া') }}</span>
                             <span
-                                >{{ qty(row.used_qty, row.unit) }} ·
+                                >{{ qty(row.used_qty, t(row.unit)) }} ·
                                 {{ taka(row.used_value) }}</span
                             >
                         </li>

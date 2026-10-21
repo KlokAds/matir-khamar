@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
+import { t } from '@/lib/i18n';
 import { day, today } from '@/lib/khamar';
 
 defineOptions({
@@ -72,19 +73,19 @@ const props = defineProps<{
 const GESTATION = 283;
 
 const outcomes: Record<string, string> = {
-    female: 'বকনা বাছুর',
-    male: 'এঁড়ে বাছুর',
-    twins: 'যমজ',
-    stillborn: 'মৃত বাচ্চা',
-    aborted: 'গর্ভপাত',
+    female: t('বকনা বাছুর'),
+    male: t('এঁড়ে বাছুর'),
+    twins: t('যমজ'),
+    stillborn: t('মৃত বাচ্চা'),
+    aborted: t('গর্ভপাত'),
 };
 const liveOutcomes = ['female', 'male', 'twins'];
 
 const markers = [
-    { at: 90, label: '৩ মাস', row: 0 },
-    { at: 180, label: '৬ মাস', row: 1 },
-    { at: 210, label: '৭ মাস · দুধ বন্ধ', row: 0, key: true },
-    { at: 270, label: '৯ মাস', row: 1 },
+    { at: 90, label: t('৩ মাস'), row: 0 },
+    { at: 180, label: t('৬ মাস'), row: 1 },
+    { at: 210, label: t('৭ মাস · দুধ বন্ধ'), row: 0, key: true },
+    { at: 270, label: t('৯ মাস'), row: 1 },
 ].map((m) => ({ ...m, pct: (m.at / GESTATION) * 100 }));
 
 const stats = computed(() => ({
@@ -96,15 +97,24 @@ const stats = computed(() => ({
 }));
 
 const cowName = (c: { tag: string | null; name: string | null }) =>
-    [c.tag, c.name].filter(Boolean).join(' · ') || 'নাম নেই';
+    [c.tag, c.name].filter(Boolean).join(' · ') || t('নাম নেই');
 
 const leftText = (n: number | null) =>
-    n === null ? '' : n >= 0 ? `আর ${n} দিন` : `${Math.abs(n)} দিন পার`;
+    n === null
+        ? ''
+        : n >= 0
+          ? t('আর :n দিন', { n })
+          : t(':n দিন পার', { n: Math.abs(n) });
 
 const outcomeLabel = (key: string | null) =>
     key ? (outcomes[key] ?? key) : '—';
 
-const range = (s: Stage) => `${s.from}–${s.to} দিন`;
+const range = (s: Stage) => t(':from–:to দিন', { from: s.from, to: s.to });
+
+// One phrase so English can reorder it; the months value sits in its own styled span.
+const monthsParts = t('গর্ভের :months চলছে')
+    .split(':months')
+    .map((part) => part.trim());
 
 const busy = ref<number | null>(null);
 
@@ -112,9 +122,12 @@ async function check(card: BreedingCard, result: 'pregnant' | 'empty') {
     if (
         result === 'empty' &&
         !(await ask.confirm({
-            title: 'গর্ভ হয়নি?',
-            body: `${cowName(card)} — এই বীজ দেওয়াটি "গর্ভ হয়নি" হিসেবে বন্ধ হবে। আবার গরম এলে নতুন করে বীজ দিন।`,
-            confirmText: 'হ্যাঁ, গর্ভ হয়নি',
+            title: t('গর্ভ হয়নি?'),
+            body: t(
+                ':cow — এই বীজ দেওয়াটি "গর্ভ হয়নি" হিসেবে বন্ধ হবে। আবার গরম এলে নতুন করে বীজ দিন।',
+                { cow: cowName(card) },
+            ),
+            confirmText: t('হ্যাঁ, গর্ভ হয়নি'),
             danger: true,
         }))
     ) {
@@ -155,33 +168,37 @@ function saveCalving(card: BreedingCard) {
 </script>
 
 <template>
-    <Head title="গর্ভ ও বাছুর" />
+    <Head :title="t('গর্ভ ও বাছুর')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="গর্ভ ও বাছুর"
-            subtitle="কোন গাভী কতদিনের গর্ভবতী, কবে বাচ্চা হবে, আর এখন কী যত্ন দরকার — এক নজরে।"
+            :title="t('গর্ভ ও বাছুর')"
+            :subtitle="
+                t(
+                    'কোন গাভী কতদিনের গর্ভবতী, কবে বাচ্চা হবে, আর এখন কী যত্ন দরকার — এক নজরে।',
+                )
+            "
         />
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <StatTile
-                label="গর্ভবতী"
+                :label="t('গর্ভবতী')"
                 :value="String(stats.pregnant)"
-                hint="নিশ্চিত গর্ভ"
+                :hint="t('নিশ্চিত গর্ভ')"
                 :icon="HeartPulse"
                 tone="paddy"
             />
             <StatTile
-                label="পরীক্ষা বাকি"
+                :label="t('পরীক্ষা বাকি')"
                 :value="String(stats.pending)"
-                hint="বীজ দেওয়া হয়েছে, এখনো দেখা হয়নি"
+                :hint="t('বীজ দেওয়া হয়েছে, এখনো দেখা হয়নি')"
                 :icon="Hourglass"
                 tone="turmeric"
             />
             <StatTile
-                label="৩০ দিনের মধ্যে বাচ্চা"
+                :label="t('৩০ দিনের মধ্যে বাচ্চা')"
                 :value="String(stats.soon)"
-                hint="প্রসবের প্রস্তুতি নিন"
+                :hint="t('প্রসবের প্রস্তুতি নিন')"
                 :icon="Baby"
                 tone="clay"
             />
@@ -189,14 +206,17 @@ function saveCalving(card: BreedingCard) {
 
         <!-- Open pregnancies -->
         <section class="mt-6">
-            <h2 class="mb-3 font-display text-lg">চলমান গর্ভ</h2>
+            <h2 class="mb-3 font-display text-lg">{{ t('চলমান গর্ভ') }}</h2>
 
             <div
                 v-if="!open.length"
                 class="rounded-xl border border-dashed border-border bg-card/60 px-4 py-10 text-center text-sm text-muted-foreground"
             >
-                এখন কোনো গাভী গর্ভবতী বা পরীক্ষার অপেক্ষায় নেই। গাভীর পাতায়
-                গিয়ে বীজ দেওয়ার তারিখ লিখুন।
+                {{
+                    t(
+                        'এখন কোনো গাভী গর্ভবতী বা পরীক্ষার অপেক্ষায় নেই। গাভীর পাতায় গিয়ে বীজ দেওয়ার তারিখ লিখুন।',
+                    )
+                }}
             </div>
 
             <div v-else class="grid gap-4 lg:grid-cols-2">
@@ -213,15 +233,15 @@ function saveCalving(card: BreedingCard) {
                                 >{{ cowName(card) }}</Link
                             >
                             <p class="mt-0.5 text-sm text-foreground/80">
-                                গর্ভের
+                                {{ monthsParts[0] }}
                                 <span class="num font-medium">{{
                                     card.months
                                 }}</span>
-                                চলছে
+                                {{ monthsParts[1] }}
                                 <span
                                     v-if="card.estimated"
                                     class="text-muted-foreground"
-                                    >(আনুমানিক)</span
+                                    >{{ t('(আনুমানিক)') }}</span
                                 >
                             </p>
                         </div>
@@ -232,7 +252,7 @@ function saveCalving(card: BreedingCard) {
                                     ? 'bg-paddy/12 text-paddy'
                                     : 'bg-turmeric/25 text-soil',
                             ]"
-                            >{{ card.result_label }}</span
+                            >{{ t(card.result_label) }}</span
                         >
                     </header>
 
@@ -288,7 +308,7 @@ function saveCalving(card: BreedingCard) {
                     >
                         <span class="flex items-center gap-1.5 text-sm">
                             <CalendarClock class="size-4 text-pond" />
-                            সম্ভাব্য প্রসব:
+                            {{ t('সম্ভাব্য প্রসব:') }}
                             <span class="num font-medium">{{
                                 day(card.expected_on)
                             }}</span>
@@ -308,17 +328,23 @@ function saveCalving(card: BreedingCard) {
                     </div>
 
                     <p class="mt-2 text-xs text-muted-foreground">
-                        বীজ:
+                        {{ t('বীজ:') }}
                         <span class="num">{{ day(card.served_on) }}</span> ·
-                        {{ card.method }}
+                        {{ t(card.method) }}
                         <template v-if="card.sire">
-                            · ষাঁড়/বীজ: {{ card.sire }}</template
+                            ·
+                            {{
+                                t('ষাঁড়/বীজ: :sire', { sire: card.sire })
+                            }}</template
                         >
                         <template v-if="card.by_whom">
-                            · দিয়েছেন: {{ card.by_whom }}</template
+                            ·
+                            {{
+                                t('দিয়েছেন: :name', { name: card.by_whom })
+                            }}</template
                         >
                         <template v-if="card.checked_on">
-                            · পরীক্ষা:
+                            · {{ t('পরীক্ষা:') }}
                             <span class="num">{{
                                 day(card.checked_on)
                             }}</span></template
@@ -330,7 +356,11 @@ function saveCalving(card: BreedingCard) {
                         class="mt-3 rounded-lg border border-paddy/25 bg-paddy/5 p-3"
                     >
                         <p class="text-sm font-medium text-paddy">
-                            এখন যা দরকার — {{ card.stage.title }}
+                            {{
+                                t('এখন যা দরকার — :stage', {
+                                    stage: card.stage.title,
+                                })
+                            }}
                         </p>
                         <ul class="mt-2 space-y-1.5">
                             <li
@@ -356,7 +386,7 @@ function saveCalving(card: BreedingCard) {
                                 @click="check(card, 'pregnant')"
                             >
                                 <HeartPulse class="size-4" />
-                                গর্ভ হয়েছে
+                                {{ t('গর্ভ হয়েছে') }}
                             </Button>
                             <Button
                                 size="sm"
@@ -365,7 +395,7 @@ function saveCalving(card: BreedingCard) {
                                 @click="check(card, 'empty')"
                             >
                                 <X class="size-4" />
-                                গর্ভ হয়নি
+                                {{ t('গর্ভ হয়নি') }}
                             </Button>
                         </template>
                         <Button
@@ -376,7 +406,7 @@ function saveCalving(card: BreedingCard) {
                             @click="openCalving(card)"
                         >
                             <Baby class="size-4" />
-                            বাচ্চা হয়েছে
+                            {{ t('বাচ্চা হয়েছে') }}
                         </Button>
                     </div>
 
@@ -387,7 +417,7 @@ function saveCalving(card: BreedingCard) {
                     >
                         <div class="grid grid-cols-2 gap-3">
                             <Field
-                                label="তারিখ"
+                                :label="t('তারিখ')"
                                 :error="calving.errors.calved_on"
                             >
                                 <DateField
@@ -397,7 +427,7 @@ function saveCalving(card: BreedingCard) {
                                 />
                             </Field>
                             <Field
-                                label="কী হয়েছে"
+                                :label="t('কী হয়েছে')"
                                 :error="calving.errors.outcome"
                             >
                                 <NSelect v-model="calving.outcome">
@@ -412,13 +442,13 @@ function saveCalving(card: BreedingCard) {
                             </Field>
                         </div>
                         <Field
-                            label="নোট (ইচ্ছামতো)"
+                            :label="t('নোট (ইচ্ছামতো)')"
                             :error="calving.errors.notes"
                         >
                             <Input
                                 v-model="calving.notes"
                                 class="h-10"
-                                placeholder="যেমন: সহজে প্রসব, ফুল পড়েছে"
+                                :placeholder="t('যেমন: সহজে প্রসব, ফুল পড়েছে')"
                             />
                         </Field>
                         <div class="flex gap-2">
@@ -426,14 +456,14 @@ function saveCalving(card: BreedingCard) {
                                 type="submit"
                                 size="sm"
                                 :disabled="calving.processing"
-                                >রাখুন</Button
+                                >{{ t('রাখুন') }}</Button
                             >
                             <Button
                                 type="button"
                                 size="sm"
                                 variant="ghost"
                                 @click="calvingFor = null"
-                                >বাদ দিন</Button
+                                >{{ t('বাদ দিন') }}</Button
                             >
                         </div>
                     </form>
@@ -444,10 +474,15 @@ function saveCalving(card: BreedingCard) {
         <div class="mt-6 grid gap-6 lg:grid-cols-2">
             <!-- Waiting for service -->
             <section class="rounded-xl border border-border bg-card p-4">
-                <h2 class="font-display text-lg">বীজ দেওয়ার অপেক্ষায়</h2>
+                <h2 class="font-display text-lg">
+                    {{ t('বীজ দেওয়ার অপেক্ষায়') }}
+                </h2>
                 <p class="mt-1 text-xs text-muted-foreground">
-                    ২১ দিন পরপর গরম আসে; গরম দেখার ১২–১৮ ঘণ্টার মধ্যে বীজ দিলে
-                    ভালো। গাভীর পাতায় বীজ দেওয়ার তারিখ লিখুন।
+                    {{
+                        t(
+                            '২১ দিন পরপর গরম আসে; গরম দেখার ১২–১৮ ঘণ্টার মধ্যে বীজ দিলে ভালো। গাভীর পাতায় বীজ দেওয়ার তারিখ লিখুন।',
+                        )
+                    }}
                 </p>
 
                 <ul
@@ -466,18 +501,19 @@ function saveCalving(card: BreedingCard) {
                                 >
                                 <span
                                     class="block truncate text-xs text-muted-foreground"
-                                    >{{ cow.center }}</span
+                                    >{{ t(cow.center) }}</span
                                 >
                             </span>
                             <span
                                 class="shrink-0 text-right text-xs text-muted-foreground"
                             >
                                 <template v-if="cow.last_calved"
-                                    >শেষ বাচ্চা<br /><span class="num">{{
-                                        day(cow.last_calved)
-                                    }}</span></template
+                                    >{{ t('শেষ বাচ্চা') }}<br /><span
+                                        class="num"
+                                        >{{ day(cow.last_calved) }}</span
+                                    ></template
                                 >
-                                <template v-else>বীজ দিন →</template>
+                                <template v-else>{{ t('বীজ দিন →') }}</template>
                             </span>
                         </Link>
                     </li>
@@ -486,13 +522,15 @@ function saveCalving(card: BreedingCard) {
                     v-else
                     class="py-8 text-center text-sm text-muted-foreground"
                 >
-                    অপেক্ষায় কোনো গাভী নেই।
+                    {{ t('অপেক্ষায় কোনো গাভী নেই।') }}
                 </p>
             </section>
 
             <!-- Recent calvings -->
             <section class="rounded-xl border border-border bg-card p-4">
-                <h2 class="font-display text-lg">সাম্প্রতিক বাচ্চা</h2>
+                <h2 class="font-display text-lg">
+                    {{ t('সাম্প্রতিক বাচ্চা') }}
+                </h2>
 
                 <ul v-if="recent.length" class="mt-3 divide-y divide-border/70">
                     <li
@@ -515,7 +553,7 @@ function saveCalving(card: BreedingCard) {
                             v-if="r.calf_id"
                             :href="`/animals/${r.calf_id}`"
                             class="shrink-0 rounded-full bg-paddy/12 px-2.5 py-1 text-xs font-medium text-paddy hover:bg-paddy/20"
-                            >বাছুর দেখুন</Link
+                            >{{ t('বাছুর দেখুন') }}</Link
                         >
                         <Link
                             v-else-if="
@@ -525,7 +563,7 @@ function saveCalving(card: BreedingCard) {
                             class="flex shrink-0 items-center gap-1 rounded-full bg-turmeric/25 px-2.5 py-1 text-xs font-medium text-soil hover:bg-turmeric/40"
                         >
                             <Plus class="size-3.5" />
-                            বাছুরটি তালিকায় যোগ করুন
+                            {{ t('বাছুরটি তালিকায় যোগ করুন') }}
                         </Link>
                     </li>
                 </ul>
@@ -533,7 +571,7 @@ function saveCalving(card: BreedingCard) {
                     v-else
                     class="py-8 text-center text-sm text-muted-foreground"
                 >
-                    এখনো কোনো বাচ্চা হওয়ার হিসাব নেই।
+                    {{ t('এখনো কোনো বাচ্চা হওয়ার হিসাব নেই।') }}
                 </p>
             </section>
         </div>
@@ -543,14 +581,14 @@ function saveCalving(card: BreedingCard) {
             <details
                 v-for="g in [
                     {
-                        title: 'পুরো গাইড — গর্ভের ২৮৩ দিন',
+                        title: t('পুরো গাইড — গর্ভের ২৮৩ দিন'),
                         stages: guide,
-                        unit: 'বীজ দেওয়ার পর',
+                        unit: t('বীজ দেওয়ার পর'),
                     },
                     {
-                        title: 'বাছুরের যত্ন — বয়স অনুযায়ী',
+                        title: t('বাছুরের যত্ন — বয়স অনুযায়ী'),
                         stages: calfGuide,
-                        unit: 'বয়স',
+                        unit: t('বয়স'),
                     },
                 ]"
                 :key="g.title"
@@ -582,19 +620,23 @@ function saveCalving(card: BreedingCard) {
                             <ul
                                 class="mt-1 list-disc space-y-0.5 pl-4 text-sm text-foreground/85 marker:text-paddy/60"
                             >
-                                <li v-for="(t, i) in s.tasks" :key="i">
-                                    {{ t }}
+                                <li v-for="(task, i) in s.tasks" :key="i">
+                                    {{ task }}
                                 </li>
                             </ul>
                         </li>
                     </ol>
                     <p v-else class="py-4 text-sm text-muted-foreground">
-                        গাইড পাওয়া যায়নি।
+                        {{ t('গাইড পাওয়া যায়নি।') }}
                     </p>
                 </div>
             </details>
             <p class="px-1 text-xs text-muted-foreground">
-                ঔষধ, মাত্রা ও টিকার তারিখ অবশ্যই ডাক্তারের পরামর্শে ঠিক করুন।
+                {{
+                    t(
+                        'ঔষধ, মাত্রা ও টিকার তারিখ অবশ্যই ডাক্তারের পরামর্শে ঠিক করুন।',
+                    )
+                }}
             </p>
         </div>
     </div>

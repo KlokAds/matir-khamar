@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
+import { t, tAll } from '@/lib/i18n';
 import { day, today, useCan } from '@/lib/khamar';
 
 /**
@@ -113,9 +114,11 @@ async function setResult(result: 'pregnant' | 'empty') {
     if (
         result === 'empty' &&
         !(await ask.confirm({
-            title: 'গর্ভ হয়নি লিখবেন?',
-            body: 'এই হিসাব বন্ধ হবে; আবার গরম এলে নতুন করে বীজের তারিখ দিন।',
-            confirmText: 'হ্যাঁ, হয়নি',
+            title: t('গর্ভ হয়নি লিখবেন?'),
+            body: t(
+                'এই হিসাব বন্ধ হবে; আবার গরম এলে নতুন করে বীজের তারিখ দিন।',
+            ),
+            confirmText: t('হ্যাঁ, হয়নি'),
         }))
     ) {
         return;
@@ -156,14 +159,15 @@ const marks = [
         >
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 font-display text-lg">
-                    <CalendarHeart class="size-5 text-clay" /> গর্ভ ও বাচ্চা
+                    <CalendarHeart class="size-5 text-clay" />
+                    {{ t('গর্ভ ও বাচ্চা') }}
                 </h2>
                 <Button
                     v-if="canBreed"
                     size="sm"
                     variant="secondary"
                     @click="serving = !serving"
-                    >বীজ / গর্ভ লিখুন</Button
+                    >{{ t('বীজ / গর্ভ লিখুন') }}</Button
                 >
             </div>
 
@@ -190,20 +194,20 @@ const marks = [
                         ]"
                         @click="service.mode = m.key"
                     >
-                        {{ m.label }}
+                        {{ t(m.label) }}
                     </button>
                 </div>
                 <Field
                     v-if="service.mode === 'served'"
-                    label="বীজ দেওয়ার তারিখ"
+                    :label="t('বীজ দেওয়ার তারিখ')"
                     :error="service.errors.served_on"
                     ><DateField v-model="service.served_on" :max="today()"
                 /></Field>
                 <Field
                     v-else
-                    label="কত মাস চলছে"
+                    :label="t('কত মাস চলছে')"
                     :error="service.errors.months_pregnant"
-                    hint="যেমন 4 বা 4.5"
+                    :hint="t('যেমন 4 বা 4.5')"
                     ><Input
                         v-model="service.months_pregnant"
                         type="number"
@@ -212,10 +216,10 @@ const marks = [
                         max="9.5"
                         class="num"
                 /></Field>
-                <Field label="কীভাবে">
+                <Field :label="t('কীভাবে')">
                     <NSelect v-model="service.method">
                         <option
-                            v-for="(label, key) in options.methods"
+                            v-for="(label, key) in tAll(options.methods)"
                             :key="key"
                             :value="key"
                         >
@@ -223,25 +227,25 @@ const marks = [
                         </option>
                     </NSelect>
                 </Field>
-                <Field label="ষাঁড় / সিমেনের জাত (ঐচ্ছিক)"
+                <Field :label="t('ষাঁড় / সিমেনের জাত (ঐচ্ছিক)')"
                     ><Input
                         v-model="service.sire"
-                        placeholder="যেমন: ফ্রিজিয়ান ৭৫%"
+                        :placeholder="t('যেমন: ফ্রিজিয়ান ৭৫%')"
                 /></Field>
-                <Field label="কে দিলেন (ঐচ্ছিক)"
+                <Field :label="t('কে দিলেন (ঐচ্ছিক)')"
                     ><Input
                         v-model="service.by_whom"
-                        placeholder="যেমন: উপজেলা প্রাণিসম্পদ"
+                        :placeholder="t('যেমন: উপজেলা প্রাণিসম্পদ')"
                 /></Field>
                 <div class="flex gap-2 sm:col-span-2">
-                    <Button type="submit" :disabled="service.processing"
-                        >লিখুন</Button
-                    >
+                    <Button type="submit" :disabled="service.processing">{{
+                        t('লিখুন')
+                    }}</Button>
                     <Button
                         type="button"
                         variant="ghost"
                         @click="serving = false"
-                        >বাদ</Button
+                        >{{ t('বাদ') }}</Button
                     >
                 </div>
             </form>
@@ -255,15 +259,15 @@ const marks = [
                                 ? 'bg-paddy/15 text-paddy'
                                 : 'bg-turmeric/20 text-turmeric',
                         ]"
-                        >{{ current.result_label }}</span
+                        >{{ t(current.result_label) }}</span
                     >
-                    <span class="text-lg font-semibold"
-                        >{{ current.months }} চলছে</span
-                    >
+                    <span class="text-lg font-semibold">{{
+                        t(':months চলছে', { months: current.months })
+                    }}</span>
                     <span
                         v-if="current.estimated"
                         class="text-xs text-muted-foreground"
-                        >(আনুমানিক)</span
+                        >({{ t('আনুমানিক') }})</span
                     >
                 </div>
                 <div class="relative pt-1 pb-5">
@@ -278,11 +282,11 @@ const marks = [
                         :key="m.day"
                         class="absolute top-4 -translate-x-1/2 text-[10px] whitespace-nowrap text-muted-foreground"
                         :style="{ left: `${(m.day / 283) * 100}%` }"
-                        >{{ m.label }}</span
+                        >{{ t(m.label) }}</span
                     >
                 </div>
                 <p class="text-sm">
-                    বাচ্চা হওয়ার আনুমানিক দিন
+                    {{ t('বাচ্চা হওয়ার আনুমানিক দিন') }}
                     <b>{{ day(current.expected_on) }}</b>
                     <span
                         v-if="current.days_left !== null"
@@ -295,13 +299,16 @@ const marks = [
                         ·
                         {{
                             current.days_left >= 0
-                                ? `আর ${current.days_left} দিন`
-                                : `${Math.abs(current.days_left)} দিন পার`
+                                ? t('আর :n দিন', { n: current.days_left })
+                                : t(':n দিন পার', {
+                                      n: Math.abs(current.days_left),
+                                  })
                         }}</span
                     >
                 </p>
                 <p class="text-xs text-muted-foreground">
-                    বীজ {{ day(current.served_on) }} · {{ current.method
+                    {{ t('বীজ') }} {{ day(current.served_on) }} ·
+                    {{ t(current.method)
                     }}{{ current.sire ? ` · ${current.sire}` : '' }}
                 </p>
 
@@ -310,7 +317,7 @@ const marks = [
                     class="rounded-lg border border-paddy/30 bg-paddy/8 p-3"
                 >
                     <p class="mb-1.5 text-sm font-semibold">
-                        এখন করণীয় — {{ current.stage.title }}
+                        {{ t('এখন করণীয়') }} — {{ t(current.stage.title) }}
                     </p>
                     <ul class="space-y-1 text-sm">
                         <li
@@ -320,7 +327,7 @@ const marks = [
                         >
                             <span
                                 class="mt-2 size-1.5 shrink-0 rounded-full bg-paddy"
-                            />{{ task }}
+                            />{{ t(task) }}
                         </li>
                     </ul>
                 </div>
@@ -330,21 +337,21 @@ const marks = [
                     class="flex flex-wrap gap-2"
                 >
                     <template v-if="current.result === 'pending'">
-                        <Button size="sm" @click="setResult('pregnant')"
-                            >গর্ভ হয়েছে</Button
-                        >
+                        <Button size="sm" @click="setResult('pregnant')">{{
+                            t('গর্ভ হয়েছে')
+                        }}</Button>
                         <Button
                             size="sm"
                             variant="secondary"
                             @click="setResult('empty')"
-                            >গর্ভ হয়নি</Button
+                            >{{ t('গর্ভ হয়নি') }}</Button
                         >
                     </template>
                     <Button
                         size="sm"
                         variant="secondary"
                         @click="calving = !calving"
-                        ><Baby /> বাচ্চা হয়েছে</Button
+                        ><Baby /> {{ t('বাচ্চা হয়েছে') }}</Button
                     >
                 </div>
 
@@ -353,13 +360,13 @@ const marks = [
                     class="grid gap-3 rounded-lg bg-muted/50 p-3 sm:grid-cols-2"
                     @submit.prevent="saveCalving"
                 >
-                    <Field label="তারিখ" :error="calf.errors.calved_on"
+                    <Field :label="t('তারিখ')" :error="calf.errors.calved_on"
                         ><DateField v-model="calf.calved_on" :max="today()"
                     /></Field>
-                    <Field label="কী হলো" :error="calf.errors.outcome">
+                    <Field :label="t('কী হলো')" :error="calf.errors.outcome">
                         <NSelect v-model="calf.outcome">
                             <option
-                                v-for="(label, key) in options.outcomes"
+                                v-for="(label, key) in tAll(options.outcomes)"
                                 :key="key"
                                 :value="key"
                             >
@@ -367,27 +374,30 @@ const marks = [
                             </option>
                         </NSelect>
                     </Field>
-                    <Field label="নোট" class="sm:col-span-2"
+                    <Field :label="t('নোট')" class="sm:col-span-2"
                         ><Input
                             v-model="calf.notes"
-                            placeholder="যেমন: রাত ২টায়, ডাক্তার লাগেনি"
+                            :placeholder="t('যেমন: রাত ২টায়, ডাক্তার লাগেনি')"
                     /></Field>
                     <div class="flex gap-2 sm:col-span-2">
-                        <Button type="submit" :disabled="calf.processing"
-                            >লিখুন</Button
-                        >
+                        <Button type="submit" :disabled="calf.processing">{{
+                            t('লিখুন')
+                        }}</Button>
                         <Button
                             type="button"
                             variant="ghost"
                             @click="calving = false"
-                            >বাদ</Button
+                            >{{ t('বাদ') }}</Button
                         >
                     </div>
                 </form>
             </div>
             <p v-else-if="!serving" class="text-sm text-muted-foreground">
-                এখন কোনো গর্ভের হিসাব খোলা নেই। গরম এলে ১২–১৮ ঘণ্টার মধ্যে বীজ
-                দিন, তারিখটা এখানে লিখুন।
+                {{
+                    t(
+                        'এখন কোনো গর্ভের হিসাব খোলা নেই। গরম এলে ১২–১৮ ঘণ্টার মধ্যে বীজ দিন, তারিখটা এখানে লিখুন।',
+                    )
+                }}
             </p>
 
             <ul
@@ -400,22 +410,22 @@ const marks = [
                     class="flex flex-wrap justify-between gap-2 py-2"
                 >
                     <span
-                        >বীজ {{ day(b.served_on) }} ·
+                        >{{ t('বীজ') }} {{ day(b.served_on) }} ·
                         {{
                             b.calved_on
-                                ? `বাচ্চা ${day(b.calved_on)}`
-                                : b.result_label
+                                ? t('বাচ্চা :date', { date: day(b.calved_on) })
+                                : t(b.result_label)
                         }}</span
                     >
                     <span class="text-muted-foreground">
                         <template v-if="b.outcome_label">{{
-                            b.outcome_label
+                            t(b.outcome_label)
                         }}</template>
                         <Link
                             v-if="b.calf_id"
                             :href="`/animals/${b.calf_id}`"
                             class="ml-1 underline"
-                            >বাছুর</Link
+                            >{{ t('বাছুর') }}</Link
                         >
                         <Link
                             v-else-if="
@@ -428,7 +438,7 @@ const marks = [
                             "
                             :href="`/animals/create?mother=${animalId}`"
                             class="ml-1 underline"
-                            >বাছুর তালিকায় যোগ করুন</Link
+                            >{{ t('বাছুর তালিকায় যোগ করুন') }}</Link
                         >
                     </span>
                 </li>
@@ -439,13 +449,13 @@ const marks = [
         <section class="min-w-0 rounded-xl border border-border bg-card p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 font-display text-lg">
-                    <Syringe class="size-5 text-paddy" /> টিকা ও কৃমি
+                    <Syringe class="size-5 text-paddy" /> {{ t('টিকা ও কৃমি') }}
                 </h2>
                 <Link
                     v-if="can['post-daily'] && active"
                     href="/health"
                     class="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                    >লিখুন →</Link
+                    >{{ t('লিখুন') }} →</Link
                 >
             </div>
             <ul v-if="health.length" class="divide-y divide-border/60 text-sm">
@@ -457,13 +467,13 @@ const marks = [
                     <span
                         ><b class="font-medium">{{ h.name }}</b>
                         <small class="text-muted-foreground">
-                            · {{ h.kind_label }} · {{ h.target }}</small
+                            · {{ t(h.kind_label) }} · {{ h.target }}</small
                         ></span
                     >
                     <span class="text-xs text-muted-foreground"
                         >{{ day(h.given_on)
                         }}<template v-if="h.next_due_on">
-                            → পরেরটা
+                            → {{ t('পরেরটা') }}
                             <b
                                 :class="
                                     h.next_due_on < today()
@@ -477,7 +487,7 @@ const marks = [
                 </li>
             </ul>
             <p v-else class="text-sm text-muted-foreground">
-                এখনো কোনো টিকা বা কৃমিনাশক লেখা হয়নি।
+                {{ t('এখনো কোনো টিকা বা কৃমিনাশক লেখা হয়নি।') }}
             </p>
         </section>
 
@@ -485,14 +495,14 @@ const marks = [
         <section class="min-w-0 rounded-xl border border-border bg-card p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
                 <h2 class="flex items-center gap-2 font-display text-lg">
-                    <Scale class="size-5 text-pond" /> ওজন ও বাড়া
+                    <Scale class="size-5 text-pond" /> {{ t('ওজন ও বাড়া') }}
                 </h2>
                 <Button
                     v-if="can['post-daily'] && active"
                     size="sm"
                     variant="secondary"
                     @click="weighing = !weighing"
-                    >ওজন লিখুন</Button
+                    >{{ t('ওজন লিখুন') }}</Button
                 >
             </div>
 
@@ -503,8 +513,13 @@ const marks = [
             >
                 <Layers class="size-4 text-turmeric" />
                 <span
-                    ><b>{{ batch.label }}</b> · {{ batch.days }} দিন চলছে
-                    (লক্ষ্য {{ batch.target_days }} দিন)</span
+                    ><b>{{ batch.label }}</b> ·
+                    {{
+                        t(':days দিন চলছে (লক্ষ্য :target দিন)', {
+                            days: batch.days,
+                            target: batch.target_days,
+                        })
+                    }}</span
                 >
             </Link>
 
@@ -513,10 +528,10 @@ const marks = [
                 class="mb-4 grid gap-3 rounded-lg bg-muted/50 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
                 @submit.prevent="saveWeight"
             >
-                <Field label="তারিখ" :error="weight.errors.date"
+                <Field :label="t('তারিখ')" :error="weight.errors.date"
                     ><DateField v-model="weight.date" :max="today()"
                 /></Field>
-                <Field label="ওজন (কেজি)" :error="weight.errors.kg"
+                <Field :label="t('ওজন (কেজি)')" :error="weight.errors.kg"
                     ><Input
                         v-model="weight.kg"
                         type="number"
@@ -525,31 +540,37 @@ const marks = [
                         class="num"
                         required
                 /></Field>
-                <Button type="submit" :disabled="weight.processing"
-                    >লিখুন</Button
-                >
+                <Button type="submit" :disabled="weight.processing">{{
+                    t('লিখুন')
+                }}</Button>
             </form>
 
             <div v-if="weights.length" class="space-y-3">
                 <div class="grid grid-cols-3 gap-2 text-center">
                     <div class="rounded-lg bg-muted/60 p-2">
-                        <p class="text-xs text-muted-foreground">শুরু</p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ t('শুরু') }}
+                        </p>
                         <p class="num font-semibold">
-                            {{ growth.first_kg }} কেজি
+                            {{ growth.first_kg }} {{ t('কেজি') }}
                         </p>
                     </div>
                     <div class="rounded-lg bg-muted/60 p-2">
-                        <p class="text-xs text-muted-foreground">এখন</p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ t('এখন') }}
+                        </p>
                         <p class="num font-semibold">
-                            {{ growth.last_kg }} কেজি
+                            {{ growth.last_kg }} {{ t('কেজি') }}
                         </p>
                     </div>
                     <div class="rounded-lg bg-paddy/12 p-2">
-                        <p class="text-xs text-muted-foreground">দিনে বাড়া</p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ t('দিনে বাড়া') }}
+                        </p>
                         <p class="num font-semibold">
                             {{
                                 growth.per_day !== null
-                                    ? `${growth.per_day} কেজি`
+                                    ? `${growth.per_day} ${t('কেজি')}`
                                     : '—'
                             }}
                         </p>
@@ -563,7 +584,7 @@ const marks = [
                     >
                         <span>{{ day(w.date) }}</span>
                         <span class="num"
-                            >{{ w.kg }} কেজি
+                            >{{ w.kg }} {{ t('কেজি') }}
                             <small v-if="w.note" class="text-muted-foreground"
                                 >· {{ w.note }}</small
                             ></span
@@ -572,8 +593,11 @@ const marks = [
                 </ul>
             </div>
             <p v-else-if="!weighing" class="text-sm text-muted-foreground">
-                এখনো ওজন লেখা হয়নি। মাপার ফিতা দিয়েও আনুমানিক ওজন লেখা যায় —
-                মাসে একবার লিখলেই বাড়ার হিসাব দেখা যাবে।
+                {{
+                    t(
+                        'এখনো ওজন লেখা হয়নি। মাপার ফিতা দিয়েও আনুমানিক ওজন লেখা যায় — মাসে একবার লিখলেই বাড়ার হিসাব দেখা যাবে।',
+                    )
+                }}
             </p>
 
             <div
@@ -581,9 +605,8 @@ const marks = [
                 class="mt-4 rounded-lg border border-pond/30 bg-pond/8 p-3"
             >
                 <p class="mb-1.5 text-sm font-semibold">
-                    বাছুরের যত্ন — বয়স {{ ageDays }} দিন ({{
-                        calfStage.title
-                    }})
+                    {{ t('বাছুরের যত্ন — বয়স :n দিন', { n: ageDays }) }}
+                    ({{ t(calfStage.title) }})
                 </p>
                 <ul class="space-y-1 text-sm">
                     <li
@@ -593,13 +616,17 @@ const marks = [
                     >
                         <span
                             class="mt-2 size-1.5 shrink-0 rounded-full bg-pond"
-                        />{{ task }}
+                        />{{ t(task) }}
                     </li>
                 </ul>
             </div>
         </section>
     </div>
     <p class="mt-2 text-xs text-muted-foreground">
-        ঔষধ, মাত্রা ও টিকার তারিখ অবশ্যই প্রাণিসম্পদ ডাক্তারের পরামর্শে।
+        {{
+            t(
+                'ঔষধ, মাত্রা ও টিকার তারিখ অবশ্যই প্রাণিসম্পদ ডাক্তারের পরামর্শে।',
+            )
+        }}
     </p>
 </template>

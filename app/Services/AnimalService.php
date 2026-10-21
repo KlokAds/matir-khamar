@@ -29,7 +29,7 @@ class AnimalService
         $center = CostCenter::query()->findOrFail((int) $data['cost_center_id']);
 
         if (! $center->holds_animals) {
-            throw ValidationException::withMessages(['cost_center_id' => 'এই ক্যাটাগরিতে পশু রাখা যায় না।']);
+            throw ValidationException::withMessages(['cost_center_id' => __('এই ক্যাটাগরিতে পশু রাখা যায় না।')]);
         }
 
         return DB::transaction(function () use ($data, $cost, $paidFromAccountId, $budgetHeadId, $attachments) {
@@ -52,7 +52,7 @@ class AnimalService
                     : $paidFromAccountId;
 
                 if (! $creditAccountId) {
-                    throw ValidationException::withMessages(['paid_from_account_id' => 'কোন হিসাব থেকে টাকা গেছে তা বাছুন।']);
+                    throw ValidationException::withMessages(['paid_from_account_id' => __('কোন হিসাব থেকে টাকা গেছে তা বাছুন।')]);
                 }
 
                 $this->ledger->post(
@@ -106,11 +106,11 @@ class AnimalService
         $center = CostCenter::query()->findOrFail((int) $data['cost_center_id']);
 
         if (! $center->holds_animals) {
-            throw ValidationException::withMessages(['cost_center_id' => 'এই ক্যাটাগরিতে পশু রাখা যায় না।']);
+            throw ValidationException::withMessages(['cost_center_id' => __('এই ক্যাটাগরিতে পশু রাখা যায় না।')]);
         }
 
         if ($count < 1) {
-            throw ValidationException::withMessages(['count' => 'অন্তত একটি গরু।']);
+            throw ValidationException::withMessages(['count' => __('অন্তত একটি গরু।')]);
         }
 
         return DB::transaction(function () use ($data, $count, $totalCost, $paidFromAccountId, $budgetHeadId, $attachments, $center) {
@@ -148,7 +148,7 @@ class AnimalService
                 $creditAccountId = $opening ? Account::byCode(AccountCodes::OPENING)->id : $paidFromAccountId;
 
                 if (! $creditAccountId) {
-                    throw ValidationException::withMessages(['paid_from_account_id' => 'কোন হিসাব থেকে টাকা গেছে তা বাছুন।']);
+                    throw ValidationException::withMessages(['paid_from_account_id' => __('কোন হিসাব থেকে টাকা গেছে তা বাছুন।')]);
                 }
 
                 $tags = implode(', ', array_map(fn (Animal $a) => $a->tag, $animals));
@@ -173,13 +173,13 @@ class AnimalService
         $this->assertActive($animal);
 
         if ($animal->cost_center_id === $toCenterId) {
-            throw ValidationException::withMessages(['cost_center_id' => 'পশুটি আগে থেকেই এই ক্যাটাগরিতে আছে।']);
+            throw ValidationException::withMessages(['cost_center_id' => __('পশুটি আগে থেকেই এই ক্যাটাগরিতে আছে।')]);
         }
 
         $to = CostCenter::query()->findOrFail($toCenterId);
 
         if (! $to->holds_animals) {
-            throw ValidationException::withMessages(['cost_center_id' => 'এই ক্যাটাগরিতে পশু রাখা যায় না।']);
+            throw ValidationException::withMessages(['cost_center_id' => __('এই ক্যাটাগরিতে পশু রাখা যায় না।')]);
         }
 
         return DB::transaction(function () use ($animal, $to, $date) {
@@ -260,7 +260,7 @@ class AnimalService
     private function assertActive(Animal $animal): void
     {
         if ($animal->status !== 'active') {
-            throw ValidationException::withMessages(['animal' => 'এই পশু আর খামারে নেই।']);
+            throw ValidationException::withMessages(['animal' => __('এই পশু আর খামারে নেই।')]);
         }
     }
 }

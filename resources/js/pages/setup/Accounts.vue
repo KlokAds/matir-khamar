@@ -9,6 +9,7 @@ import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
+import { t, tAll } from '@/lib/i18n';
 import { taka } from '@/lib/khamar';
 
 defineOptions({
@@ -51,10 +52,10 @@ const parentType = computed(
 
 const rename = async (a: { id: number; name: string; is_active: boolean }) => {
     const name = await ask.prompt({
-        title: 'খাতের নাম বদলান',
-        label: 'নতুন নাম',
+        title: t('খাতের নাম বদলান'),
+        label: t('নতুন নাম'),
         initial: a.name,
-        confirmText: 'রাখুন',
+        confirmText: t('রাখুন'),
     });
 
     if (name && name !== a.name) {
@@ -70,9 +71,11 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
     if (
         a.is_active &&
         !(await ask.confirm({
-            title: `"${a.name}" বন্ধ করবেন?`,
-            body: 'নতুন এন্ট্রিতে আর দেখাবে না। আগের হিসাব যেমন আছে তেমনই থাকবে; পরে আবার চালু করা যাবে।',
-            confirmText: 'বন্ধ করুন',
+            title: t('":name" বন্ধ করবেন?', { name: a.name }),
+            body: t(
+                'নতুন এন্ট্রিতে আর দেখাবে না। আগের হিসাব যেমন আছে তেমনই থাকবে; পরে আবার চালু করা যাবে।',
+            ),
+            confirmText: t('বন্ধ করুন'),
         }))
     ) {
         return;
@@ -87,16 +90,20 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
 </script>
 
 <template>
-    <Head title="হিসাব খাত" />
+    <Head :title="t('হিসাব খাত')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="হিসাব খাত (চার্ট অব অ্যাকাউন্টস)"
-            subtitle="নতুন খরচ বা আয়ের ধরন এলে খাত যোগ করুন। ✎ দিয়ে নাম বদলান; সুইচ দিয়ে খাত চালু বা বন্ধ করুন — বন্ধ খাত নতুন এন্ট্রিতে আসে না, পুরনো হিসাব থাকে।"
+            :title="t('হিসাব খাত (চার্ট অব অ্যাকাউন্টস)')"
+            :subtitle="
+                t(
+                    'নতুন খরচ বা আয়ের ধরন এলে খাত যোগ করুন। ✎ দিয়ে নাম বদলান; সুইচ দিয়ে খাত চালু বা বন্ধ করুন — বন্ধ খাত নতুন এন্ট্রিতে আসে না, পুরনো হিসাব থাকে।',
+                )
+            "
         >
             <template #actions
                 ><Button @click="adding = !adding"
-                    ><Plus /> নতুন খাত</Button
+                    ><Plus /> {{ t('নতুন খাত') }}</Button
                 ></template
             >
         </PageTitle>
@@ -113,35 +120,42 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
                 })
             "
         >
-            <Field label="কোন ধরনের ভেতরে"
+            <Field :label="t('কোন ধরনের ভেতরে')"
                 ><NSelect v-model="f.parent_id"
                     ><option v-for="p in parents" :key="p.id" :value="p.id">
-                        {{ p.code }} · {{ p.name }}
+                        {{ p.code }} · {{ t(p.name) }}
                     </option></NSelect
                 ></Field
             >
-            <Field label="কোড" :error="f.errors.code" hint="যেমন 5130"
+            <Field
+                :label="t('কোড')"
+                :error="f.errors.code"
+                :hint="t('যেমন 5130')"
                 ><Input v-model="f.code" required
             /></Field>
-            <Field label="নাম" :error="f.errors.name"
+            <Field :label="t('নাম')" :error="f.errors.name"
                 ><Input
                     v-model="f.name"
                     required
-                    placeholder="যেমন: লবণ ও ভিটামিন"
+                    :placeholder="t('যেমন: লবণ ও ভিটামিন')"
             /></Field>
-            <Field v-if="parentType === 'asset'" label="এটা কী"
+            <Field v-if="parentType === 'asset'" :label="t('এটা কী')"
                 ><NSelect v-model="f.subtype"
-                    ><option :value="null">সাধারণ</option>
-                    <option value="cash">নগদ</option>
-                    <option value="bank">ব্যাংক</option>
-                    <option value="wallet">মোবাইল ওয়ালেট</option>
-                    <option value="person">কারো কাছে রাখা</option>
-                    <option value="fixed_asset">স্থায়ী সম্পদ</option>
-                    <option value="land">জমি</option>
-                    <option value="inventory">স্টক</option></NSelect
+                    ><option :value="null">{{ t('সাধারণ') }}</option>
+                    <option value="cash">{{ t('নগদ') }}</option>
+                    <option value="bank">{{ t('ব্যাংক') }}</option>
+                    <option value="wallet">{{ t('মোবাইল ওয়ালেট') }}</option>
+                    <option value="person">{{ t('কারো কাছে রাখা') }}</option>
+                    <option value="fixed_asset">
+                        {{ t('স্থায়ী সম্পদ') }}
+                    </option>
+                    <option value="land">{{ t('জমি') }}</option>
+                    <option value="inventory">{{ t('স্টক') }}</option></NSelect
                 ></Field
             >
-            <Button type="submit" :disabled="f.processing">যোগ করুন</Button>
+            <Button type="submit" :disabled="f.processing">{{
+                t('যোগ করুন')
+            }}</Button>
         </form>
 
         <div class="grid gap-5 xl:grid-cols-2">
@@ -150,7 +164,9 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
                 :key="g.type"
                 class="rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="mb-2 font-display text-lg">{{ types[g.type] }}</h2>
+                <h2 class="mb-2 font-display text-lg">
+                    {{ tAll(types)[g.type] }}
+                </h2>
                 <ul class="divide-y divide-border/60">
                     <li
                         v-for="a in g.rows"
@@ -167,7 +183,7 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
                                 !a.is_active &&
                                     'text-muted-foreground line-through',
                             ]"
-                            >{{ a.name }}</span
+                            >{{ t(a.name) }}</span
                         >
                         <span
                             v-if="a.used"
@@ -177,8 +193,8 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
                         <Button
                             variant="ghost"
                             size="icon-sm"
-                            :title="'নাম বদলান'"
-                            aria-label="নাম বদলান"
+                            :title="t('নাম বদলান')"
+                            :aria-label="t('নাম বদলান')"
                             @click="rename(a)"
                         >
                             <Pencil />

@@ -48,7 +48,7 @@ class DashboardController extends Controller
                     'id' => $entry->id,
                     'number' => $entry->number,
                     'date' => $entry->date->toDateString(),
-                    'type' => JournalEntry::TYPES[$entry->type] ?? $entry->type,
+                    'type' => __(JournalEntry::TYPES[$entry->type] ?? $entry->type),
                     'description' => $entry->description,
                     'amount' => (int) $entry->lines->sum('debit'),
                     'reversed' => $entry->reversed_by_id !== null,

@@ -23,6 +23,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { t } from '@/lib/i18n';
 import { useCan } from '@/lib/khamar';
 import { pendingCount } from '@/lib/offlineQueue';
 import { dashboard } from '@/routes';
@@ -38,10 +39,10 @@ function group(
 ): NavItem[] {
     const children = entries
         .filter(([, , allowed]) => allowed)
-        .map(([childTitle, href]) => ({ title: childTitle, href }));
+        .map(([childTitle, href]) => ({ title: t(childTitle), href }));
 
     return children.length
-        ? [{ title, href: children[0].href, icon, children }]
+        ? [{ title: t(title), href: children[0].href, icon, children }]
         : [];
 }
 
@@ -49,11 +50,11 @@ const items = computed<NavItem[]>(() => {
     const c = can.value;
 
     return [
-        { title: 'আজকের খামার', href: dashboard(), icon: LayoutGrid },
+        { title: t('আজকের খামার'), href: dashboard(), icon: LayoutGrid },
         ...(c['post-daily']
             ? [
                   {
-                      title: 'অফলাইন এন্ট্রি',
+                      title: t('অফলাইন এন্ট্রি'),
                       href: '/offline',
                       icon: CloudOff,
                       reload: true,
@@ -62,7 +63,7 @@ const items = computed<NavItem[]>(() => {
               ]
             : []),
         {
-            title: 'মনে করিয়ে দিন',
+            title: t('মনে করিয়ে দিন'),
             href: '/reminders',
             icon: AlarmClock,
         },

@@ -8,6 +8,7 @@ use App\Models\JournalLine;
 use App\Models\MilkRecord;
 use App\Services\ReportService;
 use App\Support\Lookups;
+use App\Support\Tr;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class CostCenterController extends Controller
                 'parent_id' => $model->parent_id,
                 'sort' => $model->sort,
                 'description' => $model->description,
-                'kind_label' => CostCenter::KINDS[$center['kind']] ?? $center['kind'],
+                'kind_label' => __(CostCenter::KINDS[$center['kind']] ?? $center['kind']),
                 'system' => in_array($center['code'], self::SYSTEM_CODES, true),
                 'entries' => $uses,
                 'animals' => (int) ($animals[$center['id']] ?? 0),
@@ -66,22 +67,22 @@ class CostCenterController extends Controller
 
         return Inertia::render('centers/Manage', [
             'rows' => $rows,
-            'kinds' => CostCenter::KINDS,
+            'kinds' => Tr::all(CostCenter::KINDS),
         ]);
     }
 
     public function toggle(CostCenter $center): RedirectResponse
     {
         if ($center->is_active && in_array($center->code, ['FARM', 'SHADHARON'], true)) {
-            return back()->withErrors(['center' => 'এটি বন্ধ করা যায় না — পুরো হিসাব এর ওপর চলে।']);
+            return back()->withErrors(['center' => __('এটি বন্ধ করা যায় না — পুরো হিসাব এর ওপর চলে।')]);
         }
 
         if ($center->is_active && $center->animals()->where('status', 'active')->exists()) {
-            return back()->withErrors(['center' => "\"{$center->name}\"-এ এখনো গরু আছে। আগে সেগুলো অন্য ক্যাটাগরিতে নিন, তারপর বন্ধ করুন।"]);
+            return back()->withErrors(['center' => __('":name"-এ এখনো গরু আছে। আগে সেগুলো অন্য ক্যাটাগরিতে নিন, তারপর বন্ধ করুন।', ['name' => $center->name])]);
         }
 
         $center->update(['is_active' => ! $center->is_active]);
-        Inertia::flash('toast', ['type' => 'success', 'message' => $center->is_active ? "\"{$center->name}\" চালু হলো।" : "\"{$center->name}\" বন্ধ — তালিকা থেকে লুকানো থাকবে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => $center->is_active ? __('":name" চালু হলো।', ['name' => $center->name]) : __('":name" বন্ধ — তালিকা থেকে লুকানো থাকবে।', ['name' => $center->name])]);
 
         return back();
     }
@@ -124,7 +125,7 @@ class CostCenterController extends Controller
             || CostCenter::query()->where('parent_id', $center->id)->exists();
 
         if ($inUse) {
-            return back()->withErrors(['center' => "\"{$center->name}\"-এ হিসাব বা গরু আছে, তাই মোছা যাবে না — বন্ধ করে লুকিয়ে রাখুন।"]);
+            return back()->withErrors(['center' => __('":name"-এ হিসাব বা গরু আছে, তাই মোছা যাবে না — বন্ধ করে লুকিয়ে রাখুন।', ['name' => $center->name])]);
         }
 
         // Light references (diary, goals, reminders, imports) let go of it rather than block.
@@ -136,7 +137,7 @@ class CostCenterController extends Controller
 
         $name = $center->name;
         $center->delete();
-        Inertia::flash('toast', ['type' => 'success', 'message' => "\"{$name}\" মুছে ফেলা হলো।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('":name" মুছে ফেলা হলো।', ['name' => $name])]);
 
         return back();
     }
@@ -150,7 +151,7 @@ class CostCenterController extends Controller
             'farm' => $reports->farmTotals($from, $to),
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
-            'kinds' => CostCenter::KINDS,
+            'kinds' => Tr::all(CostCenter::KINDS),
             'parents' => Lookups::centers(false),
         ]);
     }
@@ -187,7 +188,7 @@ class CostCenterController extends Controller
 
         return Inertia::render('centers/Show', [
             'center' => $center->only(['id', 'code', 'name', 'kind', 'holds_animals', 'is_active', 'description', 'parent_id', 'sort']),
-            'kindLabel' => CostCenter::KINDS[$center->kind] ?? $center->kind,
+            'kindLabel' => __(CostCenter::KINDS[$center->kind] ?? $center->kind),
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'totals' => $totals,
@@ -198,7 +199,7 @@ class CostCenterController extends Controller
             'costPerLiter' => $milk > 0 ? (int) round($totals['expense'] / $milk) : null,
             'animals' => Animal::query()->whereIn('cost_center_id', $ids)->where('status', 'active')->orderBy('tag')
                 ->get(['id', 'tag', 'name', 'sex', 'breed', 'book_value', 'acquired_on', 'cost_center_id']),
-            'kinds' => CostCenter::KINDS,
+            'kinds' => Tr::all(CostCenter::KINDS),
             'parents' => Lookups::centers(false),
         ]);
     }
@@ -207,7 +208,7 @@ class CostCenterController extends Controller
     {
         $center = CostCenter::query()->create($this->validated($request));
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "নতুন ক্যাটাগরি \"{$center->name}\" যোগ হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন ক্যাটাগরি ":name" যোগ হয়েছে।', ['name' => $center->name])]);
 
         return to_route('centers.show', $center);
     }
@@ -217,20 +218,20 @@ class CostCenterController extends Controller
         $data = $this->validated($request, $center);
 
         if (in_array($center->code, self::SYSTEM_CODES, true) && $data['code'] !== $center->code) {
-            return back()->withErrors(['code' => 'এই ক্যাটাগরির কোড অ্যাপ নিজে ব্যবহার করে — বদলানো যাবে না।']);
+            return back()->withErrors(['code' => __('এই ক্যাটাগরির কোড অ্যাপ নিজে ব্যবহার করে — বদলানো যাবে না।')]);
         }
 
         if (isset($data['parent_id']) && in_array((int) $data['parent_id'], $center->descendantIds(), true)) {
-            return back()->withErrors(['parent_id' => 'একটি ক্যাটাগরি নিজের নিচের ক্যাটাগরির ভেতরে যেতে পারে না।']);
+            return back()->withErrors(['parent_id' => __('একটি ক্যাটাগরি নিজের নিচের ক্যাটাগরির ভেতরে যেতে পারে না।')]);
         }
 
         if (! ($data['holds_animals'] ?? false) && $center->animals()->where('status', 'active')->exists()) {
-            return back()->withErrors(['holds_animals' => 'এখানে এখনো পশু আছে, আগে সেগুলো অন্য ক্যাটাগরিতে নিন।']);
+            return back()->withErrors(['holds_animals' => __('এখানে এখনো পশু আছে, আগে সেগুলো অন্য ক্যাটাগরিতে নিন।')]);
         }
 
         $center->update($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'ক্যাটাগরি আপডেট হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ক্যাটাগরি আপডেট হয়েছে।')]);
 
         return back();
     }
@@ -248,7 +249,7 @@ class CostCenterController extends Controller
             'sort' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'description' => ['nullable', 'string', 'max:255'],
         ], [
-            'code.regex' => 'কোডে শুধু ইংরেজি বড় হাতের অক্ষর, সংখ্যা, - বা _ চলবে।',
+            'code.regex' => __('কোডে শুধু ইংরেজি বড় হাতের অক্ষর, সংখ্যা, - বা _ চলবে।'),
         ]);
 
         $data['sort'] ??= 0;

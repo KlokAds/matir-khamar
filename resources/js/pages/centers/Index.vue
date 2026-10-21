@@ -9,6 +9,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, taka, useCan } from '@/lib/khamar';
 import type { Center, TreeNode } from '@/lib/khamar';
 
@@ -28,6 +29,8 @@ const props = defineProps<{
 }>();
 
 const can = useCan();
+const kindLabels = computed(() => tAll(props.kinds));
+const tCenter = (c: Center) => centerLabel({ ...c, name: t(c.name) });
 const range = reactive({ from: props.from, to: props.to });
 const adding = ref(false);
 const center = useForm({
@@ -55,12 +58,16 @@ const applyRange = () =>
 </script>
 
 <template>
-    <Head title="ক্যাটাগরি ও প্রজেক্ট" />
+    <Head :title="t('ক্যাটাগরি ও প্রজেক্ট')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="ক্যাটাগরি ও প্রজেক্ট"
-            subtitle="প্রতিটি ক্যাটাগরির নিজের আয়-খরচ, উপরে উঠলে সব মিলিয়ে প্রজেক্ট আর পুরো খামার।"
+            :title="t('ক্যাটাগরি ও প্রজেক্ট')"
+            :subtitle="
+                t(
+                    'প্রতিটি ক্যাটাগরির নিজের আয়-খরচ, উপরে উঠলে সব মিলিয়ে প্রজেক্ট আর পুরো খামার।',
+                )
+            "
         >
             <template #actions>
                 <form
@@ -70,13 +77,13 @@ const applyRange = () =>
                     <DateField v-model="range.from" class="w-36" />
                     <span class="text-muted-foreground">—</span>
                     <DateField v-model="range.to" class="w-36" />
-                    <Button type="submit" size="sm" variant="secondary"
-                        >দেখুন</Button
-                    >
+                    <Button type="submit" size="sm" variant="secondary">{{
+                        t('দেখুন')
+                    }}</Button>
                 </form>
                 <Button v-if="can['manage-setup']" as-child size="sm">
                     <Link href="/setup/centers"
-                        ><Settings2 /> সাজান ও এডিট</Link
+                        ><Settings2 /> {{ t('সাজান ও এডিট') }}</Link
                     >
                 </Button>
             </template>
@@ -90,29 +97,32 @@ const applyRange = () =>
             <p
                 class="text-sm text-muted-foreground sm:col-span-2 lg:col-span-4"
             >
-                ভবিষ্যতে মাছ, হাঁস-মুরগি, দোকান, নতুন জমি — যা-ই আসুক, এখান থেকে
-                নতুন ক্যাটাগরি বা প্রজেক্ট খুলুন। কোনো কোড বদলাতে হবে না।
+                {{
+                    t(
+                        'ভবিষ্যতে মাছ, হাঁস-মুরগি, দোকান, নতুন জমি — যা-ই আসুক, এখান থেকে নতুন ক্যাটাগরি বা প্রজেক্ট খুলুন। কোনো কোড বদলাতে হবে না।',
+                    )
+                }}
             </p>
-            <Field label="নাম" :error="center.errors.name"
+            <Field :label="t('নাম')" :error="center.errors.name"
                 ><Input
                     v-model="center.name"
                     required
-                    placeholder="যেমন: হাঁস পালন"
+                    :placeholder="t('যেমন: হাঁস পালন')"
             /></Field>
             <Field
-                label="ইংরেজি কোড"
+                :label="t('ইংরেজি কোড')"
                 :error="center.errors.code"
-                hint="যেমন DUCK"
+                :hint="t('যেমন DUCK')"
                 ><Input
                     v-model="center.code"
                     required
                     class="uppercase"
                     @input="center.code = center.code.toUpperCase()"
             /></Field>
-            <Field label="ধরন" :error="center.errors.kind"
+            <Field :label="t('ধরন')" :error="center.errors.kind"
                 ><NSelect v-model="center.kind"
                     ><option
-                        v-for="(label, key) in kinds"
+                        v-for="(label, key) in kindLabels"
                         :key="key"
                         :value="key"
                     >
@@ -120,10 +130,12 @@ const applyRange = () =>
                     </option></NSelect
                 ></Field
             >
-            <Field label="কোন প্রজেক্টের ভেতরে" :error="center.errors.parent_id"
+            <Field
+                :label="t('কোন প্রজেক্টের ভেতরে')"
+                :error="center.errors.parent_id"
                 ><NSelect v-model="center.parent_id"
                     ><option v-for="p in parents" :key="p.id" :value="p.id">
-                        {{ centerLabel(p) }}
+                        {{ tCenter(p) }}
                     </option></NSelect
                 ></Field
             >
@@ -133,7 +145,7 @@ const applyRange = () =>
                     type="checkbox"
                     class="size-4 accent-[var(--primary)]"
                 />
-                এখানে পশু থাকবে</label
+                {{ t('এখানে পশু থাকবে') }}</label
             >
             <label class="flex items-center gap-2 text-sm"
                 ><input
@@ -141,15 +153,15 @@ const applyRange = () =>
                     type="checkbox"
                     class="size-4 accent-[var(--primary)]"
                 />
-                এখনই চালু</label
+                {{ t('এখনই চালু') }}</label
             >
             <div class="flex gap-2 lg:col-span-2 lg:justify-end">
-                <Button type="submit" :disabled="center.processing"
-                    >যোগ করুন</Button
-                >
-                <Button type="button" variant="ghost" @click="adding = false"
-                    >বাদ</Button
-                >
+                <Button type="submit" :disabled="center.processing">{{
+                    t('যোগ করুন')
+                }}</Button>
+                <Button type="button" variant="ghost" @click="adding = false">{{
+                    t('বাদ')
+                }}</Button>
             </div>
         </form>
 
@@ -161,10 +173,18 @@ const applyRange = () =>
                     <tr
                         class="border-b border-border text-left text-xs text-muted-foreground"
                     >
-                        <th class="pb-2 font-medium">ক্যাটাগরি / প্রজেক্ট</th>
-                        <th class="pb-2 text-right font-medium">আয়</th>
-                        <th class="pb-2 text-right font-medium">খরচ</th>
-                        <th class="pb-2 text-right font-medium">লাভ / ক্ষতি</th>
+                        <th class="pb-2 font-medium">
+                            {{ t('ক্যাটাগরি / প্রজেক্ট') }}
+                        </th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('আয়') }}
+                        </th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('খরচ') }}
+                        </th>
+                        <th class="pb-2 text-right font-medium">
+                            {{ t('লাভ / ক্ষতি') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -176,7 +196,9 @@ const applyRange = () =>
                 </tbody>
                 <tfoot>
                     <tr class="font-semibold">
-                        <td class="pt-3">পুরো খামার (নিজস্ব লেনদেন বাদে)</td>
+                        <td class="pt-3">
+                            {{ t('পুরো খামার (নিজস্ব লেনদেন বাদে)') }}
+                        </td>
                         <td class="num pt-3 text-right text-income">
                             {{ taka(farm.income) }}
                         </td>
@@ -202,8 +224,8 @@ const applyRange = () =>
             >
                 {{
                     showClosed
-                        ? 'বন্ধ প্রজেক্টগুলো লুকান'
-                        : `বন্ধ প্রজেক্ট দেখুন (${closed}টি)`
+                        ? t('বন্ধ প্রজেক্টগুলো লুকান')
+                        : t('বন্ধ প্রজেক্ট দেখুন (:nটি)', { n: closed })
                 }}
             </button>
         </div>

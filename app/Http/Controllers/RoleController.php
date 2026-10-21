@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Role;
 use App\Models\AccessRole;
 use App\Models\User;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -30,7 +31,7 @@ class RoleController extends Controller
                 'is_admin' => $role->isAdmin(),
                 'users' => (int) ($counts[$role->key] ?? 0),
             ]),
-            'abilities' => Role::ABILITIES,
+            'abilities' => Tr::all(Role::ABILITIES),
         ]);
     }
 
@@ -45,7 +46,7 @@ class RoleController extends Controller
             'sort' => (int) AccessRole::query()->max('sort') + 1,
         ]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "নতুন রোল \"{$data['name']}\" তৈরি হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন রোল ":name" তৈরি হয়েছে।', ['name' => $data['name']])]);
 
         return back();
     }
@@ -61,7 +62,7 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "\"{$role->name}\" রোল আপডেট হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('":name" রোল আপডেট হয়েছে।', ['name' => $role->name])]);
 
         return back();
     }
@@ -69,16 +70,16 @@ class RoleController extends Controller
     public function destroy(AccessRole $role): RedirectResponse
     {
         if ($role->is_system) {
-            return back()->withErrors(['role' => 'শুরু থেকে থাকা রোল মোছা যায় না।']);
+            return back()->withErrors(['role' => __('শুরু থেকে থাকা রোল মোছা যায় না।')]);
         }
 
         if (User::query()->where('role', $role->key)->exists()) {
-            return back()->withErrors(['role' => 'এই রোলে এখনো ব্যবহারকারী আছে। আগে তাঁদের অন্য রোলে নিন।']);
+            return back()->withErrors(['role' => __('এই রোলে এখনো ব্যবহারকারী আছে। আগে তাঁদের অন্য রোলে নিন।')]);
         }
 
         $role->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'রোল মুছে ফেলা হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('রোল মুছে ফেলা হয়েছে।')]);
 
         return back();
     }

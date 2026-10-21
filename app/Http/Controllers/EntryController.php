@@ -13,6 +13,7 @@ use App\Services\PartyAccounts;
 use App\Services\PrepaidService;
 use App\Support\Lookups;
 use App\Support\Money;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -77,7 +78,7 @@ class EntryController extends Controller
                 'number' => $entry->number,
                 'date' => $entry->date->toDateString(),
                 'type' => $entry->type,
-                'type_label' => JournalEntry::TYPES[$entry->type] ?? $entry->type,
+                'type_label' => __(JournalEntry::TYPES[$entry->type] ?? $entry->type),
                 'description' => $entry->description,
                 'amount' => (int) $entry->lines->sum('debit'),
                 'creator' => $entry->creator->name,
@@ -88,7 +89,7 @@ class EntryController extends Controller
         return Inertia::render('entries/Index', [
             'entries' => $entries,
             'filters' => $filters,
-            'types' => JournalEntry::TYPES,
+            'types' => Tr::all(JournalEntry::TYPES),
             'centers' => Lookups::centers(false),
         ]);
     }
@@ -103,7 +104,7 @@ class EntryController extends Controller
                 'number' => $entry->number,
                 'date' => $entry->date->toDateString(),
                 'type' => $entry->type,
-                'type_label' => JournalEntry::TYPES[$entry->type] ?? $entry->type,
+                'type_label' => __(JournalEntry::TYPES[$entry->type] ?? $entry->type),
                 'description' => $entry->description,
                 'reference' => $entry->reference,
                 'party' => $entry->party?->name,
@@ -138,7 +139,7 @@ class EntryController extends Controller
 
         return Inertia::render('entries/Create', [
             'form' => array_key_exists($form, self::FORMS) ? $form : 'expense',
-            'forms' => self::FORMS,
+            'forms' => Tr::all(self::FORMS),
             'centers' => Lookups::centers(),
             'moneyAccounts' => Lookups::moneyAccounts(),
             'expenseAccounts' => Lookups::accounts('expense'),
@@ -146,7 +147,7 @@ class EntryController extends Controller
             'assetAccounts' => Lookups::assetAccounts(),
             'budgetHeads' => Lookups::budgetHeads(),
             'parties' => Lookups::parties(),
-            'partyTypes' => Party::TYPES,
+            'partyTypes' => Tr::all(Party::TYPES),
             'animals' => Lookups::activeAnimals(),
             'defaultCenterId' => CostCenter::query()->where('code', 'SHADHARON')->value('id'),
             'maxVoucherKb' => config('khamar.max_voucher_kb'),
@@ -266,7 +267,7 @@ class EntryController extends Controller
                 $interest = Money::toPoisha($data['interest'] ?? 0);
 
                 if ($principal + $interest === 0) {
-                    throw ValidationException::withMessages(['principal' => 'আসল বা সুদের টাকা দিন।']);
+                    throw ValidationException::withMessages(['principal' => __('আসল বা সুদের টাকা দিন।')]);
                 }
 
                 $lines = [];
@@ -291,7 +292,7 @@ class EntryController extends Controller
             default => throw new LogicException("Unknown entry form {$form}."),
         };
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "এন্ট্রি {$entry->number} সংরক্ষিত হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('এন্ট্রি :number সংরক্ষিত হয়েছে।', ['number' => $entry->number])]);
 
         return $request->boolean('stay') ? back() : to_route('entries.show', $entry);
     }
@@ -316,8 +317,8 @@ class EntryController extends Controller
             'lines.*.animal_id' => ['nullable', 'exists:animals,id'],
             'lines.*.memo' => ['nullable', 'string', 'max:255'],
         ], [
-            'money_account_id.required_if' => 'কোন হিসাব থেকে টাকা গেল/এল তা বাছুন।',
-            'party_id.required_if' => 'বাকির জন্য কার সাথে লেনদেন তা বাছুন।',
+            'money_account_id.required_if' => __('কোন হিসাব থেকে টাকা গেল/এল তা বাছুন।'),
+            'party_id.required_if' => __('বাকির জন্য কার সাথে লেনদেন তা বাছুন।'),
         ]);
 
         $total = 0;
@@ -354,7 +355,7 @@ class EntryController extends Controller
 
         $reversal = $ledger->reverse($entry->load('lines'), $data['date'], $data['reason']);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$entry->number} বাতিল হয়েছে (উল্টো এন্ট্রি {$reversal->number})।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':number বাতিল হয়েছে (উল্টো এন্ট্রি :reversal)।', ['number' => $entry->number, 'reversal' => $reversal->number])]);
 
         return to_route('entries.show', $reversal);
     }
@@ -370,7 +371,7 @@ class EntryController extends Controller
             $ledger->attach($entry, $file);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'ভাউচার যোগ হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ভাউচার যোগ হয়েছে।')]);
 
         return back();
     }

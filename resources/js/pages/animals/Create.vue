@@ -8,6 +8,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 
@@ -95,12 +96,16 @@ watch(
 </script>
 
 <template>
-    <Head title="নতুন গরু" />
+    <Head :title="t('নতুন গরু')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="খামারে নতুন গরু"
-            subtitle="যে গরু আগে থেকেই আছে সেগুলোও এখানে যোগ করুন — 'আগে থেকেই ছিল' বেছে কেনা দাম দিন।"
+            :title="t('খামারে নতুন গরু')"
+            :subtitle="
+                t(
+                    'যে গরু আগে থেকেই আছে সেগুলোও এখানে যোগ করুন — \'আগে থেকেই ছিল\' বেছে কেনা দাম দিন।',
+                )
+            "
         />
 
         <form
@@ -109,12 +114,15 @@ watch(
         >
             <Field
                 v-if="f.acquisition !== 'born'"
-                label="কয়টি গরু"
+                :label="t('কয়টি গরু')"
                 :error="f.errors.count"
                 :hint="
                     many
-                        ? `একসাথে কেনা — দাম সমান ভাগ হবে, নম্বর ${nextTag} থেকে শুরু`
-                        : 'একসাথে কয়েকটি কিনলে সংখ্যা দিন'
+                        ? t(
+                              'একসাথে কেনা — দাম সমান ভাগ হবে, নম্বর :tag থেকে শুরু',
+                              { tag: nextTag },
+                          )
+                        : t('একসাথে কয়েকটি কিনলে সংখ্যা দিন')
                 "
             >
                 <Input
@@ -127,37 +135,47 @@ watch(
             </Field>
             <Field
                 v-if="!many"
-                label="নম্বর (ঐচ্ছিক)"
+                :label="t('নম্বর (ঐচ্ছিক)')"
                 :error="f.errors.tag"
-                hint="খালি রাখলে অ্যাপ নিজে পরের নম্বর দেবে"
+                :hint="t('খালি রাখলে অ্যাপ নিজে পরের নম্বর দেবে')"
             >
                 <Input v-model="f.tag" :placeholder="nextTag" />
             </Field>
-            <Field v-if="!many" label="নাম (ঐচ্ছিক)" :error="f.errors.name"
-                ><Input v-model="f.name" placeholder="যেমন: লালী"
+            <Field
+                v-if="!many"
+                :label="t('নাম (ঐচ্ছিক)')"
+                :error="f.errors.name"
+                ><Input v-model="f.name" :placeholder="t('যেমন: লালী')"
             /></Field>
-            <Field label="লিঙ্গ">
+            <Field :label="t('লিঙ্গ')">
                 <NSelect v-model="f.sex"
-                    ><option value="female">স্ত্রী (গাভী/বকনা)</option>
-                    <option value="male">পুরুষ (ষাঁড়/এঁড়ে)</option></NSelect
-                >
-            </Field>
-            <Field label="জাত"
-                ><Input
-                    v-model="f.breed"
-                    placeholder="যেমন: ফ্রিজিয়ান ক্রস, দেশি"
-            /></Field>
-            <Field label="কোন ক্যাটাগরিতে" :error="f.errors.cost_center_id">
-                <NSelect v-model="f.cost_center_id"
-                    ><option v-for="c in centers" :key="c.id" :value="c.id">
-                        {{ centerLabel(c) }}
+                    ><option value="female">
+                        {{ t('স্ত্রী (গাভী/বকনা)') }}
+                    </option>
+                    <option value="male">
+                        {{ t('পুরুষ (ষাঁড়/এঁড়ে)') }}
                     </option></NSelect
                 >
             </Field>
-            <Field label="কীভাবে এল">
+            <Field :label="t('জাত')"
+                ><Input
+                    v-model="f.breed"
+                    :placeholder="t('যেমন: ফ্রিজিয়ান ক্রস, দেশি')"
+            /></Field>
+            <Field
+                :label="t('কোন ক্যাটাগরিতে')"
+                :error="f.errors.cost_center_id"
+            >
+                <NSelect v-model="f.cost_center_id"
+                    ><option v-for="c in centers" :key="c.id" :value="c.id">
+                        {{ centerLabel({ ...c, name: t(c.name) }) }}
+                    </option></NSelect
+                >
+            </Field>
+            <Field :label="t('কীভাবে এল')">
                 <NSelect v-model="f.acquisition"
                     ><option
-                        v-for="(label, key) in acquisitions"
+                        v-for="(label, key) in tAll(acquisitions)"
                         :key="key"
                         :value="key"
                     >
@@ -168,20 +186,26 @@ watch(
             <Field
                 :label="
                     f.acquisition === 'born'
-                        ? 'জন্মের তারিখ'
-                        : 'খামারে আসার তারিখ'
+                        ? t('জন্মের তারিখ')
+                        : t('খামারে আসার তারিখ')
                 "
                 :error="f.errors.acquired_on"
                 ><DateField v-model="f.acquired_on" :max="today()"
             /></Field>
-            <Field v-if="f.acquisition !== 'born'" label="জন্ম তারিখ (জানলে)"
+            <Field
+                v-if="f.acquisition !== 'born'"
+                :label="t('জন্ম তারিখ (জানলে)')"
                 ><DateField clearable v-model="f.birth_date" :max="today()"
             /></Field>
             <Field
                 v-if="showBatch"
-                label="কোন ব্যাচে"
+                :label="t('কোন ব্যাচে')"
                 :error="f.errors.batch"
-                hint="একসাথে কেনা গরু এক ব্যাচে — দিন, খরচ আর লাভ ব্যাচ ধরে দেখা যাবে"
+                :hint="
+                    t(
+                        'একসাথে কেনা গরু এক ব্যাচে — দিন, খরচ আর লাভ ব্যাচ ধরে দেখা যাবে',
+                    )
+                "
             >
                 <NSelect v-model="f.batch">
                     <option
@@ -189,21 +213,27 @@ watch(
                         :key="b.id"
                         :value="String(b.id)"
                     >
-                        {{ b.label }} (শুরু {{ b.started_on }})
+                        {{ b.label }}
+                        {{ t('(শুরু :date)', { date: b.started_on }) }}
                     </option>
                     <option value="new">
-                        নতুন: ব্যাচ-{{
-                            nextBatchNumbers[String(f.cost_center_id)] ?? 1
+                        {{
+                            t('নতুন: ব্যাচ-:n', {
+                                n:
+                                    nextBatchNumbers[
+                                        String(f.cost_center_id)
+                                    ] ?? 1,
+                            })
                         }}
                     </option>
-                    <option value="">কোনো ব্যাচে নয়</option>
+                    <option value="">{{ t('কোনো ব্যাচে নয়') }}</option>
                 </NSelect>
             </Field>
             <Field
                 v-if="!many"
-                label="ওজন (কেজি, ঐচ্ছিক)"
+                :label="t('ওজন (কেজি, ঐচ্ছিক)')"
                 :error="f.errors.weight_kg"
-                hint="শুরুর ওজন থাকলে পরে দিনে কত বাড়লো দেখা যাবে"
+                :hint="t('শুরুর ওজন থাকলে পরে দিনে কত বাড়লো দেখা যাবে')"
             >
                 <Input
                     v-model="f.weight_kg"
@@ -215,9 +245,13 @@ watch(
             </Field>
             <Field
                 v-if="f.sex === 'female' && f.acquisition !== 'born'"
-                label="গর্ভবতী? কত মাস চলছে"
+                :label="t('গর্ভবতী? কত মাস চলছে')"
                 :error="f.errors.months_pregnant"
-                hint="জানা থাকলে লিখুন, যেমন 4 — বাচ্চা হওয়ার আনুমানিক দিন হিসাব হবে"
+                :hint="
+                    t(
+                        'জানা থাকলে লিখুন, যেমন 4 — বাচ্চা হওয়ার আনুমানিক দিন হিসাব হবে',
+                    )
+                "
             >
                 <Input
                     v-model="f.months_pregnant"
@@ -226,10 +260,13 @@ watch(
                     min="0"
                     max="9.5"
                     class="num"
-                    placeholder="গর্ভবতী না হলে খালি রাখুন"
+                    :placeholder="t('গর্ভবতী না হলে খালি রাখুন')"
                 />
             </Field>
-            <Field v-if="f.acquisition === 'born' && mothers.length" label="মা">
+            <Field
+                v-if="f.acquisition === 'born' && mothers.length"
+                :label="t('মা')"
+            >
                 <NSelect v-model="f.mother_id"
                     ><option :value="null">—</option>
                     <option v-for="m in mothers" :key="m.id" :value="m.id">
@@ -240,15 +277,20 @@ watch(
             <template v-if="f.acquisition !== 'born'">
                 <Field
                     :label="
-                        (many ? 'মোট ' : '') +
-                        (f.acquisition === 'opening'
-                            ? 'কেনা দাম / আজকের মূল্য (৳)'
-                            : 'কেনা দাম (৳)')
+                        f.acquisition === 'opening'
+                            ? many
+                                ? t('মোট কেনা দাম / আজকের মূল্য (৳)')
+                                : t('কেনা দাম / আজকের মূল্য (৳)')
+                            : many
+                              ? t('মোট কেনা দাম (৳)')
+                              : t('কেনা দাম (৳)')
                     "
                     :error="f.errors.cost"
                     :hint="
                         perHead
-                            ? `প্রতিটি ৳ ${perHead.toLocaleString('en-IN')}`
+                            ? t('প্রতিটি ৳ :amount', {
+                                  amount: perHead.toLocaleString('en-IN'),
+                              })
                             : undefined
                     "
                 >
@@ -263,7 +305,7 @@ watch(
                 </Field>
                 <Field
                     v-if="f.acquisition === 'purchase'"
-                    label="টাকা কোথা থেকে"
+                    :label="t('টাকা কোথা থেকে')"
                     :error="f.errors.paid_from_account_id"
                 >
                     <NSelect v-model="f.paid_from_account_id"
@@ -272,16 +314,16 @@ watch(
                             :key="a.id"
                             :value="a.id"
                         >
-                            {{ a.name }}
+                            {{ t(a.name) }}
                         </option></NSelect
                     >
                 </Field>
                 <Field
                     v-if="f.acquisition === 'purchase'"
-                    label="উদ্যোগ বাজেট খাত"
+                    :label="t('উদ্যোগ বাজেট খাত')"
                 >
                     <NSelect v-model="f.budget_head_id"
-                        ><option :value="null">— নয় —</option>
+                        ><option :value="null">{{ t('— নয় —') }}</option>
                         <option
                             v-for="b in budgetHeads"
                             :key="b.id"
@@ -293,7 +335,7 @@ watch(
                 </Field>
                 <Field
                     v-if="f.acquisition === 'purchase'"
-                    label="হাটের রসিদ / ছবি"
+                    :label="t('হাটের রসিদ / ছবি')"
                 >
                     <label
                         class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm hover:bg-accent"
@@ -302,7 +344,7 @@ watch(
                         <span class="truncate">{{
                             f.attachments.length
                                 ? f.attachments.map((x) => x.name).join(', ')
-                                : 'ছবি / PDF'
+                                : t('ছবি / PDF')
                         }}</span>
                         <input
                             type="file"
@@ -322,15 +364,17 @@ watch(
                 </Field>
             </template>
             <div class="sm:col-span-2 lg:col-span-3">
-                <Field label="নোট"
+                <Field :label="t('নোট')"
                     ><Input
                         v-model="f.notes"
-                        placeholder="টিকা, রোগ, বৈশিষ্ট্য…"
+                        :placeholder="t('টিকা, রোগ, বৈশিষ্ট্য…')"
                 /></Field>
             </div>
             <div class="sm:col-span-2 lg:col-span-3">
                 <Button type="submit" :disabled="f.processing">{{
-                    many ? `${f.count}টি গরু যোগ করুন` : 'গরু যোগ করুন'
+                    many
+                        ? t(':nটি গরু যোগ করুন', { n: f.count })
+                        : t('গরু যোগ করুন')
                 }}</Button>
             </div>
         </form>

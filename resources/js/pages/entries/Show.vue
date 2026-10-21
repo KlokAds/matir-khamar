@@ -7,6 +7,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { day, taka, today, useCan } from '@/lib/khamar';
 
 const props = defineProps<{
@@ -48,6 +49,16 @@ defineOptions({
 });
 
 const can = useCan();
+/** Split a translated sentence around its :n slot so a link can sit in the middle. */
+const around = (text: string) => {
+    const [before, after = ''] = t(text).split(':n');
+
+    return { before, after };
+};
+const reversedText = computed(() =>
+    around('এই এন্ট্রিটি বাতিল করা হয়েছে উল্টো এন্ট্রি :n দিয়ে।'),
+);
+const reversalOfText = computed(() => around('এটি :n এর বাতিল-এন্ট্রি।'));
 const print = () => window.print();
 const showReverse = ref(false);
 const reverse = useForm({ reason: '', date: today() });
@@ -77,18 +88,18 @@ function pick(event: Event) {
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            :title="`ভাউচার ${entry.number}`"
-            :subtitle="`${entry.type_label} · ${day(entry.date)}`"
+            :title="t('ভাউচার :n', { n: entry.number })"
+            :subtitle="`${t(entry.type_label)} · ${day(entry.date)}`"
         >
             <template #actions>
                 <Button variant="secondary" @click="print"
-                    ><Printer /> প্রিন্ট</Button
+                    ><Printer /> {{ t('প্রিন্ট') }}</Button
                 >
                 <Button
                     v-if="entry.can_reverse && can['reverse-entries']"
                     variant="destructive"
                     @click="showReverse = !showReverse"
-                    ><Undo2 /> বাতিল করুন</Button
+                    ><Undo2 /> {{ t('বাতিল করুন') }}</Button
                 >
             </template>
         </PageTitle>
@@ -97,25 +108,25 @@ function pick(event: Event) {
             v-if="entry.reversed_by"
             class="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm"
         >
-            এই এন্ট্রিটি বাতিল করা হয়েছে উল্টো এন্ট্রি
+            {{ reversedText.before }}
             <Link
                 :href="`/entries/${entry.reversed_by.id}`"
                 class="font-medium underline"
                 >{{ entry.reversed_by.number }}</Link
             >
-            দিয়ে।
+            {{ reversedText.after }}
         </div>
         <div
             v-if="entry.reversal_of"
             class="mb-4 rounded-xl border border-border bg-muted/60 p-3 text-sm"
         >
-            এটি
+            {{ reversalOfText.before }}
             <Link
                 :href="`/entries/${entry.reversal_of.id}`"
                 class="font-medium underline"
                 >{{ entry.reversal_of.number }}</Link
             >
-            এর বাতিল-এন্ট্রি।
+            {{ reversalOfText.after }}
         </div>
 
         <form
@@ -124,7 +135,7 @@ function pick(event: Event) {
             @submit.prevent="reverse.post(`/entries/${entry.id}/reverse`)"
         >
             <Field
-                label="কেন বাতিল (অডিট লগে থাকবে)"
+                :label="t('কেন বাতিল (অডিট লগে থাকবে)')"
                 :error="
                     reverse.errors.reason ||
                     (reverse.errors as Record<string, string>).entry
@@ -134,17 +145,17 @@ function pick(event: Event) {
                     v-model="reverse.reason"
                     required
                     minlength="3"
-                    placeholder="যেমন: টাকার অঙ্ক ভুল ছিল"
+                    :placeholder="t('যেমন: টাকার অঙ্ক ভুল ছিল')"
                 />
             </Field>
-            <Field label="বাতিলের তারিখ" :error="reverse.errors.date">
+            <Field :label="t('বাতিলের তারিখ')" :error="reverse.errors.date">
                 <DateField v-model="reverse.date" :max="today()" />
             </Field>
             <Button
                 type="submit"
                 variant="destructive"
                 :disabled="reverse.processing"
-                >উল্টো এন্ট্রি দিন</Button
+                >{{ t('উল্টো এন্ট্রি দিন') }}</Button
             >
         </form>
 
@@ -157,22 +168,31 @@ function pick(event: Event) {
                     <p class="mt-1 text-sm text-muted-foreground">
                         <span v-if="entry.party">{{ entry.party }} · </span>
                         <span v-if="entry.reference"
-                            >রসিদ {{ entry.reference }} ·
+                            >{{ t('রসিদ :n', { n: entry.reference }) }} ·
                         </span>
-                        লিখেছেন {{ entry.creator }} ({{ entry.created_at }})
+                        {{
+                            t('লিখেছেন :name (:at)', {
+                                name: entry.creator ?? '',
+                                at: entry.created_at ?? '',
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[560px] text-sm">
                         <thead class="text-left text-xs text-muted-foreground">
                             <tr class="border-b border-border">
-                                <th class="px-4 py-2 font-medium">খাত</th>
-                                <th class="px-4 py-2 font-medium">ক্যাটাগরি</th>
-                                <th class="px-4 py-2 text-right font-medium">
-                                    ডেবিট
+                                <th class="px-4 py-2 font-medium">
+                                    {{ t('খাত') }}
+                                </th>
+                                <th class="px-4 py-2 font-medium">
+                                    {{ t('ক্যাটাগরি') }}
                                 </th>
                                 <th class="px-4 py-2 text-right font-medium">
-                                    ক্রেডিট
+                                    {{ t('ডেবিট') }}
+                                </th>
+                                <th class="px-4 py-2 text-right font-medium">
+                                    {{ t('ক্রেডিট') }}
                                 </th>
                             </tr>
                         </thead>
@@ -183,7 +203,7 @@ function pick(event: Event) {
                                 class="border-b border-border/60"
                             >
                                 <td class="px-4 py-2.5">
-                                    {{ line.account }}
+                                    {{ t(line.account) }}
                                     <p
                                         v-if="
                                             line.memo ||
@@ -196,10 +216,14 @@ function pick(event: Event) {
                                             [
                                                 line.memo,
                                                 line.animal
-                                                    ? `গরু ${line.animal}`
+                                                    ? t('গরু :tag', {
+                                                          tag: line.animal,
+                                                      })
                                                     : null,
                                                 line.budget_head
-                                                    ? `বাজেট ${line.budget_head}`
+                                                    ? t('বাজেট :head', {
+                                                          head: line.budget_head,
+                                                      })
                                                     : null,
                                             ]
                                                 .filter(Boolean)
@@ -208,7 +232,7 @@ function pick(event: Event) {
                                     </p>
                                 </td>
                                 <td class="px-4 py-2.5 text-muted-foreground">
-                                    {{ line.center ?? '—' }}
+                                    {{ line.center ? t(line.center) : '—' }}
                                 </td>
                                 <td class="num px-4 py-2.5 text-right">
                                     {{ line.debit ? taka(line.debit) : '' }}
@@ -221,7 +245,7 @@ function pick(event: Event) {
                         <tfoot>
                             <tr class="font-semibold">
                                 <td class="px-4 py-2.5" colspan="2">
-                                    মোট (দুই পাশ সমান)
+                                    {{ t('মোট (দুই পাশ সমান)') }}
                                 </td>
                                 <td class="num px-4 py-2.5 text-right">
                                     {{ taka(totalDebit) }}
@@ -238,7 +262,9 @@ function pick(event: Event) {
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
-                <h2 class="mb-3 font-display text-lg">ভাউচার / রসিদ</h2>
+                <h2 class="mb-3 font-display text-lg">
+                    {{ t('ভাউচার / রসিদ') }}
+                </h2>
                 <ul v-if="entry.attachments.length" class="mb-3 space-y-2">
                     <li v-for="file in entry.attachments" :key="file.id">
                         <a
@@ -258,14 +284,18 @@ function pick(event: Event) {
                     </li>
                 </ul>
                 <p v-else class="mb-3 text-sm text-muted-foreground">
-                    কোনো ভাউচার যোগ করা হয়নি।
+                    {{ t('কোনো ভাউচার যোগ করা হয়নি।') }}
                 </p>
                 <label
                     v-if="can['post-entries']"
                     class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2.5 text-sm hover:bg-accent"
                 >
                     <Paperclip class="size-4 text-muted-foreground" />
-                    {{ upload.processing ? 'আপলোড হচ্ছে…' : 'ভাউচার যোগ করুন' }}
+                    {{
+                        upload.processing
+                            ? t('আপলোড হচ্ছে…')
+                            : t('ভাউচার যোগ করুন')
+                    }}
                     <input
                         type="file"
                         class="sr-only"

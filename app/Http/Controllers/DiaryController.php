@@ -8,6 +8,7 @@ use App\Models\FarmNoteFile;
 use App\Models\Goal;
 use App\Support\CareGuide;
 use App\Support\Lookups;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -29,7 +30,7 @@ class DiaryController extends Controller
 
         return Inertia::render('diary/Index', [
             'kind' => $kind,
-            'kinds' => FarmNote::KINDS,
+            'kinds' => Tr::all(FarmNote::KINDS),
             'counts' => FarmNote::query()->selectRaw('kind, COUNT(*) as n')->groupBy('kind')->pluck('n', 'kind'),
             'notes' => FarmNote::query()->with(['costCenter:id,name', 'animal:id,tag', 'author:id,name', 'files'])
                 ->when($kind, fn ($query) => $query->where('kind', $kind))
@@ -85,7 +86,7 @@ class DiaryController extends Controller
             ]);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'ডায়েরিতে লেখা হলো।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ডায়েরিতে লেখা হলো।')]);
 
         return back();
     }
@@ -110,7 +111,7 @@ class DiaryController extends Controller
         }
 
         $note->update($this->noteData($request));
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'নোট হালনাগাদ হলো।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নোট হালনাগাদ হলো।')]);
 
         return back();
     }
@@ -120,7 +121,7 @@ class DiaryController extends Controller
         $data = $this->goalData($request);
         $data['current_value'] ??= $data['start_value'];
         Goal::query()->create($this->markAchieved($data));
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'নতুন লক্ষ্য রাখা হলো।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('নতুন লক্ষ্য রাখা হলো।')]);
 
         return back();
     }
@@ -128,7 +129,7 @@ class DiaryController extends Controller
     public function updateGoal(Request $request, Goal $goal): RedirectResponse
     {
         $goal->update($this->markAchieved($this->goalData($request), $goal));
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'লক্ষ্য হালনাগাদ হলো।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('লক্ষ্য হালনাগাদ হলো।')]);
 
         return back();
     }

@@ -28,6 +28,7 @@ import VoiceRecorder from '@/components/khamar/VoiceRecorder.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { centerLabel, day, qty, today, useCan } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 
@@ -90,16 +91,16 @@ const todayStr = today();
 
 type Tab = 'diary' | 'goals' | 'routine';
 const tabs: { key: Tab; label: string; icon: typeof Target }[] = [
-    { key: 'diary', label: 'ডায়েরি', icon: NotebookPen },
-    { key: 'goals', label: 'লক্ষ্য', icon: Target },
-    { key: 'routine', label: 'নিয়ম ও রুটিন', icon: ListChecks },
+    { key: 'diary', label: t('ডায়েরি'), icon: NotebookPen },
+    { key: 'goals', label: t('লক্ষ্য'), icon: Target },
+    { key: 'routine', label: t('নিয়ম ও রুটিন'), icon: ListChecks },
 ];
 const tab = ref<Tab>('diary');
 
 onMounted(() => {
     const hash = window.location.hash.slice(1);
 
-    if (tabs.some((t) => t.key === hash)) {
+    if (tabs.some((item) => item.key === hash)) {
         tab.value = hash as Tab;
     }
 });
@@ -139,7 +140,9 @@ const note = useForm({
 /* attachments: photos and voice notes */
 
 const MAX_FILES = 5;
-const tooMany = `একটি লেখায় সর্বোচ্চ ${MAX_FILES}টি ছবি বা ভয়েস রাখা যায়।`;
+const tooMany = t('একটি লেখায় সর্বোচ্চ :maxটি ছবি বা ভয়েস রাখা যায়।', {
+    max: MAX_FILES,
+});
 type Picked = { key: number; file: File; url: string; kind: 'image' | 'audio' };
 const picked = ref<Picked[]>([]);
 const fileMessage = ref('');
@@ -289,11 +292,16 @@ const animalLabel = (a: { tag: string; name: string | null }) =>
 /* ---------- goals ---------- */
 
 const suggestions = [
-    { title: 'দিনে দুধ', unit: 'লিটার', start: '18', target: '30' },
-    { title: 'মোটাতাজা দিনে বাড়া', unit: 'কেজি', start: '0.5', target: '0.8' },
+    { title: t('দিনে দুধ'), unit: t('লিটার'), start: '18', target: '30' },
     {
-        title: 'খাবারের খরচ প্রতি লিটার দুধে',
-        unit: 'টাকা',
+        title: t('মোটাতাজা দিনে বাড়া'),
+        unit: t('কেজি'),
+        start: '0.5',
+        target: '0.8',
+    },
+    {
+        title: t('খাবারের খরচ প্রতি লিটার দুধে'),
+        unit: t('টাকা'),
         start: '45',
         target: '35',
     },
@@ -400,21 +408,23 @@ const doneIn = (i: number, items: string[]) =>
     items.filter((_, j) => ticks.value[`${i}-${j}`]).length;
 
 const rules = [
-    'সব লেনদেন সেদিনই, রসিদসহ লিখুন।',
-    'প্রতিটি গরুর আলাদা কার্ড আর নিয়মিত ওজন।',
-    'খাবার কেজিতে মেপে দিন, আন্দাজে নয়।',
-    'মাসে একবার লাভ-ক্ষতি দেখে অন্তত একটি সিদ্ধান্ত নিন।',
-    'ভুল লুকাবেন না — ডায়েরিতে লিখে রাখুন।',
+    t('সব লেনদেন সেদিনই, রসিদসহ লিখুন।'),
+    t('প্রতিটি গরুর আলাদা কার্ড আর নিয়মিত ওজন।'),
+    t('খাবার কেজিতে মেপে দিন, আন্দাজে নয়।'),
+    t('মাসে একবার লাভ-ক্ষতি দেখে অন্তত একটি সিদ্ধান্ত নিন।'),
+    t('ভুল লুকাবেন না — ডায়েরিতে লিখে রাখুন।'),
 ];
 </script>
 
 <template>
-    <Head title="খামার ডায়েরি" />
+    <Head :title="t('খামার ডায়েরি')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="খামার ডায়েরি"
-            subtitle="প্রতিদিনের কথা, ভুল, শিক্ষা আর লক্ষ্য — এক জায়গায়।"
+            :title="t('খামার ডায়েরি')"
+            :subtitle="
+                t('প্রতিদিনের কথা, ভুল, শিক্ষা আর লক্ষ্য — এক জায়গায়।')
+            "
         />
 
         <!-- segmented tabs -->
@@ -423,21 +433,21 @@ const rules = [
             class="mb-5 grid grid-cols-3 gap-1 rounded-lg border border-border bg-card p-1 md:max-w-lg"
         >
             <button
-                v-for="t in tabs"
-                :key="t.key"
+                v-for="item in tabs"
+                :key="item.key"
                 type="button"
                 role="tab"
-                :aria-selected="tab === t.key"
+                :aria-selected="tab === item.key"
                 :class="[
                     'flex h-10 items-center justify-center gap-1.5 rounded-md px-2 text-sm font-medium transition-colors',
-                    tab === t.key
+                    tab === item.key
                         ? 'bg-primary text-primary-foreground shadow-xs'
                         : 'text-muted-foreground hover:bg-accent',
                 ]"
-                @click="tab = t.key"
+                @click="tab = item.key"
             >
-                <component :is="t.icon" class="size-4 shrink-0" />
-                <span class="truncate">{{ t.label }}</span>
+                <component :is="item.icon" class="size-4 shrink-0" />
+                <span class="truncate">{{ item.label }}</span>
             </button>
         </div>
 
@@ -449,11 +459,15 @@ const rules = [
                 >
                     <Lightbulb class="mt-0.5 size-5 shrink-0 text-turmeric" />
                     <div>
-                        <p class="font-display text-base">কেন লিখবেন?</p>
+                        <p class="font-display text-base">
+                            {{ t('কেন লিখবেন?') }}
+                        </p>
                         <p class="mt-1 text-muted-foreground">
-                            প্রতিদিনের ছোট কথা, ভুল আর শিক্ষা লিখে রাখলে প্রতি
-                            মাসে খামার একটু করে ভালো হয়। একই ভুল দুবার হয় না,
-                            আর ভালো চিন্তাগুলো হারিয়ে যায় না।
+                            {{
+                                t(
+                                    'প্রতিদিনের ছোট কথা, ভুল আর শিক্ষা লিখে রাখলে প্রতি মাসে খামার একটু করে ভালো হয়। একই ভুল দুবার হয় না, আর ভালো চিন্তাগুলো হারিয়ে যায় না।',
+                                )
+                            }}
                         </p>
                     </div>
                 </div>
@@ -463,10 +477,12 @@ const rules = [
                     class="rounded-xl border border-border bg-card p-4"
                     @submit.prevent="saveNote"
                 >
-                    <h2 class="mb-3 font-display text-lg">আজ কী লিখবেন?</h2>
+                    <h2 class="mb-3 font-display text-lg">
+                        {{ t('আজ কী লিখবেন?') }}
+                    </h2>
 
                     <Field
-                        label="কী ধরনের কথা"
+                        :label="t('কী ধরনের কথা')"
                         :error="note.errors.kind"
                         class="mb-3"
                     >
@@ -476,44 +492,49 @@ const rules = [
                                 :key="key"
                                 :value="key"
                             >
-                                {{ label }}
+                                {{ t(label) }}
                             </option>
                         </NSelect>
                     </Field>
 
                     <div class="grid gap-3">
-                        <Field label="তারিখ" :error="note.errors.date">
+                        <Field :label="t('তারিখ')" :error="note.errors.date">
                             <DateField
                                 v-model="note.date"
                                 :max="todayStr"
                                 class="h-10"
                             />
                         </Field>
-                        <Field label="শিরোনাম" :error="note.errors.title">
+                        <Field :label="t('শিরোনাম')" :error="note.errors.title">
                             <Input
                                 v-model="note.title"
                                 required
                                 maxlength="200"
                                 class="h-10"
-                                placeholder="যেমন: লাল গাভীর খাওয়া কম"
+                                :placeholder="t('যেমন: লাল গাভীর খাওয়া কম')"
                             />
                         </Field>
-                        <Field label="বিস্তারিত" :error="note.errors.body">
+                        <Field
+                            :label="t('বিস্তারিত')"
+                            :error="note.errors.body"
+                        >
                             <textarea
                                 v-model="note.body"
                                 rows="4"
                                 class="w-full rounded-md border border-input bg-card px-3 py-2 text-[15px] shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
-                                placeholder="কী হলো, কেন হলো, এরপর কী করবেন…"
+                                :placeholder="
+                                    t('কী হলো, কেন হলো, এরপর কী করবেন…')
+                                "
                             />
                         </Field>
                         <div class="grid grid-cols-2 gap-3">
                             <Field
-                                label="বিভাগ"
+                                :label="t('বিভাগ')"
                                 :error="note.errors.cost_center_id"
                             >
                                 <NSelect
                                     v-model="note.cost_center_id"
-                                    placeholder="ঐচ্ছিক"
+                                    :placeholder="t('ঐচ্ছিক')"
                                 >
                                     <option :value="null">—</option>
                                     <option
@@ -522,14 +543,22 @@ const rules = [
                                         :value="c.id"
                                         :disabled="c.kind === 'group'"
                                     >
-                                        {{ centerLabel(c) }}
+                                        {{
+                                            centerLabel({
+                                                ...c,
+                                                name: t(c.name),
+                                            })
+                                        }}
                                     </option>
                                 </NSelect>
                             </Field>
-                            <Field label="পশু" :error="note.errors.animal_id">
+                            <Field
+                                :label="t('পশু')"
+                                :error="note.errors.animal_id"
+                            >
                                 <NSelect
                                     v-model="note.animal_id"
-                                    placeholder="ঐচ্ছিক"
+                                    :placeholder="t('ঐচ্ছিক')"
                                 >
                                     <option :value="null">—</option>
                                     <option
@@ -543,8 +572,12 @@ const rules = [
                             </Field>
                         </div>
                         <Field
-                            label="কবে আবার দেখবেন"
-                            hint="ঐচ্ছিক — দিন পার হলে লাল হয়ে মনে করিয়ে দেবে।"
+                            :label="t('কবে আবার দেখবেন')"
+                            :hint="
+                                t(
+                                    'ঐচ্ছিক — দিন পার হলে লাল হয়ে মনে করিয়ে দেবে।',
+                                )
+                            "
                             :error="note.errors.follow_up_on"
                         >
                             <DateField
@@ -563,7 +596,7 @@ const rules = [
                                     class="h-11 text-base"
                                     @click="openCamera"
                                 >
-                                    📷 ছবি
+                                    📷 {{ t('ছবি') }}
                                 </Button>
                                 <Button
                                     type="button"
@@ -572,7 +605,7 @@ const rules = [
                                     :disabled="recorderOpen"
                                     @click="openRecorder"
                                 >
-                                    🎙 ভয়েস নোট
+                                    🎙 {{ t('ভয়েস নোট') }}
                                 </Button>
                             </div>
                             <input
@@ -617,7 +650,7 @@ const rules = [
                                     <button
                                         type="button"
                                         class="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-destructive"
-                                        aria-label="সরিয়ে দিন"
+                                        :aria-label="t('সরিয়ে দিন')"
                                         @click="removePicked(p.key)"
                                     >
                                         <X class="size-4" />
@@ -645,27 +678,32 @@ const rules = [
                         type="submit"
                         class="mt-4 h-11 w-full text-base"
                         :disabled="note.processing || !note.title.trim()"
-                        >লিখে রাখুন</Button
+                        >{{ t('লিখে রাখুন') }}</Button
                     >
                 </form>
             </div>
 
             <section class="min-w-0 lg:col-span-3">
                 <!-- Phone: one tidy dropdown. Wider screens: the chips fit in a row. -->
-                <Field label="কোন ধরনের লেখা দেখবেন" class="mb-4 md:hidden">
+                <Field
+                    :label="t('কোন ধরনের লেখা দেখবেন')"
+                    class="mb-4 md:hidden"
+                >
                     <NSelect
                         :model-value="kind ?? ''"
                         @update:model-value="
                             (v) => filter(v ? String(v) : null)
                         "
                     >
-                        <option value="">সব ({{ totalCount }})</option>
+                        <option value="">
+                            {{ t('সব (:n)', { n: totalCount }) }}
+                        </option>
                         <option
                             v-for="(label, key) in kinds"
                             :key="key"
                             :value="key"
                         >
-                            {{ label }} ({{ counts[key] ?? 0 }})
+                            {{ t(label) }} ({{ counts[key] ?? 0 }})
                         </option>
                     </NSelect>
                 </Field>
@@ -681,7 +719,7 @@ const rules = [
                             ]"
                             @click="filter(null)"
                         >
-                            সব
+                            {{ t('সব') }}
                             <span class="num opacity-75">{{ totalCount }}</span>
                         </button>
                         <button
@@ -696,7 +734,7 @@ const rules = [
                             ]"
                             @click="filter(key)"
                         >
-                            {{ label }}
+                            {{ t(label) }}
                             <span class="num opacity-75">{{
                                 counts[key] ?? 0
                             }}</span>
@@ -711,12 +749,14 @@ const rules = [
                     <NotebookPen
                         class="mx-auto mb-2 size-8 text-muted-foreground/60"
                     />
-                    <p class="font-display text-lg">ডায়েরির পাতা এখনো খালি</p>
+                    <p class="font-display text-lg">
+                        {{ t('ডায়েরির পাতা এখনো খালি') }}
+                    </p>
                     <p class="mt-1 text-sm text-muted-foreground">
                         {{
                             kind
-                                ? 'এই ধরনের কোনো লেখা নেই।'
-                                : 'আজকের একটি ছোট কথা দিয়ে শুরু করুন।'
+                                ? t('এই ধরনের কোনো লেখা নেই।')
+                                : t('আজকের একটি ছোট কথা দিয়ে শুরু করুন।')
                         }}
                     </p>
                 </div>
@@ -730,7 +770,7 @@ const rules = [
                             <span
                                 v-if="g.date === todayStr"
                                 class="rounded-full bg-paddy/15 px-2 py-0.5 text-[11px] text-paddy"
-                                >আজ</span
+                                >{{ t('আজ') }}</span
                             >
                             <span class="h-px flex-1 bg-border" />
                         </h3>
@@ -752,12 +792,12 @@ const rules = [
                                             'rounded-full px-2 py-0.5 font-medium',
                                             styleOf(n.kind).chip,
                                         ]"
-                                        >{{ kinds[n.kind] ?? n.kind }}</span
+                                        >{{ t(kinds[n.kind] ?? n.kind) }}</span
                                     >
                                     <span
                                         v-if="n.center"
                                         class="rounded-full border border-border px-2 py-0.5 text-muted-foreground"
-                                        >{{ n.center }}</span
+                                        >{{ t(n.center) }}</span
                                     >
                                     <Link
                                         v-if="n.animal && n.animal_id"
@@ -859,14 +899,14 @@ const rules = [
                                                     n.follow_up_on,
                                                     n.done,
                                                 )
-                                                    ? 'দেরি হয়েছে · '
-                                                    : 'দেখবেন · '
+                                                    ? t('দেরি হয়েছে · ')
+                                                    : t('দেখবেন · ')
                                             }}{{ day(n.follow_up_on) }}
                                         </span>
                                         <Toggle
                                             :model-value="n.done"
-                                            on-text="দেখা হয়েছে"
-                                            off-text="বাকি"
+                                            :on-text="t('দেখা হয়েছে')"
+                                            :off-text="t('বাকি')"
                                             :disabled="!can['post-daily']"
                                             @update:model-value="toggleDone(n)"
                                         />
@@ -889,10 +929,15 @@ const rules = [
                     <Target
                         class="mx-auto mb-2 size-8 text-muted-foreground/60"
                     />
-                    <p class="font-display text-lg">এখনো কোনো লক্ষ্য নেই</p>
+                    <p class="font-display text-lg">
+                        {{ t('এখনো কোনো লক্ষ্য নেই') }}
+                    </p>
                     <p class="mt-1 text-sm text-muted-foreground">
-                        একটি মাপা যায় এমন লক্ষ্য ঠিক করুন — যেমন দিনে দুধ ১৮
-                        থেকে ৩০ লিটার।
+                        {{
+                            t(
+                                'একটি মাপা যায় এমন লক্ষ্য ঠিক করুন — যেমন দিনে দুধ ১৮ থেকে ৩০ লিটার।',
+                            )
+                        }}
                     </p>
                 </div>
 
@@ -910,18 +955,20 @@ const rules = [
                                 v-if="g.center || lessIsBetter(g)"
                                 class="mt-0.5 text-xs text-muted-foreground"
                             >
-                                <span v-if="g.center">{{ g.center }}</span>
+                                <span v-if="g.center">{{ t(g.center) }}</span>
                                 <span v-if="g.center && lessIsBetter(g)">
                                     ·
                                 </span>
-                                <span v-if="lessIsBetter(g)">কম হলেই ভালো</span>
+                                <span v-if="lessIsBetter(g)">{{
+                                    t('কম হলেই ভালো')
+                                }}</span>
                             </p>
                         </div>
                         <span
                             v-if="g.achieved"
                             class="inline-flex shrink-0 items-center gap-1 rounded-full bg-income/15 px-2.5 py-1 text-xs font-medium text-income"
                         >
-                            <Trophy class="size-3.5" /> অর্জিত
+                            <Trophy class="size-3.5" /> {{ t('অর্জিত') }}
                         </span>
                         <span
                             v-else
@@ -950,23 +997,23 @@ const rules = [
                         class="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-muted-foreground"
                     >
                         <div>
-                            <div>শুরু</div>
+                            <div>{{ t('শুরু') }}</div>
                             <div class="num text-sm text-foreground">
-                                {{ qty(g.start_value, g.unit ?? '') }}
+                                {{ qty(g.start_value, t(g.unit ?? '')) }}
                             </div>
                         </div>
                         <div>
-                            <div>এখন</div>
+                            <div>{{ t('এখন') }}</div>
                             <div
                                 class="num text-sm font-semibold text-foreground"
                             >
-                                {{ qty(g.current_value, g.unit ?? '') }}
+                                {{ qty(g.current_value, t(g.unit ?? '')) }}
                             </div>
                         </div>
                         <div>
-                            <div>লক্ষ্য</div>
+                            <div>{{ t('লক্ষ্য') }}</div>
                             <div class="num text-sm text-foreground">
-                                {{ qty(g.target_value, g.unit ?? '') }}
+                                {{ qty(g.target_value, t(g.unit ?? '')) }}
                             </div>
                         </div>
                     </div>
@@ -987,8 +1034,8 @@ const rules = [
                         <CalendarClock v-else class="size-3.5" />
                         {{
                             isOverdue(g.due_on, g.achieved)
-                                ? 'সময় পার হয়ে গেছে · '
-                                : 'শেষ তারিখ · '
+                                ? t('সময় পার হয়ে গেছে · ')
+                                : t('শেষ তারিখ · ')
                         }}{{ day(g.due_on) }}
                     </p>
                     <p
@@ -1004,9 +1051,9 @@ const rules = [
                         @submit.prevent="updateCurrent(g)"
                     >
                         <label class="grid min-w-0 flex-1 gap-1">
-                            <span class="text-xs font-medium"
-                                >আজকের অবস্থা</span
-                            >
+                            <span class="text-xs font-medium">{{
+                                t('আজকের অবস্থা')
+                            }}</span>
                             <div class="relative">
                                 <Input
                                     v-model="nowValues[g.id]"
@@ -1018,7 +1065,7 @@ const rules = [
                                 <span
                                     v-if="g.unit"
                                     class="pointer-events-none absolute top-2.5 right-3 text-xs text-muted-foreground"
-                                    >{{ g.unit }}</span
+                                    >{{ t(g.unit) }}</span
                                 >
                             </div>
                         </label>
@@ -1032,7 +1079,7 @@ const rules = [
                                 parseFloat(nowValues[g.id]) === g.current_value
                             "
                         >
-                            <Check class="size-4" /> রাখুন
+                            <Check class="size-4" /> {{ t('রাখুন') }}
                         </Button>
                     </form>
                 </article>
@@ -1043,10 +1090,13 @@ const rules = [
                 class="h-fit rounded-xl border border-border bg-card p-4 lg:col-span-2"
                 @submit.prevent="saveGoal"
             >
-                <h2 class="font-display text-lg">নতুন লক্ষ্য</h2>
+                <h2 class="font-display text-lg">{{ t('নতুন লক্ষ্য') }}</h2>
                 <p class="mt-1 text-xs text-muted-foreground">
-                    যেটা কম হলে ভালো (যেমন খরচ), সেখানে লক্ষ্য শুরুর চেয়ে কম
-                    দিন।
+                    {{
+                        t(
+                            'যেটা কম হলে ভালো (যেমন খরচ), সেখানে লক্ষ্য শুরুর চেয়ে কম দিন।',
+                        )
+                    }}
                 </p>
 
                 <div class="mt-3 flex flex-wrap gap-1.5">
@@ -1062,23 +1112,26 @@ const rules = [
                 </div>
 
                 <div class="mt-4 grid gap-3">
-                    <Field label="লক্ষ্য" :error="goal.errors.title">
+                    <Field :label="t('লক্ষ্য')" :error="goal.errors.title">
                         <Input
                             v-model="goal.title"
                             required
                             class="h-10"
-                            placeholder="যেমন: দিনে দুধ"
+                            :placeholder="t('যেমন: দিনে দুধ')"
                         />
                     </Field>
                     <div class="grid grid-cols-2 gap-3">
-                        <Field label="একক" :error="goal.errors.unit">
+                        <Field :label="t('একক')" :error="goal.errors.unit">
                             <Input
                                 v-model="goal.unit"
                                 class="h-10"
-                                placeholder="লিটার"
+                                :placeholder="t('লিটার')"
                             />
                         </Field>
-                        <Field label="শেষ তারিখ" :error="goal.errors.due_on">
+                        <Field
+                            :label="t('শেষ তারিখ')"
+                            :error="goal.errors.due_on"
+                        >
                             <DateField
                                 clearable
                                 v-model="goal.due_on"
@@ -1088,7 +1141,10 @@ const rules = [
                         </Field>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <Field label="শুরু" :error="goal.errors.start_value">
+                        <Field
+                            :label="t('শুরু')"
+                            :error="goal.errors.start_value"
+                        >
                             <Input
                                 v-model="goal.start_value"
                                 type="number"
@@ -1099,7 +1155,10 @@ const rules = [
                                 placeholder="18"
                             />
                         </Field>
-                        <Field label="এখন" :error="goal.errors.current_value">
+                        <Field
+                            :label="t('এখন')"
+                            :error="goal.errors.current_value"
+                        >
                             <Input
                                 v-model="goal.current_value"
                                 type="number"
@@ -1109,7 +1168,10 @@ const rules = [
                                 placeholder="18"
                             />
                         </Field>
-                        <Field label="লক্ষ্য" :error="goal.errors.target_value">
+                        <Field
+                            :label="t('লক্ষ্য')"
+                            :error="goal.errors.target_value"
+                        >
                             <Input
                                 v-model="goal.target_value"
                                 type="number"
@@ -1121,10 +1183,13 @@ const rules = [
                             />
                         </Field>
                     </div>
-                    <Field label="বিভাগ" :error="goal.errors.cost_center_id">
+                    <Field
+                        :label="t('বিভাগ')"
+                        :error="goal.errors.cost_center_id"
+                    >
                         <NSelect
                             v-model="goal.cost_center_id"
-                            placeholder="ঐচ্ছিক"
+                            :placeholder="t('ঐচ্ছিক')"
                         >
                             <option :value="null">—</option>
                             <option
@@ -1133,16 +1198,18 @@ const rules = [
                                 :value="c.id"
                                 :disabled="c.kind === 'group'"
                             >
-                                {{ centerLabel(c) }}
+                                {{ centerLabel({ ...c, name: t(c.name) }) }}
                             </option>
                         </NSelect>
                     </Field>
-                    <Field label="নোট" :error="goal.errors.notes">
+                    <Field :label="t('নোট')" :error="goal.errors.notes">
                         <textarea
                             v-model="goal.notes"
                             rows="2"
                             class="w-full rounded-md border border-input bg-card px-3 py-2 text-[15px] shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
-                            placeholder="কীভাবে পৌঁছাবেন — যেমন সবুজ ঘাস বাড়ানো"
+                            :placeholder="
+                                t('কীভাবে পৌঁছাবেন — যেমন সবুজ ঘাস বাড়ানো')
+                            "
                         />
                     </Field>
                 </div>
@@ -1151,7 +1218,7 @@ const rules = [
                     type="submit"
                     class="mt-4 h-11 w-full text-base"
                     :disabled="goal.processing || !goal.title.trim()"
-                    >লক্ষ্য রাখুন</Button
+                    >{{ t('লক্ষ্য রাখুন') }}</Button
                 >
             </form>
         </div>
@@ -1163,7 +1230,7 @@ const rules = [
                     v-if="!routine.length"
                     class="rounded-xl border border-dashed border-border bg-card/60 px-4 py-12 text-center text-sm text-muted-foreground sm:col-span-2"
                 >
-                    রুটিন এখনো ঠিক করা হয়নি।
+                    {{ t('রুটিন এখনো ঠিক করা হয়নি।') }}
                 </p>
                 <div
                     v-for="(block, i) in routine"
@@ -1171,7 +1238,9 @@ const rules = [
                     class="rounded-xl border border-border bg-card p-4"
                 >
                     <div class="mb-2 flex items-center justify-between gap-2">
-                        <h3 class="font-display text-lg">{{ block.title }}</h3>
+                        <h3 class="font-display text-lg">
+                            {{ t(block.title) }}
+                        </h3>
                         <span class="num text-xs text-muted-foreground"
                             >{{ doneIn(i, block.items) }}/{{
                                 block.items.length
@@ -1205,21 +1274,23 @@ const rules = [
                                         ticks[`${i}-${j}`] &&
                                         'text-muted-foreground line-through'
                                     "
-                                    >{{ item }}</span
+                                    >{{ t(item) }}</span
                                 >
                             </button>
                         </li>
                     </ul>
                 </div>
                 <p class="text-xs text-muted-foreground sm:col-span-2">
-                    টিক শুধু এই ফোনে, আজকের জন্য মনে থাকে।
+                    {{ t('টিক শুধু এই ফোনে, আজকের জন্য মনে থাকে।') }}
                 </p>
             </section>
 
             <aside
                 class="h-fit rounded-xl border border-paddy/30 bg-paddy/5 p-4 lg:col-span-2"
             >
-                <h2 class="font-display text-lg">ভালো খামারের ৫টি নিয়ম</h2>
+                <h2 class="font-display text-lg">
+                    {{ t('ভালো খামারের ৫টি নিয়ম') }}
+                </h2>
                 <ol class="mt-3 space-y-3">
                     <li
                         v-for="(rule, i) in rules"

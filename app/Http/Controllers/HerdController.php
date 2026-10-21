@@ -70,7 +70,7 @@ class HerdController extends Controller
         }
 
         $care->recordService($animal, $data);
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag}: গর্ভের হিসাব শুরু হলো।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':tag: গর্ভের হিসাব শুরু হলো।', ['tag' => $animal->tag])]);
 
         return back();
     }
@@ -91,7 +91,7 @@ class HerdController extends Controller
         }
 
         $breeding->update($data);
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'গর্ভের হিসাব হালনাগাদ হলো।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('গর্ভের হিসাব হালনাগাদ হলো।')]);
 
         return back();
     }
@@ -114,7 +114,7 @@ class HerdController extends Controller
         $data['number'] = Batch::nextNumber((int) $data['cost_center_id']);
         $batch = Batch::query()->create($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$batch->label()} খোলা হলো।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':batch খোলা হলো।', ['batch' => $batch->label()])]);
 
         return back();
     }
@@ -125,7 +125,7 @@ class HerdController extends Controller
         unset($data['cost_center_id']);
         $batch->update($data);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$batch->label()} হালনাগাদ হলো।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':batch হালনাগাদ হলো।', ['batch' => $batch->label()])]);
 
         return back();
     }
@@ -139,7 +139,7 @@ class HerdController extends Controller
         ]);
 
         AnimalWeight::query()->create([...$data, 'animal_id' => $animal->id, 'created_by' => $request->user()->id]);
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$animal->tag}: ওজন লেখা হলো।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':tag: ওজন লেখা হলো।', ['tag' => $animal->tag])]);
 
         return back();
     }

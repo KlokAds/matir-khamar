@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\HealthEvent;
 use App\Services\HerdCare;
 use App\Support\Lookups;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -26,7 +27,7 @@ class HealthController extends Controller
                 ->map(fn (HealthEvent $e) => [
                     'id' => $e->id,
                     'kind' => $e->kind,
-                    'kind_label' => HealthEvent::KINDS[$e->kind] ?? $e->kind,
+                    'kind_label' => __(HealthEvent::KINDS[$e->kind] ?? $e->kind),
                     'name' => $e->name,
                     'target' => $e->target(),
                     'animal_id' => $e->animal_id,
@@ -37,7 +38,8 @@ class HealthController extends Controller
                     'notes' => $e->notes,
                     'deletable' => (bool) $e->created_at?->greaterThan(now()->subDay()),
                 ]),
-            'kinds' => HealthEvent::KINDS,
+            'kinds' => Tr::all(HealthEvent::KINDS),
+            // Names stay Bangla: they are saved as data and matched to find the newer dose; the page shows them translated.
             'presets' => HealthEvent::PRESETS,
             'centers' => array_values(array_filter(Lookups::centers(), fn ($c) => $c['holds_animals'])),
             'animals' => Animal::query()->where('status', 'active')->orderBy('tag')->get(['id', 'tag', 'name', 'cost_center_id']),
@@ -79,14 +81,14 @@ class HealthController extends Controller
             return 1;
         });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$data['name']} লেখা হলো".($count > 1 ? " ({$count}টি গরু)" : '').'।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => $count > 1 ? __(':name লেখা হলো (:countটি গরু)।', ['name' => $data['name'], 'count' => $count]) : __(':name লেখা হলো।', ['name' => $data['name']])]);
 
         return back();
     }
 
     public function destroy(HealthEvent $event): RedirectResponse
     {
-        abort_unless($event->created_at?->greaterThan(now()->subDay()), 403, 'একদিনের বেশি পুরনো লেখা মোছা যায় না।');
+        abort_unless($event->created_at?->greaterThan(now()->subDay()), 403, Tr::get('একদিনের বেশি পুরনো লেখা মোছা যায় না।'));
         $event->delete();
 
         return back();

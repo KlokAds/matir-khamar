@@ -18,6 +18,7 @@ import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { currentLocale, t } from '@/lib/i18n';
 import { centerLabel } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
 import { disablePush, enablePush, pushState } from '@/lib/push';
@@ -112,17 +113,17 @@ const local = (d: Date) =>
 const presets = [
     {
         key: '1h',
-        label: '১ ঘণ্টা পরে',
+        label: t('১ ঘণ্টা পরে'),
         at: () => new Date(Date.now() + 3600_000),
     },
     {
         key: '3h',
-        label: '৩ ঘণ্টা পরে',
+        label: t('৩ ঘণ্টা পরে'),
         at: () => new Date(Date.now() + 3 * 3600_000),
     },
     {
         key: 'evening',
-        label: 'আজ সন্ধ্যা ৬টা',
+        label: t('আজ সন্ধ্যা ৬টা'),
         at: () => {
             const d = new Date();
             d.setHours(18, 0, 0, 0);
@@ -136,7 +137,7 @@ const presets = [
     },
     {
         key: 'morning',
-        label: 'কাল সকাল ৭টা',
+        label: t('কাল সকাল ৭টা'),
         at: () => {
             const d = new Date();
             d.setDate(d.getDate() + 1);
@@ -145,7 +146,7 @@ const presets = [
             return d;
         },
     },
-    { key: 'custom', label: 'নিজে সময় দিন', at: () => new Date() },
+    { key: 'custom', label: t('নিজে সময় দিন'), at: () => new Date() },
 ] as const;
 
 const preset = ref<(typeof presets)[number]['key']>('1h');
@@ -184,7 +185,7 @@ function save() {
 }
 
 function remindToBuy(item: { name: string }) {
-    f.title = `${item.name} কিনতে হবে`;
+    f.title = t(':name কিনতে হবে', { name: t(item.name) });
     pick('morning');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -209,19 +210,19 @@ const todayKey = local(new Date()).slice(0, 10);
 const groups = computed(() => [
     {
         key: 'late',
-        title: 'সময় পার হয়ে গেছে',
+        title: t('সময় পার হয়ে গেছে'),
         rows: props.open.filter((r) => r.overdue),
     },
     {
         key: 'today',
-        title: 'আজ',
+        title: t('আজ'),
         rows: props.open.filter(
             (r) => !r.overdue && r.due_at.slice(0, 10) === todayKey,
         ),
     },
     {
         key: 'later',
-        title: 'সামনে',
+        title: t('সামনে'),
         rows: props.open.filter(
             (r) => !r.overdue && r.due_at.slice(0, 10) > todayKey,
         ),
@@ -230,7 +231,8 @@ const groups = computed(() => [
 
 function when(value: string): string {
     const d = new Date(value);
-    const time = d.toLocaleTimeString('bn-BD', {
+    const locale = currentLocale() === 'en' ? 'en-GB' : 'bn-BD';
+    const time = d.toLocaleTimeString(locale, {
         hour: 'numeric',
         minute: '2-digit',
     });
@@ -241,18 +243,18 @@ function when(value: string): string {
     );
 
     if (dayDiff === 0) {
-        return `আজ ${time}`;
+        return t('আজ :time', { time });
     }
 
     if (dayDiff === 1) {
-        return `কাল ${time}`;
+        return t('কাল :time', { time });
     }
 
     if (dayDiff === -1) {
-        return `গতকাল ${time}`;
+        return t('গতকাল :time', { time });
     }
 
-    return `${d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'short' })} ${time}`;
+    return `${d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })} ${time}`;
 }
 
 const lowStock = computed(() => props.stock.filter((s) => s.low));
@@ -262,12 +264,16 @@ const trackedStock = computed(() =>
 </script>
 
 <template>
-    <Head title="মনে করিয়ে দিন" />
+    <Head :title="t('মনে করিয়ে দিন')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="মনে করিয়ে দিন"
-            subtitle="মাঠে দাঁড়িয়ে মনে পড়লো? লিখে সময় দিন — ঠিক সময়ে ফোনে নোটিফিকেশন যাবে।"
+            :title="t('মনে করিয়ে দিন')"
+            :subtitle="
+                t(
+                    'মাঠে দাঁড়িয়ে মনে পড়লো? লিখে সময় দিন — ঠিক সময়ে ফোনে নোটিফিকেশন যাবে।',
+                )
+            "
         />
 
         <div class="grid gap-6 lg:grid-cols-5">
@@ -277,69 +283,89 @@ const trackedStock = computed(() =>
                     <h2
                         class="mb-2 flex items-center gap-2 font-display text-lg"
                     >
-                        <Smartphone class="size-5 text-paddy" /> এই ফোনে
-                        নোটিফিকেশন
+                        <Smartphone class="size-5 text-paddy" />
+                        {{ t('এই ফোনে নোটিফিকেশন') }}
                     </h2>
 
                     <p v-if="!vapidKey" class="text-sm text-muted-foreground">
-                        সার্ভারে নোটিফিকেশনের চাবি তৈরি করা যায়নি। অ্যাপ
-                        আপডেটের পর আবার চেষ্টা করুন।
+                        {{
+                            t(
+                                'সার্ভারে নোটিফিকেশনের চাবি তৈরি করা যায়নি। অ্যাপ আপডেটের পর আবার চেষ্টা করুন।',
+                            )
+                        }}
                     </p>
                     <template v-else-if="state === 'on'">
                         <p class="mb-3 flex items-center gap-2 text-sm">
-                            <BellRing class="size-4 text-paddy" /> চালু আছে ·
-                            আপনার মোট {{ devices }}টি ফোন/ব্রাউজারে যাবে
+                            <BellRing class="size-4 text-paddy" />
+                            {{
+                                t(
+                                    'চালু আছে · আপনার মোট :nটি ফোন/ব্রাউজারে যাবে',
+                                    { n: devices },
+                                )
+                            }}
                         </p>
                         <div class="flex flex-wrap gap-2">
                             <Button
                                 size="sm"
                                 variant="secondary"
                                 @click="sendTest"
-                                ><Send /> পরীক্ষা পাঠান</Button
+                                ><Send /> {{ t('পরীক্ষা পাঠান') }}</Button
                             >
                             <Button
                                 size="sm"
                                 variant="ghost"
                                 :disabled="busy"
                                 @click="turnOff"
-                                ><BellOff /> এই ফোনে বন্ধ</Button
+                                ><BellOff /> {{ t('এই ফোনে বন্ধ') }}</Button
                             >
                         </div>
                     </template>
                     <template v-else-if="state === 'off'">
                         <p class="mb-3 text-sm text-muted-foreground">
-                            চালু করলে অ্যাপ বন্ধ থাকলেও সময়মতো ফোনে আসবে, শব্দ
-                            ও কাঁপুনি সহ।
+                            {{
+                                t(
+                                    'চালু করলে অ্যাপ বন্ধ থাকলেও সময়মতো ফোনে আসবে, শব্দ ও কাঁপুনি সহ।',
+                                )
+                            }}
                         </p>
                         <Button :disabled="busy" @click="turnOn"
-                            ><BellRing /> নোটিফিকেশন চালু করুন</Button
+                            ><BellRing />
+                            {{ t('নোটিফিকেশন চালু করুন') }}</Button
                         >
                     </template>
                     <p
                         v-else-if="state === 'blocked'"
                         class="text-sm text-muted-foreground"
                     >
-                        এই ফোনে নোটিফিকেশন আটকানো আছে। ব্রাউজারের ঠিকানার পাশের
-                        🔒 চিহ্ন → অনুমতি → নোটিফিকেশন "অনুমতি দিন" করে পাতাটি
-                        আবার খুলুন।
+                        {{
+                            t(
+                                'এই ফোনে নোটিফিকেশন আটকানো আছে। ব্রাউজারের ঠিকানার পাশের 🔒 চিহ্ন → অনুমতি → নোটিফিকেশন "অনুমতি দিন" করে পাতাটি আবার খুলুন।',
+                            )
+                        }}
                     </p>
                     <p
                         v-else-if="state === 'needs-install'"
                         class="text-sm text-muted-foreground"
                     >
-                        আইফোনে আগে অ্যাপটি হোম স্ক্রিনে রাখুন: Safari-র শেয়ার
-                        বোতাম → "Add to Home Screen"। তারপর সেখান থেকে খুলে
-                        এখানে চালু করুন।
+                        {{
+                            t(
+                                'আইফোনে আগে অ্যাপটি হোম স্ক্রিনে রাখুন: Safari-র শেয়ার বোতাম → "Add to Home Screen"। তারপর সেখান থেকে খুলে এখানে চালু করুন।',
+                            )
+                        }}
                     </p>
                     <p v-else class="text-sm text-muted-foreground">
-                        এই ব্রাউজারে নোটিফিকেশন চলে না। ফোনে Chrome দিয়ে খুলুন।
+                        {{
+                            t(
+                                'এই ব্রাউজারে নোটিফিকেশন চলে না। ফোনে Chrome দিয়ে খুলুন।',
+                            )
+                        }}
                     </p>
 
                     <div
                         class="mt-4 grid gap-2 border-t border-border/70 pt-3 text-sm"
                     >
                         <label class="flex items-center justify-between gap-3">
-                            <span>নিজের রিমাইন্ডার</span>
+                            <span>{{ t('নিজের রিমাইন্ডার') }}</span>
                             <Toggle
                                 v-model="prefs.reminders"
                                 @update:model-value="savePrefs"
@@ -347,11 +373,12 @@ const trackedStock = computed(() =>
                         </label>
                         <label class="flex items-center justify-between gap-3">
                             <span
-                                >সকাল ৭টায় আজকের কাজের তালিকা
-                                <small class="block text-muted-foreground"
-                                    >গর্ভ পরীক্ষা, বাচ্চা হওয়ার দিন, স্টক
-                                    ফুরানো…</small
-                                ></span
+                                >{{ t('সকাল ৭টায় আজকের কাজের তালিকা') }}
+                                <small class="block text-muted-foreground">{{
+                                    t(
+                                        'গর্ভ পরীক্ষা, বাচ্চা হওয়ার দিন, স্টক ফুরানো…',
+                                    )
+                                }}</small></span
                             >
                             <Toggle
                                 v-model="prefs.morning"
@@ -360,10 +387,10 @@ const trackedStock = computed(() =>
                         </label>
                         <label class="flex items-center justify-between gap-3">
                             <span
-                                >সন্ধ্যা ৭টায়, দুধ/খাবার না লিখলে
-                                <small class="block text-muted-foreground"
-                                    >সেদিন লেখা হয়ে থাকলে আসবে না</small
-                                ></span
+                                >{{ t('সন্ধ্যা ৭টায়, দুধ/খাবার না লিখলে') }}
+                                <small class="block text-muted-foreground">{{
+                                    t('সেদিন লেখা হয়ে থাকলে আসবে না')
+                                }}</small></span
                             >
                             <Toggle
                                 v-model="prefs.evening"
@@ -381,20 +408,25 @@ const trackedStock = computed(() =>
                     <h2
                         class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
-                        <AlarmClock class="size-5 text-turmeric" /> নতুন
-                        রিমাইন্ডার
+                        <AlarmClock class="size-5 text-turmeric" />
+                        {{ t('নতুন রিমাইন্ডার') }}
                     </h2>
                     <div class="grid gap-3">
-                        <Field label="কী মনে করাবো" :error="f.errors.title">
+                        <Field
+                            :label="t('কী মনে করাবো')"
+                            :error="f.errors.title"
+                        >
                             <Input
                                 v-model="f.title"
                                 required
                                 maxlength="160"
-                                placeholder="যেমন: ঘাসের জমিতে সার দিতে হবে"
+                                :placeholder="
+                                    t('যেমন: ঘাসের জমিতে সার দিতে হবে')
+                                "
                             />
                         </Field>
 
-                        <Field label="কখন" :error="f.errors.due_at">
+                        <Field :label="t('কখন')" :error="f.errors.due_at">
                             <div class="grid grid-cols-2 gap-1.5">
                                 <button
                                     v-for="p in presets"
@@ -422,20 +454,22 @@ const trackedStock = computed(() =>
                         </Field>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <Field label="কতবার">
+                            <Field :label="t('কতবার')">
                                 <NSelect v-model="f.repeat">
                                     <option
                                         v-for="(label, key) in repeats"
                                         :key="key"
                                         :value="key"
                                     >
-                                        {{ label }}
+                                        {{ t(label) }}
                                     </option>
                                 </NSelect>
                             </Field>
-                            <Field label="কাকে">
+                            <Field :label="t('কাকে')">
                                 <NSelect v-model="f.for_user_id">
-                                    <option :value="null">সবাইকে</option>
+                                    <option :value="null">
+                                        {{ t('সবাইকে') }}
+                                    </option>
                                     <option
                                         v-for="p in people"
                                         :key="p.id"
@@ -453,17 +487,19 @@ const trackedStock = computed(() =>
                             class="text-left text-sm text-muted-foreground underline-offset-4 hover:underline"
                             @click="more = true"
                         >
-                            + বিস্তারিত, ক্যাটাগরি বা গরু যোগ করুন
+                            {{ t('+ বিস্তারিত, ক্যাটাগরি বা গরু যোগ করুন') }}
                         </button>
                         <template v-else>
-                            <Field label="বিস্তারিত (ঐচ্ছিক)">
+                            <Field :label="t('বিস্তারিত (ঐচ্ছিক)')">
                                 <Input
                                     v-model="f.body"
-                                    placeholder="যেমন: ইউরিয়া ১০ কেজি, উত্তরের জমি"
+                                    :placeholder="
+                                        t('যেমন: ইউরিয়া ১০ কেজি, উত্তরের জমি')
+                                    "
                                 />
                             </Field>
                             <div class="grid grid-cols-2 gap-3">
-                                <Field label="ক্যাটাগরি">
+                                <Field :label="t('ক্যাটাগরি')">
                                     <NSelect v-model="f.cost_center_id">
                                         <option :value="null">—</option>
                                         <option
@@ -472,11 +508,16 @@ const trackedStock = computed(() =>
                                             :value="c.id"
                                             :disabled="c.kind === 'group'"
                                         >
-                                            {{ centerLabel(c) }}
+                                            {{
+                                                centerLabel({
+                                                    ...c,
+                                                    name: t(c.name),
+                                                })
+                                            }}
                                         </option>
                                     </NSelect>
                                 </Field>
-                                <Field label="গরু">
+                                <Field :label="t('গরু')">
                                     <NSelect v-model="f.animal_id">
                                         <option :value="null">—</option>
                                         <option
@@ -491,9 +532,9 @@ const trackedStock = computed(() =>
                             </div>
                         </template>
 
-                        <Button type="submit" :disabled="f.processing"
-                            >সময় ঠিক করুন</Button
-                        >
+                        <Button type="submit" :disabled="f.processing">{{
+                            t('সময় ঠিক করুন')
+                        }}</Button>
                     </div>
                 </form>
             </div>
@@ -507,7 +548,8 @@ const trackedStock = computed(() =>
                     <h2
                         class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
-                        <Package class="size-5 text-clay" /> স্টক আর কত দিন চলবে
+                        <Package class="size-5 text-clay" />
+                        {{ t('স্টক আর কত দিন চলবে') }}
                     </h2>
                     <ul class="divide-y divide-border/60">
                         <li
@@ -516,10 +558,19 @@ const trackedStock = computed(() =>
                             class="flex items-center justify-between gap-3 py-2 text-sm"
                         >
                             <span class="min-w-0">
-                                <span class="font-medium">{{ s.name }}</span>
-                                <small class="num block text-muted-foreground"
-                                    >আছে {{ s.qty_on_hand }} {{ s.unit }} · দিনে
-                                    গড়ে {{ s.per_day }} {{ s.unit }}</small
+                                <span class="font-medium">{{ t(s.name) }}</span>
+                                <small
+                                    class="num block text-muted-foreground"
+                                    >{{
+                                        t(
+                                            'আছে :qty :unit · দিনে গড়ে :per :unit',
+                                            {
+                                                qty: s.qty_on_hand,
+                                                per: s.per_day ?? '',
+                                                unit: t(s.unit),
+                                            },
+                                        )
+                                    }}</small
                                 >
                             </span>
                             <span class="flex shrink-0 items-center gap-2">
@@ -528,14 +579,18 @@ const trackedStock = computed(() =>
                                         'num',
                                         s.low ? 'text-destructive' : '',
                                     ]"
-                                    >{{ Math.round(s.days_left ?? 0) }} দিন</b
+                                    >{{
+                                        t(':n দিন', {
+                                            n: Math.round(s.days_left ?? 0),
+                                        })
+                                    }}</b
                                 >
                                 <Button
                                     v-if="s.low"
                                     size="sm"
                                     variant="secondary"
                                     @click="remindToBuy(s)"
-                                    >মনে করাও</Button
+                                    >{{ t('মনে করাও') }}</Button
                                 >
                             </span>
                         </li>
@@ -544,7 +599,7 @@ const trackedStock = computed(() =>
                         v-if="lowStock.length"
                         class="mt-2 text-xs text-muted-foreground"
                     >
-                        ৫ দিনের কম থাকলে সকালের তালিকাতেও আসবে।
+                        {{ t('৫ দিনের কম থাকলে সকালের তালিকাতেও আসবে।') }}
                     </p>
                 </section>
 
@@ -571,7 +626,7 @@ const trackedStock = computed(() =>
                                     <button
                                         type="button"
                                         class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-paddy/60 text-paddy hover:bg-paddy hover:text-primary-foreground"
-                                        aria-label="হয়ে গেছে"
+                                        :aria-label="t('হয়ে গেছে')"
                                         @click="act(r, 'done')"
                                     >
                                         <Check class="size-3.5" />
@@ -599,14 +654,16 @@ const trackedStock = computed(() =>
                                                 v-if="r.repeat !== 'none'"
                                                 class="inline-flex items-center gap-1"
                                                 ><Repeat class="size-3" />{{
-                                                    repeats[r.repeat]
+                                                    t(repeats[r.repeat])
                                                 }}</span
                                             >
                                             <span>{{
-                                                r.for ? `→ ${r.for}` : '→ সবাই'
+                                                r.for
+                                                    ? `→ ${r.for}`
+                                                    : t('→ সবাই')
                                             }}</span>
                                             <span v-if="r.center">{{
-                                                r.center
+                                                t(r.center)
                                             }}</span>
                                             <Link
                                                 v-if="r.animal_id"
@@ -623,7 +680,7 @@ const trackedStock = computed(() =>
                                         variant="ghost"
                                         class="h-8"
                                         @click="act(r, 'snooze', 60)"
-                                        >১ ঘণ্টা পরে</Button
+                                        >{{ t('১ ঘণ্টা পরে') }}</Button
                                     >
                                     <Button
                                         size="sm"
@@ -636,7 +693,7 @@ const trackedStock = computed(() =>
                                                 minutesUntilMorning(),
                                             )
                                         "
-                                        >কাল সকালে</Button
+                                        >{{ t('কাল সকালে') }}</Button
                                     >
                                 </div>
                             </li>
@@ -648,14 +705,14 @@ const trackedStock = computed(() =>
                     v-if="!open.length"
                     class="rounded-xl border border-dashed border-border px-4 py-10 text-center text-muted-foreground"
                 >
-                    কোনো রিমাইন্ডার বাকি নেই।
+                    {{ t('কোনো রিমাইন্ডার বাকি নেই।') }}
                 </p>
 
                 <details v-if="done.length" class="group">
                     <summary
                         class="cursor-pointer text-sm text-muted-foreground"
                     >
-                        হয়ে যাওয়া ({{ done.length }})
+                        {{ t('হয়ে যাওয়া (:n)', { n: done.length }) }}
                     </summary>
                     <ul class="mt-2 divide-y divide-border/60 text-sm">
                         <li
@@ -671,7 +728,7 @@ const trackedStock = computed(() =>
                                 class="shrink-0 text-xs underline"
                                 @click="act(r, 'undo')"
                             >
-                                ফিরিয়ে আনুন
+                                {{ t('ফিরিয়ে আনুন') }}
                             </button>
                         </li>
                     </ul>

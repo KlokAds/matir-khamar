@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { currentLocale } from '@/lib/i18n';
 
 /** Poisha (integer) to "৳ 1,23,450.00" with South-Asian digit grouping. */
 export function taka(
@@ -38,6 +39,21 @@ const months = [
     'নভে',
     'ডিসে',
 ];
+const monthsEn = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+];
+const short = () => (currentLocale() === 'en' ? monthsEn : months);
 
 /** "2026-10-21" -> "21 অক্টো 2026" */
 export function day(value: string | null | undefined): string {
@@ -47,7 +63,7 @@ export function day(value: string | null | undefined): string {
 
     const [y, m, d] = value.slice(0, 10).split('-').map(Number);
 
-    return `${d} ${months[m - 1]} ${y}`;
+    return `${d} ${short()[m - 1]} ${y}`;
 }
 
 const monthsFull = [
@@ -64,18 +80,34 @@ const monthsFull = [
     'নভেম্বর',
     'ডিসেম্বর',
 ];
+const monthsFullEn = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+];
 
 /** "2026-10" -> "অক্টোবর 2026" */
 export function monthFull(ym: string): string {
     const [y, m] = ym.split('-').map(Number);
 
-    return `${monthsFull[m - 1]} ${y}`;
+    const names = currentLocale() === 'en' ? monthsFullEn : monthsFull;
+
+    return `${names[m - 1]} ${y}`;
 }
 
 export function monthLabel(ym: string): string {
     const [y, m] = ym.split('-').map(Number);
 
-    return `${months[m - 1]} ${String(y).slice(2)}`;
+    return `${short()[m - 1]} ${String(y).slice(2)}`;
 }
 
 /** Feeding time by the clock: before 11 morning, before 3 pm noon, then afternoon. */

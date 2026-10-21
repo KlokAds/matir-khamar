@@ -16,6 +16,7 @@ import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import { Button } from '@/components/ui/button';
+import { currentLocale, t } from '@/lib/i18n';
 import { day, monthFull, qty, taka } from '@/lib/khamar';
 
 defineOptions({
@@ -115,13 +116,13 @@ const previousName = computed(() => monthFull(props.previousMonth));
 /** "▲ 12%" / "▼ 8%" against last month; null when last month had nothing to compare. */
 function change(now: number, before: number): string | null {
     if (before === 0) {
-        return now === 0 ? null : 'নতুন';
+        return now === 0 ? null : t('নতুন');
     }
 
     const pct = Math.round(((now - before) / Math.abs(before)) * 100);
 
     if (pct === 0) {
-        return '— ০% পরিবর্তন নেই';
+        return t('— ০% পরিবর্তন নেই');
     }
 
     return `${pct > 0 ? '▲' : '▼'} ${Math.abs(pct)}%`;
@@ -130,7 +131,9 @@ function change(now: number, before: number): string | null {
 const hint = (now: number, before: number, text: string) => {
     const c = change(now, before);
 
-    return c ? `${c} · গত মাসে ${text}` : `গত মাসে ${text}`;
+    return c
+        ? t(':change · গত মাসে :text', { change: c, text })
+        : t('গত মাসে :text', { text });
 };
 
 const moneyTotal = computed(() =>
@@ -145,11 +148,11 @@ const maxExpense = computed(() =>
 
 const animalGroups = computed(() =>
     [
-        { key: 'bought', title: 'কেনা হয়েছে', rows: props.animals.bought },
-        { key: 'sold', title: 'বিক্রি হয়েছে', rows: props.animals.sold },
+        { key: 'bought', title: t('কেনা হয়েছে'), rows: props.animals.bought },
+        { key: 'sold', title: t('বিক্রি হয়েছে'), rows: props.animals.sold },
         {
             key: 'dead',
-            title: 'মারা গেছে (খাতার মূল্য)',
+            title: t('মারা গেছে (খাতার মূল্য)'),
             rows: props.animals.dead,
         },
     ].filter((group) => group.rows.length > 0),
@@ -159,56 +162,66 @@ const groupTotal = (rows: AnimalRow[]) =>
 
 const print = () => window.print();
 
-const MONTHS = [
-    'জানুয়ারি',
-    'ফেব্রুয়ারি',
-    'মার্চ',
-    'এপ্রিল',
-    'মে',
-    'জুন',
-    'জুলাই',
-    'আগস্ট',
-    'সেপ্টেম্বর',
-    'অক্টোবর',
-    'নভেম্বর',
-    'ডিসেম্বর',
-];
 const periodLabel = computed(() => {
     const [y, m] = props.month.split('-').map(Number);
     const last = new Date(y, m, 0).getDate();
 
-    return `১–${last} ${MONTHS[m - 1]} ${y}`;
+    return t('১–:last :month', { last, month: monthFull(`${y}-${m}`) });
 });
-const preparedOn = new Date().toLocaleDateString('bn-BD', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-});
+const preparedOn = new Date().toLocaleDateString(
+    currentLocale() === 'en' ? 'en-GB' : 'bn-BD',
+    {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    },
+);
 
 /** One plain sentence a reader can take away without reading the tables. */
 const summary = computed(() => {
     const f = props.farm;
     const p = props.previous;
     const parts = [
-        `${monthName.value}-এ আয় ${taka(f.income)}, খরচ ${taka(f.expense)} — ${f.profit >= 0 ? 'লাভ' : 'ক্ষতি'} ${taka(Math.abs(f.profit))}।`,
+        t(
+            f.profit >= 0
+                ? ':month-এ আয় :income, খরচ :expense — লাভ :amount।'
+                : ':month-এ আয় :income, খরচ :expense — ক্ষতি :amount।',
+            {
+                month: monthName.value,
+                income: taka(f.income),
+                expense: taka(f.expense),
+                amount: taka(Math.abs(f.profit)),
+            },
+        ),
     ];
 
     if (p.expense > 0) {
         const pct = Math.round(((f.expense - p.expense) / p.expense) * 100);
         parts.push(
             pct === 0
-                ? 'খরচ গত মাসের সমান।'
-                : `খরচ গত মাসের চেয়ে ${Math.abs(pct)}% ${pct > 0 ? 'বেশি' : 'কম'}।`,
+                ? t('খরচ গত মাসের সমান।')
+                : t(
+                      pct > 0
+                          ? 'খরচ গত মাসের চেয়ে :pct% বেশি।'
+                          : 'খরচ গত মাসের চেয়ে :pct% কম।',
+                      { pct: Math.abs(pct) },
+                  ),
         );
     }
 
     parts.push(
-        `দুধ ${qty(props.milk.liters, 'লিটার')}, খামারে ${props.herdTotal}টি গরু।`,
+        t('দুধ :milk, খামারে :herdটি গরু।', {
+            milk: qty(props.milk.liters, t('লিটার')),
+            herd: props.herdTotal,
+        }),
     );
 
     if (props.expenses[0]) {
         parts.push(
-            `সবচেয়ে বড় খরচ: ${props.expenses[0].name} (${taka(props.expenses[0].amount)})।`,
+            t('সবচেয়ে বড় খরচ: :name (:amount)।', {
+                name: t(props.expenses[0].name),
+                amount: taka(props.expenses[0].amount),
+            }),
         );
     }
 
@@ -217,12 +230,16 @@ const summary = computed(() => {
 
 function share() {
     const lines = [
-        `মাটির খামার — ${monthName.value}-এর হিসাব`,
-        `আয়: ${taka(props.farm.income)}`,
-        `খরচ: ${taka(props.farm.expense)}`,
-        `${props.farm.profit >= 0 ? 'লাভ' : 'ক্ষতি'}: ${taka(Math.abs(props.farm.profit))}`,
-        `দুধ: ${qty(props.milk.liters, 'লিটার')}`,
-        `গরু: ${props.herdTotal}টি`,
+        t('মাটির খামার — :month-এর হিসাব', { month: monthName.value }),
+        t('আয়: :amount', { amount: taka(props.farm.income) }),
+        t('খরচ: :amount', { amount: taka(props.farm.expense) }),
+        t(props.farm.profit >= 0 ? 'লাভ: :amount' : 'ক্ষতি: :amount', {
+            amount: taka(Math.abs(props.farm.profit)),
+        }),
+        t('দুধ: :amount', {
+            amount: qty(props.milk.liters, t('লিটার')),
+        }),
+        t('গরু: :nটি', { n: props.herdTotal }),
     ];
 
     window.open(
@@ -234,23 +251,27 @@ function share() {
 </script>
 
 <template>
-    <Head :title="`মাসিক রিপোর্ট — ${monthName}`" />
+    <Head :title="t('মাসিক রিপোর্ট — :month', { month: monthName })" />
 
     <div class="monthly-report flex flex-1 flex-col p-4 md:p-6">
         <div class="no-print">
             <PageTitle
-                title="মাসিক রিপোর্ট"
-                subtitle="এক পাতায় মাসের পুরো হিসাব — প্রিন্ট করুন, PDF সেভ করুন বা WhatsApp-এ পাঠান।"
+                :title="t('মাসিক রিপোর্ট')"
+                :subtitle="
+                    t(
+                        'এক পাতায় মাসের পুরো হিসাব — প্রিন্ট করুন, PDF সেভ করুন বা WhatsApp-এ পাঠান।',
+                    )
+                "
             >
                 <template #actions>
-                    <Field label="মাস" class="w-44">
+                    <Field :label="t('মাস')" class="w-44">
                         <DateField mode="month" v-model="month" />
                     </Field>
                     <Button size="sm" variant="secondary" @click="print"
-                        ><Printer /> প্রিন্ট / PDF সেভ</Button
+                        ><Printer /> {{ t('প্রিন্ট / PDF সেভ') }}</Button
                     >
                     <Button size="sm" @click="share"
-                        ><Send /> WhatsApp-এ পাঠান</Button
+                        ><Send /> {{ t('WhatsApp-এ পাঠান') }}</Button
                     >
                 </template>
             </PageTitle>
@@ -274,10 +295,14 @@ function share() {
                             <p
                                 class="font-display text-xl leading-tight md:text-2xl"
                             >
-                                মাটির খামার
+                                {{ t('মাটির খামার') }}
                             </p>
                             <p class="text-sm text-muted-foreground">
-                                Klok Ads কৃষি উদ্যোগ · গোপাই কাটখৈর, নওগাঁ সদর
+                                {{
+                                    t(
+                                        'Klok Ads কৃষি উদ্যোগ · গোপাই কাটখৈর, নওগাঁ সদর',
+                                    )
+                                }}
                             </p>
                         </div>
                     </div>
@@ -285,20 +310,24 @@ function share() {
                         <p
                             class="text-[11px] font-semibold tracking-wide text-paddy"
                         >
-                            মাসিক হিসাব বিবরণী
+                            {{ t('মাসিক হিসাব বিবরণী') }}
                         </p>
                         <p class="font-display text-xl leading-tight">
                             {{ monthName }}
                         </p>
                         <p class="text-xs text-muted-foreground">
-                            সময়কাল {{ periodLabel }} · প্রস্তুত
-                            {{ preparedOn }}
+                            {{
+                                t('সময়কাল :period · প্রস্তুত :date', {
+                                    period: periodLabel,
+                                    date: preparedOn,
+                                })
+                            }}
                         </p>
                     </div>
                 </div>
                 <div class="letterhead-rule" />
                 <p class="px-4 py-3 text-sm leading-relaxed md:px-5">
-                    <b>সারসংক্ষেপ:</b> {{ summary }}
+                    <b>{{ t('সারসংক্ষেপ:') }}</b> {{ summary }}
                 </p>
             </div>
 
@@ -307,7 +336,7 @@ function share() {
                 class="report-card grid grid-cols-2 gap-3 lg:grid-cols-4 print:grid-cols-4"
             >
                 <StatTile
-                    label="মোট আয়"
+                    :label="t('মোট আয়')"
                     :value="taka(farm.income)"
                     :hint="
                         hint(
@@ -320,7 +349,7 @@ function share() {
                     tone="paddy"
                 />
                 <StatTile
-                    label="মোট খরচ"
+                    :label="t('মোট খরচ')"
                     :value="taka(farm.expense)"
                     :hint="
                         hint(
@@ -333,7 +362,7 @@ function share() {
                     tone="clay"
                 />
                 <StatTile
-                    :label="farm.profit >= 0 ? 'লাভ' : 'ক্ষতি'"
+                    :label="farm.profit >= 0 ? t('লাভ') : t('ক্ষতি')"
                     :value="taka(farm.profit)"
                     :hint="
                         hint(
@@ -346,13 +375,13 @@ function share() {
                     tone="turmeric"
                 />
                 <StatTile
-                    label="দুধ"
-                    :value="qty(milk.liters, 'লি.')"
+                    :label="t('দুধ')"
+                    :value="qty(milk.liters, t('লি.'))"
                     :hint="
                         hint(
                             milk.liters,
                             milk.previous,
-                            qty(milk.previous, 'লি.'),
+                            qty(milk.previous, t('লি.')),
                         )
                     "
                     :icon="Milk"
@@ -360,8 +389,12 @@ function share() {
                 />
             </div>
             <p class="text-xs text-muted-foreground">
-                তুলনা: {{ previousName }}-এর সাথে। নিজের ঘাস/খড় এক খাত থেকে
-                আরেক খাতে দেওয়া খামারের মোট হিসাবে ধরা হয়নি।
+                {{
+                    t(
+                        'তুলনা: :month-এর সাথে। নিজের ঘাস/খড় এক খাত থেকে আরেক খাতে দেওয়া খামারের মোট হিসাবে ধরা হয়নি।',
+                        { month: previousName },
+                    )
+                }}
             </p>
 
             <div
@@ -371,9 +404,9 @@ function share() {
                 <section
                     class="report-card card lg:col-span-2 print:col-span-2"
                 >
-                    <h2 class="card-title">খাত অনুযায়ী আয়-খরচ</h2>
+                    <h2 class="card-title">{{ t('খাত অনুযায়ী আয়-খরচ') }}</h2>
                     <p v-if="projects.length === 0" class="empty">
-                        এই মাসে কোনো খাতে লেনদেন নেই।
+                        {{ t('এই মাসে কোনো খাতে লেনদেন নেই।') }}
                     </p>
                     <div v-else class="-mx-1 overflow-x-auto">
                         <table class="w-full min-w-[22rem] text-sm">
@@ -382,22 +415,22 @@ function share() {
                                     <th
                                         class="px-1 py-1.5 text-left font-medium"
                                     >
-                                        খাত
+                                        {{ t('খাত') }}
                                     </th>
                                     <th
                                         class="px-1 py-1.5 text-right font-medium"
                                     >
-                                        আয়
+                                        {{ t('আয়') }}
                                     </th>
                                     <th
                                         class="px-1 py-1.5 text-right font-medium"
                                     >
-                                        খরচ
+                                        {{ t('খরচ') }}
                                     </th>
                                     <th
                                         class="px-1 py-1.5 text-right font-medium"
                                     >
-                                        লাভ
+                                        {{ t('লাভ') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -428,7 +461,7 @@ function share() {
                                                 class="text-muted-foreground"
                                                 >└</span
                                             >
-                                            {{ row.name }}
+                                            {{ t(row.name) }}
                                         </span>
                                     </td>
                                     <td class="num px-1 py-1.5 text-right">
@@ -455,9 +488,9 @@ function share() {
 
                 <!-- Top expenses -->
                 <section class="report-card card">
-                    <h2 class="card-title">বড় খরচগুলো</h2>
+                    <h2 class="card-title">{{ t('বড় খরচগুলো') }}</h2>
                     <p v-if="expenses.length === 0" class="empty">
-                        এই মাসে খরচ লেখা হয়নি।
+                        {{ t('এই মাসে খরচ লেখা হয়নি।') }}
                     </p>
                     <ul v-else class="space-y-2.5">
                         <li v-for="row in expenses" :key="row.id">
@@ -465,7 +498,7 @@ function share() {
                                 class="flex items-baseline justify-between gap-3 text-sm"
                             >
                                 <span class="min-w-0 truncate">{{
-                                    row.name
+                                    t(row.name)
                                 }}</span>
                                 <span class="num shrink-0 font-semibold">{{
                                     taka(row.amount)
@@ -487,12 +520,12 @@ function share() {
 
                 <!-- Money places -->
                 <section class="report-card card">
-                    <h2 class="card-title">টাকা কোথায় আছে</h2>
+                    <h2 class="card-title">{{ t('টাকা কোথায় আছে') }}</h2>
                     <p class="mb-2 text-xs text-muted-foreground">
-                        আজ পর্যন্ত খাতার হিসাবে
+                        {{ t('আজ পর্যন্ত খাতার হিসাবে') }}
                     </p>
                     <p v-if="money.length === 0" class="empty">
-                        কোনো নগদ/ব্যাংক হিসাব নেই।
+                        {{ t('কোনো নগদ/ব্যাংক হিসাব নেই।') }}
                     </p>
                     <table v-else class="w-full text-sm">
                         <tbody>
@@ -501,13 +534,13 @@ function share() {
                                 :key="row.id"
                                 class="border-b border-border/60"
                             >
-                                <td class="py-1.5">{{ row.name }}</td>
+                                <td class="py-1.5">{{ t(row.name) }}</td>
                                 <td class="num py-1.5 text-right">
                                     {{ taka(row.balance) }}
                                 </td>
                             </tr>
                             <tr class="font-semibold">
-                                <td class="pt-2">মোট</td>
+                                <td class="pt-2">{{ t('মোট') }}</td>
                                 <td class="num pt-2 text-right">
                                     {{ taka(moneyTotal) }}
                                 </td>
@@ -520,10 +553,10 @@ function share() {
                 <section class="report-card card">
                     <h2 class="card-title flex items-center gap-2">
                         <Beef class="no-print size-5 text-clay" />
-                        মাস শেষে গরু: {{ herdTotal }}টি
+                        {{ t('মাস শেষে গরু: :nটি', { n: herdTotal }) }}
                     </h2>
                     <p v-if="herd.length === 0" class="empty">
-                        খামারে কোনো গরু নেই।
+                        {{ t('খামারে কোনো গরু নেই।') }}
                     </p>
                     <ul v-else class="divide-y divide-border/60 text-sm">
                         <li
@@ -531,10 +564,10 @@ function share() {
                             :key="row.center"
                             class="flex justify-between py-1.5"
                         >
-                            <span>{{ row.center }}</span>
-                            <span class="num font-semibold"
-                                >{{ row.count }}টি</span
-                            >
+                            <span>{{ t(row.center) }}</span>
+                            <span class="num font-semibold">{{
+                                t(':nটি', { n: row.count })
+                            }}</span>
                         </li>
                     </ul>
 
@@ -548,8 +581,8 @@ function share() {
                         >
                             <span
                                 >{{ group.title }} ({{
-                                    group.rows.length
-                                }}টি)</span
+                                    t(':nটি', { n: group.rows.length })
+                                }})</span
                             >
                             <span class="num">{{
                                 taka(groupTotal(group.rows))
@@ -578,15 +611,21 @@ function share() {
                         v-if="animalGroups.length === 0"
                         class="mt-3 text-xs text-muted-foreground"
                     >
-                        এই মাসে কোনো গরু কেনা, বিক্রি বা মারা যায়নি।
+                        {{ t('এই মাসে কোনো গরু কেনা, বিক্রি বা মারা যায়নি।') }}
                     </p>
                 </section>
 
                 <!-- Pregnancies -->
                 <section class="report-card card">
-                    <h2 class="card-title">৬০ দিনের মধ্যে বাচ্চা হবে</h2>
+                    <h2 class="card-title">
+                        {{ t('৬০ দিনের মধ্যে বাচ্চা হবে') }}
+                    </h2>
                     <p v-if="due.length === 0" class="empty">
-                        সামনের ৬০ দিনে কোনো গাভীর বাচ্চা হওয়ার কথা নেই।
+                        {{
+                            t(
+                                'সামনের ৬০ দিনে কোনো গাভীর বাচ্চা হওয়ার কথা নেই।',
+                            )
+                        }}
                     </p>
                     <ul v-else class="divide-y divide-border/60 text-sm">
                         <li
@@ -604,8 +643,12 @@ function share() {
                                 >
                                 <span
                                     class="block text-xs text-muted-foreground"
-                                    >{{ row.result_label }} · গর্ভের
-                                    {{ row.months }}</span
+                                    >{{ t(row.result_label) }} ·
+                                    {{
+                                        t('গর্ভের :months', {
+                                            months: row.months,
+                                        })
+                                    }}</span
                                 >
                             </span>
                             <span class="shrink-0 text-right">
@@ -617,8 +660,12 @@ function share() {
                                     class="num block text-xs text-muted-foreground"
                                     >{{
                                         row.days_left >= 0
-                                            ? `আর ${row.days_left} দিন`
-                                            : `${Math.abs(row.days_left)} দিন পার`
+                                            ? t('আর :n দিন', {
+                                                  n: row.days_left,
+                                              })
+                                            : t(':n দিন পার', {
+                                                  n: Math.abs(row.days_left),
+                                              })
                                     }}</span
                                 >
                             </span>
@@ -630,9 +677,9 @@ function share() {
                 <section
                     class="report-card card lg:col-span-2 print:col-span-2"
                 >
-                    <h2 class="card-title">চলমান মোটাতাজা ব্যাচ</h2>
+                    <h2 class="card-title">{{ t('চলমান মোটাতাজা ব্যাচ') }}</h2>
                     <p v-if="batches.length === 0" class="empty">
-                        এখন কোনো ব্যাচ চলছে না।
+                        {{ t('এখন কোনো ব্যাচ চলছে না।') }}
                     </p>
                     <div v-else class="grid gap-3 sm:grid-cols-2">
                         <div
@@ -644,26 +691,34 @@ function share() {
                                 <span>{{ row.label }}</span>
                                 <span
                                     class="font-normal text-muted-foreground"
-                                    >{{ row.center }}</span
+                                    >{{ t(row.center) }}</span
                                 >
                             </p>
                             <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
-                                <dt class="text-muted-foreground">চলছে</dt>
+                                <dt class="text-muted-foreground">
+                                    {{ t('চলছে') }}
+                                </dt>
                                 <dd class="text-right">{{ row.span }}</dd>
-                                <dt class="text-muted-foreground">গরু</dt>
-                                <dd class="num text-right">{{ row.head }}টি</dd>
-                                <dt class="text-muted-foreground">মোট খরচ</dt>
+                                <dt class="text-muted-foreground">
+                                    {{ t('গরু') }}
+                                </dt>
+                                <dd class="num text-right">
+                                    {{ t(':nটি', { n: row.head }) }}
+                                </dd>
+                                <dt class="text-muted-foreground">
+                                    {{ t('মোট খরচ') }}
+                                </dt>
                                 <dd class="num text-right">
                                     {{ taka(row.spent) }}
                                 </dd>
                                 <dt class="text-muted-foreground">
-                                    গড়ে দিনে বাড়ছে
+                                    {{ t('গড়ে দিনে বাড়ছে') }}
                                 </dt>
                                 <dd class="num text-right">
                                     {{
                                         row.avg_gain !== null
-                                            ? `${row.avg_gain} কেজি`
-                                            : 'ওজন নেওয়া হয়নি'
+                                            ? t(':n কেজি', { n: row.avg_gain })
+                                            : t('ওজন নেওয়া হয়নি')
                                     }}
                                 </dd>
                             </dl>
@@ -673,9 +728,9 @@ function share() {
 
                 <!-- Feed -->
                 <section class="report-card card">
-                    <h2 class="card-title">খাবার ও উপকরণ খরচ হলো</h2>
+                    <h2 class="card-title">{{ t('খাবার ও উপকরণ খরচ হলো') }}</h2>
                     <p v-if="feed.length === 0" class="empty">
-                        এই মাসে স্টক থেকে কিছু দেওয়া হয়নি।
+                        {{ t('এই মাসে স্টক থেকে কিছু দেওয়া হয়নি।') }}
                     </p>
                     <table v-else class="w-full text-sm">
                         <tbody>
@@ -684,18 +739,18 @@ function share() {
                                 :key="row.id"
                                 class="border-b border-border/60"
                             >
-                                <td class="py-1.5">{{ row.name }}</td>
+                                <td class="py-1.5">{{ t(row.name) }}</td>
                                 <td
                                     class="num py-1.5 text-right text-muted-foreground"
                                 >
-                                    {{ qty(row.used_qty, row.unit) }}
+                                    {{ qty(row.used_qty, t(row.unit)) }}
                                 </td>
                                 <td class="num py-1.5 pl-3 text-right">
                                     {{ taka(row.used_value) }}
                                 </td>
                             </tr>
                             <tr class="font-semibold">
-                                <td class="pt-2" colspan="2">মোট</td>
+                                <td class="pt-2" colspan="2">{{ t('মোট') }}</td>
                                 <td class="num pt-2 text-right">
                                     {{ taka(feedTotal) }}
                                 </td>
@@ -706,9 +761,9 @@ function share() {
 
                 <!-- Goals -->
                 <section class="report-card card">
-                    <h2 class="card-title">লক্ষ্য কতদূর</h2>
+                    <h2 class="card-title">{{ t('লক্ষ্য কতদূর') }}</h2>
                     <p v-if="goals.length === 0" class="empty">
-                        কোনো লক্ষ্য ঠিক করা হয়নি।
+                        {{ t('কোনো লক্ষ্য ঠিক করা হয়নি।') }}
                     </p>
                     <ul v-else class="space-y-3">
                         <li
@@ -722,7 +777,7 @@ function share() {
                                     }}<span
                                         v-if="goal.achieved"
                                         class="ml-1 text-income"
-                                        >✓ পূরণ হয়েছে</span
+                                        >{{ t('✓ পূরণ হয়েছে') }}</span
                                     ></span
                                 >
                                 <span class="num shrink-0"
@@ -738,10 +793,21 @@ function share() {
                                 />
                             </div>
                             <p class="num mt-0.5 text-xs text-muted-foreground">
-                                এখন {{ goal.current_value }} {{ goal.unit }} /
-                                লক্ষ্য {{ goal.target_value }} {{ goal.unit
+                                {{
+                                    t(
+                                        'এখন :current :unit / লক্ষ্য :target :unit',
+                                        {
+                                            current: goal.current_value,
+                                            target: goal.target_value,
+                                            unit: goal.unit ?? '',
+                                        },
+                                    )
                                 }}<template v-if="goal.due_on">
-                                    · {{ day(goal.due_on) }}-এর মধ্যে</template
+                                    {{
+                                        t('· :date-এর মধ্যে', {
+                                            date: day(goal.due_on),
+                                        })
+                                    }}</template
                                 >
                             </p>
                         </li>
@@ -752,9 +818,13 @@ function share() {
                 <section
                     class="report-card card lg:col-span-2 print:col-span-2"
                 >
-                    <h2 class="card-title">এই মাসের শিক্ষা ও ভুল</h2>
+                    <h2 class="card-title">{{ t('এই মাসের শিক্ষা ও ভুল') }}</h2>
                     <p v-if="notes.length === 0" class="empty">
-                        ডায়েরিতে এই মাসে কোনো শিক্ষা বা ভুল লেখা হয়নি।
+                        {{
+                            t(
+                                'ডায়েরিতে এই মাসে কোনো শিক্ষা বা ভুল লেখা হয়নি।',
+                            )
+                        }}
                     </p>
                     <ul v-else class="space-y-2.5 text-sm">
                         <li
@@ -770,7 +840,9 @@ function share() {
                                         : 'bg-paddy/14 text-paddy',
                                 ]"
                                 >{{
-                                    note.kind === 'mistake' ? 'ভুল' : 'শিক্ষা'
+                                    note.kind === 'mistake'
+                                        ? t('ভুল')
+                                        : t('শিক্ষা')
                                 }}</span
                             >
                             <span class="min-w-0">
@@ -792,7 +864,11 @@ function share() {
             </div>
 
             <p class="pt-2 text-center text-xs text-muted-foreground">
-                মাটির খামার হিসাব থেকে তৈরি · {{ monthName }}
+                {{
+                    t('মাটির খামার হিসাব থেকে তৈরি · :month', {
+                        month: monthName,
+                    })
+                }}
             </p>
             <!-- Sign-off -->
             <div
@@ -800,18 +876,21 @@ function share() {
             >
                 <div>
                     <div class="mb-1 border-t border-foreground/40" />
-                    প্রস্তুতকারী — হিসাব অ্যাডমিন
+                    {{ t('প্রস্তুতকারী — হিসাব অ্যাডমিন') }}
                 </div>
                 <div>
                     <div class="mb-1 border-t border-foreground/40" />
-                    অনুমোদন — খামার মালিক
+                    {{ t('অনুমোদন — খামার মালিক') }}
                 </div>
             </div>
             <p
                 class="report-card text-center text-[11px] text-muted-foreground"
             >
-                সব অঙ্ক খামারের হিসাব খাতা থেকে স্বয়ংক্রিয়ভাবে তৈরি · মাটির
-                খামার
+                {{
+                    t(
+                        'সব অঙ্ক খামারের হিসাব খাতা থেকে স্বয়ংক্রিয়ভাবে তৈরি · মাটির খামার',
+                    )
+                }}
             </p>
         </div>
     </div>

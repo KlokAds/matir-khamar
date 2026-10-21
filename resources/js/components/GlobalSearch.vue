@@ -91,6 +91,7 @@ const hits = computed<Hit[]>(() => [
     ...remote.value.map((r) => ({
         ...r,
         group: t(r.group),
+        hint: t(r.hint),
         icon: icons[r.icon] ?? Search,
     })),
 ]);

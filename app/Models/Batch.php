@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Support\Tr;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,7 +58,7 @@ class Batch extends Model
 
     public function label(): string
     {
-        return $this->name ?: "ব্যাচ-{$this->number}";
+        return $this->name ?: Tr::get('ব্যাচ-:number', ['number' => $this->number]);
     }
 
     /** Days the batch has run: to its close, or to today while it is open. */

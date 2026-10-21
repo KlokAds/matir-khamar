@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Http\Middleware\SetLocale;
 use App\Models\JournalEntry;
 use App\Models\MilkRecord;
 use App\Models\Reminder;
 use App\Models\User;
+use App\Support\Tr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 
@@ -35,17 +37,17 @@ class Notifier
                 : $this->dailyWorkers();
 
             foreach ($recipients->filter(fn (User $u) => $u->wantsNotification('reminders')) as $user) {
-                $this->push->toUsers([$user], [
+                $this->push->toUsers([$user], $this->inLanguageOf($user, fn () => [
                     'title' => '⏰ '.$reminder->title,
-                    'body' => $reminder->body ?: 'মনে করিয়ে দিচ্ছি — হয়ে গেলে "হয়ে গেছে" চাপুন।',
+                    'body' => $reminder->body ?: Tr::get('মনে করিয়ে দিচ্ছি — হয়ে গেলে "হয়ে গেছে" চাপুন।'),
                     'url' => '/reminders',
                     'tag' => "reminder-{$reminder->id}",
                     'requireInteraction' => true,
                     'actions' => [
-                        ['action' => 'done', 'title' => 'হয়ে গেছে', 'url' => $this->actionUrl($reminder, 'done', $user)],
-                        ['action' => 'later', 'title' => '১ ঘণ্টা পরে', 'url' => $this->actionUrl($reminder, 'later', $user)],
+                        ['action' => 'done', 'title' => Tr::get('হয়ে গেছে'), 'url' => $this->actionUrl($reminder, 'done', $user)],
+                        ['action' => 'later', 'title' => Tr::get('১ ঘণ্টা পরে'), 'url' => $this->actionUrl($reminder, 'later', $user)],
                     ],
-                ]);
+                ]));
             }
 
             $reminder->update(['sent_at' => now()]);
@@ -72,8 +74,8 @@ class Notifier
 
         foreach ($this->stock->low() as $item) {
             $lines[] = $item['days_left'] !== null
-                ? "{$item['name']} আর ".round($item['days_left']).' দিন চলবে — কেনার ব্যবস্থা করুন'
-                : "{$item['name']} কমে গেছে";
+                ? Tr::get(':name আর :days দিন চলবে — কেনার ব্যবস্থা করুন', ['name' => $item['name'], 'days' => round($item['days_left'])])
+                : Tr::get(':name কমে গেছে', ['name' => $item['name']]);
         }
 
         $today = Reminder::query()->visibleTo($user)->whereBetween('due_at', [now()->startOfDay(), now()->endOfDay()])->orderBy('due_at')->get();
@@ -90,18 +92,22 @@ class Notifier
         $sent = 0;
 
         foreach ($this->dailyWorkers()->filter(fn (User $u) => $u->wantsNotification('morning')) as $user) {
-            $lines = $this->morningLines($user);
+            $payload = $this->inLanguageOf($user, function () use ($user) {
+                $lines = $this->morningLines($user);
 
-            if ($lines === []) {
+                return $lines === [] ? null : [
+                    'title' => Tr::get('শুভ সকাল — আজ :countটি কাজ মনে রাখার', ['count' => count($lines)]),
+                    'body' => implode("\n", array_slice($lines, 0, 5)).(count($lines) > 5 ? "\n".Tr::get('…আরও :countটি', ['count' => count($lines) - 5]) : ''),
+                    'url' => '/dashboard',
+                    'tag' => 'morning-'.now()->toDateString(),
+                ];
+            });
+
+            if ($payload === null) {
                 continue;
             }
 
-            $sent += $this->push->toUsers([$user], [
-                'title' => 'শুভ সকাল — আজ '.count($lines).'টি কাজ মনে রাখার',
-                'body' => implode("\n", array_slice($lines, 0, 5)).(count($lines) > 5 ? "\n…আরও ".(count($lines) - 5).'টি' : ''),
-                'url' => '/dashboard',
-                'tag' => 'morning-'.now()->toDateString(),
-            ]);
+            $sent += $this->push->toUsers([$user], $payload);
         }
 
         return $sent;
@@ -132,12 +138,39 @@ class Notifier
             return 0;
         }
 
-        return $this->push->toUsers($this->dailyWorkers()->filter(fn (User $u) => $u->wantsNotification('evening')), [
-            'title' => 'আজকের '.implode(' ও ', $missing).' এখনো লেখা হয়নি',
-            'body' => 'ঘুমানোর আগে দুই মিনিটে লিখে ফেলুন — ইন্টারনেট না থাকলেও ফোনে জমা থাকবে।',
-            'url' => in_array('দুধ', $missing, true) ? '/milk' : '/stock/move?mode=issue',
-            'tag' => 'evening-'.now()->toDateString(),
-        ]);
+        $sent = 0;
+
+        foreach ($this->dailyWorkers()->filter(fn (User $u) => $u->wantsNotification('evening')) as $user) {
+            $sent += $this->push->toUsers([$user], $this->inLanguageOf($user, fn () => [
+                'title' => Tr::get('আজকের :what এখনো লেখা হয়নি', ['what' => implode(' '.Tr::get('ও').' ', Tr::all($missing))]),
+                'body' => Tr::get('ঘুমানোর আগে দুই মিনিটে লিখে ফেলুন — ইন্টারনেট না থাকলেও ফোনে জমা থাকবে।'),
+                'url' => in_array('দুধ', $missing, true) ? '/milk' : '/stock/move?mode=issue',
+                'tag' => 'evening-'.now()->toDateString(),
+            ]));
+        }
+
+        return $sent;
+    }
+
+    /**
+     * Builds a message in the person's own language. Pushes go out from the scheduler, which
+     * runs in Bangla, so each recipient's text is made under their locale and then put back.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $build
+     * @return T
+     */
+    private function inLanguageOf(User $user, callable $build): mixed
+    {
+        $previous = app()->getLocale();
+        app()->setLocale(in_array($user->locale, SetLocale::LOCALES, true) ? $user->locale : 'bn');
+
+        try {
+            return $build();
+        } finally {
+            app()->setLocale($previous);
+        }
     }
 
     private function actionUrl(Reminder $reminder, string $action, User $user): string

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\PushSender;
 use App\Services\StockForecast;
 use App\Support\Lookups;
+use App\Support\Tr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class ReminderController extends Controller
             'done' => Reminder::query()->with(['recipient:id,name', 'author:id,name', 'costCenter:id,name', 'animal:id,tag'])
                 ->whereNotNull('done_at')->where(fn ($q) => $q->whereNull('for_user_id')->orWhere('for_user_id', $user->id)->orWhere('created_by', $user->id))
                 ->orderByDesc('done_at')->limit(20)->get()->map($map),
-            'repeats' => Reminder::REPEATS,
+            'repeats' => Tr::all(Reminder::REPEATS),
             'people' => User::query()->where('is_active', true)->where('is_super', false)->orderBy('name')->get(['id', 'name']),
             'centers' => Lookups::centers(),
             'animals' => Animal::query()->where('status', 'active')->orderBy('tag')->get(['id', 'tag', 'name']),
@@ -75,7 +76,7 @@ class ReminderController extends Controller
         ]);
 
         $reminder = Reminder::query()->create([...$data, 'due_at' => Date::parse($data['due_at']), 'created_by' => $request->user()->id]);
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'মনে করিয়ে দেওয়া হবে '.$reminder->due_at->format('d M, g:i A').'।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('মনে করিয়ে দেওয়া হবে :when।', ['when' => $reminder->due_at->format('d M, g:i A')])]);
 
         return back();
     }
@@ -136,15 +137,15 @@ class ReminderController extends Controller
     public function test(Request $request, PushSender $push): RedirectResponse
     {
         $reached = $push->toUsers([$request->user()], [
-            'title' => 'মাটির খামার — পরীক্ষা',
-            'body' => 'নোটিফিকেশন ঠিকমতো আসছে। ✅',
+            'title' => Tr::get('মাটির খামার — পরীক্ষা'),
+            'body' => Tr::get('নোটিফিকেশন ঠিকমতো আসছে। ✅'),
             'url' => '/reminders',
             'tag' => 'test',
         ]);
 
         Inertia::flash('toast', $reached > 0
-            ? ['type' => 'success', 'message' => "{$reached}টি ফোনে পাঠানো হলো।"]
-            : ['type' => 'error', 'message' => 'কোনো ফোনে পৌঁছায়নি — এই ফোনে নোটিফিকেশন চালু করুন।']);
+            ? ['type' => 'success', 'message' => __(':countটি ফোনে পাঠানো হলো।', ['count' => $reached])]
+            : ['type' => 'error', 'message' => __('কোনো ফোনে পৌঁছায়নি — এই ফোনে নোটিফিকেশন চালু করুন।')]);
 
         return back();
     }

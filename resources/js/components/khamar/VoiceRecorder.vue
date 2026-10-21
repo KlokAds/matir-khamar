@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Mic, Square, X } from '@lucide/vue';
 import { computed, onBeforeUnmount, ref } from 'vue';
+import { t } from '@/lib/i18n';
 
 /**
  * A big, thumb-sized voice recorder for diary notes. One tap starts, one tap stops;
@@ -194,7 +195,7 @@ onBeforeUnmount(() => {
             v-if="!recording"
             type="button"
             class="absolute top-2 right-2 rounded-md p-1.5 text-muted-foreground hover:bg-accent"
-            aria-label="বন্ধ করুন"
+            :aria-label="t('বন্ধ করুন')"
             @click="emit('close')"
         >
             <X class="size-4" />
@@ -205,7 +206,7 @@ onBeforeUnmount(() => {
             type="button"
             class="flex size-20 items-center justify-center rounded-full bg-paddy text-primary-foreground shadow-md transition-transform active:scale-95 disabled:opacity-60"
             :disabled="starting"
-            aria-label="রেকর্ড শুরু করুন"
+            :aria-label="t('রেকর্ড শুরু করুন')"
             @click="start"
         >
             <Mic class="size-9" />
@@ -214,7 +215,7 @@ onBeforeUnmount(() => {
             v-else
             type="button"
             class="flex size-20 animate-pulse items-center justify-center rounded-full bg-destructive text-white shadow-md transition-transform active:scale-95"
-            aria-label="রেকর্ড থামান"
+            :aria-label="t('রেকর্ড থামান')"
             @click="stop"
         >
             <Square class="size-8 fill-current" />
@@ -225,14 +226,14 @@ onBeforeUnmount(() => {
             <p class="text-xs text-muted-foreground">
                 {{
                     recording
-                        ? 'বলছেন… থামাতে লাল বোতামে চাপুন (সর্বোচ্চ ৩ মিনিট)'
-                        : 'চাপ দিয়ে বলা শুরু করুন'
+                        ? t('বলছেন… থামাতে লাল বোতামে চাপুন (সর্বোচ্চ ৩ মিনিট)')
+                        : t('চাপ দিয়ে বলা শুরু করুন')
                 }}
             </p>
         </div>
 
         <p v-if="error" class="text-sm font-medium text-destructive">
-            {{ error }}
+            {{ t(error) }}
         </p>
     </div>
 </template>

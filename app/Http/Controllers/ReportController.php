@@ -221,7 +221,7 @@ class ReportController extends Controller
 
         $head->update([...$data, 'approved_amount' => Money::toPoisha($data['approved_amount'])]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'বাজেট খাত আপডেট হয়েছে।']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('বাজেট খাত আপডেট হয়েছে।')]);
 
         return back();
     }

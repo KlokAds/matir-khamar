@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Support\PhpCli;
+use App\Support\Tr;
 use Illuminate\Contracts\Process\ProcessResult;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Cache;
@@ -81,7 +82,7 @@ class SelfUpdater
         $lock = Cache::lock('khamar:self-update', 900);
 
         if (! $lock->get()) {
-            throw new RuntimeException('একটি আপডেট ইতিমধ্যে চলছে।');
+            throw new RuntimeException(Tr::get('একটি আপডেট ইতিমধ্যে চলছে।'));
         }
 
         $log = [];
@@ -90,7 +91,7 @@ class SelfUpdater
 
         try {
             if (! $this->available()) {
-                throw new RuntimeException('এই সার্ভারের কোড git checkout নয়, তাই নিজে আপডেট হতে পারে না।');
+                throw new RuntimeException(Tr::get('এই সার্ভারের কোড git checkout নয়, তাই নিজে আপডেট হতে পারে না।'));
             }
 
             $artisan = fn (string $command, int $timeout = 300) => $this->run($log, "artisan {$command}",
@@ -106,7 +107,7 @@ class SelfUpdater
             $to = trim($this->git(['rev-parse', 'HEAD'])->output());
 
             if ($from === $to) {
-                $log[] = 'আগে থেকেই সর্বশেষ সংস্করণ।';
+                $log[] = Tr::get('আগে থেকেই সর্বশেষ সংস্করণ।');
             }
 
             $artisan('down --retry=30');
@@ -121,7 +122,7 @@ class SelfUpdater
 
             $ok = true;
         } catch (Throwable $exception) {
-            $log[] = 'ব্যর্থ: '.$this->clean($exception->getMessage());
+            $log[] = Tr::get('ব্যর্থ: :error', ['error' => $this->clean($exception->getMessage())]);
         } finally {
             $lock->release();
         }
@@ -161,7 +162,7 @@ class SelfUpdater
         $log[] = ($result->successful() ? '✓ ' : '✗ ').$label.($output !== '' ? "\n".mb_substr($output, -1500) : '');
 
         if ($result->failed()) {
-            throw new RuntimeException("{$label} ব্যর্থ (exit {$result->exitCode()}).");
+            throw new RuntimeException(Tr::get(':label ব্যর্থ (exit :code).', ['label' => $label, 'code' => (int) $result->exitCode()]));
         }
 
         return $result;

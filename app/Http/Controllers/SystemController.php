@@ -25,7 +25,7 @@ class SystemController extends Controller
     public function update(Request $request, SelfUpdater $updater): RedirectResponse
     {
         $request->validate(['current_password' => ['required', 'current_password']], [
-            'current_password.current_password' => 'আপনার নিজের লগইন পাসওয়ার্ড মেলেনি।',
+            'current_password.current_password' => __('আপনার নিজের লগইন পাসওয়ার্ড মেলেনি।'),
         ]);
 
         // Backup, pull, migrate and caches can take a couple of minutes on shared hosting.
@@ -41,8 +41,8 @@ class SystemController extends Controller
         AuditLog::record('app_updated', null, ['revision' => $result['from']], ['revision' => $result['to'], 'ok' => $result['ok']]);
 
         Inertia::flash('toast', $result['ok']
-            ? ['type' => 'success', 'message' => 'সাইট সর্বশেষ সংস্করণে আপডেট হয়েছে।']
-            : ['type' => 'error', 'message' => 'আপডেট শেষ হয়নি — নিচের লগ দেখুন। শুরুর আগে ডাটাবেসের ব্যাকআপ নেওয়া আছে।']);
+            ? ['type' => 'success', 'message' => __('সাইট সর্বশেষ সংস্করণে আপডেট হয়েছে।')]
+            : ['type' => 'error', 'message' => __('আপডেট শেষ হয়নি — নিচের লগ দেখুন। শুরুর আগে ডাটাবেসের ব্যাকআপ নেওয়া আছে।')]);
 
         return back();
     }

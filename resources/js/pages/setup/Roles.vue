@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ask } from '@/lib/dialog';
+import { t } from '@/lib/i18n';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { Plus, ShieldCheck, Trash2, UserRound } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
@@ -79,8 +80,8 @@ const save = (role: RoleRow) =>
 const remove = async (role: RoleRow) => {
     if (
         await ask.confirm({
-            title: `"${role.name}" রোল মুছবেন?`,
-            confirmText: 'মুছুন',
+            title: t('":name" রোল মুছবেন?', { name: t(role.name) }),
+            confirmText: t('মুছুন'),
             danger: true,
         })
     ) {
@@ -97,15 +98,21 @@ const create = useForm({
 </script>
 
 <template>
-    <Head title="রোল ও অনুমতি" />
+    <Head :title="t('রোল ও অনুমতি')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="রোল ও অনুমতি"
-            subtitle="কোন রোল কী করতে পারবে টিক দিয়ে ঠিক করুন। হিসাব অ্যাডমিন সবসময় সব পারে, যাতে কেউ খামারকে তালাবন্ধ করতে না পারে। সুপার অ্যাডমিন (আপনি) এই তালিকার বাইরে।"
+            :title="t('রোল ও অনুমতি')"
+            :subtitle="
+                t(
+                    'কোন রোল কী করতে পারবে টিক দিয়ে ঠিক করুন। হিসাব অ্যাডমিন সবসময় সব পারে, যাতে কেউ খামারকে তালাবন্ধ করতে না পারে। সুপার অ্যাডমিন (আপনি) এই তালিকার বাইরে।',
+                )
+            "
         >
             <template #actions>
-                <Button @click="adding = !adding"><Plus /> নতুন রোল</Button>
+                <Button @click="adding = !adding"
+                    ><Plus /> {{ t('নতুন রোল') }}</Button
+                >
             </template>
         </PageTitle>
 
@@ -130,11 +137,11 @@ const create = useForm({
             "
         >
             <div class="grid gap-3 sm:max-w-sm">
-                <Field label="রোলের নাম" :error="create.errors.name">
+                <Field :label="t('রোলের নাম')" :error="create.errors.name">
                     <Input
                         v-model="create.name"
                         required
-                        placeholder="যেমন: হিসাবরক্ষক, পশু ডাক্তার"
+                        :placeholder="t('যেমন: হিসাবরক্ষক, পশু ডাক্তার')"
                     />
                 </Field>
             </div>
@@ -150,7 +157,7 @@ const create = useForm({
                         :value="key"
                         class="mt-1 size-4 accent-[var(--primary)]"
                     />
-                    <span>{{ label }}</span>
+                    <span>{{ t(label) }}</span>
                 </label>
             </div>
             <label class="mt-3 flex items-center gap-2 text-sm">
@@ -159,15 +166,15 @@ const create = useForm({
                     type="checkbox"
                     class="size-4 accent-[var(--primary)]"
                 />
-                ২-ধাপ যাচাই (2FA) বাধ্যতামূলক
+                {{ t('২-ধাপ যাচাই (2FA) বাধ্যতামূলক') }}
             </label>
             <div class="mt-4 flex gap-2">
-                <Button type="submit" :disabled="create.processing"
-                    >তৈরি করুন</Button
-                >
-                <Button type="button" variant="ghost" @click="adding = false"
-                    >বাদ</Button
-                >
+                <Button type="submit" :disabled="create.processing">{{
+                    t('তৈরি করুন')
+                }}</Button>
+                <Button type="button" variant="ghost" @click="adding = false">{{
+                    t('বাদ')
+                }}</Button>
             </div>
         </form>
 
@@ -187,18 +194,18 @@ const create = useForm({
                     >
                         <span class="flex items-center gap-1"
                             ><UserRound class="size-3.5" />
-                            {{ role.users }} জন</span
+                            {{ t(':n জন', { n: role.users }) }}</span
                         >
                         <span
                             v-if="role.is_system"
                             class="rounded bg-muted px-1.5 py-0.5"
-                            >শুরু থেকে</span
+                            >{{ t('শুরু থেকে') }}</span
                         >
                         <button
                             v-else
                             type="button"
                             class="rounded p-1 hover:bg-accent hover:text-destructive"
-                            aria-label="মুছুন"
+                            :aria-label="t('মুছুন')"
                             @click="remove(role)"
                         >
                             <Trash2 class="size-4" />
@@ -226,7 +233,7 @@ const create = useForm({
                             class="mt-1 size-4 accent-[var(--primary)]"
                             @change="toggle(role, String(key))"
                         />
-                        <span>{{ label }}</span>
+                        <span>{{ t(label) }}</span>
                     </label>
                 </div>
 
@@ -239,7 +246,7 @@ const create = useForm({
                         class="size-4 accent-[var(--primary)]"
                     />
                     <ShieldCheck class="size-4 text-paddy" />
-                    ২-ধাপ যাচাই (2FA) বাধ্যতামূলক
+                    {{ t('২-ধাপ যাচাই (2FA) বাধ্যতামূলক') }}
                 </label>
 
                 <div class="mt-3 flex justify-end">
@@ -247,7 +254,7 @@ const create = useForm({
                         size="sm"
                         :disabled="!changed(role)"
                         @click="save(role)"
-                        >রাখুন</Button
+                        >{{ t('রাখুন') }}</Button
                     >
                 </div>
             </section>

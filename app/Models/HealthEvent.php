@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Support\Tr;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -79,6 +80,6 @@ class HealthEvent extends Model
 
     public function target(): string
     {
-        return $this->animal->tag ?? ($this->costCenter ? "পুরো {$this->costCenter->name}" : 'পুরো খামার');
+        return $this->animal->tag ?? ($this->costCenter ? Tr::get('পুরো :name', ['name' => $this->costCenter->name]) : Tr::get('পুরো খামার'));
     }
 }

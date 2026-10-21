@@ -4,6 +4,7 @@ import { ArrowDown, HandCoins, Leaf, Sprout, Wheat } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Input } from '@/components/ui/input';
+import { t } from '@/lib/i18n';
 import { taka } from '@/lib/khamar';
 
 /**
@@ -78,7 +79,7 @@ const overheadLines = computed(() =>
 
 /* ---------- 2. খাবার ---------- */
 const feed = reactive({
-    item: 'গমের ভুসি',
+    item: t('গমের ভুসি'),
     kg: '50',
     price: '2500',
     centers: [
@@ -119,7 +120,7 @@ const grassUsed = computed(() =>
 
 /* ---------- 4. সার ---------- */
 const fert = reactive({
-    item: 'ইউরিয়া সার',
+    item: t('ইউরিয়া সার'),
     kg: '50',
     price: '1500',
     plots: [
@@ -137,44 +138,54 @@ const fertUsed = computed(() =>
 </script>
 
 <template>
-    <Head title="ভাগ কীভাবে হয়" />
+    <Head :title="t('ভাগ কীভাবে হয়')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="ভাগ কীভাবে হয় — উদাহরণ"
-            subtitle="সংখ্যাগুলো বদলে দেখুন, ফল সাথে সাথে বদলাবে। এখানে কিছু খাতায় ওঠে না — শুধু বোঝার জন্য।"
+            :title="t('ভাগ কীভাবে হয় — উদাহরণ')"
+            :subtitle="
+                t(
+                    'সংখ্যাগুলো বদলে দেখুন, ফল সাথে সাথে বদলাবে। এখানে কিছু খাতায় ওঠে না — শুধু বোঝার জন্য।',
+                )
+            "
         />
 
         <div
             class="mb-5 grid grid-cols-2 gap-1 rounded-lg border border-border bg-card p-1 sm:flex"
         >
             <button
-                v-for="t in tabs"
-                :key="t.key"
+                v-for="tb in tabs"
+                :key="tb.key"
                 type="button"
                 :class="[
                     'flex shrink-0 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors sm:justify-start',
-                    tab === t.key
+                    tab === tb.key
                         ? 'bg-primary text-primary-foreground'
                         : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                 ]"
-                @click="tab = t.key"
+                @click="tab = tb.key"
             >
-                <component :is="t.icon" class="size-4" />
-                {{ t.label }}
+                <component :is="tb.icon" class="size-4" />
+                {{ t(tb.label) }}
             </button>
         </div>
 
         <!-- 1. সাধারণ খরচ -->
         <div v-if="tab === 'overhead'" class="demo">
             <div class="step">
-                <h3><span class="badge">১</span> মাসজুড়ে যে খরচ সবার জন্য</h3>
+                <h3>
+                    <span class="badge">{{ t('১') }}</span>
+                    {{ t('মাসজুড়ে যে খরচ সবার জন্য') }}
+                </h3>
                 <p class="note">
-                    এন্ট্রি দেওয়ার সময় ক্যাটাগরি "সাধারণ খরচ" বেছে নিন। কারও
-                    একার নয় এমন খরচ এখানে জমে।
+                    {{
+                        t(
+                            'এন্ট্রি দেওয়ার সময় ক্যাটাগরি "সাধারণ খরচ" বেছে নিন। কারও একার নয় এমন খরচ এখানে জমে।',
+                        )
+                    }}
                 </p>
                 <div v-for="(cost, i) in overhead.costs" :key="i" class="row-2">
-                    <span>{{ cost.name }}</span>
+                    <span>{{ t(cost.name) }}</span>
                     <Input
                         v-model="cost.amount"
                         type="number"
@@ -182,7 +193,8 @@ const fertUsed = computed(() =>
                     />
                 </div>
                 <p class="total">
-                    সাধারণ খরচে জমা <b class="num">{{ tk(overheadTotal) }}</b>
+                    {{ t('সাধারণ খরচে জমা') }}
+                    <b class="num">{{ tk(overheadTotal) }}</b>
                 </p>
             </div>
 
@@ -190,11 +202,15 @@ const fertUsed = computed(() =>
 
             <div class="step">
                 <h3>
-                    <span class="badge">২</span> কোন ক্যাটাগরিতে কতটি গরু কতদিন
+                    <span class="badge">{{ t('২') }}</span>
+                    {{ t('কোন ক্যাটাগরিতে কতটি গরু কতদিন') }}
                 </h3>
                 <p class="note">
-                    অ্যাপ নিজেই গরুর তালিকা থেকে গুনে নেয় (পশু-দিন = গরু ×
-                    দিন)। মাসের মাঝে গরু এলে শুধু যতদিন ছিল ততদিন ধরা হয়।
+                    {{
+                        t(
+                            'অ্যাপ নিজেই গরুর তালিকা থেকে গুনে নেয় (পশু-দিন = গরু × দিন)। মাসের মাঝে গরু এলে শুধু যতদিন ছিল ততদিন ধরা হয়।',
+                        )
+                    }}
                 </p>
                 <div class="grid gap-2">
                     <div
@@ -202,38 +218,42 @@ const fertUsed = computed(() =>
                         :key="i"
                         class="grid grid-cols-[1fr_4.5rem_4.5rem_5rem] items-center gap-2 text-sm"
                     >
-                        <span class="font-medium">{{ c.name }}</span>
+                        <span class="font-medium">{{ t(c.name) }}</span>
                         <label class="mini"
                             ><Input
                                 v-model="c.cows"
                                 type="number"
                                 class="num text-right"
-                            /><small>গরু</small></label
+                            /><small>{{ t('গরু') }}</small></label
                         >
                         <label class="mini"
                             ><Input
                                 v-model="c.days"
                                 type="number"
                                 class="num text-right"
-                            /><small>দিন</small></label
+                            /><small>{{ t('দিন') }}</small></label
                         >
                         <span class="num text-right"
                             >= {{ animalDays[i] }}
-                            <small class="text-muted-foreground"
-                                >পশু-দিন</small
-                            ></span
+                            <small class="text-muted-foreground">{{
+                                t('পশু-দিন')
+                            }}</small></span
                         >
                     </div>
                 </div>
                 <p class="total">
-                    মোট <b class="num">{{ animalDaysTotal }}</b> পশু-দিন
+                    {{ t('মোট') }} <b class="num">{{ animalDaysTotal }}</b>
+                    {{ t('পশু-দিন') }}
                 </p>
             </div>
 
             <ArrowDown class="arrow" />
 
             <div class="step">
-                <h3><span class="badge">৩</span> অনুপাতে ভাগ</h3>
+                <h3>
+                    <span class="badge">{{ t('৩') }}</span>
+                    {{ t('অনুপাতে ভাগ') }}
+                </h3>
                 <div class="bar">
                     <div
                         v-for="(c, i) in overhead.centers"
@@ -246,7 +266,7 @@ const fertUsed = computed(() =>
                 </div>
                 <div v-for="(c, i) in overhead.centers" :key="i" class="result">
                     <span class="flex items-center gap-2"
-                        ><i :class="['dot', COLORS[i]]" />{{ c.name }}</span
+                        ><i :class="['dot', COLORS[i]]" />{{ t(c.name) }}</span
                     >
                     <span class="num text-muted-foreground"
                         >{{ animalDays[i] }} ÷ {{ animalDaysTotal }} =
@@ -266,25 +286,28 @@ const fertUsed = computed(() =>
 
             <div class="step">
                 <h3>
-                    <span class="badge">৪</span> খাতায় যা উঠবে ("খরচ ভাগ"
-                    পাতায় এক চাপে)
+                    <span class="badge">{{ t('৪') }}</span>
+                    {{ t('খাতায় যা উঠবে ("খরচ ভাগ" পাতায় এক চাপে)') }}
                 </h3>
                 <p class="note">
-                    প্রতিটি খরচ তার নিজের নামেই যায় — গাভীর হিসাবে দেখবেন
-                    "কারেন্ট বিল", "রাখালের বেতন" আলাদা করে।
+                    {{
+                        t(
+                            'প্রতিটি খরচ তার নিজের নামেই যায় — গাভীর হিসাবে দেখবেন "কারেন্ট বিল", "রাখালের বেতন" আলাদা করে।',
+                        )
+                    }}
                 </p>
                 <table class="ledger">
                     <thead>
                         <tr>
-                            <th>খাত</th>
+                            <th>{{ t('খাত') }}</th>
                             <th v-for="c in overhead.centers" :key="c.name">
-                                {{ c.name }}
+                                {{ t(c.name) }}
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="line in overheadLines" :key="line.name">
-                            <td>{{ line.name }}</td>
+                            <td>{{ t(line.name) }}</td>
                             <td
                                 v-for="(part, i) in line.parts"
                                 :key="i"
@@ -296,8 +319,13 @@ const fertUsed = computed(() =>
                     </tbody>
                 </table>
                 <p class="total">
-                    সাধারণ খরচ থেকে বের হলো {{ tk(overheadTotal) }} → এখন সেখানে
-                    <b>৳ 0</b>। পুরো খামারের খরচ একই থাকে, শুধু সঠিক ঘরে গেলো।
+                    {{
+                        t('সাধারণ খরচ থেকে বের হলো :amount → এখন সেখানে', {
+                            amount: tk(overheadTotal),
+                        })
+                    }}
+                    <b>৳ 0</b
+                    >{{ t('। পুরো খামারের খরচ একই থাকে, শুধু সঠিক ঘরে গেলো।') }}
                 </p>
             </div>
         </div>
@@ -305,37 +333,50 @@ const fertUsed = computed(() =>
         <!-- 2. খাবার -->
         <div v-else-if="tab === 'feed'" class="demo">
             <div class="step">
-                <h3><span class="badge">১</span> একবারে কেনা — স্টকে ওঠে</h3>
+                <h3>
+                    <span class="badge">{{ t('১') }}</span>
+                    {{ t('একবারে কেনা — স্টকে ওঠে') }}
+                </h3>
                 <p class="note">
-                    "মাল কেনা" দিয়ে কিনলে টাকা এখনো কোনো ক্যাটাগরির খরচ হয় না,
-                    স্টকে থাকে।
+                    {{
+                        t(
+                            '"মাল কেনা" দিয়ে কিনলে টাকা এখনো কোনো ক্যাটাগরির খরচ হয় না, স্টকে থাকে।',
+                        )
+                    }}
                 </p>
                 <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
                     <label class="mini wide"
-                        ><small>মাল</small><Input v-model="feed.item"
+                        ><small>{{ t('মাল') }}</small
+                        ><Input v-model="feed.item"
                     /></label>
                     <label class="mini wide"
-                        ><small>কেজি</small
+                        ><small>{{ t('কেজি') }}</small
                         ><Input v-model="feed.kg" type="number" class="num"
                     /></label>
                     <label class="mini wide"
-                        ><small>দাম (৳)</small
+                        ><small>{{ t('দাম (৳)') }}</small
                         ><Input v-model="feed.price" type="number" class="num"
                     /></label>
                 </div>
                 <p class="total">
-                    প্রতি কেজি <b class="num">{{ tk(feedRate) }}</b>
+                    {{ t('প্রতি কেজি') }}
+                    <b class="num">{{ tk(feedRate) }}</b>
                 </p>
             </div>
 
             <ArrowDown class="arrow" />
 
             <div class="step">
-                <h3><span class="badge">২</span> যতটুকু যেখানে খাওয়ানো হলো</h3>
+                <h3>
+                    <span class="badge">{{ t('২') }}</span>
+                    {{ t('যতটুকু যেখানে খাওয়ানো হলো') }}
+                </h3>
                 <p class="note">
-                    "গরুকে খাবার দেওয়া" পাতায় প্রতি ক্যাটাগরিতে কেজি লিখুন
-                    (সকাল/দুপুর/বিকাল আলাদা করেও)। সেদিন কতটি গরু ছিল, অ্যাপ
-                    নিজে লিখে রাখে।
+                    {{
+                        t(
+                            '"গরুকে খাবার দেওয়া" পাতায় প্রতি ক্যাটাগরিতে কেজি লিখুন (সকাল/দুপুর/বিকাল আলাদা করেও)। সেদিন কতটি গরু ছিল, অ্যাপ নিজে লিখে রাখে।',
+                        )
+                    }}
                 </p>
                 <div
                     v-for="(c, i) in feed.centers"
@@ -343,19 +384,20 @@ const fertUsed = computed(() =>
                     class="grid grid-cols-[1fr_5.5rem_auto] items-center gap-2 py-1 text-sm"
                 >
                     <span class="font-medium"
-                        ><i :class="['dot mr-2', COLORS[i]]" />{{ c.name }}
-                        <small class="block pl-4 text-muted-foreground"
-                            >{{ c.cows }}টি গরু · প্রতিটি
-                            {{ n(c.cows) ? round2(n(c.kg) / n(c.cows)) : 0 }}
-                            কেজি</small
-                        ></span
+                        ><i :class="['dot mr-2', COLORS[i]]" />{{ t(c.name) }}
+                        <small class="block pl-4 text-muted-foreground">{{
+                            t(':cowsটি গরু · প্রতিটি :kg কেজি', {
+                                cows: c.cows,
+                                kg: n(c.cows) ? round2(n(c.kg) / n(c.cows)) : 0,
+                            })
+                        }}</small></span
                     >
                     <label class="mini"
                         ><Input
                             v-model="c.kg"
                             type="number"
                             class="num text-right"
-                        /><small>কেজি</small></label
+                        /><small>{{ t('কেজি') }}</small></label
                     >
                     <b class="num w-24 text-right">{{ tk(feedShares[i]) }}</b>
                 </div>
@@ -365,10 +407,16 @@ const fertUsed = computed(() =>
                         feedUsed > n(feed.kg) && 'text-destructive',
                     ]"
                 >
-                    দেওয়া হলো {{ feedUsed }} কেজি · স্টকে বাকি
-                    <b class="num">{{ round2(n(feed.kg) - feedUsed) }} কেজি</b>
+                    {{
+                        t('দেওয়া হলো :kg কেজি · স্টকে বাকি', { kg: feedUsed })
+                    }}
+                    <b class="num">{{
+                        t(':kg কেজি', { kg: round2(n(feed.kg) - feedUsed) })
+                    }}</b>
                     <template v-if="feedUsed > n(feed.kg)">
-                        — স্টকের বেশি দেওয়া যায় না, অ্যাপ আটকে দেবে</template
+                        {{
+                            t('— স্টকের বেশি দেওয়া যায় না, অ্যাপ আটকে দেবে')
+                        }}</template
                     >
                 </p>
             </div>
@@ -376,7 +424,9 @@ const fertUsed = computed(() =>
             <ArrowDown class="arrow" />
 
             <div class="step">
-                <h3><span class="badge">৩</span> ফল</h3>
+                <h3>
+                    <span class="badge">{{ t('৩') }}</span> {{ t('ফল') }}
+                </h3>
                 <div class="bar">
                     <div
                         v-for="(c, i) in feed.centers"
@@ -394,10 +444,11 @@ const fertUsed = computed(() =>
                     />
                 </div>
                 <p class="note">
-                    প্রতিটি ক্যাটাগরির খরচে উঠলো শুধু তার খাওয়া কেজির দাম।
-                    বাকিটা স্টকে থাকে, পরে যে খাবে তার ঘরে যাবে। "কোথায় কত কেজি
-                    গেল" রিপোর্টে মাস শেষে প্রতি গরু দিনে কত কেজি খেল তাও
-                    দেখাবে।
+                    {{
+                        t(
+                            'প্রতিটি ক্যাটাগরির খরচে উঠলো শুধু তার খাওয়া কেজির দাম। বাকিটা স্টকে থাকে, পরে যে খাবে তার ঘরে যাবে। "কোথায় কত কেজি গেল" রিপোর্টে মাস শেষে প্রতি গরু দিনে কত কেজি খেল তাও দেখাবে।',
+                        )
+                    }}
                 </p>
             </div>
         </div>
@@ -405,140 +456,42 @@ const fertUsed = computed(() =>
         <!-- 3. নিজের ঘাস -->
         <div v-else-if="tab === 'grass'" class="demo">
             <div class="step">
-                <h3><span class="badge">১</span> নিজের জমি থেকে ঘাস কাটা</h3>
+                <h3>
+                    <span class="badge">{{ t('১') }}</span>
+                    {{ t('নিজের জমি থেকে ঘাস কাটা') }}
+                </h3>
                 <p class="note">
-                    "নিজের উৎপাদন (ঘাস)" পাতায় কত কেজি, বাজারদর, আর কত শতাংশ
-                    জমি থেকে — লিখুন।
+                    {{
+                        t(
+                            '"নিজের উৎপাদন (ঘাস)" পাতায় কত কেজি, বাজারদর, আর কত শতাংশ জমি থেকে — লিখুন।',
+                        )
+                    }}
                 </p>
                 <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
                     <label class="mini wide"
-                        ><small>জমি (শতাংশ)</small
+                        ><small>{{ t('জমি (শতাংশ)') }}</small
                         ><Input v-model="grass.land" type="number" class="num"
                     /></label>
                     <label class="mini wide"
-                        ><small>ঘাস (কেজি)</small
+                        ><small>{{ t('ঘাস (কেজি)') }}</small
                         ><Input v-model="grass.kg" type="number" class="num"
                     /></label>
                     <label class="mini wide"
-                        ><small>বাজারদর (৳/কেজি)</small
+                        ><small>{{ t('বাজারদর (৳/কেজি)') }}</small
                         ><Input v-model="grass.rate" type="number" class="num"
                     /></label>
                     <label class="mini wide"
-                        ><small>এ মাসের লিজ খরচ (৳)</small
+                        ><small>{{ t('এ মাসের লিজ খরচ (৳)') }}</small
                         ><Input v-model="grass.lease" type="number" class="num"
                     /></label>
                 </div>
                 <p class="total">
-                    প্রতি শতাংশে <b class="num">{{ grassPerDecimal }} কেজি</b> ·
-                    ঘাসের দাম <b class="num">{{ tk(grassValue) }}</b>
-                </p>
-            </div>
-
-            <ArrowDown class="arrow" />
-
-            <div class="step">
-                <h3><span class="badge">২</span> কোন গরুকে কত</h3>
-                <div
-                    v-for="(c, i) in grass.centers"
-                    :key="i"
-                    class="grid grid-cols-[1fr_5rem_4rem_4rem] items-center gap-2 py-1 text-sm"
-                >
-                    <span class="font-medium"
-                        ><i :class="['dot mr-2', COLORS[i]]" />{{ c.name }}
-                        <small class="block pl-4 text-muted-foreground"
-                            >প্রতি গরু দিনে
-                            {{
-                                n(c.cows) * n(c.days)
-                                    ? round2(n(c.kg) / (n(c.cows) * n(c.days)))
-                                    : 0
-                            }}
-                            কেজি · {{ tk(n(c.kg) * n(grass.rate)) }}</small
-                        ></span
-                    >
-                    <label class="mini"
-                        ><Input
-                            v-model="c.kg"
-                            type="number"
-                            class="num text-right"
-                        /><small>কেজি</small></label
-                    >
-                    <label class="mini"
-                        ><Input
-                            v-model="c.cows"
-                            type="number"
-                            class="num text-right"
-                        /><small>গরু</small></label
-                    >
-                    <label class="mini"
-                        ><Input
-                            v-model="c.days"
-                            type="number"
-                            class="num text-right"
-                        /><small>দিন</small></label
-                    >
-                </div>
-                <p class="total">
-                    {{ grass.land }} শতাংশ জমির {{ grassUsed }} কেজি ঘাসে
-                    <b
-                        >{{
-                            grass.centers.reduce((s, c) => s + n(c.cows), 0)
-                        }}টি গরু</b
-                    >
-                    খেলো · স্টকে বাকি {{ round2(n(grass.kg) - grassUsed) }} কেজি
-                </p>
-            </div>
-
-            <ArrowDown class="arrow" />
-
-            <div class="step">
-                <h3><span class="badge">৩</span> কে কী দেখে</h3>
-                <div class="result">
-                    <span>ঘাস চাষ (জমি) — ঘাস বিক্রি হিসেবে আয়</span><span /><b
-                        class="num text-income"
-                        >{{ tk(grassValue) }}</b
-                    >
-                </div>
-                <div class="result">
-                    <span>ঘাস চাষ (জমি) — লিজ খরচ</span><span /><b
-                        class="num text-expense"
-                        >−{{ tk(n(grass.lease)) }}</b
-                    >
-                </div>
-                <div class="result font-semibold">
-                    <span>ঘাস চাষে লাভ (নিজে চাষ করা কি সস্তা?)</span><span /><b
-                        class="num"
-                        >{{ tk(grassValue - n(grass.lease)) }}</b
-                    >
-                </div>
-                <p class="note mt-3">
-                    গরুর ক্যাটাগরিগুলোর খরচে ঘাস ওঠে বাজারদরে, তাই কোন গরু কত
-                    খরচ খায় তা সঠিক থাকে। কিন্তু পুরো খামারের হিসাবে এই আয়-খরচ
-                    কাটাকাটি হয়ে যায় — টাকা খামারের বাইরে যায়নি, তাই খামারের
-                    মোট লাভ বাড়িয়ে দেখায় না। আসল খরচ শুধু লিজের
-                    {{ tk(n(grass.lease)) }}।
-                </p>
-            </div>
-        </div>
-
-        <!-- 4. সার -->
-        <div v-else class="demo">
-            <div class="step">
-                <h3><span class="badge">১</span> সার কেনা — স্টকে ওঠে</h3>
-                <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                    <label class="mini wide"
-                        ><small>মাল</small><Input v-model="fert.item"
-                    /></label>
-                    <label class="mini wide"
-                        ><small>কেজি</small
-                        ><Input v-model="fert.kg" type="number" class="num"
-                    /></label>
-                    <label class="mini wide"
-                        ><small>দাম (৳)</small
-                        ><Input v-model="fert.price" type="number" class="num"
-                    /></label>
-                </div>
-                <p class="total">
-                    প্রতি কেজি <b class="num">{{ tk(fertRate) }}</b>
+                    {{ t('প্রতি শতাংশে') }}
+                    <b class="num">{{
+                        t(':kg কেজি', { kg: grassPerDecimal })
+                    }}</b>
+                    · {{ t('ঘাসের দাম') }}
+                    <b class="num">{{ tk(grassValue) }}</b>
                 </p>
             </div>
 
@@ -546,11 +499,147 @@ const fertUsed = computed(() =>
 
             <div class="step">
                 <h3>
-                    <span class="badge">২</span> কোন জমিতে কত কেজি, কত শতাংশে
+                    <span class="badge">{{ t('২') }}</span>
+                    {{ t('কোন গরুকে কত') }}
+                </h3>
+                <div
+                    v-for="(c, i) in grass.centers"
+                    :key="i"
+                    class="grid grid-cols-[1fr_5rem_4rem_4rem] items-center gap-2 py-1 text-sm"
+                >
+                    <span class="font-medium"
+                        ><i :class="['dot mr-2', COLORS[i]]" />{{ t(c.name) }}
+                        <small class="block pl-4 text-muted-foreground">{{
+                            t('প্রতি গরু দিনে :kg কেজি · :amount', {
+                                kg:
+                                    n(c.cows) * n(c.days)
+                                        ? round2(
+                                              n(c.kg) / (n(c.cows) * n(c.days)),
+                                          )
+                                        : 0,
+                                amount: tk(n(c.kg) * n(grass.rate)),
+                            })
+                        }}</small></span
+                    >
+                    <label class="mini"
+                        ><Input
+                            v-model="c.kg"
+                            type="number"
+                            class="num text-right"
+                        /><small>{{ t('কেজি') }}</small></label
+                    >
+                    <label class="mini"
+                        ><Input
+                            v-model="c.cows"
+                            type="number"
+                            class="num text-right"
+                        /><small>{{ t('গরু') }}</small></label
+                    >
+                    <label class="mini"
+                        ><Input
+                            v-model="c.days"
+                            type="number"
+                            class="num text-right"
+                        /><small>{{ t('দিন') }}</small></label
+                    >
+                </div>
+                <p class="total">
+                    {{
+                        t(':land শতাংশ জমির :kg কেজি ঘাসে', {
+                            land: grass.land,
+                            kg: grassUsed,
+                        })
+                    }}
+                    <b>{{
+                        t(':cowsটি গরু', {
+                            cows: grass.centers.reduce(
+                                (s, c) => s + n(c.cows),
+                                0,
+                            ),
+                        })
+                    }}</b>
+                    {{
+                        t('খেলো · স্টকে বাকি :kg কেজি', {
+                            kg: round2(n(grass.kg) - grassUsed),
+                        })
+                    }}
+                </p>
+            </div>
+
+            <ArrowDown class="arrow" />
+
+            <div class="step">
+                <h3>
+                    <span class="badge">{{ t('৩') }}</span>
+                    {{ t('কে কী দেখে') }}
+                </h3>
+                <div class="result">
+                    <span>{{ t('ঘাস চাষ (জমি) — ঘাস বিক্রি হিসেবে আয়') }}</span
+                    ><span /><b class="num text-income">{{ tk(grassValue) }}</b>
+                </div>
+                <div class="result">
+                    <span>{{ t('ঘাস চাষ (জমি) — লিজ খরচ') }}</span
+                    ><span /><b class="num text-expense"
+                        >−{{ tk(n(grass.lease)) }}</b
+                    >
+                </div>
+                <div class="result font-semibold">
+                    <span>{{ t('ঘাস চাষে লাভ (নিজে চাষ করা কি সস্তা?)') }}</span
+                    ><span /><b class="num">{{
+                        tk(grassValue - n(grass.lease))
+                    }}</b>
+                </div>
+                <p class="note mt-3">
+                    {{
+                        t(
+                            'গরুর ক্যাটাগরিগুলোর খরচে ঘাস ওঠে বাজারদরে, তাই কোন গরু কত খরচ খায় তা সঠিক থাকে। কিন্তু পুরো খামারের হিসাবে এই আয়-খরচ কাটাকাটি হয়ে যায় — টাকা খামারের বাইরে যায়নি, তাই খামারের মোট লাভ বাড়িয়ে দেখায় না। আসল খরচ শুধু লিজের :amount।',
+                            { amount: tk(n(grass.lease)) },
+                        )
+                    }}
+                </p>
+            </div>
+        </div>
+
+        <!-- 4. সার -->
+        <div v-else class="demo">
+            <div class="step">
+                <h3>
+                    <span class="badge">{{ t('১') }}</span>
+                    {{ t('সার কেনা — স্টকে ওঠে') }}
+                </h3>
+                <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+                    <label class="mini wide"
+                        ><small>{{ t('মাল') }}</small
+                        ><Input v-model="fert.item"
+                    /></label>
+                    <label class="mini wide"
+                        ><small>{{ t('কেজি') }}</small
+                        ><Input v-model="fert.kg" type="number" class="num"
+                    /></label>
+                    <label class="mini wide"
+                        ><small>{{ t('দাম (৳)') }}</small
+                        ><Input v-model="fert.price" type="number" class="num"
+                    /></label>
+                </div>
+                <p class="total">
+                    {{ t('প্রতি কেজি') }}
+                    <b class="num">{{ tk(fertRate) }}</b>
+                </p>
+            </div>
+
+            <ArrowDown class="arrow" />
+
+            <div class="step">
+                <h3>
+                    <span class="badge">{{ t('২') }}</span>
+                    {{ t('কোন জমিতে কত কেজি, কত শতাংশে') }}
                 </h3>
                 <p class="note">
-                    "গরুকে খাবার দেওয়া / ব্যবহার" পাতায় সার বাছলে প্রতি লাইনে
-                    জমির শতাংশ চাইবে।
+                    {{
+                        t(
+                            '"গরুকে খাবার দেওয়া / ব্যবহার" পাতায় সার বাছলে প্রতি লাইনে জমির শতাংশ চাইবে।',
+                        )
+                    }}
                 </p>
                 <div
                     v-for="(p, i) in fert.plots"
@@ -558,39 +647,45 @@ const fertUsed = computed(() =>
                     class="grid grid-cols-[1fr_5rem_5rem_6rem] items-center gap-2 py-1 text-sm"
                 >
                     <span class="font-medium"
-                        ><i :class="['dot mr-2', COLORS[i]]" />{{ p.name }}
-                        <small class="block pl-4 text-muted-foreground"
-                            >প্রতি শতাংশে
-                            {{ n(p.land) ? round2(n(p.kg) / n(p.land)) : 0 }}
-                            কেজি</small
-                        ></span
+                        ><i :class="['dot mr-2', COLORS[i]]" />{{ t(p.name) }}
+                        <small class="block pl-4 text-muted-foreground">{{
+                            t('প্রতি শতাংশে :kg কেজি', {
+                                kg: n(p.land) ? round2(n(p.kg) / n(p.land)) : 0,
+                            })
+                        }}</small></span
                     >
                     <label class="mini"
                         ><Input
                             v-model="p.kg"
                             type="number"
                             class="num text-right"
-                        /><small>কেজি</small></label
+                        /><small>{{ t('কেজি') }}</small></label
                     >
                     <label class="mini"
                         ><Input
                             v-model="p.land"
                             type="number"
                             class="num text-right"
-                        /><small>শতাংশ</small></label
+                        /><small>{{ t('শতাংশ') }}</small></label
                     >
                     <b class="num text-right">{{ tk(n(p.kg) * fertRate) }}</b>
                 </div>
                 <p class="total">
-                    দেওয়া হলো {{ fertUsed }} কেজি · স্টকে বাকি
-                    <b class="num">{{ round2(n(fert.kg) - fertUsed) }} কেজি</b>
+                    {{
+                        t('দেওয়া হলো :kg কেজি · স্টকে বাকি', { kg: fertUsed })
+                    }}
+                    <b class="num">{{
+                        t(':kg কেজি', { kg: round2(n(fert.kg) - fertUsed) })
+                    }}</b>
                 </p>
             </div>
 
             <ArrowDown class="arrow" />
 
             <div class="step">
-                <h3><span class="badge">৩</span> ফল</h3>
+                <h3>
+                    <span class="badge">{{ t('৩') }}</span> {{ t('ফল') }}
+                </h3>
                 <div class="bar">
                     <div
                         v-for="(p, i) in fert.plots"
@@ -602,27 +697,30 @@ const fertUsed = computed(() =>
                     />
                 </div>
                 <p class="note">
-                    সবজি বাগানের খরচে উঠলো শুধু তার জমিতে পড়া সারের দাম, ফল
-                    বাগানের খরচে তারটুকু। ঘাসের জমির সার ঘাস চাষের খরচ — তাই
-                    ঘাসের প্রতি কেজির আসল খরচও বোঝা যায়।
+                    {{
+                        t(
+                            'সবজি বাগানের খরচে উঠলো শুধু তার জমিতে পড়া সারের দাম, ফল বাগানের খরচে তারটুকু। ঘাসের জমির সার ঘাস চাষের খরচ — তাই ঘাসের প্রতি কেজির আসল খরচও বোঝা যায়।',
+                        )
+                    }}
                 </p>
             </div>
         </div>
 
         <p class="mt-6 text-sm text-muted-foreground">
-            আসল কাজ করতে:
-            <Link href="/allocation" class="underline">খরচ ভাগ</Link> ·
-            <Link href="/stock/move?mode=issue" class="underline"
-                >গরুকে খাবার দেওয়া</Link
-            >
+            {{ t('আসল কাজ করতে:') }}
+            <Link href="/allocation" class="underline">{{ t('খরচ ভাগ') }}</Link>
             ·
-            <Link href="/stock/move?mode=produce" class="underline"
-                >নিজের উৎপাদন</Link
-            >
+            <Link href="/stock/move?mode=issue" class="underline">{{
+                t('গরুকে খাবার দেওয়া')
+            }}</Link>
             ·
-            <Link href="/reports/usage" class="underline"
-                >কোথায় কত কেজি গেল</Link
-            >
+            <Link href="/stock/move?mode=produce" class="underline">{{
+                t('নিজের উৎপাদন')
+            }}</Link>
+            ·
+            <Link href="/reports/usage" class="underline">{{
+                t('কোথায় কত কেজি গেল')
+            }}</Link>
         </p>
     </div>
 </template>

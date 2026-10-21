@@ -15,6 +15,7 @@ use App\Services\MilkBook;
 use App\Services\StockService;
 use App\Support\Lookups;
 use App\Support\Money;
+use App\Support\Tr;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,8 +44,8 @@ class OfflineController extends Controller
         return Inertia::render('offline/Index', [
             'userId' => $request->user()->id,
             'snapshotAt' => now()->toIso8601String(),
-            'sessions' => MilkRecord::SESSIONS,
-            'feedSessions' => StockMovement::SESSIONS,
+            'sessions' => Tr::all(MilkRecord::SESSIONS),
+            'feedSessions' => Tr::all(StockMovement::SESSIONS),
             'cows' => Animal::query()->where('status', 'active')->where('sex', 'female')->when($gavi, fn ($query) => $query->where('cost_center_id', $gavi))->orderBy('tag')->get(['id', 'tag', 'name']),
             'items' => Lookups::items(),
             'centers' => array_values(array_filter(Lookups::centers(), fn ($center) => ! in_array($center['kind'], ['group'], true))),
@@ -74,7 +75,7 @@ class OfflineController extends Controller
                 // Another user's id is never revealed or reused.
                 $results[] = $existing->user_id === $user->id
                     ? $existing->result()
-                    : ['uuid' => $item['uuid'], 'status' => 'failed', 'message' => 'এই এন্ট্রি অন্য ব্যবহারকারীর।', 'number' => null];
+                    : ['uuid' => $item['uuid'], 'status' => 'failed', 'message' => Tr::get('এই এন্ট্রি অন্য ব্যবহারকারীর।'), 'number' => null];
 
                 continue;
             }
@@ -109,7 +110,7 @@ class OfflineController extends Controller
                             'rows.*.animal_id' => ['nullable', 'exists:animals,id'],
                             'rows.*.liters' => ['nullable', 'numeric', 'min:0', 'max:80'],
                         ])->validate();
-                        $message = $milk->record($data['date'], $data['session'], $data['rows'], $user->id).'টি গাভীর দুধ রাখা হয়েছে';
+                        $message = Tr::get(':countটি গাভীর দুধ রাখা হয়েছে', ['count' => $milk->record($data['date'], $data['session'], $data['rows'], $user->id)]);
                         break;
 
                     case 'feed':
@@ -152,7 +153,7 @@ class OfflineController extends Controller
             // A server hiccup: nothing is kept, the phone tries again later.
             report($exception);
 
-            return ['uuid' => $item['uuid'], 'status' => 'retry', 'message' => 'সার্ভারে সমস্যা, পরে আবার পাঠানো হবে।', 'number' => null];
+            return ['uuid' => $item['uuid'], 'status' => 'retry', 'message' => Tr::get('সার্ভারে সমস্যা, পরে আবার পাঠানো হবে।'), 'number' => null];
         }
 
         return OfflineSubmission::query()->where('uuid', $item['uuid'])->firstOrFail()->result();
@@ -163,7 +164,7 @@ class OfflineController extends Controller
         $ability = $kind === 'expense' ? 'post-entries' : 'post-daily';
 
         if (! $user->can($ability)) {
-            throw ValidationException::withMessages(['kind' => 'আপনার এই ধরনের এন্ট্রি দেওয়ার অনুমতি নেই।']);
+            throw ValidationException::withMessages(['kind' => __('আপনার এই ধরনের এন্ট্রি দেওয়ার অনুমতি নেই।')]);
         }
     }
 

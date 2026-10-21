@@ -18,6 +18,7 @@ import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ask } from '@/lib/dialog';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel } from '@/lib/khamar';
 
 /**
@@ -53,6 +54,10 @@ type Row = {
 };
 
 const props = defineProps<{ rows: Row[]; kinds: Record<string, string> }>();
+
+const kindLabels = computed(() => tAll(props.kinds));
+const tCenter = (c: { name: string; depth: number }) =>
+    centerLabel({ ...c, name: t(c.name) });
 
 const page = usePage();
 const pageError = computed(
@@ -143,9 +148,9 @@ const move = (row: Row, direction: 'up' | 'down') =>
 async function remove(row: Row) {
     if (
         await ask.confirm({
-            title: `"${row.name}" মুছবেন?`,
-            body: 'এতে কোনো হিসাব নেই, তাই পুরোপুরি মুছে যাবে।',
-            confirmText: 'মুছুন',
+            title: t('":name" মুছবেন?', { name: t(row.name) }),
+            body: t('এতে কোনো হিসাব নেই, তাই পুরোপুরি মুছে যাবে।'),
+            confirmText: t('মুছুন'),
             danger: true,
         })
     ) {
@@ -160,23 +165,27 @@ const isLast = (row: Row) => siblings(row).at(-1)?.id === row.id;
 
 const whyNoDelete = (row: Row) =>
     row.system
-        ? 'অ্যাপের নিজের ক্যাটাগরি — মোছা যায় না'
+        ? t('অ্যাপের নিজের ক্যাটাগরি — মোছা যায় না')
         : row.children
-          ? 'ভেতরে আরও ক্যাটাগরি আছে'
-          : 'হিসাব বা গরু আছে — মোছা যায় না, বন্ধ করে লুকান';
+          ? t('ভেতরে আরও ক্যাটাগরি আছে')
+          : t('হিসাব বা গরু আছে — মোছা যায় না, বন্ধ করে লুকান');
 </script>
 
 <template>
-    <Head title="ক্যাটাগরি সাজান" />
+    <Head :title="t('ক্যাটাগরি সাজান')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="প্রজেক্ট ও ক্যাটাগরি — সাজান ও এডিট"
-            subtitle="সব কাজ এক জায়গায়: চালু/বন্ধ, নাম বদল, ওপরে-নিচে, ভেতরে নতুন, মোছা।"
+            :title="t('প্রজেক্ট ও ক্যাটাগরি — সাজান ও এডিট')"
+            :subtitle="
+                t(
+                    'সব কাজ এক জায়গায়: চালু/বন্ধ, নাম বদল, ওপরে-নিচে, ভেতরে নতুন, মোছা।',
+                )
+            "
         >
             <template #actions>
                 <Button size="sm" @click="startAdd(null)"
-                    ><Plus /> নতুন প্রজেক্ট</Button
+                    ><Plus /> {{ t('নতুন প্রজেক্ট') }}</Button
                 >
             </template>
         </PageTitle>
@@ -186,25 +195,26 @@ const whyNoDelete = (row: Row) =>
             class="mb-4 grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground sm:grid-cols-3 lg:grid-cols-6"
         >
             <span class="flex items-center gap-1.5"
-                ><span class="h-3 w-5 rounded-full bg-primary" /> চালু =
-                তালিকায় দেখা যায়</span
+                ><span class="h-3 w-5 rounded-full bg-primary" />
+                {{ t('চালু = তালিকায় দেখা যায়') }}</span
             >
             <span class="flex items-center gap-1.5"
-                ><span class="h-3 w-5 rounded-full bg-input" /> বন্ধ =
-                লুকানো</span
+                ><span class="h-3 w-5 rounded-full bg-input" />
+                {{ t('বন্ধ = লুকানো') }}</span
             >
             <span class="flex items-center gap-1.5"
-                ><Pencil class="size-3.5" /> নাম/ধরন বদল</span
+                ><Pencil class="size-3.5" /> {{ t('নাম/ধরন বদল') }}</span
             >
             <span class="flex items-center gap-1.5"
-                ><ArrowUp class="size-3.5" /><ArrowDown class="size-3.5" /> ক্রম
-                বদল</span
+                ><ArrowUp class="size-3.5" /><ArrowDown class="size-3.5" />
+                {{ t('ক্রম বদল') }}</span
             >
             <span class="flex items-center gap-1.5"
-                ><Plus class="size-3.5" /> ভেতরে নতুন</span
+                ><Plus class="size-3.5" /> {{ t('ভেতরে নতুন') }}</span
             >
             <span class="flex items-center gap-1.5"
-                ><Trash2 class="size-3.5" /> মোছা (শুধু খালি হলে)</span
+                ><Trash2 class="size-3.5" />
+                {{ t('মোছা (শুধু খালি হলে)') }}</span
             >
         </div>
 
@@ -220,24 +230,29 @@ const whyNoDelete = (row: Row) =>
             class="mb-4 grid gap-3 rounded-xl border border-primary/40 bg-card p-4 sm:grid-cols-2"
             @submit.prevent="save"
         >
-            <p class="font-medium sm:col-span-2">নতুন প্রজেক্ট / ক্যাটাগরি</p>
-            <Field label="নাম" :error="form.errors.name"
+            <p class="font-medium sm:col-span-2">
+                {{ t('নতুন প্রজেক্ট / ক্যাটাগরি') }}
+            </p>
+            <Field :label="t('নাম')" :error="form.errors.name"
                 ><Input
                     v-model="form.name"
                     required
-                    placeholder="যেমন: হাঁস পালন"
+                    :placeholder="t('যেমন: হাঁস পালন')"
             /></Field>
-            <Field label="ইংরেজি কোড" :error="form.errors.code" hint="যেমন DUCK"
+            <Field
+                :label="t('ইংরেজি কোড')"
+                :error="form.errors.code"
+                :hint="t('যেমন DUCK')"
                 ><Input
                     v-model="form.code"
                     required
                     class="uppercase"
                     @input="form.code = form.code.toUpperCase()"
             /></Field>
-            <Field label="ধরন">
+            <Field :label="t('ধরন')">
                 <NSelect v-model="form.kind">
                     <option
-                        v-for="(label, key) in kinds"
+                        v-for="(label, key) in kindLabels"
                         :key="key"
                         :value="key"
                     >
@@ -245,10 +260,10 @@ const whyNoDelete = (row: Row) =>
                     </option>
                 </NSelect>
             </Field>
-            <Field label="কোনটার ভেতরে" :error="form.errors.parent_id">
+            <Field :label="t('কোনটার ভেতরে')" :error="form.errors.parent_id">
                 <NSelect v-model="form.parent_id">
                     <option v-for="r in rows" :key="r.id" :value="r.id">
-                        {{ centerLabel(r) }}
+                        {{ tCenter(r) }}
                     </option>
                 </NSelect>
             </Field>
@@ -258,15 +273,15 @@ const whyNoDelete = (row: Row) =>
                     type="checkbox"
                     class="size-4 accent-[var(--primary)]"
                 />
-                এখানে গরু থাকবে</label
+                {{ t('এখানে গরু থাকবে') }}</label
             >
             <div class="flex gap-2 sm:justify-end">
-                <Button type="submit" :disabled="form.processing"
-                    >যোগ করুন</Button
-                >
-                <Button type="button" variant="ghost" @click="close"
-                    >বাদ</Button
-                >
+                <Button type="submit" :disabled="form.processing">{{
+                    t('যোগ করুন')
+                }}</Button>
+                <Button type="button" variant="ghost" @click="close">{{
+                    t('বাদ')
+                }}</Button>
             </div>
         </form>
 
@@ -298,7 +313,7 @@ const whyNoDelete = (row: Row) =>
                                         row.depth < 2 && 'font-semibold',
                                     ]"
                                 >
-                                    {{ row.name }}
+                                    {{ t(row.name) }}
                                     <Lock
                                         v-if="row.system"
                                         class="size-3 shrink-0 text-muted-foreground"
@@ -306,17 +321,23 @@ const whyNoDelete = (row: Row) =>
                                     <span
                                         v-if="!row.is_active"
                                         class="rounded bg-muted px-1.5 text-[11px] font-normal text-muted-foreground"
-                                        >বন্ধ</span
+                                        >{{ t('বন্ধ') }}</span
                                     >
                                 </p>
                                 <p
                                     class="truncate text-xs text-muted-foreground"
                                 >
-                                    {{ row.kind_label }} · {{ row.code
+                                    {{ t(row.kind_label) }} · {{ row.code
                                     }}<template v-if="row.entries">
-                                        · {{ row.entries }}টি হিসাব</template
+                                        ·
+                                        {{
+                                            t(':nটি হিসাব', { n: row.entries })
+                                        }}</template
                                     ><template v-if="row.animals">
-                                        · {{ row.animals }}টি গরু</template
+                                        ·
+                                        {{
+                                            t(':nটি গরু', { n: row.animals })
+                                        }}</template
                                     >
                                 </p>
                             </div>
@@ -333,7 +354,7 @@ const whyNoDelete = (row: Row) =>
                             <button
                                 type="button"
                                 class="act"
-                                title="এডিট"
+                                :title="t('এডিট')"
                                 @click="startEdit(row)"
                             >
                                 <Pencil class="size-4" />
@@ -341,7 +362,7 @@ const whyNoDelete = (row: Row) =>
                             <button
                                 type="button"
                                 class="act"
-                                title="ওপরে"
+                                :title="t('ওপরে')"
                                 :disabled="isFirst(row)"
                                 @click="move(row, 'up')"
                             >
@@ -350,7 +371,7 @@ const whyNoDelete = (row: Row) =>
                             <button
                                 type="button"
                                 class="act"
-                                title="নিচে"
+                                :title="t('নিচে')"
                                 :disabled="isLast(row)"
                                 @click="move(row, 'down')"
                             >
@@ -359,7 +380,7 @@ const whyNoDelete = (row: Row) =>
                             <button
                                 type="button"
                                 class="act"
-                                title="ভেতরে নতুন"
+                                :title="t('ভেতরে নতুন')"
                                 @click="startAdd(row)"
                             >
                                 <Plus class="size-4" />
@@ -367,7 +388,7 @@ const whyNoDelete = (row: Row) =>
                             <Link
                                 :href="`/centers/${row.id}`"
                                 class="act"
-                                title="হিসাব দেখুন"
+                                :title="t('হিসাব দেখুন')"
                             >
                                 <Eye class="size-4" />
                             </Link>
@@ -375,7 +396,9 @@ const whyNoDelete = (row: Row) =>
                                 type="button"
                                 class="act hover:text-destructive"
                                 :title="
-                                    row.deletable ? 'মুছুন' : whyNoDelete(row)
+                                    row.deletable
+                                        ? t('মুছুন')
+                                        : whyNoDelete(row)
                                 "
                                 :disabled="!row.deletable"
                                 @click="remove(row)"
@@ -393,19 +416,21 @@ const whyNoDelete = (row: Row) =>
                         <p class="text-sm font-medium sm:col-span-2">
                             {{
                                 editingId === row.id
-                                    ? 'এডিট করুন'
-                                    : `"${row.name}"-এর ভেতরে নতুন`
+                                    ? t('এডিট করুন')
+                                    : t('":name"-এর ভেতরে নতুন', {
+                                          name: t(row.name),
+                                      })
                             }}
                         </p>
-                        <Field label="নাম" :error="form.errors.name"
+                        <Field :label="t('নাম')" :error="form.errors.name"
                             ><Input v-model="form.name" required
                         /></Field>
                         <Field
-                            label="ইংরেজি কোড"
+                            :label="t('ইংরেজি কোড')"
                             :error="form.errors.code"
                             :hint="
                                 editingId === row.id && row.system
-                                    ? 'অ্যাপের নিজের কোড — বদলানো যায় না'
+                                    ? t('অ্যাপের নিজের কোড — বদলানো যায় না')
                                     : undefined
                             "
                             ><Input
@@ -415,10 +440,10 @@ const whyNoDelete = (row: Row) =>
                                 :disabled="editingId === row.id && row.system"
                                 @input="form.code = form.code.toUpperCase()"
                         /></Field>
-                        <Field label="ধরন">
+                        <Field :label="t('ধরন')">
                             <NSelect v-model="form.kind">
                                 <option
-                                    v-for="(label, key) in kinds"
+                                    v-for="(label, key) in kindLabels"
                                     :key="key"
                                     :value="key"
                                 >
@@ -427,11 +452,13 @@ const whyNoDelete = (row: Row) =>
                             </NSelect>
                         </Field>
                         <Field
-                            label="কোনটার ভেতরে"
+                            :label="t('কোনটার ভেতরে')"
                             :error="form.errors.parent_id"
                         >
                             <NSelect v-model="form.parent_id">
-                                <option :value="null">— সবার ওপরে —</option>
+                                <option :value="null">
+                                    {{ t('— সবার ওপরে —') }}
+                                </option>
                                 <option
                                     v-for="r in rows.filter(
                                         (x) =>
@@ -441,11 +468,13 @@ const whyNoDelete = (row: Row) =>
                                     :key="r.id"
                                     :value="r.id"
                                 >
-                                    {{ centerLabel(r) }}
+                                    {{ tCenter(r) }}
                                 </option>
                             </NSelect>
                         </Field>
-                        <Field label="বিবরণ (ঐচ্ছিক)" class="sm:col-span-2"
+                        <Field
+                            :label="t('বিবরণ (ঐচ্ছিক)')"
+                            class="sm:col-span-2"
                             ><Input v-model="form.description"
                         /></Field>
                         <label class="flex items-center gap-2 text-sm"
@@ -454,7 +483,7 @@ const whyNoDelete = (row: Row) =>
                                 type="checkbox"
                                 class="size-4 accent-[var(--primary)]"
                             />
-                            এখানে গরু থাকবে</label
+                            {{ t('এখানে গরু থাকবে') }}</label
                         >
                         <p
                             v-if="form.errors.holds_animals"
@@ -464,10 +493,15 @@ const whyNoDelete = (row: Row) =>
                         </p>
                         <div class="flex gap-2 sm:justify-end">
                             <Button type="submit" :disabled="form.processing">{{
-                                editingId === row.id ? 'সেভ করুন' : 'যোগ করুন'
+                                editingId === row.id
+                                    ? t('সেভ করুন')
+                                    : t('যোগ করুন')
                             }}</Button>
-                            <Button type="button" variant="ghost" @click="close"
-                                >বাদ</Button
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                @click="close"
+                                >{{ t('বাদ') }}</Button
                             >
                         </div>
                     </form>

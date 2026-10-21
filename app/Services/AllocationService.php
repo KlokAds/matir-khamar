@@ -84,7 +84,7 @@ class AllocationService
         unset($weights[$source->id]);
 
         if ($weights === []) {
-            throw ValidationException::withMessages(['weights' => 'ভাগ করার জন্য অন্তত একটি ক্যাটাগরি ও তার অংশ দিন।']);
+            throw ValidationException::withMessages(['weights' => __('ভাগ করার জন্য অন্তত একটি ক্যাটাগরি ও তার অংশ দিন।')]);
         }
 
         $pool = $this->pool($source, $month);
@@ -122,7 +122,7 @@ class AllocationService
         $preview = $this->preview($source, $month, $weights);
 
         if ($preview['total'] === 0) {
-            throw ValidationException::withMessages(['month' => 'এই মাসে "'.$source->name.'"-এ ভাগ করার মতো কোনো খরচ নেই।']);
+            throw ValidationException::withMessages(['month' => __('এই মাসে ":name"-এ ভাগ করার মতো কোনো খরচ নেই।', ['name' => $source->name])]);
         }
 
         $label = $method === 'animal_days' ? 'পশু-দিন অনুযায়ী' : 'শতাংশ অনুযায়ী';
@@ -130,7 +130,7 @@ class AllocationService
         return DB::transaction(fn () => $this->ledger->post(
             'allocation',
             $month->copy()->endOfMonth()->toDateString(),
-            "{$source->name} খরচ ভাগ — ".BanglaDate::month($month)." ({$label})",
+            "{$source->name} খরচ ভাগ — ".BanglaDate::month($month, 'bn')." ({$label})",
             $preview['lines'],
             ['reference' => 'alloc-'.$source->id.'-'.$month->format('Y-m')],
         ));

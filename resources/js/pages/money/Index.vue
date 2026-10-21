@@ -15,6 +15,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { day, taka, today, useCan } from '@/lib/khamar';
 import type { Option } from '@/lib/khamar';
 
@@ -54,6 +55,7 @@ const props = defineProps<{
 }>();
 
 const can = useCan();
+const kindLabels = computed(() => tAll(props.kinds));
 const icons: Record<string, typeof Banknote> = {
     cash: Banknote,
     bank: Landmark,
@@ -74,7 +76,7 @@ const byKind = computed(() =>
     Object.keys(props.kinds)
         .map((kind) => ({
             kind,
-            label: props.kinds[kind],
+            label: t(props.kinds[kind]),
             amount: props.places
                 .filter((p) => p.kind === kind)
                 .reduce((sum, p) => sum + p.balance, 0),
@@ -114,22 +116,26 @@ const place = useForm({
 </script>
 
 <template>
-    <Head title="টাকা কোথায় আছে" />
+    <Head :title="t('টাকা কোথায় আছে')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="টাকা কোথায় আছে"
-            subtitle="হাতে, ব্যাংকে, বিকাশে, কারো কাছে — প্রতিটি জায়গার আলাদা হিসাব। এক জায়গা থেকে আরেক জায়গায় সরালে মোট ঠিক থাকে।"
+            :title="t('টাকা কোথায় আছে')"
+            :subtitle="
+                t(
+                    'হাতে, ব্যাংকে, বিকাশে, কারো কাছে — প্রতিটি জায়গার আলাদা হিসাব। এক জায়গা থেকে আরেক জায়গায় সরালে মোট ঠিক থাকে।',
+                )
+            "
         >
             <template #actions>
                 <Button
                     v-if="can['post-entries']"
                     variant="secondary"
                     @click="moving = !moving"
-                    ><ArrowRightLeft /> টাকা সরান</Button
+                    ><ArrowRightLeft /> {{ t('টাকা সরান') }}</Button
                 >
                 <Button v-if="can['manage-setup']" @click="adding = !adding"
-                    ><Plus /> নতুন জায়গা</Button
+                    ><Plus /> {{ t('নতুন জায়গা') }}</Button
                 >
             </template>
         </PageTitle>
@@ -137,7 +143,9 @@ const place = useForm({
         <section
             class="mb-5 rounded-xl border border-primary/30 bg-primary/5 p-4"
         >
-            <p class="text-sm text-muted-foreground">খামারের মোট টাকা</p>
+            <p class="text-sm text-muted-foreground">
+                {{ t('খামারের মোট টাকা') }}
+            </p>
             <p class="num font-display text-3xl">{{ taka(total) }}</p>
             <p
                 class="mt-1 flex flex-wrap gap-x-4 text-sm text-muted-foreground"
@@ -156,29 +164,29 @@ const place = useForm({
             class="mb-5 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
             @submit.prevent="sendMove"
         >
-            <Field label="কোথা থেকে" :error="move.errors.from_account_id">
+            <Field :label="t('কোথা থেকে')" :error="move.errors.from_account_id">
                 <NSelect v-model="move.from_account_id">
                     <option
                         v-for="a in moneyAccounts"
                         :key="a.id"
                         :value="a.id"
                     >
-                        {{ a.name }}
+                        {{ t(a.name) }}
                     </option>
                 </NSelect>
             </Field>
-            <Field label="কোথায়" :error="move.errors.to_account_id">
+            <Field :label="t('কোথায়')" :error="move.errors.to_account_id">
                 <NSelect v-model="move.to_account_id">
                     <option
                         v-for="a in moneyAccounts"
                         :key="a.id"
                         :value="a.id"
                     >
-                        {{ a.name }}
+                        {{ t(a.name) }}
                     </option>
                 </NSelect>
             </Field>
-            <Field label="টাকা (৳)" :error="move.errors.amount">
+            <Field :label="t('টাকা (৳)')" :error="move.errors.amount">
                 <Input
                     v-model="move.amount"
                     type="number"
@@ -188,15 +196,19 @@ const place = useForm({
                     required
                 />
             </Field>
-            <Field label="তারিখ" :error="move.errors.date">
+            <Field :label="t('তারিখ')" :error="move.errors.date">
                 <DateField v-model="move.date" :max="today()" />
             </Field>
-            <Button type="submit" :disabled="move.processing">সরান</Button>
+            <Button type="submit" :disabled="move.processing">{{
+                t('সরান')
+            }}</Button>
             <div class="sm:col-span-2 lg:col-span-5">
-                <Field label="কেন (ঐচ্ছিক)">
+                <Field :label="t('কেন (ঐচ্ছিক)')">
                     <Input
                         v-model="move.description"
-                        placeholder="যেমন: ব্যাংক থেকে তুলে খরচের জন্য মিঠুকে দেওয়া"
+                        :placeholder="
+                            t('যেমন: ব্যাংক থেকে তুলে খরচের জন্য মিঠুকে দেওয়া')
+                        "
                     />
                 </Field>
             </div>
@@ -214,17 +226,17 @@ const place = useForm({
                 })
             "
         >
-            <Field label="নাম" :error="place.errors.name">
+            <Field :label="t('নাম')" :error="place.errors.name">
                 <Input
                     v-model="place.name"
                     required
-                    placeholder="যেমন: মিঠুর হাতে, সোনালী ব্যাংক"
+                    :placeholder="t('যেমন: মিঠুর হাতে, সোনালী ব্যাংক')"
                 />
             </Field>
-            <Field label="ধরন" :error="place.errors.kind">
+            <Field :label="t('ধরন')" :error="place.errors.kind">
                 <NSelect v-model="place.kind">
                     <option
-                        v-for="(label, key) in kinds"
+                        v-for="(label, key) in kindLabels"
                         :key="key"
                         :value="key"
                     >
@@ -233,9 +245,9 @@ const place = useForm({
                 </NSelect>
             </Field>
             <Field
-                label="এখন কত আছে (৳)"
+                :label="t('এখন কত আছে (৳)')"
                 :error="place.errors.opening"
-                hint="খাতা শুরুর আগের টাকা; না থাকলে খালি"
+                :hint="t('খাতা শুরুর আগের টাকা; না থাকলে খালি')"
             >
                 <Input
                     v-model="place.opening"
@@ -246,12 +258,14 @@ const place = useForm({
                 />
             </Field>
             <Field
-                label="কোন তারিখের হিসাবে"
+                :label="t('কোন তারিখের হিসাবে')"
                 :error="place.errors.opening_date"
             >
                 <DateField v-model="place.opening_date" :max="today()" />
             </Field>
-            <Button type="submit" :disabled="place.processing">যোগ করুন</Button>
+            <Button type="submit" :disabled="place.processing">{{
+                t('যোগ করুন')
+            }}</Button>
         </form>
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -270,9 +284,9 @@ const place = useForm({
             >
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        <p class="truncate font-medium">{{ p.name }}</p>
+                        <p class="truncate font-medium">{{ t(p.name) }}</p>
                         <p class="text-xs text-muted-foreground">
-                            {{ p.kind_label }}
+                            {{ t(p.kind_label) }}
                         </p>
                     </div>
                     <span :class="['rounded-lg p-2', tones[p.kind]]">
@@ -295,20 +309,26 @@ const place = useForm({
             class="mt-6 min-w-0 rounded-xl border border-border bg-card"
         >
             <h2 class="border-b border-border p-4 font-display text-lg">
-                {{ selected.name }} — আসা-যাওয়া
+                {{ t(':name — আসা-যাওয়া', { name: t(selected.name) }) }}
             </h2>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[640px] text-sm">
                     <thead class="text-left text-xs text-muted-foreground">
                         <tr class="border-b border-border">
-                            <th class="px-4 py-2 font-medium">তারিখ</th>
-                            <th class="px-4 py-2 font-medium">বিবরণ</th>
-                            <th class="px-4 py-2 text-right font-medium">এল</th>
-                            <th class="px-4 py-2 text-right font-medium">
-                                গেল
+                            <th class="px-4 py-2 font-medium">
+                                {{ t('তারিখ') }}
+                            </th>
+                            <th class="px-4 py-2 font-medium">
+                                {{ t('বিবরণ') }}
                             </th>
                             <th class="px-4 py-2 text-right font-medium">
-                                জের
+                                {{ t('এল') }}
+                            </th>
+                            <th class="px-4 py-2 text-right font-medium">
+                                {{ t('গেল') }}
+                            </th>
+                            <th class="px-4 py-2 text-right font-medium">
+                                {{ t('জের') }}
                             </th>
                         </tr>
                     </thead>
@@ -345,7 +365,7 @@ const place = useForm({
                                 colspan="5"
                                 class="px-4 py-8 text-center text-muted-foreground"
                             >
-                                এখনো কোনো আসা-যাওয়া নেই।
+                                {{ t('এখনো কোনো আসা-যাওয়া নেই।') }}
                             </td>
                         </tr>
                     </tbody>

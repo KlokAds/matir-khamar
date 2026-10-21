@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { t } from '@/lib/i18n';
 </script>
 
 <template>
@@ -10,12 +11,12 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
     </div>
     <div class="ml-1 grid flex-1 text-left leading-tight">
         <span class="truncate font-display text-[15px] text-sidebar-foreground">
-            মাটির খামার
+            {{ t('মাটির খামার') }}
         </span>
         <span
             class="truncate text-[11px] tracking-wide text-sidebar-foreground/60 uppercase"
         >
-            Klok Agro · হিসাব
+            Klok Agro · {{ t('হিসাব') }}
         </span>
     </div>
 </template>

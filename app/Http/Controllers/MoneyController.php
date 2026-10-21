@@ -8,6 +8,7 @@ use App\Services\AccountCodes;
 use App\Services\Ledger;
 use App\Support\Lookups;
 use App\Support\Money;
+use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -38,11 +39,11 @@ class MoneyController extends Controller
                 'id' => $account->id,
                 'name' => $account->name,
                 'kind' => $account->subtype,
-                'kind_label' => Account::MONEY_PLACES[$account->subtype] ?? $account->subtype,
+                'kind_label' => __(Account::MONEY_PLACES[$account->subtype] ?? $account->subtype),
                 'balance' => (int) data_get($sums->get($account->id), 'net', 0),
                 'is_active' => $account->is_active,
             ])->values(),
-            'kinds' => Account::MONEY_PLACES,
+            'kinds' => Tr::all(Account::MONEY_PLACES),
             'selected' => $selected ? $this->statement($selected) : null,
             'moneyAccounts' => Lookups::moneyAccounts(),
         ]);
@@ -79,7 +80,7 @@ class MoneyController extends Controller
         return [
             'id' => $account->id,
             'name' => $account->name,
-            'kind_label' => Account::MONEY_PLACES[$account->subtype] ?? $account->subtype,
+            'kind_label' => __(Account::MONEY_PLACES[$account->subtype] ?? $account->subtype),
             // Newest first, the last 200 movements.
             'rows' => array_slice(array_reverse($rows), 0, 200),
         ];
@@ -116,7 +117,7 @@ class MoneyController extends Controller
             ]);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "\"{$account->name}\" যোগ হয়েছে।"]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('":name" যোগ হয়েছে।', ['name' => $account->name])]);
 
         return to_route('money.index', ['place' => $account->id]);
     }

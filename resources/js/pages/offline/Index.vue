@@ -19,6 +19,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { currentSession, day, qty, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 import { enqueue, listFor, remove, syncNow } from '@/lib/offlineQueue';
@@ -129,13 +130,16 @@ const reachable = computed(
     () => online.value && lastOutcome.value !== 'offline',
 );
 const centerName = (id: unknown) =>
-    props.centers.find((c) => c.id === id)?.name ?? '';
+    t(props.centers.find((c) => c.id === id)?.name ?? '');
+const unitLabel = computed(() =>
+    item.value?.unit_label ? t(item.value.unit_label) : undefined,
+);
 const cowLabel = (id: number | null) => {
     const cow = props.cows.find((c) => c.id === id);
 
     return cow
         ? `${cow.tag}${cow.name ? ' · ' + cow.name : ''}`
-        : 'সব গাভী মিলিয়ে';
+        : t('সব গাভী মিলিয়ে');
 };
 
 async function reload() {
@@ -158,7 +162,11 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
         await enqueue(
             props.userId,
             'milk',
-            `দুধ ${qty(milkTotal.value)} লি. — ${props.sessions[milk.session]}, ${day(milk.date)}`,
+            t('দুধ :qty লি. — :session, :date', {
+                qty: qty(milkTotal.value),
+                session: t(props.sessions[milk.session] ?? ''),
+                date: day(milk.date),
+            }),
             {
                 date: milk.date,
                 session: milk.session,
@@ -180,7 +188,7 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
         await enqueue(
             props.userId,
             'feed',
-            `${item.value?.name} ${qty(feedTotal.value, item.value?.unit_label)} — ${parts.map((s) => centerName(s.cost_center_id)).join(', ')} (${props.feedSessions[feed.session]})`,
+            `${t(item.value?.name ?? '')} ${qty(feedTotal.value, unitLabel.value)} — ${parts.map((s) => centerName(s.cost_center_id)).join(', ')} (${t(props.feedSessions[feed.session] ?? '')})`,
             {
                 item_id: feed.item_id,
                 session: feed.session,
@@ -198,9 +206,10 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
             return;
         }
 
-        const account =
+        const account = t(
             props.expenseAccounts.find((a) => a.id === expense.account_id)
-                ?.name ?? '';
+                ?.name ?? '',
+        );
         await enqueue(
             props.userId,
             'expense',
@@ -212,8 +221,8 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
     }
 
     saved.value = online.value
-        ? 'রাখা হয়েছে, পাঠানো হচ্ছে…'
-        : 'ফোনে রাখা হয়েছে। নেট এলে নিজে থেকেই যাবে।';
+        ? t('রাখা হয়েছে, পাঠানো হচ্ছে…')
+        : t('ফোনে রাখা হয়েছে। নেট এলে নিজে থেকেই যাবে।');
     window.setTimeout(() => (saved.value = ''), 4000);
     await reload();
 
@@ -225,9 +234,9 @@ async function save(kind: 'milk' | 'feed' | 'expense') {
 async function discard(uuid: string) {
     if (
         await ask.confirm({
-            title: 'এন্ট্রিটি মুছবেন?',
-            body: 'এটা শুধু এই ফোন থেকে মুছবে; খাতায় ওঠেনি।',
-            confirmText: 'মুছুন',
+            title: t('এন্ট্রিটি মুছবেন?'),
+            body: t('এটা শুধু এই ফোন থেকে মুছবে; খাতায় ওঠেনি।'),
+            confirmText: t('মুছুন'),
             danger: true,
         })
     ) {
@@ -264,22 +273,28 @@ onUnmounted(() => {
 });
 
 const outcomeText: Record<SyncOutcome, string> = {
-    ok: 'সব পাঠানো হয়েছে।',
-    nothing: 'পাঠানোর মতো কিছু নেই।',
-    offline: 'নেট নেই — নেট এলে নিজে থেকেই যাবে।',
-    'signed-out':
+    ok: t('সব পাঠানো হয়েছে।'),
+    nothing: t('পাঠানোর মতো কিছু নেই।'),
+    offline: t('নেট নেই — নেট এলে নিজে থেকেই যাবে।'),
+    'signed-out': t(
         'লগইন মেয়াদ শেষ — নেট থাকা অবস্থায় আবার লগইন করুন, এন্ট্রিগুলো ফোনেই আছে।',
-    error: 'সার্ভারে সমস্যা — একটু পরে আবার চেষ্টা হবে।',
+    ),
+    error: t('সার্ভারে সমস্যা — একটু পরে আবার চেষ্টা হবে।'),
 };
 </script>
 
 <template>
-    <Head title="অফলাইন এন্ট্রি" />
+    <Head :title="t('অফলাইন এন্ট্রি')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="অফলাইন এন্ট্রি"
-            :subtitle="`নেট না থাকলেও লিখুন — ফোনে জমা থাকবে। তথ্য হালনাগাদ: ${day(snapshotAt)}`"
+            :title="t('অফলাইন এন্ট্রি')"
+            :subtitle="
+                t(
+                    'নেট না থাকলেও লিখুন — ফোনে জমা থাকবে। তথ্য হালনাগাদ: :date',
+                    { date: day(snapshotAt) },
+                )
+            "
         >
             <template #actions>
                 <span
@@ -296,10 +311,10 @@ const outcomeText: Record<SyncOutcome, string> = {
                     />
                     {{
                         reachable
-                            ? 'সার্ভারের সাথে যুক্ত'
+                            ? t('সার্ভারের সাথে যুক্ত')
                             : online
-                              ? 'সার্ভারে পৌঁছানো যাচ্ছে না'
-                              : 'নেট নেই'
+                              ? t('সার্ভারে পৌঁছানো যাচ্ছে না')
+                              : t('নেট নেই')
                     }}
                 </span>
                 <Button
@@ -311,7 +326,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                         :is="syncing ? RefreshCw : CloudUpload"
                         :class="syncing && 'animate-spin'"
                     />
-                    পাঠান ({{ pending }})
+                    {{ t('পাঠান (:n)', { n: pending }) }}
                 </Button>
             </template>
         </PageTitle>
@@ -340,7 +355,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                 ]"
                 @click="tab = 'milk'"
             >
-                <Milk class="size-4" /> দুধ
+                <Milk class="size-4" /> {{ t('দুধ') }}
             </button>
             <button
                 type="button"
@@ -352,7 +367,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                 ]"
                 @click="tab = 'feed'"
             >
-                <Wheat class="size-4" /> খাবার
+                <Wheat class="size-4" /> {{ t('খাবার') }}
             </button>
             <button
                 v-if="canExpense"
@@ -365,7 +380,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                 ]"
                 @click="tab = 'expense'"
             >
-                <HandCoins class="size-4" /> খরচ
+                <HandCoins class="size-4" /> {{ t('খরচ') }}
             </button>
         </div>
 
@@ -379,12 +394,12 @@ const outcomeText: Record<SyncOutcome, string> = {
                     @submit.prevent="save('milk')"
                 >
                     <div class="grid gap-3">
-                        <Field label="তারিখ"
+                        <Field :label="t('তারিখ')"
                             ><DateField v-model="milk.date" :max="today()"
                         /></Field>
                         <SessionPicker
                             v-model="milk.session"
-                            :sessions="sessions"
+                            :sessions="tAll(sessions)"
                         />
                     </div>
                     <div
@@ -408,7 +423,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                             />
                             <span
                                 class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
-                                >লি.</span
+                                >{{ t('লি.') }}</span
                             >
                         </div>
                     </div>
@@ -416,7 +431,11 @@ const outcomeText: Record<SyncOutcome, string> = {
                         type="submit"
                         class="h-11 w-full text-base"
                         :disabled="milkTotal <= 0"
-                        >রাখুন — {{ qty(milkTotal, 'লিটার') }}</Button
+                        >{{
+                            t('রাখুন — :qty', {
+                                qty: qty(milkTotal, t('লিটার')),
+                            })
+                        }}</Button
                     >
                 </form>
 
@@ -427,30 +446,28 @@ const outcomeText: Record<SyncOutcome, string> = {
                 >
                     <SessionPicker
                         v-model="feed.session"
-                        :sessions="feedSessions"
+                        :sessions="tAll(feedSessions)"
                     />
                     <div class="grid grid-cols-2 gap-3">
-                        <Field label="কোন মাল">
+                        <Field :label="t('কোন মাল')">
                             <NSelect v-model="feed.item_id"
                                 ><option
                                     v-for="i in items"
                                     :key="i.id"
                                     :value="i.id"
                                 >
-                                    {{ i.name }}
+                                    {{ t(i.name) }}
                                 </option></NSelect
                             >
                         </Field>
-                        <Field label="তারিখ"
+                        <Field :label="t('তারিখ')"
                             ><DateField v-model="feed.date" :max="today()"
                         /></Field>
                     </div>
                     <p class="rounded-lg bg-muted/60 p-3 text-sm">
-                        আনুমানিক স্টক
-                        <b class="num">{{
-                            qty(localStock, item?.unit_label)
-                        }}</b>
-                        (না-পাঠানো এন্ট্রি বাদে)
+                        {{ t('আনুমানিক স্টক') }}
+                        <b class="num">{{ qty(localStock, unitLabel) }}</b>
+                        {{ t('(না-পাঠানো এন্ট্রি বাদে)') }}
                     </p>
                     <div
                         v-for="(split, index) in feed.splits"
@@ -463,7 +480,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                                 :key="c.id"
                                 :value="c.id"
                             >
-                                {{ c.name }}
+                                {{ t(c.name) }}
                             </option></NSelect
                         >
                         <div class="relative w-32">
@@ -478,16 +495,18 @@ const outcomeText: Record<SyncOutcome, string> = {
                             />
                             <span
                                 class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
-                                >{{ item?.unit_label }}</span
+                                >{{ unitLabel }}</span
                             >
                         </div>
                     </div>
-                    <Field label="নোট"><Input v-model="feed.note" /></Field>
+                    <Field :label="t('নোট')"
+                        ><Input v-model="feed.note"
+                    /></Field>
                     <p
                         v-if="feedTotal > localStock + 0.0005"
                         class="text-sm text-destructive"
                     >
-                        স্টকে এত মাল নেই।
+                        {{ t('স্টকে এত মাল নেই।') }}
                     </p>
                     <Button
                         type="submit"
@@ -495,7 +514,11 @@ const outcomeText: Record<SyncOutcome, string> = {
                         :disabled="
                             feedTotal <= 0 || feedTotal > localStock + 0.0005
                         "
-                        >রাখুন — {{ qty(feedTotal, item?.unit_label) }}</Button
+                        >{{
+                            t('রাখুন — :qty', {
+                                qty: qty(feedTotal, unitLabel),
+                            })
+                        }}</Button
                     >
                 </form>
 
@@ -504,45 +527,45 @@ const outcomeText: Record<SyncOutcome, string> = {
                     class="grid gap-3 sm:grid-cols-2"
                     @submit.prevent="save('expense')"
                 >
-                    <Field label="তারিখ"
+                    <Field :label="t('তারিখ')"
                         ><DateField v-model="expense.date" :max="today()"
                     /></Field>
-                    <Field label="টাকা কোথা থেকে"
+                    <Field :label="t('টাকা কোথা থেকে')"
                         ><NSelect v-model="expense.money_account_id"
                             ><option
                                 v-for="a in moneyAccounts"
                                 :key="a.id"
                                 :value="a.id"
                             >
-                                {{ a.name }}
+                                {{ t(a.name) }}
                             </option></NSelect
                         ></Field
                     >
-                    <Field label="খাত"
+                    <Field :label="t('খাত')"
                         ><NSelect
                             v-model="expense.account_id"
-                            placeholder="বাছুন"
+                            :placeholder="t('বাছুন')"
                             ><option
                                 v-for="a in expenseAccounts"
                                 :key="a.id"
                                 :value="a.id"
                             >
-                                {{ a.name }}
+                                {{ t(a.name) }}
                             </option></NSelect
                         ></Field
                     >
-                    <Field label="ক্যাটাগরি"
+                    <Field :label="t('ক্যাটাগরি')"
                         ><NSelect v-model="expense.cost_center_id"
                             ><option
                                 v-for="c in centers"
                                 :key="c.id"
                                 :value="c.id"
                             >
-                                {{ c.name }}
+                                {{ t(c.name) }}
                             </option></NSelect
                         ></Field
                     >
-                    <Field label="টাকা (৳)"
+                    <Field :label="t('টাকা (৳)')"
                         ><Input
                             v-model="expense.amount"
                             type="number"
@@ -551,11 +574,15 @@ const outcomeText: Record<SyncOutcome, string> = {
                             min="0"
                             class="num h-12 text-lg"
                     /></Field>
-                    <Field label="বিবরণ"
+                    <Field :label="t('বিবরণ')"
                         ><Input v-model="expense.description"
                     /></Field>
                     <p class="text-xs text-muted-foreground sm:col-span-2">
-                        রসিদের ছবি নেট এলে খাতা থেকে এন্ট্রি খুলে যোগ করুন।
+                        {{
+                            t(
+                                'রসিদের ছবি নেট এলে খাতা থেকে এন্ট্রি খুলে যোগ করুন।',
+                            )
+                        }}
                     </p>
                     <Button
                         type="submit"
@@ -564,7 +591,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                             !expense.account_id ||
                             !(parseFloat(expense.amount) > 0)
                         "
-                        >রাখুন</Button
+                        >{{ t('রাখুন') }}</Button
                     >
                 </form>
             </section>
@@ -573,7 +600,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                 class="min-w-0 rounded-xl border border-border bg-card lg:col-span-2"
             >
                 <h2 class="border-b border-border p-4 font-display text-lg">
-                    এই ফোনের এন্ট্রি
+                    {{ t('এই ফোনের এন্ট্রি') }}
                 </h2>
                 <ul class="divide-y divide-border/70">
                     <li
@@ -596,9 +623,9 @@ const outcomeText: Record<SyncOutcome, string> = {
                             <p class="text-xs text-muted-foreground">
                                 {{
                                     {
-                                        pending: 'পাঠানোর অপেক্ষায়',
-                                        done: 'খাতায় উঠেছে',
-                                        failed: 'হয়নি',
+                                        pending: t('পাঠানোর অপেক্ষায়'),
+                                        done: t('খাতায় উঠেছে'),
+                                        failed: t('হয়নি'),
                                     }[q.status]
                                 }}
                                 <span v-if="q.number"> · {{ q.number }}</span>
@@ -607,14 +634,14 @@ const outcomeText: Record<SyncOutcome, string> = {
                                 v-if="q.status === 'failed' && q.message"
                                 class="text-xs text-destructive"
                             >
-                                {{ q.message }}
+                                {{ t(q.message) }}
                             </p>
                         </div>
                         <button
                             v-if="q.status !== 'done'"
                             type="button"
                             class="rounded p-1 text-muted-foreground hover:bg-accent"
-                            aria-label="মুছুন"
+                            :aria-label="t('মুছুন')"
                             @click="discard(q.uuid)"
                         >
                             <Trash2 class="size-4" />
@@ -624,7 +651,7 @@ const outcomeText: Record<SyncOutcome, string> = {
                         v-if="!queue.length"
                         class="px-4 py-8 text-center text-sm text-muted-foreground"
                     >
-                        এখনো কিছু নেই।
+                        {{ t('এখনো কিছু নেই।') }}
                     </li>
                 </ul>
             </section>

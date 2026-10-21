@@ -9,6 +9,7 @@ import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { t, tAll } from '@/lib/i18n';
 import { centerLabel, currentSession, qty, taka, today } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 
@@ -50,19 +51,19 @@ const tabs = computed(() =>
     [
         {
             key: 'issue',
-            label: 'গরুকে খাওয়ানো / ব্যবহার',
+            label: t('গরুকে খাওয়ানো / ব্যবহার'),
             icon: Wheat,
             show: true,
         },
         {
             key: 'purchase',
-            label: 'মাল কেনা (স্টকে)',
+            label: t('মাল কেনা (স্টকে)'),
             icon: Truck,
             show: props.canPurchase,
         },
         {
             key: 'produce',
-            label: 'নিজের উৎপাদন (ঘাস)',
+            label: t('নিজের উৎপাদন (ঘাস)'),
             icon: Sprout,
             show: props.canPurchase,
         },
@@ -125,13 +126,18 @@ const perHead = (split: { cost_center_id: number; qty: string }) => {
     const amount = parseFloat(split.qty) || 0;
 
     return head > 0 && amount > 0
-        ? `${head}টি গরু · প্রতিটি ${Math.round((amount / head) * 100) / 100} ${item.value?.unit_label ?? ''}`
+        ? t(':headটি গরু · প্রতিটি :each :unit', {
+              head,
+              each: Math.round((amount / head) * 100) / 100,
+              unit: t(item.value?.unit_label ?? ''),
+          })
         : head > 0
-          ? `এখন ${head}টি গরু`
+          ? t('এখন :headটি গরু', { head })
           : '';
 };
 const centerName = (id: number) =>
-    props.centers.find((c) => c.id === id)?.name ?? '';
+    t(props.centers.find((c) => c.id === id)?.name ?? '');
+const centerText = (c: Center) => centerLabel({ ...c, name: t(c.name) });
 
 watch(
     () => f.mode,
@@ -186,12 +192,16 @@ function submit() {
 </script>
 
 <template>
-    <Head title="মাল আনা / দেওয়া" />
+    <Head :title="t('মাল আনা / দেওয়া')" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            title="খাবার ও ঔষধের স্টক"
-            subtitle="কেনা মাল আগে স্টকে ওঠে। যতটুকু যে ক্যাটাগরিতে খাওয়ানো হয়, ঠিক ততটুকুর দাম সেখানে খরচ হয়।"
+            :title="t('খাবার ও ঔষধের স্টক')"
+            :subtitle="
+                t(
+                    'কেনা মাল আগে স্টকে ওঠে। যতটুকু যে ক্যাটাগরিতে খাওয়ানো হয়, ঠিক ততটুকুর দাম সেখানে খরচ হয়।',
+                )
+            "
         />
 
         <div class="mb-5 flex flex-wrap gap-1.5">
@@ -216,35 +226,45 @@ function submit() {
                 class="space-y-4 rounded-xl border border-border bg-card p-4 lg:col-span-2"
             >
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <Field label="কোন মাল" :error="f.errors.item_id">
+                    <Field :label="t('কোন মাল')" :error="f.errors.item_id">
                         <NSelect v-model="f.item_id">
                             <option
                                 v-for="i in items"
                                 :key="i.id"
                                 :value="i.id"
                             >
-                                {{ i.name }} — আছে
-                                {{ qty(i.qty_on_hand, i.unit_label) }}
+                                {{
+                                    t(':name — আছে :qty', {
+                                        name: t(i.name),
+                                        qty: qty(
+                                            i.qty_on_hand,
+                                            t(i.unit_label),
+                                        ),
+                                    })
+                                }}
                             </option>
                         </NSelect>
                     </Field>
-                    <Field label="তারিখ" :error="f.errors.date">
+                    <Field :label="t('তারিখ')" :error="f.errors.date">
                         <DateField v-model="f.date" :max="today()" />
                     </Field>
                 </div>
 
                 <template v-if="f.mode === 'issue'">
-                    <SessionPicker v-model="f.session" :sessions="sessions" />
+                    <SessionPicker
+                        v-model="f.session"
+                        :sessions="tAll(sessions)"
+                    />
                     <div class="rounded-lg bg-muted/60 p-3 text-sm">
-                        স্টকে আছে
+                        {{ t('স্টকে আছে') }}
                         <b class="num">{{
-                            qty(item?.qty_on_hand, item?.unit_label)
+                            qty(item?.qty_on_hand, t(item?.unit_label ?? ''))
                         }}</b
-                        >, গড় দর
+                        >, {{ t('গড় দর') }}
                         <b class="num">{{
                             taka(Math.round(item?.average_cost ?? 0))
                         }}</b>
-                        / {{ item?.unit_label }}
+                        / {{ t(item?.unit_label ?? '') }}
                     </div>
                     <p v-if="f.errors.splits" class="text-sm text-destructive">
                         {{ f.errors.splits }}
@@ -265,7 +285,7 @@ function submit() {
                                     :value="c.id"
                                     :disabled="c.kind === 'group'"
                                 >
-                                    {{ centerLabel(c) }}
+                                    {{ centerText(c) }}
                                 </option>
                             </NSelect>
                             <div class="relative w-36 sm:w-full">
@@ -280,7 +300,7 @@ function submit() {
                                 />
                                 <span
                                     class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
-                                    >{{ item?.unit_label }}</span
+                                    >{{ t(item?.unit_label ?? '') }}</span
                                 >
                             </div>
                             <span
@@ -297,7 +317,7 @@ function submit() {
                             <button
                                 type="button"
                                 class="rounded p-1.5 text-muted-foreground hover:bg-accent"
-                                aria-label="সরান"
+                                :aria-label="t('সরান')"
                                 @click="f.splits.splice(index, 1)"
                             >
                                 <X class="size-4" />
@@ -306,9 +326,9 @@ function submit() {
                                 v-if="onLand"
                                 class="col-span-3 flex items-center gap-2 text-sm sm:col-span-4"
                             >
-                                <span class="text-muted-foreground"
-                                    >কত শতাংশ জমিতে</span
-                                >
+                                <span class="text-muted-foreground">{{
+                                    t('কত শতাংশ জমিতে')
+                                }}</span>
                                 <div class="relative w-32">
                                     <Input
                                         v-model="split.land"
@@ -321,7 +341,7 @@ function submit() {
                                     />
                                     <span
                                         class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
-                                        >শতাংশ</span
+                                        >{{ t('শতাংশ') }}</span
                                     >
                                 </div>
                                 <span
@@ -330,15 +350,19 @@ function submit() {
                                         parseFloat(split.qty) > 0
                                     "
                                     class="num text-xs text-muted-foreground"
-                                    >প্রতি শতাংশে
-                                    {{
-                                        Math.round(
-                                            (parseFloat(split.qty) /
-                                                parseFloat(split.land)) *
-                                                100,
-                                        ) / 100
-                                    }}
-                                    {{ item?.unit_label }}</span
+                                    >{{
+                                        t('প্রতি শতাংশে :n :unit', {
+                                            n:
+                                                Math.round(
+                                                    (parseFloat(split.qty) /
+                                                        parseFloat(
+                                                            split.land,
+                                                        )) *
+                                                        100,
+                                                ) / 100,
+                                            unit: t(item?.unit_label ?? ''),
+                                        })
+                                    }}</span
                                 >
                             </div>
                             <p
@@ -354,12 +378,12 @@ function submit() {
                         size="sm"
                         variant="secondary"
                         @click="addSplit"
-                        ><Plus /> আরেক ক্যাটাগরি</Button
+                        ><Plus /> {{ t('আরেক ক্যাটাগরি') }}</Button
                     >
-                    <Field label="নোট (ঐচ্ছিক)">
+                    <Field :label="t('নোট (ঐচ্ছিক)')">
                         <Input
                             v-model="f.note"
-                            placeholder="যেমন: সকাল-বিকাল দুই বেলা"
+                            :placeholder="t('যেমন: সকাল-বিকাল দুই বেলা')"
                         />
                     </Field>
                 </template>
@@ -367,9 +391,13 @@ function submit() {
                 <template v-if="f.mode === 'purchase'">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <Field
-                            :label="`পরিমাণ (${item?.unit_label ?? ''})`"
+                            :label="
+                                t('পরিমাণ (:unit)', {
+                                    unit: t(item?.unit_label ?? ''),
+                                })
+                            "
                             :error="f.errors.qty"
-                            hint="মণে কিনলে ৪০ দিয়ে গুণ করে কেজি লিখুন"
+                            :hint="t('মণে কিনলে ৪০ দিয়ে গুণ করে কেজি লিখুন')"
                         >
                             <Input
                                 v-model="f.qty"
@@ -382,11 +410,19 @@ function submit() {
                             />
                         </Field>
                         <Field
-                            label="মোট দাম (৳)"
+                            :label="t('মোট দাম (৳)')"
                             :error="f.errors.amount"
                             :hint="
                                 f.qty && f.amount
-                                    ? `প্রতি ${item?.unit_label} ${taka(Math.round((parseFloat(f.amount) * 100) / parseFloat(f.qty)))}`
+                                    ? t('প্রতি :unit :price', {
+                                          unit: t(item?.unit_label ?? ''),
+                                          price: taka(
+                                              Math.round(
+                                                  (parseFloat(f.amount) * 100) /
+                                                      parseFloat(f.qty),
+                                              ),
+                                          ),
+                                      })
                                     : ''
                             "
                         >
@@ -400,17 +436,19 @@ function submit() {
                                 required
                             />
                         </Field>
-                        <Field label="টাকা কীভাবে">
+                        <Field :label="t('টাকা কীভাবে')">
                             <NSelect v-model="f.settle">
                                 <option value="money">
-                                    নগদ/ব্যাংক থেকে দেওয়া
+                                    {{ t('নগদ/ব্যাংক থেকে দেওয়া') }}
                                 </option>
-                                <option value="credit">বাকিতে কেনা</option>
+                                <option value="credit">
+                                    {{ t('বাকিতে কেনা') }}
+                                </option>
                             </NSelect>
                         </Field>
                         <Field
                             v-if="f.settle === 'money'"
-                            label="কোথা থেকে"
+                            :label="t('কোথা থেকে')"
                             :error="f.errors.money_account_id"
                         >
                             <NSelect v-model="f.money_account_id">
@@ -419,13 +457,18 @@ function submit() {
                                     :key="a.id"
                                     :value="a.id"
                                 >
-                                    {{ a.name }}
+                                    {{ t(a.name) }}
                                 </option>
                             </NSelect>
                         </Field>
-                        <Field label="সরবরাহকারী" :error="f.errors.party_id">
+                        <Field
+                            :label="t('সরবরাহকারী')"
+                            :error="f.errors.party_id"
+                        >
                             <NSelect v-model="f.party_id">
-                                <option :value="null">— বাছুন —</option>
+                                <option :value="null">
+                                    {{ t('— বাছুন —') }}
+                                </option>
                                 <option
                                     v-for="p in suppliers"
                                     :key="p.id"
@@ -435,22 +478,27 @@ function submit() {
                                 </option>
                             </NSelect>
                         </Field>
-                        <Field label="উদ্যোগ বাজেট খাত">
+                        <Field :label="t('উদ্যোগ বাজেট খাত')">
                             <NSelect v-model="f.budget_head_id">
-                                <option :value="null">— নয় —</option>
+                                <option :value="null">
+                                    {{ t('— নয় —') }}
+                                </option>
                                 <option
                                     v-for="b in budgetHeads"
                                     :key="b.id"
                                     :value="b.id"
                                 >
-                                    {{ b.code }} · {{ b.name }}
+                                    {{ b.code }} · {{ t(b.name) }}
                                 </option>
                             </NSelect>
                         </Field>
-                        <Field label="বিবরণ">
+                        <Field :label="t('বিবরণ')">
                             <Input v-model="f.description" />
                         </Field>
-                        <Field label="রসিদের ছবি" :error="f.errors.attachments">
+                        <Field
+                            :label="t('রসিদের ছবি')"
+                            :error="f.errors.attachments"
+                        >
                             <label
                                 class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm hover:bg-accent"
                             >
@@ -462,7 +510,7 @@ function submit() {
                                         ? f.attachments
                                               .map((x) => x.name)
                                               .join(', ')
-                                        : 'ছবি / PDF'
+                                        : t('ছবি / PDF')
                                 }}</span>
                                 <input
                                     type="file"
@@ -479,14 +527,19 @@ function submit() {
 
                 <template v-if="f.mode === 'produce'">
                     <p class="rounded-lg bg-paddy/10 p-3 text-sm">
-                        নিজের জমির ঘাস কাটলে বাজারদরে স্টকে তুলুন। ঘাস চাষ
-                        ক্যাটাগরি তখন দেখাবে — নিজে চাষ করা কেনার চেয়ে লাভজনক
-                        কি না। কত শতাংশ জমি থেকে কাটলেন লিখলে রিপোর্টে দেখা যাবে
-                        প্রতি শতাংশে কত কেজি হলো।
+                        {{
+                            t(
+                                'নিজের জমির ঘাস কাটলে বাজারদরে স্টকে তুলুন। ঘাস চাষ ক্যাটাগরি তখন দেখাবে — নিজে চাষ করা কেনার চেয়ে লাভজনক কি না। কত শতাংশ জমি থেকে কাটলেন লিখলে রিপোর্টে দেখা যাবে প্রতি শতাংশে কত কেজি হলো।',
+                            )
+                        }}
                     </p>
                     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <Field
-                            :label="`পরিমাণ (${item?.unit_label ?? ''})`"
+                            :label="
+                                t('পরিমাণ (:unit)', {
+                                    unit: t(item?.unit_label ?? ''),
+                                })
+                            "
                             :error="f.errors.qty"
                         >
                             <Input
@@ -499,7 +552,11 @@ function submit() {
                             />
                         </Field>
                         <Field
-                            :label="`দর (৳ / ${item?.unit_label ?? ''})`"
+                            :label="
+                                t('দর (৳ / :unit)', {
+                                    unit: t(item?.unit_label ?? ''),
+                                })
+                            "
                             :error="f.errors.rate"
                         >
                             <Input
@@ -512,7 +569,7 @@ function submit() {
                             />
                         </Field>
                         <Field
-                            label="কোন ক্যাটাগরি উৎপাদন করলো"
+                            :label="t('কোন ক্যাটাগরি উৎপাদন করলো')"
                             :error="f.errors.cost_center_id"
                         >
                             <NSelect v-model="f.cost_center_id">
@@ -522,17 +579,27 @@ function submit() {
                                     :value="c.id"
                                     :disabled="c.kind === 'group'"
                                 >
-                                    {{ centerLabel(c) }}
+                                    {{ centerText(c) }}
                                 </option>
                             </NSelect>
                         </Field>
                         <Field
-                            label="কত শতাংশ জমি থেকে (ঐচ্ছিক)"
+                            :label="t('কত শতাংশ জমি থেকে (ঐচ্ছিক)')"
                             :error="f.errors.land_decimals"
                             :hint="
                                 parseFloat(f.land_decimals) > 0 &&
                                 parseFloat(f.qty) > 0
-                                    ? `প্রতি শতাংশে ${Math.round((parseFloat(f.qty) / parseFloat(f.land_decimals)) * 10) / 10} ${item?.unit_label ?? ''}`
+                                    ? t('প্রতি শতাংশে :n :unit', {
+                                          n:
+                                              Math.round(
+                                                  (parseFloat(f.qty) /
+                                                      parseFloat(
+                                                          f.land_decimals,
+                                                      )) *
+                                                      10,
+                                              ) / 10,
+                                          unit: t(item?.unit_label ?? ''),
+                                      })
                                     : undefined
                             "
                         >
@@ -542,7 +609,7 @@ function submit() {
                                 step="0.01"
                                 min="0"
                                 class="num"
-                                placeholder="যেমন 10"
+                                :placeholder="t('যেমন 10')"
                             />
                         </Field>
                     </div>
@@ -555,10 +622,10 @@ function submit() {
                     class="rounded-xl border border-primary/30 bg-primary/5 p-4"
                 >
                     <p class="text-sm text-muted-foreground">
-                        মোট দেওয়া হচ্ছে
+                        {{ t('মোট দেওয়া হচ্ছে') }}
                     </p>
                     <p class="num font-display text-3xl">
-                        {{ qty(issueTotal, item?.unit_label) }}
+                        {{ qty(issueTotal, t(item?.unit_label ?? '')) }}
                     </p>
                     <p class="num text-sm">
                         ≈
@@ -590,13 +657,13 @@ function submit() {
                         </li>
                     </ul>
                     <p v-if="overStock" class="mt-3 text-sm text-destructive">
-                        স্টকে এত মাল নেই।
+                        {{ t('স্টকে এত মাল নেই।') }}
                     </p>
                     <Button
                         type="submit"
                         class="mt-4 w-full"
                         :disabled="f.processing || overStock || issueTotal <= 0"
-                        >লিখে রাখুন</Button
+                        >{{ t('লিখে রাখুন') }}</Button
                     >
                 </section>
                 <section
@@ -606,8 +673,8 @@ function submit() {
                     <p class="text-sm text-muted-foreground">
                         {{
                             f.mode === 'purchase'
-                                ? 'স্টকে উঠবে'
-                                : 'উৎপাদনের মূল্য'
+                                ? t('স্টকে উঠবে')
+                                : t('উৎপাদনের মূল্য')
                         }}
                     </p>
                     <p class="num font-display text-3xl">
@@ -631,7 +698,7 @@ function submit() {
                         type="submit"
                         class="mt-4 w-full"
                         :disabled="f.processing"
-                        >সংরক্ষণ করুন</Button
+                        >{{ t('সংরক্ষণ করুন') }}</Button
                     >
                 </section>
             </aside>

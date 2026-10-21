@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Item;
 use App\Models\StockMovement;
+use App\Support\Tr;
 
 /**
  * "ভুসি আর ৪ দিন চলবে": how long each item lasts at the rate it was used over the last two
@@ -40,7 +41,7 @@ class StockForecast
             $rows[] = [
                 'id' => $item->id,
                 'name' => $item->name,
-                'unit' => Item::UNITS[$item->unit] ?? $item->unit,
+                'unit' => Tr::get(Item::UNITS[$item->unit] ?? $item->unit),
                 'qty_on_hand' => $item->qty_on_hand,
                 'per_day' => $perDay,
                 'days_left' => $daysLeft,
