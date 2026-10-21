@@ -6,6 +6,7 @@ use App\Models\AnimalPlacement;
 use App\Models\CostCenter;
 use App\Models\JournalEntry;
 use App\Models\JournalLine;
+use App\Support\BanglaDate;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -129,7 +130,7 @@ class AllocationService
         return DB::transaction(fn () => $this->ledger->post(
             'allocation',
             $month->copy()->endOfMonth()->toDateString(),
-            "{$source->name} খরচ ভাগ — ".$month->format('F Y')." ({$label})",
+            "{$source->name} খরচ ভাগ — ".BanglaDate::month($month)." ({$label})",
             $preview['lines'],
             ['reference' => 'alloc-'.$source->id.'-'.$month->format('Y-m')],
         ));

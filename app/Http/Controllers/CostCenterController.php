@@ -8,6 +8,7 @@ use App\Models\JournalLine;
 use App\Models\MilkRecord;
 use App\Services\ReportService;
 use App\Support\Lookups;
+use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -132,7 +133,7 @@ class CostCenterController extends Controller
         return $data;
     }
 
-    /** @return array{0: \Carbon\CarbonInterface, 1: \Carbon\CarbonInterface} */
+    /** @return array{0: CarbonInterface, 1: CarbonInterface} */
     private function range(Request $request): array
     {
         $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);

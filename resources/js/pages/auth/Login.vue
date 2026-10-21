@@ -8,15 +8,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
     layout: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
+        title: 'হিসাবের খাতা খুলুন',
+        description: 'আপনার ইমেইল ও পাসওয়ার্ড দিন',
     },
 });
 
@@ -27,7 +26,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head title="লগইন" />
 
     <div
         v-if="status"
@@ -46,7 +45,7 @@ defineProps<{
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email">ইমেইল</Label>
                 <Input
                     id="email"
                     type="email"
@@ -62,14 +61,14 @@ defineProps<{
 
             <div class="grid gap-2">
                 <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
+                    <Label for="password">পাসওয়ার্ড</Label>
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
                         class="text-sm"
                         :tabindex="5"
                     >
-                        Forgot your password?
+                        পাসওয়ার্ড ভুলে গেছেন?
                     </TextLink>
                 </div>
                 <PasswordInput
@@ -78,7 +77,7 @@ defineProps<{
                     required
                     :tabindex="2"
                     autocomplete="current-password"
-                    placeholder="Password"
+                    placeholder="পাসওয়ার্ড"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -86,7 +85,7 @@ defineProps<{
             <div class="flex items-center justify-between">
                 <Label for="remember" class="flex items-center space-x-3">
                     <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>Remember me</span>
+                    <span>এই ফোন/কম্পিউটারে মনে রাখুন</span>
                 </Label>
             </div>
 
@@ -98,13 +97,10 @@ defineProps<{
                 data-test="login-button"
             >
                 <Spinner v-if="processing" />
-                Log in
+                প্রবেশ করুন
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
-        </div>
+        <p class="text-center text-xs text-muted-foreground">নতুন অ্যাকাউন্ট শুধু হিসাব অ্যাডমিন খুলে দিতে পারেন।</p>
     </Form>
 </template>

@@ -7,8 +7,8 @@ use App\Models\Attachment;
 use App\Models\JournalEntry;
 use App\Models\PeriodLock;
 use App\Models\PrepaidSchedule;
+use App\Support\BanglaDate;
 use Illuminate\Http\UploadedFile;
-use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -127,7 +127,7 @@ class Ledger
     {
         if (PeriodLock::isLocked($date)) {
             throw ValidationException::withMessages([
-                'date' => Date::parse($date)->format('F Y').' মাসের হিসাব লক করা আছে। নতুন এন্ট্রি দেওয়া যাবে না।',
+                'date' => BanglaDate::month(Date::parse($date)).' মাসের হিসাব লক করা আছে। নতুন এন্ট্রি দেওয়া যাবে না।',
             ]);
         }
 
