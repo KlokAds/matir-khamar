@@ -341,33 +341,26 @@ const rules = [
 
                 <form
                     v-if="can['post-daily']"
-                    class="khata rounded-xl border border-border bg-card p-4"
+                    class="rounded-xl border border-border bg-card p-4"
                     @submit.prevent="saveNote"
                 >
                     <h2 class="font-display mb-3 text-lg">আজ কী লিখবেন?</h2>
 
-                    <div class="mb-3 flex flex-wrap gap-1.5">
-                        <button
-                            v-for="(label, key) in kinds"
-                            :key="key"
-                            type="button"
-                            :class="[
-                                'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                                note.kind === key
-                                    ? [styleOf(key).chip, 'border-current']
-                                    : 'border-border text-muted-foreground hover:bg-accent',
-                            ]"
-                            @click="note.kind = key"
-                        >
-                            {{ label }}
-                        </button>
-                    </div>
-                    <p
-                        v-if="note.errors.kind"
-                        class="mb-2 text-xs text-destructive"
+                    <Field
+                        label="কী ধরনের কথা"
+                        :error="note.errors.kind"
+                        class="mb-3"
                     >
-                        {{ note.errors.kind }}
-                    </p>
+                        <NSelect v-model="note.kind">
+                            <option
+                                v-for="(label, key) in kinds"
+                                :key="key"
+                                :value="key"
+                            >
+                                {{ label }}
+                            </option>
+                        </NSelect>
+                    </Field>
 
                     <div class="grid gap-3">
                         <Field label="তারিখ" :error="note.errors.date">
@@ -907,7 +900,7 @@ const rules = [
                 <div
                     v-for="(block, i) in routine"
                     :key="block.title"
-                    class="khata rounded-xl border border-border bg-card p-4"
+                    class="rounded-xl border border-border bg-card p-4"
                 >
                     <div class="mb-2 flex items-center justify-between gap-2">
                         <h3 class="font-display text-lg">{{ block.title }}</h3>
