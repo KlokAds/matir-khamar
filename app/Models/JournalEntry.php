@@ -54,6 +54,8 @@ class JournalEntry extends Model
         'investment' => 'বিনিয়োগ গ্রহণ',
         'withdrawal' => 'মূলধন উত্তোলন',
         'loan' => 'ঋণ গ্রহণ',
+        'lend' => 'ধার/জামানত দেওয়া',
+        'lend_return' => 'ধার/জামানত ফেরত পাওয়া',
         'loan_repayment' => 'ঋণের কিস্তি',
         'grant' => 'অনুদান গ্রহণ',
         'allocation' => 'সাধারণ খরচ ভাগ',

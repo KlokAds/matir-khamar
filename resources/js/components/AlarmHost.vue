@@ -37,7 +37,15 @@ function beep() {
         // No sound allowed (browser blocked audio): the screen and vibration still show it.
     }
 
-    if ('vibrate' in navigator) {
+    // Browsers only allow vibration after the person has touched the page once.
+    const touched =
+        (
+            navigator as Navigator & {
+                userActivation?: { hasBeenActive: boolean };
+            }
+        ).userActivation?.hasBeenActive ?? true;
+
+    if ('vibrate' in navigator && touched) {
         navigator.vibrate([500, 200, 500]);
     }
 }
@@ -55,7 +63,7 @@ function stopSound() {
         beeper = null;
     }
 
-    if ('vibrate' in navigator) {
+    if ('vibrate' in navigator && navigator.userActivation?.hasBeenActive) {
         navigator.vibrate(0);
     }
 }

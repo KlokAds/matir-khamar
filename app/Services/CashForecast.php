@@ -106,6 +106,17 @@ class CashForecast
                 }
             }
 
+            // Planned loan instalments we pay, and money lent that is due back (ধার ও জামানত).
+            $flowFrom = $row['partial'] ? $today->subDays(60) : $start;
+
+            foreach (app(DebtBook::class)->plannedFlows($flowFrom, $end) as $i => $flow) {
+                $parts[] = $flow['amount'] < 0
+                    ? $this->part("debt-out-{$index}-{$i}", 'expense', Tr::get('কিস্তি/ফেরত: :name', ['name' => $flow['label']]), -$flow['amount'],
+                        Tr::get('ধার ও জামানতে লেখা তারিখ :date', ['date' => BanglaDate::day(CarbonImmutable::parse($flow['date']))]))
+                    : $this->part("debt-in-{$index}-{$i}", 'income', Tr::get('ফেরত পাওয়ার কথা: :name', ['name' => $flow['label']]), $flow['amount'],
+                        Tr::get('ধার ও জামানতে লেখা তারিখ :date', ['date' => BanglaDate::day(CarbonImmutable::parse($flow['date']))]), optional: true);
+            }
+
             // Fattening rounds reaching their target: shown, not counted, since the price is unknown.
             foreach (Batch::query()->whereNull('closed_on')->with(['animals' => fn ($q) => $q->where('status', 'active')])->get() as $batch) {
                 $targetOn = $batch->started_on->addDays($batch->target_days);

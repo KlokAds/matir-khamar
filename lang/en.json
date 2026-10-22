@@ -424,5 +424,22 @@
     ":name-এর কাছে :amount পাওনা": ":name owes us :amount",
     ":name-কে :amount দিতে হবে": "We owe :name :amount",
     ":days দিন ধরে বাকি · আদায়ের কথা বলুন": "Due for :days days · ask for payment",
-    ":days দিন ধরে বাকি · শোধের তারিখ ঠিক করুন": "Due for :days days · set a date to pay"
+    ":days দিন ধরে বাকি · শোধের তারিখ ঠিক করুন": "Due for :days days · set a date to pay",
+    "আমরা দিলাম — ফেরত পাবো": "We gave — it comes back",
+    "আমরা নিলাম — ফেরত দিতে হবে": "We took — we pay it back",
+    "ধার/জামানত দেওয়া": "Loan/deposit given",
+    "ধার/জামানত ফেরত পাওয়া": "Loan/deposit returned",
+    "টাকার পরিমাণ দিন।": "Enter the amount.",
+    "বাকি আছে :left, এর বেশি লেখা যাবে না।": ":left is outstanding; you cannot enter more.",
+    ":n দিন পার হয়ে গেছে": ":n days overdue",
+    ":n দিন পর": "in :n days",
+    ":name-কে ফেরত দিতে হবে ৳:amount": "Pay back :name ৳:amount",
+    ":name-এর কাছ থেকে ফেরত পাওয়ার কথা ৳:amount": ":name should return ৳:amount",
+    "টাকা কোন হিসাব থেকে/তে, সেটা বাছুন।": "Choose which money account it goes from/to.",
+    ":name-এর হিসাব খোলা হলো।": "Account for :name opened.",
+    "লেখা হলো।": "Saved.",
+    "ফেরতের পরিকল্পনা রাখা হলো।": "Repayment plan saved.",
+    "কিস্তি/ফেরত: :name": "Instalment/repayment: :name",
+    "ধার ও জামানতে লেখা তারিখ :date": "Date set in Loans & deposits: :date",
+    "ফেরত পাওয়ার কথা: :name": "Expected back: :name"
 }

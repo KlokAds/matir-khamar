@@ -190,6 +190,13 @@ export const pageLinks: PageLink[] = [
         ability: 'view-reports',
     },
     {
+        title: 'ধার ও জামানত',
+        words: 'loan deposit lend borrow installment ধার জামানত বন্ধক কিস্তি ফেরত ঋণ',
+        href: '/debts',
+        icon: HandCoins,
+        ability: 'view-reports',
+    },
+    {
         title: 'নগদ ও পাওনা',
         words: 'cash forecast dues receivable payable নগদ পূর্বাভাস পাওনা দেনা বাকি',
         href: '/cash',
