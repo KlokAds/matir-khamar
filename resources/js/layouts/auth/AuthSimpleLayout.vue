@@ -110,7 +110,7 @@ defineProps<{
 
                     <!-- The Android app: the same site, with its own notifications and sound. -->
                     <details
-                        class="group rounded-xl border border-border bg-card/70 text-sm"
+                        class="app-download group rounded-xl border border-border bg-card/70 text-sm"
                     >
                         <summary
                             class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden"

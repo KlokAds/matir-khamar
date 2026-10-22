@@ -478,5 +478,7 @@
     ":rate% সুদ, :years বছরে শোধ": ":rate% interest, repaid over :years years",
     "প্রতি কিস্তিতে আসল; সুদ আলাদা খরচ হিসেবে \"ঋণের সুদ\" খাতে লিখুন।": "Each instalment is principal; write the interest separately as an expense under \"Loan interest\".",
     "উদ্যোগ ঋণের তথ্য রাখা হলো।": "Udyog loan details saved.",
-    "উদ্যোগ ঋণ অনুমোদন লেখা হলো — \"ধার ও জামানত\"-এ কিস্তিসহ ঋণ খোলা হয়েছে।": "Udyog loan approval recorded — the loan and its instalments are open in \"Loans & deposits\"."
+    "উদ্যোগ ঋণ অনুমোদন লেখা হলো — \"ধার ও জামানত\"-এ কিস্তিসহ ঋণ খোলা হয়েছে।": "Udyog loan approval recorded — the loan and its instalments are open in \"Loans & deposits\".",
+    "বদলানো হলো — মনে করাবে :when।": "Changed — will remind :when.",
+    "রিমাইন্ডার মুছে ফেলা হলো।": "Reminder deleted."
 }

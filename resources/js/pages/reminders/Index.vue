@@ -7,9 +7,11 @@ import {
     Check,
     ChevronDown,
     Package,
+    Pencil,
     Repeat,
     Send,
     Smartphone,
+    Trash2,
     Undo2,
 } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -20,6 +22,7 @@ import Toggle from '@/components/khamar/Toggle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
+import { ask } from '@/lib/dialog';
 import { currentLocale, t } from '@/lib/i18n';
 import { centerLabel } from '@/lib/khamar';
 import type { Center } from '@/lib/khamar';
@@ -40,6 +43,8 @@ type Row = {
     repeat: string;
     alarm: boolean;
     for: string | null;
+    for_user_id: number | null;
+    cost_center_id: number | null;
     by: string | null;
     center: string | null;
     animal: string | null;
@@ -293,9 +298,44 @@ function pick(key: (typeof presets)[number]['key']) {
 
 const more = ref(false);
 
+/* The same form changes an existing reminder: its time stays as it was unless changed. */
+const editing = ref<Row | null>(null);
+const formEl = ref<HTMLElement | null>(null);
+
+function startEdit(row: Row) {
+    editing.value = row;
+    f.clearErrors();
+    f.title = row.title;
+    f.body = row.body ?? '';
+    f.due_at = row.due_at;
+    f.repeat = row.repeat;
+    f.alarm = row.alarm;
+    f.for_user_id = row.for_user_id;
+    f.cost_center_id = row.cost_center_id;
+    f.animal_id = row.animal_id;
+    preset.value = 'custom';
+    more.value = Boolean(row.body || row.cost_center_id || row.animal_id);
+    formEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function stopEdit() {
+    editing.value = null;
+    f.reset();
+    pick('1h');
+}
+
 function save() {
     if (preset.value !== 'custom') {
         f.due_at = local(presets.find((p) => p.key === preset.value)!.at());
+    }
+
+    if (editing.value) {
+        f.patch(`/reminders/${editing.value.id}`, {
+            preserveScroll: true,
+            onSuccess: stopEdit,
+        });
+
+        return;
     }
 
     f.post('/reminders', {
@@ -305,6 +345,26 @@ function save() {
             pick('1h');
         },
     });
+}
+
+async function remove(row: Row) {
+    if (
+        await ask.confirm({
+            title: t('রিমাইন্ডার মুছবেন?'),
+            body: row.title,
+            confirmText: t('মুছে ফেলুন'),
+            danger: true,
+        })
+    ) {
+        router.delete(`/reminders/${row.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (editing.value?.id === row.id) {
+                    stopEdit();
+                }
+            },
+        });
+    }
 }
 
 function remindToBuy(item: { name: string }) {
@@ -588,14 +648,27 @@ const trackedStock = computed(() =>
 
                 <!-- New reminder -->
                 <form
-                    class="rounded-xl border border-border bg-card p-4"
+                    ref="formEl"
+                    :class="[
+                        'scroll-mt-20 rounded-xl border bg-card p-4',
+                        editing
+                            ? 'border-turmeric ring-2 ring-turmeric/30'
+                            : 'border-border',
+                    ]"
                     @submit.prevent="save"
                 >
                     <h2
                         class="mb-3 flex items-center gap-2 font-display text-lg"
                     >
-                        <AlarmClock class="size-5 text-turmeric" />
-                        {{ t('নতুন রিমাইন্ডার') }}
+                        <component
+                            :is="editing ? Pencil : AlarmClock"
+                            class="size-5 text-turmeric"
+                        />
+                        {{
+                            editing
+                                ? t('রিমাইন্ডার বদলান')
+                                : t('নতুন রিমাইন্ডার')
+                        }}
                     </h2>
                     <div class="grid gap-3">
                         <Field
@@ -738,9 +811,25 @@ const trackedStock = computed(() =>
                             </div>
                         </template>
 
-                        <Button type="submit" :disabled="f.processing">{{
-                            t('সময় ঠিক করুন')
-                        }}</Button>
+                        <div class="flex gap-2">
+                            <Button
+                                type="submit"
+                                class="flex-1"
+                                :disabled="f.processing"
+                                >{{
+                                    editing
+                                        ? t('বদলে রাখুন')
+                                        : t('সময় ঠিক করুন')
+                                }}</Button
+                            >
+                            <Button
+                                v-if="editing"
+                                type="button"
+                                variant="secondary"
+                                @click="stopEdit"
+                                >{{ t('বাতিল') }}</Button
+                            >
+                        </div>
                     </div>
                 </form>
             </div>
@@ -906,6 +995,22 @@ const trackedStock = computed(() =>
                                         "
                                         >{{ t('কাল সকালে') }}</Button
                                     >
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        class="h-8"
+                                        @click="startEdit(r)"
+                                        ><Pencil /> {{ t('বদলান') }}</Button
+                                    >
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        class="h-8 text-destructive"
+                                        :aria-label="t('মুছে ফেলুন')"
+                                        :title="t('মুছে ফেলুন')"
+                                        @click="remove(r)"
+                                        ><Trash2
+                                    /></Button>
                                 </div>
                             </li>
                         </ul>
