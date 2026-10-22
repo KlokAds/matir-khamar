@@ -18,6 +18,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ManageController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\ProfitController;
@@ -61,6 +62,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('push/subscribe', [ReminderController::class, 'subscribe'])->middleware('throttle:20,1')->name('push.subscribe');
     Route::post('push/unsubscribe', [ReminderController::class, 'unsubscribe'])->name('push.unsubscribe');
     Route::post('push/test', [ReminderController::class, 'test'])->middleware('throttle:10,1')->name('push.test');
+    // The bell's list, and the service worker's way to fetch words a push came without.
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('notifications/latest', [NotificationController::class, 'latest'])->name('notifications.latest');
     Route::put('notify-prefs', [ReminderController::class, 'prefs'])->name('notify.prefs');
 
     // Daily work: milk and feed use. Open to the entry role.

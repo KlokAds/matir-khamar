@@ -172,7 +172,8 @@ async function showHere() {
                 body: t('এটা দেখা গেলে ফোন অ্যাপের নোটিফিকেশন দেখাতে পারে।'),
                 icon: '/icons/icon-192.png',
                 badge: '/icons/icon-192.png',
-                tag: 'local-test',
+                // A new tag each time, so every test makes its sound.
+                tag: `local-test-${Date.now()}`,
             },
         );
         check.value = 'shown';
