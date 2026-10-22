@@ -1,7 +1,7 @@
 ﻿name: matirkhamar
 description: Matir Khamar - the farm's own Android app (the website inside, with chat-style notifications).
 publish_to: none
-version: 2.0.0+2
+version: 2.0.1+3
 
 environment:
     sdk: '>=3.5.0 <4.0.0'
