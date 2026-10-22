@@ -1,0 +1,20 @@
+name: Keep the farm clock running
+
+# The live site runs its own clock (php artisan khamar:clock) for reminders and phone alarms.
+# The host can stop background processes; any visit to the site starts the clock again. This
+# knocks on the site every five minutes, so the clock is back within minutes even when nobody
+# has the app open. No secrets: the health page is public and does nothing else.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  knock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Visit the site
+        run: curl -fsS --retry 3 --retry-delay 5 -o /dev/null -w '%{http_code}\n' https://khamar.klokads.com/up

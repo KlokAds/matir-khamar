@@ -65,12 +65,15 @@ class WebCron
             return;
         }
 
-        $command = sprintf(
-            'cd %s && nohup %s artisan khamar:clock >> %s 2>&1 &',
-            escapeshellarg(base_path()),
-            escapeshellarg(PhpCli::path()),
-            escapeshellarg(storage_path('logs/clock.log')),
-        );
+        $this->spawnClock();
+    }
+
+    /** A new clock process, detached from whoever starts it (a request or the retiring clock). */
+    public function spawnClock(): void
+    {
+        // setsid gives it its own session, so the web worker that started it can end without it.
+        $run = sprintf('%s artisan khamar:clock >> %s 2>&1 < /dev/null &', escapeshellarg(PhpCli::path()), escapeshellarg(storage_path('logs/clock.log')));
+        $command = sprintf('cd %s && if command -v setsid >/dev/null 2>&1; then setsid nohup %s else nohup %s fi', escapeshellarg(base_path()), $run, $run);
 
         try {
             Process::timeout(10)->run(['sh', '-c', $command]);
