@@ -85,7 +85,13 @@ defineProps<{
 
             <div class="flex items-center justify-between">
                 <Label for="remember" class="flex items-center space-x-3">
-                    <Checkbox id="remember" name="remember" :tabindex="3" />
+                    <!-- On by default: the farm phone stays signed in; untick on a shared computer. -->
+                    <Checkbox
+                        id="remember"
+                        name="remember"
+                        :default-value="true"
+                        :tabindex="3"
+                    />
                     <span>{{ t('এই ফোন/কম্পিউটারে মনে রাখুন') }}</span>
                 </Label>
             </div>
