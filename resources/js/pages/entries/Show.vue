@@ -3,6 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { FileText, Paperclip, Printer, Undo2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
+import PhotoPicker from '@/components/khamar/PhotoPicker.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
@@ -71,10 +72,8 @@ const totalCredit = computed(() =>
     props.entry.lines.reduce((sum, line) => sum + line.credit, 0),
 );
 
-function pick(event: Event) {
-    upload.attachments = Array.from(
-        (event.target as HTMLInputElement).files ?? [],
-    ).slice(0, 5);
+function pick(files: File[]) {
+    upload.attachments = files.slice(0, 5);
     upload.post(`/entries/${props.entry.id}/attachments`, {
         forceFormData: true,
         preserveScroll: true,
@@ -286,25 +285,18 @@ function pick(event: Event) {
                 <p v-else class="mb-3 text-sm text-muted-foreground">
                     {{ t('কোনো ভাউচার যোগ করা হয়নি।') }}
                 </p>
-                <label
+                <PhotoPicker
                     v-if="can['post-entries']"
-                    class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2.5 text-sm hover:bg-accent"
+                    :list="false"
+                    :disabled="upload.processing"
+                    @picked="pick"
+                />
+                <p
+                    v-if="upload.processing"
+                    class="mt-2 text-xs text-muted-foreground"
                 >
-                    <Paperclip class="size-4 text-muted-foreground" />
-                    {{
-                        upload.processing
-                            ? t('আপলোড হচ্ছে…')
-                            : t('ভাউচার যোগ করুন')
-                    }}
-                    <input
-                        type="file"
-                        class="sr-only"
-                        accept="image/*,application/pdf"
-                        capture="environment"
-                        multiple
-                        @change="pick"
-                    />
-                </label>
+                    {{ t('আপলোড হচ্ছে…') }}
+                </p>
                 <p
                     v-if="upload.errors.attachments"
                     class="mt-2 text-xs text-destructive"

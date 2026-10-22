@@ -148,6 +148,7 @@ const picked = ref<Picked[]>([]);
 const fileMessage = ref('');
 const recorderOpen = ref(false);
 const photoInput = ref<HTMLInputElement | null>(null);
+const galleryInput = ref<HTMLInputElement | null>(null);
 let pickKey = 0;
 
 function syncFiles() {
@@ -195,14 +196,16 @@ function openRecorder() {
     recorderOpen.value = true;
 }
 
-function openCamera() {
+// The camera there and then, or a photo already on the phone: phones differ in which one a
+// single photo button opens, so both are offered.
+function openCamera(from: 'camera' | 'gallery' = 'camera') {
     if (picked.value.length >= MAX_FILES) {
         fileMessage.value = tooMany;
 
         return;
     }
 
-    photoInput.value?.click();
+    (from === 'gallery' ? galleryInput : photoInput).value?.click();
 }
 
 function removePicked(key: number) {
@@ -589,14 +592,22 @@ const rules = [
                         </Field>
 
                         <div class="grid gap-2">
-                            <div class="grid grid-cols-2 gap-2">
+                            <div class="grid grid-cols-3 gap-2">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     class="h-11 text-base"
-                                    @click="openCamera"
+                                    @click="openCamera('camera')"
                                 >
-                                    📷 {{ t('ছবি') }}
+                                    📷 {{ t('ছবি তুলুন') }}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    class="h-11 text-base"
+                                    @click="openCamera('gallery')"
+                                >
+                                    🖼 {{ t('গ্যালারি') }}
                                 </Button>
                                 <Button
                                     type="button"
@@ -613,6 +624,14 @@ const rules = [
                                 type="file"
                                 accept="image/*"
                                 capture="environment"
+                                multiple
+                                class="hidden"
+                                @change="onPhotos"
+                            />
+                            <input
+                                ref="galleryInput"
+                                type="file"
+                                accept="image/*"
                                 multiple
                                 class="hidden"
                                 @change="onPhotos"
