@@ -179,6 +179,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 ><NSelect v-model="sell.money_account_id" manage="money"
                     ><option
                         v-for="a in moneyAccounts"
+                        :data-locked="a.is_system || undefined"
                         :key="a.id"
                         :value="a.id"
                     >

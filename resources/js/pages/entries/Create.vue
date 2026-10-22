@@ -323,6 +323,7 @@ const help = computed<Record<string, string>>(() => ({
                             >
                                 <option
                                     v-for="a in moneyAccounts"
+                                    :data-locked="a.is_system || undefined"
                                     :key="a.id"
                                     :value="a.id"
                                 >
@@ -342,6 +343,7 @@ const help = computed<Record<string, string>>(() => ({
                                 >
                                     <option
                                         v-for="a in moneyAccounts"
+                                        :data-locked="a.is_system || undefined"
                                         :key="a.id"
                                         :value="a.id"
                                     >
@@ -359,6 +361,7 @@ const help = computed<Record<string, string>>(() => ({
                                 >
                                     <option
                                         v-for="a in moneyAccounts"
+                                        :data-locked="a.is_system || undefined"
                                         :key="a.id"
                                         :value="a.id"
                                     >
@@ -434,6 +437,7 @@ const help = computed<Record<string, string>>(() => ({
                             <NSelect v-model="f.cost_center_id" manage="center">
                                 <option
                                     v-for="c in centers"
+                                    :data-locked="c.locked || undefined"
                                     :key="c.id"
                                     :value="c.id"
                                     :disabled="c.kind === 'group'"
@@ -595,6 +599,9 @@ const help = computed<Record<string, string>>(() => ({
                                     >
                                         <option
                                             v-for="a in lineAccounts"
+                                            :data-locked="
+                                                a.is_system || undefined
+                                            "
                                             :key="a.id"
                                             :value="a.id"
                                         >
@@ -612,6 +619,7 @@ const help = computed<Record<string, string>>(() => ({
                                     >
                                         <option
                                             v-for="c in centers"
+                                            :data-locked="c.locked || undefined"
                                             :key="c.id"
                                             :value="c.id"
                                             :disabled="c.kind === 'group'"

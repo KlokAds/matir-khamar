@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Http\Controllers\CostCenterController;
 use App\Models\Account;
 use App\Models\Animal;
 use App\Models\BudgetHead;
@@ -34,6 +35,8 @@ final class Lookups
                     'holds_animals' => $center->holds_animals,
                     'depth' => $depth,
                     'is_active' => $center->is_active,
+                    // The app looks these up by code: they can be renamed, never removed.
+                    'locked' => in_array($center->code, CostCenterController::SYSTEM_CODES, true),
                 ];
                 $walk($center->id, $depth + 1);
             }
@@ -54,14 +57,14 @@ final class Lookups
             ->whereNotNull('parent_id')
             ->where(fn ($query) => $query->whereNull('subtype')->orWhereNotIn('subtype', ['animal_cost', Account::INTERNAL_SUBTYPE]))
             ->orderBy('code')
-            ->get(['id', 'name', 'code', 'subtype'])
+            ->get(['id', 'name', 'code', 'subtype', 'is_system'])
             ->all();
     }
 
     /** @return array<int, Account> id, name, code, subtype */
     public static function moneyAccounts(): array
     {
-        return Account::query()->money()->orderBy('code')->get(['id', 'name', 'code', 'subtype'])->all();
+        return Account::query()->money()->orderBy('code')->get(['id', 'name', 'code', 'subtype', 'is_system'])->all();
     }
 
     /** @return array<int, Account> id, name, code, subtype */

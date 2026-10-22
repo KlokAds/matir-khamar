@@ -158,7 +158,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\ManageController::destroy
-* @see app/Http/Controllers/ManageController.php:40
+* @see app/Http/Controllers/ManageController.php:41
 * @route '/manage/{type}/{id}'
 */
 export const destroy = (args: { type: string | number, id: string | number } | [type: string | number, id: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -173,7 +173,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\ManageController::destroy
-* @see app/Http/Controllers/ManageController.php:40
+* @see app/Http/Controllers/ManageController.php:41
 * @route '/manage/{type}/{id}'
 */
 destroy.url = (args: { type: string | number, id: string | number } | [type: string | number, id: string | number ], options?: RouteQueryOptions) => {
@@ -199,7 +199,7 @@ destroy.url = (args: { type: string | number, id: string | number } | [type: str
 
 /**
 * @see \App\Http\Controllers\ManageController::destroy
-* @see app/Http/Controllers/ManageController.php:40
+* @see app/Http/Controllers/ManageController.php:41
 * @route '/manage/{type}/{id}'
 */
 destroy.delete = (args: { type: string | number, id: string | number } | [type: string | number, id: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -209,7 +209,7 @@ destroy.delete = (args: { type: string | number, id: string | number } | [type: 
 
 /**
 * @see \App\Http\Controllers\ManageController::destroy
-* @see app/Http/Controllers/ManageController.php:40
+* @see app/Http/Controllers/ManageController.php:41
 * @route '/manage/{type}/{id}'
 */
 const destroyForm = (args: { type: string | number, id: string | number } | [type: string | number, id: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -224,7 +224,7 @@ const destroyForm = (args: { type: string | number, id: string | number } | [typ
 
 /**
 * @see \App\Http\Controllers\ManageController::destroy
-* @see app/Http/Controllers/ManageController.php:40
+* @see app/Http/Controllers/ManageController.php:41
 * @route '/manage/{type}/{id}'
 */
 destroyForm.delete = (args: { type: string | number, id: string | number } | [type: string | number, id: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
