@@ -312,6 +312,7 @@ watch(
                     <NSelect v-model="f.paid_from_account_id" manage="money"
                         ><option
                             v-for="a in moneyAccounts"
+                            :data-locked="a.is_system || undefined"
                             :key="a.id"
                             :value="a.id"
                         >

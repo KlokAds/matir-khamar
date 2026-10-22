@@ -232,6 +232,7 @@ function submit() {
                                 v-for="i in items"
                                 :key="i.id"
                                 :value="i.id"
+                                :data-name="i.name"
                             >
                                 {{
                                     t(':name — আছে :qty', {
@@ -282,6 +283,7 @@ function submit() {
                             >
                                 <option
                                     v-for="c in centerChoices"
+                                    :data-locked="c.locked || undefined"
                                     :key="c.id"
                                     :value="c.id"
                                     :disabled="c.kind === 'group'"
@@ -459,6 +461,7 @@ function submit() {
                             >
                                 <option
                                     v-for="a in moneyAccounts"
+                                    :data-locked="a.is_system || undefined"
                                     :key="a.id"
                                     :value="a.id"
                                 >
@@ -580,6 +583,7 @@ function submit() {
                             <NSelect v-model="f.cost_center_id">
                                 <option
                                     v-for="c in centerChoices"
+                                    :data-locked="c.locked || undefined"
                                     :key="c.id"
                                     :value="c.id"
                                     :disabled="c.kind === 'group'"

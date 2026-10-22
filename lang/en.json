@@ -462,6 +462,6 @@
     "নাম দিন (১২০ অক্ষরের মধ্যে)।": "Enter a name (up to 120 characters).",
     "\":name\" নামে আগে থেকেই আছে।": "\":name\" already exists.",
     "\":name\" যোগ হলো।": "\":name\" added.",
-    "নাম বদলানো হলো।": "Renamed.",
-    "\":name\" হিসাবে ব্যবহার হয়েছে, তাই লুকিয়ে রাখা হলো — পুরোনো হিসাব ঠিক থাকবে।": "\":name\" is used in the books, so it was hidden — old entries stay right."
+    "\":name\" হিসাবে ব্যবহার হয়েছে, তাই লুকিয়ে রাখা হলো — পুরোনো হিসাব ঠিক থাকবে।": "\":name\" is used in the books, so it was hidden — old entries stay right.",
+    "\":old\" এখন থেকে \":new\" নামে।": "\":old\" is now called \":new\"."
 }

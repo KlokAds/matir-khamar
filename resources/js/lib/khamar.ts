@@ -230,6 +230,8 @@ export type Center = {
     holds_animals: boolean;
     depth: number;
     is_active: boolean;
+    /** The app's own: renamed, never removed. */
+    locked?: boolean;
 };
 
 export type Option = {
@@ -237,6 +239,7 @@ export type Option = {
     name: string;
     code?: string;
     subtype?: string | null;
+    is_system?: boolean;
 };
 
 export type TreeNode = {

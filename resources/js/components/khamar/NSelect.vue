@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import {
     Check,
     ChevronDown,
@@ -25,6 +25,7 @@ import {
     useSlots,
 } from 'vue';
 import type { VNode } from 'vue';
+import { toast } from 'vue-sonner';
 import { ask } from '@/lib/dialog';
 import { t } from '@/lib/i18n';
 import { useCan } from '@/lib/khamar';
@@ -66,6 +67,10 @@ type Choice = {
     disabled: boolean;
     depth: number;
     parent: boolean;
+    /** The app's own (data-locked on the option): it can be renamed, not removed. */
+    locked: boolean;
+    /** The plain name (data-name), when the label carries more, like stock on hand. */
+    name: string;
 };
 
 const NBSP = '\u00a0';
@@ -150,6 +155,8 @@ function collect(nodes: VNode[] | undefined, out: Choice[]): Choice[] {
                 label: tree.label,
                 depth: tree.depth,
                 parent: false,
+                locked: !!attrs['data-locked'],
+                name: String(attrs['data-name'] ?? tree.label),
                 disabled: attrs.disabled === '' || attrs.disabled === true,
             });
         }
@@ -195,8 +202,6 @@ async function onOpen(value: boolean) {
     open.value = value;
 
     if (!value) {
-        stopEditing();
-
         return;
     }
 
@@ -261,10 +266,6 @@ function onKey(event: KeyboardEvent) {
         event.preventDefault();
         move(-1);
     } else if (event.key === 'Enter') {
-        if (adding.value || editing.value !== null) {
-            return;
-        }
-
         event.preventDefault();
         const choice = shown.value[active.value];
 
@@ -284,19 +285,10 @@ const NEEDS: Record<string, keyof Abilities> = {
     worker: 'post-entries',
 };
 const can = useCan();
-const page = usePage();
 const canManage = computed(
     () => !!props.manage && !!can.value[NEEDS[props.manage]],
 );
-const adding = ref(false);
-const editing = ref<Value>(null);
-const draft = ref('');
 const busy = ref(false);
-// Shows the server's answer (e.g. "already exists") only after a try from this list.
-const tried = ref(false);
-const manageError = computed(
-    () => (page.props.errors as Record<string, string> | undefined)?.name,
-);
 const manageable = (choice: Choice) =>
     canManage.value &&
     !choice.disabled &&
@@ -305,47 +297,39 @@ const manageable = (choice: Choice) =>
     choice.value !== '' &&
     !Number.isNaN(Number(choice.value));
 
-/** With a name already typed in the search box, add it in one tap; otherwise ask for a name. */
-function startAdd() {
-    editing.value = null;
-    draft.value = query.value.trim();
+/** A refusal from the server (e.g. "already exists") comes back as a toast. */
+const showError = (errors: Record<string, string>) =>
+    toast.error(Object.values(errors)[0] ?? t('হয়নি, আবার চেষ্টা করুন।'));
 
-    if (draft.value) {
-        saveNew();
+/*
+ * Names are typed in the app's own small dialog, not inside the open list: on a phone the
+ * keyboard can close a list, and a tap meant for it would land on the page underneath.
+ * A name already typed in the search box is added in one tap.
+ */
+async function startAdd() {
+    let name = query.value.trim();
+    open.value = false;
 
-        return;
+    if (!name) {
+        name =
+            (
+                await ask.prompt({
+                    title: t('নতুন যোগ করুন'),
+                    label: t('নাম'),
+                    confirmText: t('যোগ করুন'),
+                })
+            )?.trim() ?? '';
     }
 
-    adding.value = true;
-}
-
-function startEdit(choice: Choice) {
-    adding.value = false;
-    editing.value = choice.value;
-    draft.value = choice.label;
-}
-
-function stopEditing() {
-    tried.value = false;
-    adding.value = false;
-    editing.value = null;
-    draft.value = '';
-}
-
-const isEditing = (choice: Choice) =>
-    editing.value !== null && String(editing.value) === String(choice.value);
-
-function saveNew() {
-    if (!draft.value.trim() || busy.value) {
+    if (!name || busy.value) {
         return;
     }
 
     const before = new Set(choices.value.map((c) => String(c.value)));
     busy.value = true;
-    tried.value = true;
     router.post(
         `/manage/${props.manage}`,
-        { name: draft.value.trim(), extra: props.manageExtra ?? {} },
+        { name, extra: props.manageExtra ?? {} },
         {
             preserveScroll: true,
             preserveState: true,
@@ -358,38 +342,46 @@ function saveNew() {
 
                 if (added) {
                     model.value = added.value;
-                    open.value = false;
                 }
-
-                stopEditing();
             },
+            onError: showError,
             onFinish: () => (busy.value = false),
         },
     );
 }
 
-function saveEdit() {
-    if (!draft.value.trim() || busy.value) {
+async function startEdit(choice: Choice) {
+    open.value = false;
+    const name = (
+        await ask.prompt({
+            title: t('নাম বদলান'),
+            label: t('নতুন নাম'),
+            initial: choice.name,
+            confirmText: t('রাখুন'),
+        })
+    )?.trim();
+
+    if (!name || name === choice.name || busy.value) {
         return;
     }
 
     busy.value = true;
-    tried.value = true;
     router.put(
-        `/manage/${props.manage}/${editing.value}`,
-        { name: draft.value.trim() },
+        `/manage/${props.manage}/${choice.value}`,
+        { name },
         {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: stopEditing,
+            onError: showError,
             onFinish: () => (busy.value = false),
         },
     );
 }
 
 async function remove(choice: Choice) {
+    open.value = false;
     const ok = await ask.confirm({
-        title: t('":name" মুছবেন?', { name: choice.label }),
+        title: t('":name" মুছবেন?', { name: choice.name }),
         body: t(
             'কোনো হিসাবে ব্যবহার না হলে পুরো মুছে যাবে; হিসাবে থাকলে শুধু তালিকা থেকে লুকানো হবে — পুরোনো হিসাব ঠিক থাকবে।',
         ),
@@ -401,7 +393,6 @@ async function remove(choice: Choice) {
         return;
     }
 
-    tried.value = true;
     router.delete(`/manage/${props.manage}/${choice.value}`, {
         preserveScroll: true,
         preserveState: true,
@@ -410,6 +401,7 @@ async function remove(choice: Choice) {
                 model.value = null;
             }
         },
+        onError: showError,
     });
 }
 
@@ -460,7 +452,7 @@ function onTriggerKey(event: KeyboardEvent) {
                 @open-auto-focus.prevent
             >
                 <div
-                    v-if="searchable && !adding"
+                    v-if="searchable"
                     class="flex items-center gap-2 border-b border-border px-3"
                 >
                     <Search class="size-4 shrink-0 text-muted-foreground" />
@@ -485,39 +477,7 @@ function onTriggerKey(event: KeyboardEvent) {
                         v-for="(choice, index) in shown"
                         :key="choice.key"
                     >
-                        <form
-                            v-if="isEditing(choice)"
-                            class="flex items-center gap-1.5 px-1 py-1"
-                            @submit.prevent="saveEdit"
-                        >
-                            <input
-                                v-model="draft"
-                                v-focus
-                                type="text"
-                                class="h-9 min-w-0 flex-1 rounded-md border border-input bg-card px-2.5 text-[15px] outline-none focus:border-ring"
-                                :aria-label="t('নতুন নাম')"
-                                @keydown.esc.stop.prevent="stopEditing"
-                            />
-                            <button
-                                type="submit"
-                                class="btn-icon size-8 text-primary"
-                                :disabled="busy"
-                                :aria-label="t('রাখুন')"
-                                :title="t('রাখুন')"
-                            >
-                                <Check />
-                            </button>
-                            <button
-                                type="button"
-                                class="btn-icon size-8"
-                                :aria-label="t('বাদ')"
-                                :title="t('বাদ')"
-                                @click="stopEditing"
-                            >
-                                <X />
-                            </button>
-                        </form>
-                        <div v-else class="flex items-center gap-0.5">
+                        <div class="flex items-center gap-0.5">
                             <button
                                 type="button"
                                 role="option"
@@ -589,6 +549,7 @@ function onTriggerKey(event: KeyboardEvent) {
                                     <Pencil />
                                 </button>
                                 <button
+                                    v-if="!choice.locked"
                                     type="button"
                                     class="row-act hover:text-destructive"
                                     :aria-label="t('মুছুন')"
@@ -609,37 +570,7 @@ function onTriggerKey(event: KeyboardEvent) {
                 </div>
 
                 <div v-if="canManage" class="border-t border-border p-1.5">
-                    <form
-                        v-if="adding"
-                        class="flex items-center gap-1.5"
-                        @submit.prevent="saveNew"
-                    >
-                        <input
-                            v-model="draft"
-                            v-focus
-                            type="text"
-                            class="h-9 min-w-0 flex-1 rounded-md border border-input bg-card px-2.5 text-[15px] outline-none focus:border-ring"
-                            :placeholder="t('নতুনটির নাম')"
-                            @keydown.esc.stop.prevent="stopEditing"
-                        />
-                        <button
-                            type="submit"
-                            class="btn-chip-primary h-9"
-                            :disabled="busy || !draft.trim()"
-                        >
-                            <Plus /> {{ t('যোগ') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="btn-icon size-8"
-                            :aria-label="t('বাদ')"
-                            @click="stopEditing"
-                        >
-                            <X />
-                        </button>
-                    </form>
                     <button
-                        v-else
                         type="button"
                         class="flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-sm font-medium text-primary hover:bg-primary/10"
                         @click="startAdd"
@@ -651,12 +582,6 @@ function onTriggerKey(event: KeyboardEvent) {
                                 : t('নতুন যোগ করুন')
                         }}
                     </button>
-                    <p
-                        v-if="manageError && tried"
-                        class="px-1 pt-1 text-xs leading-normal text-destructive"
-                    >
-                        {{ manageError }}
-                    </p>
                 </div>
             </PopoverContent>
         </PopoverPortal>

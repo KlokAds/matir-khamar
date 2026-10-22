@@ -31,8 +31,9 @@ class ManageController extends Controller
         $this->authorizeType($type);
         $data = $request->validate(['name' => ['required', 'string', 'max:120']]);
 
+        $before = (string) $book->find($type, $id)->getAttribute('name');
         $book->rename($type, $id, $data['name']);
-        Inertia::flash('toast', ['type' => 'success', 'message' => Tr::get('নাম বদলানো হলো।')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => Tr::get('":old" এখন থেকে ":new" নামে।', ['old' => $before, 'new' => trim($data['name'])])]);
 
         return back();
     }
