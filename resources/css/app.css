@@ -234,6 +234,18 @@
 }
 
 /*
+ * In the Android app's web view, locking the page while a menu or dialog is open makes the
+ * page behind jump to the top and back. The open sheet covers it anyway, so the app skips
+ * the lock; the app's own download card is pointless inside the app.
+ */
+html.in-app body {
+    overflow: visible !important;
+}
+html.in-app .app-download {
+    display: none;
+}
+
+/*
  * Bangla vowel signs (ি ী ু ূ ৃ) and ya-phala (্য) can draw above or below the line box,
  * whatever its height. Text cut off with "…" used overflow: hidden, which clips every
  * direction; overflow-x: clip cuts only the right edge and leaves the top and bottom free.

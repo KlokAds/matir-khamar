@@ -59,6 +59,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');
     Route::post('reminders', [ReminderController::class, 'store'])->middleware('throttle:60,1')->name('reminders.store');
     Route::put('reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
+    Route::patch('reminders/{reminder}', [ReminderController::class, 'edit'])->name('reminders.edit');
+    Route::delete('reminders/{reminder}', [ReminderController::class, 'destroy'])->name('reminders.destroy');
     Route::post('push/subscribe', [ReminderController::class, 'subscribe'])->middleware('throttle:20,1')->name('push.subscribe');
     Route::post('push/unsubscribe', [ReminderController::class, 'unsubscribe'])->name('push.unsubscribe');
     Route::post('push/test', [ReminderController::class, 'test'])->middleware('throttle:10,1')->name('push.test');

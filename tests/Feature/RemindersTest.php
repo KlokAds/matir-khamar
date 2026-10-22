@@ -44,6 +44,36 @@ it('sends a reminder once it falls due, with buttons on the notification', funct
         ->and($notifier->sendDueReminders())->toBe(0);
 });
 
+it('changes a reminder that was already sent, so it rings again at the new time, and deletes one', function () {
+    $this->post('/reminders', ['title' => 'পুরোনো', 'due_at' => now()->addMinutes(5)->format('Y-m-d\TH:i'), 'repeat' => 'none']);
+    $this->travel(6)->minutes();
+    app(Notifier::class)->sendDueReminders();
+    $reminder = Reminder::query()->sole();
+    expect($reminder->sent_at)->not->toBeNull();
+
+    $this->patch("/reminders/{$reminder->id}", [
+        'title' => 'নতুন কথা', 'due_at' => now()->addMinutes(10)->format('Y-m-d\TH:i'), 'repeat' => 'none', 'alarm' => true,
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $reminder->refresh();
+    expect($reminder->title)->toBe('নতুন কথা')->and($reminder->alarm)->toBeTrue()->and($reminder->sent_at)->toBeNull();
+
+    $this->travel(11)->minutes();
+    expect(app(Notifier::class)->sendDueReminders())->toBe(1)
+        ->and(end($this->sent)['payload']['title'])->toContain('নতুন কথা');
+
+    $this->delete("/reminders/{$reminder->id}")->assertRedirect();
+    expect(Reminder::query()->count())->toBe(0);
+});
+
+it('does not let one person change another person\'s private reminder', function () {
+    $other = User::factory()->create(['role' => Role::Manager]);
+    $reminder = Reminder::query()->create(['title' => 'নিজের', 'due_at' => now()->addHour(), 'repeat' => 'none', 'created_by' => $other->id, 'for_user_id' => $other->id]);
+    $worker = User::factory()->create(['role' => Role::Manager]);
+
+    $this->actingAs($worker)->delete("/reminders/{$reminder->id}")->assertForbidden();
+});
+
 it('lets the notification buttons close or postpone a reminder without a session', function () {
     $reminder = Reminder::query()->create(['title' => 'টিকা', 'due_at' => now(), 'created_by' => $this->admin->id, 'sent_at' => now()]);
     auth()->logout();

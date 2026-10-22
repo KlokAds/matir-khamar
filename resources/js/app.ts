@@ -44,6 +44,11 @@ initializeFlashToast();
 // A notification that arrives while the app is open also shows inside it.
 initializePushBanner();
 
+// Inside the farm's Android app (its web view names itself in the user agent).
+if (navigator.userAgent.includes('MatirKhamarApp')) {
+    document.documentElement.classList.add('in-app');
+}
+
 // Installable app + offline entries: the service worker keeps the offline
 // page on the phone, and waiting entries are sent whenever the net returns.
 initializeOffline();

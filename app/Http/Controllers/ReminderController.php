@@ -35,6 +35,8 @@ class ReminderController extends Controller
             'repeat' => $r->repeat,
             'alarm' => $r->alarm,
             'for' => $r->recipient?->name,
+            'for_user_id' => $r->for_user_id,
+            'cost_center_id' => $r->cost_center_id,
             'by' => $r->author?->name,
             'center' => $r->costCenter?->name,
             'animal' => $r->animal?->tag,
@@ -90,6 +92,42 @@ class ReminderController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('মনে করিয়ে দেওয়া হবে :when।', ['when' => $reminder->due_at->format('d M, g:i A')])]);
 
         return back();
+    }
+
+    /** Changed words, time or alarm: it rings afresh at the new time. */
+    public function edit(Request $request, Reminder $reminder): RedirectResponse
+    {
+        $this->authorizeSeen($request, $reminder);
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:160'],
+            'body' => ['nullable', 'string', 'max:1000'],
+            'due_at' => ['required', 'date'],
+            'repeat' => ['required', Rule::in(array_keys(Reminder::REPEATS))],
+            'alarm' => ['boolean'],
+            'for_user_id' => ['nullable', 'exists:users,id'],
+            'cost_center_id' => ['nullable', 'exists:cost_centers,id'],
+            'animal_id' => ['nullable', 'exists:animals,id'],
+        ]);
+
+        $reminder->update([...$data, 'due_at' => Date::parse($data['due_at']), 'sent_at' => null, 'rings' => 0, 'last_rung_at' => null, 'done_at' => null, 'done_by' => null]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('বদলানো হলো — মনে করাবে :when।', ['when' => $reminder->due_at->format('d M, g:i A')])]);
+
+        return back();
+    }
+
+    public function destroy(Request $request, Reminder $reminder): RedirectResponse
+    {
+        $this->authorizeSeen($request, $reminder);
+        $reminder->delete();
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('রিমাইন্ডার মুছে ফেলা হলো।')]);
+
+        return back();
+    }
+
+    private function authorizeSeen(Request $request, Reminder $reminder): void
+    {
+        abort_unless(Reminder::query()->visibleTo($request->user())->whereKey($reminder->id)->exists()
+            || $reminder->created_by === $request->user()->id, 403);
     }
 
     public function update(Request $request, Reminder $reminder): RedirectResponse
