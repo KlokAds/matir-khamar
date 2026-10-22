@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\CostCenter;
+use App\Models\MilkRecord;
 use App\Models\User;
 use App\Support\Lookups;
 use Database\Seeders\KhamarSetupSeeder;
@@ -59,4 +60,16 @@ it('hides everything inside a project that is off, from the menu and the lists',
         ->and(CostCenter::runningIds())->not->toContain(($this->code)('GAVI')->id);
 
     $this->get('/dashboard')->assertInertia(fn ($page) => $page->where('modules.cattle', false));
+});
+
+it('keeps the milk pages out of the menu until there is milk to write', function () {
+    expect(CostCenter::modules()['milk'])->toBeFalse()
+        ->and(CostCenter::modules()['cattle'])->toBeTrue();
+
+    MilkRecord::query()->create([
+        'date' => now()->toDateString(), 'session' => 'morning', 'liters' => 4,
+        'cost_center_id' => ($this->code)('GAVI')->id, 'recorded_by' => auth()->id(),
+    ]);
+
+    expect(CostCenter::modules()['milk'])->toBeTrue();
 });

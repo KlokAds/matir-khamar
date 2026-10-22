@@ -128,7 +128,7 @@ class CostCenter extends Model
 
     /**
      * Which parts of the farm are running, for the menu and the pages: cattle, goats, milk,
-     * fattening, land and crops.
+     * fattening, land and crops. Milk counts only once there is milk to write.
      *
      * @return array{cattle:bool, goat:bool, milk:bool, fattening:bool, land:bool}
      */
@@ -141,7 +141,8 @@ class CostCenter extends Model
         return [
             'cattle' => $on('GORU'),
             'goat' => $on('CHAGOL'),
-            'milk' => $on('GAVI'),
+            // Milk pages wait for the first milk: a cow that has calved, or milk already written.
+            'milk' => $on('GAVI') && (MilkRecord::query()->exists() || Breeding::query()->whereNotNull('calved_on')->exists()),
             'fattening' => $on('MOTATAJA'),
             'land' => $on('GHAS', 'FOSOL', 'DHAN'),
         ];

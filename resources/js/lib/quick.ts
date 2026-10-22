@@ -25,7 +25,7 @@ type Ability = keyof Abilities;
 /** The farm part a page belongs to: it drops out when that project is turned off. */
 const moduleOf: Record<string, (m: Modules) => boolean> = {
     '/milk': (m) => m.milk,
-    '/breeding': (m) => m.milk,
+    '/breeding': (m) => m.cattle,
     '/batches': (m) => m.fattening,
     '/animals': (m) => m.cattle || m.goat,
     '/animals/create': (m) => m.cattle || m.goat,
