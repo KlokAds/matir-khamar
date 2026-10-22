@@ -13,6 +13,7 @@ enum Role: string
     case Manager = 'manager';
     case Entry = 'entry';
     case Viewer = 'viewer';
+    case Investor = 'investor';
 
     /** Every ability a role can be given, with the Bangla description shown in Setup → Roles. */
     public const ABILITIES = [
@@ -27,6 +28,7 @@ enum Role: string
         'manage-users' => 'ব্যবহারকারী যোগ/বদল/বন্ধ',
         'manage-roles' => 'রোল ও অনুমতি বদল',
         'manage-update' => 'সাইট আপডেট',
+        'investor-view' => 'বিনিয়োগকারীর পাতা দেখা',
     ];
 
     public function label(): string
@@ -35,7 +37,8 @@ enum Role: string
             self::Admin => 'হিসাব অ্যাডমিন',
             self::Manager => 'খামার ম্যানেজার',
             self::Entry => 'দৈনিক এন্ট্রি',
-            self::Viewer => 'শুধু দেখা (বিনিয়োগকারী/ব্যাংক)',
+            self::Viewer => 'শুধু দেখা (ব্যাংক/হিসাবরক্ষক)',
+            self::Investor => 'বিনিয়োগকারী',
         };
     }
 
@@ -47,6 +50,7 @@ enum Role: string
             self::Manager => ['view-reports', 'post-entries', 'post-daily'],
             self::Entry => ['post-daily'],
             self::Viewer => ['view-reports'],
+            self::Investor => ['investor-view'],
         };
     }
 

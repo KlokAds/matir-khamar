@@ -50,6 +50,13 @@ function group(
 const items = computed<NavItem[]>(() => {
     const c = can.value;
 
+    // An investor-only login sees one page: their own projects.
+    if (c['investor-view'] && Object.keys(c).length === 1) {
+        return [
+            { title: t('আমার বিনিয়োগ'), href: '/investor', icon: HandCoins },
+        ];
+    }
+
     return [
         { title: t('আজকের খামার'), href: dashboard(), icon: LayoutGrid },
         ...(c['post-daily']
@@ -94,12 +101,15 @@ const items = computed<NavItem[]>(() => {
         ]),
         ...group('টাকার হিসাব', HandCoins, [
             ['নতুন এন্ট্রি', '/entries/create', !!c['post-entries']],
+            ['মজুরির খাতা', '/labour', !!c['view-reports']],
+            ['নগদ ও পাওনা', '/cash', !!c['view-reports']],
             ['টাকা কোথায় আছে', '/money', !!c['view-reports']],
             ['খাতা (সব এন্ট্রি)', '/entries', !!c['view-reports']],
             ['খরচ ভাগ (মাস শেষে)', '/allocation', !!c['post-entries']],
         ]),
         ...group('রিপোর্ট', ChartColumnBig, [
             ['লাভের হিসাব ও পরিকল্পনা', '/profit', !!c['view-reports']],
+            ['বাজারদর', '/prices', !!c['view-reports']],
             ['ক্যাটাগরি ও প্রজেক্ট', '/centers', !!c['view-reports']],
             ['লাভ-ক্ষতি ও সম্পদ', '/reports', !!c['view-reports']],
             ['মাসিক রিপোর্ট', '/reports/monthly', !!c['view-reports']],
@@ -113,6 +123,7 @@ const items = computed<NavItem[]>(() => {
             ['ক্রেতা, বিনিয়োগকারী…', '/setup/parties', !!c['manage-setup']],
             ['বিলিং থেকে আনা', '/setup/import', !!c['manage-import']],
             ['ব্যবহারকারী', '/setup/users', !!c['manage-users']],
+            ['বিনিয়োগকারী', '/setup/investors', !!c['manage-users']],
             ['রোল ও অনুমতি', '/setup/roles', !!c['manage-roles']],
             ['মাস লক', '/setup/periods', !!c['lock-periods']],
             ['অডিট লগ', '/setup/audit', !!c['view-audit']],

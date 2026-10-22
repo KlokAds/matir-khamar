@@ -1,12 +1,15 @@
 import LocaleController from './LocaleController'
 import ReminderController from './ReminderController'
 import DashboardController from './DashboardController'
+import InvestorController from './InvestorController'
 import SearchController from './SearchController'
 import MilkController from './MilkController'
 import StockController from './StockController'
 import OfflineController from './OfflineController'
 import HerdController from './HerdController'
 import HealthController from './HealthController'
+import PriceController from './PriceController'
+import LabourController from './LabourController'
 import DiaryController from './DiaryController'
 import CostCenterController from './CostCenterController'
 import EntryController from './EntryController'
@@ -15,6 +18,7 @@ import ReportController from './ReportController'
 import MoneyController from './MoneyController'
 import LandController from './LandController'
 import ProfitController from './ProfitController'
+import CashController from './CashController'
 import AllocationController from './AllocationController'
 import SetupController from './SetupController'
 import ImportController from './ImportController'
@@ -26,12 +30,15 @@ const Controllers = {
     LocaleController: Object.assign(LocaleController, LocaleController),
     ReminderController: Object.assign(ReminderController, ReminderController),
     DashboardController: Object.assign(DashboardController, DashboardController),
+    InvestorController: Object.assign(InvestorController, InvestorController),
     SearchController: Object.assign(SearchController, SearchController),
     MilkController: Object.assign(MilkController, MilkController),
     StockController: Object.assign(StockController, StockController),
     OfflineController: Object.assign(OfflineController, OfflineController),
     HerdController: Object.assign(HerdController, HerdController),
     HealthController: Object.assign(HealthController, HealthController),
+    PriceController: Object.assign(PriceController, PriceController),
+    LabourController: Object.assign(LabourController, LabourController),
     DiaryController: Object.assign(DiaryController, DiaryController),
     CostCenterController: Object.assign(CostCenterController, CostCenterController),
     EntryController: Object.assign(EntryController, EntryController),
@@ -40,6 +47,7 @@ const Controllers = {
     MoneyController: Object.assign(MoneyController, MoneyController),
     LandController: Object.assign(LandController, LandController),
     ProfitController: Object.assign(ProfitController, ProfitController),
+    CashController: Object.assign(CashController, CashController),
     AllocationController: Object.assign(AllocationController, AllocationController),
     SetupController: Object.assign(SetupController, SetupController),
     ImportController: Object.assign(ImportController, ImportController),

@@ -9,6 +9,7 @@ import money from './money'
 import importMethod7367d2 from './import'
 import rolesF85c84 from './roles'
 import update603324 from './update'
+import investorsF3f70d from './investors'
 import users48860f from './users'
 import periods7f6f60 from './periods'
 /**
@@ -417,6 +418,87 @@ updateForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 update.form = updateForm
 
 /**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+export const investors = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: investors.url(options),
+    method: 'get',
+})
+
+investors.definition = {
+    methods: ["get","head"],
+    url: '/setup/investors',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+investors.url = (options?: RouteQueryOptions) => {
+    return investors.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+investors.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: investors.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+investors.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: investors.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+const investorsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: investors.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+investorsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: investors.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\InvestorController::investors
+* @see app/Http/Controllers/InvestorController.php:37
+* @route '/setup/investors'
+*/
+investorsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: investors.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+investors.form = investorsForm
+
+/**
 * @see \App\Http\Controllers\SetupController::users
 * @see app/Http/Controllers/SetupController.php:27
 * @route '/setup/users'
@@ -670,6 +752,7 @@ const setup = {
     import: Object.assign(importMethod, importMethod7367d2),
     roles: Object.assign(roles, rolesF85c84),
     update: Object.assign(update, update603324),
+    investors: Object.assign(investors, investorsF3f70d),
     users: Object.assign(users, users48860f),
     periods: Object.assign(periods, periods7f6f60),
     audit: Object.assign(audit, audit),

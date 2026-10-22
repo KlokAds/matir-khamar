@@ -190,6 +190,27 @@ export const pageLinks: PageLink[] = [
         ability: 'view-reports',
     },
     {
+        title: 'নগদ ও পাওনা',
+        words: 'cash forecast dues receivable payable নগদ পূর্বাভাস পাওনা দেনা বাকি',
+        href: '/cash',
+        icon: HandCoins,
+        ability: 'view-reports',
+    },
+    {
+        title: 'মজুরির খাতা',
+        words: 'labour wages workers মজুরি শ্রমিক কামলা দিনমজুর বেতন',
+        href: '/labour',
+        icon: HandCoins,
+        ability: 'view-reports',
+    },
+    {
+        title: 'বাজারদর',
+        words: 'market price haat দাম হাট বাজার ধান খড় গরু',
+        href: '/prices',
+        icon: ChartColumnBig,
+        ability: 'view-reports',
+    },
+    {
         title: 'জমি ও ফসল',
         words: 'land crop paddy rice potato mustard maize জমি ধান চাল আলু সরিষা ভুট্টা লিজ মৌসুম বিঘা',
         href: '/land',

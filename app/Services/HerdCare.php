@@ -276,6 +276,51 @@ class HerdCare
         return $items;
     }
 
+    /**
+     * Enterprise budget heads that are nearly or fully used, and spending with no voucher —
+     * the two things a loan officer asks about first.
+     *
+     * @return list<array{kind:string, title:string, detail:string, href:string, when:string, urgent:bool}>
+     */
+    public function budgetWarnings(CarbonInterface $today): array
+    {
+        $items = [];
+
+        foreach ($this->reports->budget() as $head) {
+            if ($head['approved'] <= 0) {
+                continue;
+            }
+
+            $used = (int) round($head['spent'] / $head['approved'] * 100);
+
+            if ($used >= 80) {
+                $items[] = [
+                    'kind' => 'budget',
+                    'title' => $used >= 100
+                        ? Tr::get(':name: বাজেট শেষ (:pct%)', ['name' => $head['name'], 'pct' => $used])
+                        : Tr::get(':name: বাজেটের :pct% খরচ হয়েছে', ['name' => $head['name'], 'pct' => $used]),
+                    'detail' => Tr::get('বাকি :left', ['left' => number_format(max(0, $head['remaining']) / 100)]),
+                    'href' => '/reports/budget',
+                    'when' => $today->toDateString(),
+                    'urgent' => $used >= 100,
+                ];
+            }
+
+            if ($head['missing_vouchers'] > 0) {
+                $items[] = [
+                    'kind' => 'budget',
+                    'title' => Tr::get(':name: :n টি খরচে ভাউচার নেই', ['name' => $head['name'], 'n' => $head['missing_vouchers']]),
+                    'detail' => Tr::get('রসিদের ছবি যোগ করুন — না হলে অনুদান ঋণ হয়ে যেতে পারে'),
+                    'href' => '/reports/budget',
+                    'when' => $today->toDateString(),
+                    'urgent' => false,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
     /** Whether the farm has cows in the dairy category, so missing milk is worth a nudge. */
     public function hasMilkingCows(): bool
     {
@@ -334,6 +379,14 @@ class HerdCare
 
         foreach ($this->healthDue($today) as $due) {
             $items[] = $due;
+        }
+
+        foreach (app(DuesBook::class)->reminders($today) as $due) {
+            $items[] = $due;
+        }
+
+        foreach ($this->budgetWarnings($today) as $warning) {
+            $items[] = $warning;
         }
 
         foreach (app(CropBook::class)->leaseReminders($today) as $lease) {
