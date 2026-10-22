@@ -175,25 +175,53 @@ self.addEventListener('push', (event) => {
     }
 
     const actions = (data.actions || []).slice(0, 2);
+    const alarm = Boolean(data.alarm);
+    // An alarm opens the app's full-screen ringing view when tapped.
+    const url = alarm
+        ? `/reminders?ring=${data.reminder_id}&title=${encodeURIComponent(data.title || '')}`
+        : data.url || '/dashboard';
 
     event.waitUntil(
-        self.registration.showNotification(data.title || 'মাটির খামার', {
-            body: data.body || '',
-            tag: data.tag,
-            renotify: Boolean(data.tag),
-            requireInteraction: Boolean(data.requireInteraction),
-            icon: '/icons/icon-192.png',
-            badge: '/icons/icon-192.png',
-            vibrate: [300, 120, 300, 120, 600],
-            lang: 'bn',
-            data: {
-                url: data.url || '/dashboard',
-                actions: Object.fromEntries(
-                    actions.map((a) => [a.action, a.url]),
-                ),
-            },
-            actions: actions.map((a) => ({ action: a.action, title: a.title })),
-        }),
+        Promise.all([
+            self.registration.showNotification(data.title || 'মাটির খামার', {
+                body: data.body || '',
+                tag: data.tag,
+                renotify: Boolean(data.tag),
+                requireInteraction: Boolean(data.requireInteraction) || alarm,
+                icon: '/icons/icon-192.png',
+                badge: '/icons/icon-192.png',
+                // An alarm shakes the phone long, like a ringing clock.
+                vibrate: alarm
+                    ? [800, 300, 800, 300, 800, 300, 800, 300, 1200]
+                    : [300, 120, 300, 120, 600],
+                lang: 'bn',
+                data: {
+                    url,
+                    actions: Object.fromEntries(
+                        actions.map((a) => [a.action, a.url]),
+                    ),
+                },
+                actions: actions.map((a) => ({
+                    action: a.action,
+                    title: a.title,
+                })),
+            }),
+            // If the app is open, it rings on screen too.
+            alarm
+                ? self.clients
+                      .matchAll({ type: 'window', includeUncontrolled: true })
+                      .then((windows) =>
+                          windows.forEach((w) =>
+                              w.postMessage({
+                                  type: 'khamar-alarm',
+                                  id: data.reminder_id,
+                                  title: data.title,
+                                  body: data.body,
+                              }),
+                          ),
+                      )
+                : Promise.resolve(),
+        ]),
     );
 });
 

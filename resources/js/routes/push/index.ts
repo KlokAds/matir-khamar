@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\ReminderController::subscribe
-* @see app/Http/Controllers/ReminderController.php:107
+* @see app/Http/Controllers/ReminderController.php:109
 * @route '/push/subscribe'
 */
 export const subscribe = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ subscribe.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::subscribe
-* @see app/Http/Controllers/ReminderController.php:107
+* @see app/Http/Controllers/ReminderController.php:109
 * @route '/push/subscribe'
 */
 subscribe.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ subscribe.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReminderController::subscribe
-* @see app/Http/Controllers/ReminderController.php:107
+* @see app/Http/Controllers/ReminderController.php:109
 * @route '/push/subscribe'
 */
 subscribe.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ subscribe.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ReminderController::subscribe
-* @see app/Http/Controllers/ReminderController.php:107
+* @see app/Http/Controllers/ReminderController.php:109
 * @route '/push/subscribe'
 */
 const subscribeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const subscribeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'>
 
 /**
 * @see \App\Http\Controllers\ReminderController::subscribe
-* @see app/Http/Controllers/ReminderController.php:107
+* @see app/Http/Controllers/ReminderController.php:109
 * @route '/push/subscribe'
 */
 subscribeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ subscribe.form = subscribeForm
 
 /**
 * @see \App\Http\Controllers\ReminderController::unsubscribe
-* @see app/Http/Controllers/ReminderController.php:129
+* @see app/Http/Controllers/ReminderController.php:131
 * @route '/push/unsubscribe'
 */
 export const unsubscribe = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -72,7 +72,7 @@ unsubscribe.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::unsubscribe
-* @see app/Http/Controllers/ReminderController.php:129
+* @see app/Http/Controllers/ReminderController.php:131
 * @route '/push/unsubscribe'
 */
 unsubscribe.url = (options?: RouteQueryOptions) => {
@@ -81,7 +81,7 @@ unsubscribe.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReminderController::unsubscribe
-* @see app/Http/Controllers/ReminderController.php:129
+* @see app/Http/Controllers/ReminderController.php:131
 * @route '/push/unsubscribe'
 */
 unsubscribe.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -91,7 +91,7 @@ unsubscribe.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ReminderController::unsubscribe
-* @see app/Http/Controllers/ReminderController.php:129
+* @see app/Http/Controllers/ReminderController.php:131
 * @route '/push/unsubscribe'
 */
 const unsubscribeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -101,7 +101,7 @@ const unsubscribeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post
 
 /**
 * @see \App\Http\Controllers\ReminderController::unsubscribe
-* @see app/Http/Controllers/ReminderController.php:129
+* @see app/Http/Controllers/ReminderController.php:131
 * @route '/push/unsubscribe'
 */
 unsubscribeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -113,7 +113,7 @@ unsubscribe.form = unsubscribeForm
 
 /**
 * @see \App\Http\Controllers\ReminderController::test
-* @see app/Http/Controllers/ReminderController.php:137
+* @see app/Http/Controllers/ReminderController.php:139
 * @route '/push/test'
 */
 export const test = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -128,7 +128,7 @@ test.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::test
-* @see app/Http/Controllers/ReminderController.php:137
+* @see app/Http/Controllers/ReminderController.php:139
 * @route '/push/test'
 */
 test.url = (options?: RouteQueryOptions) => {
@@ -137,7 +137,7 @@ test.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReminderController::test
-* @see app/Http/Controllers/ReminderController.php:137
+* @see app/Http/Controllers/ReminderController.php:139
 * @route '/push/test'
 */
 test.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -147,7 +147,7 @@ test.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ReminderController::test
-* @see app/Http/Controllers/ReminderController.php:137
+* @see app/Http/Controllers/ReminderController.php:139
 * @route '/push/test'
 */
 const testForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -157,7 +157,7 @@ const testForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 
 /**
 * @see \App\Http\Controllers\ReminderController::test
-* @see app/Http/Controllers/ReminderController.php:137
+* @see app/Http/Controllers/ReminderController.php:139
 * @route '/push/test'
 */
 testForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

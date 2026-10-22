@@ -33,6 +33,7 @@ class ReminderController extends Controller
             'body' => $r->body,
             'due_at' => $r->due_at->format('Y-m-d\TH:i'),
             'repeat' => $r->repeat,
+            'alarm' => $r->alarm,
             'for' => $r->recipient?->name,
             'by' => $r->author?->name,
             'center' => $r->costCenter?->name,
@@ -70,6 +71,7 @@ class ReminderController extends Controller
             'body' => ['nullable', 'string', 'max:1000'],
             'due_at' => ['required', 'date', 'after:-1 day'],
             'repeat' => ['required', Rule::in(array_keys(Reminder::REPEATS))],
+            'alarm' => ['boolean'],
             'for_user_id' => ['nullable', 'exists:users,id'],
             'cost_center_id' => ['nullable', 'exists:cost_centers,id'],
             'animal_id' => ['nullable', 'exists:animals,id'],
@@ -168,7 +170,7 @@ class ReminderController extends Controller
         match ($action) {
             'done' => $reminder->update(['done_at' => now(), 'done_by' => $user?->id]),
             'undo' => $reminder->update(['done_at' => null, 'done_by' => null]),
-            default => $reminder->update(['due_at' => now()->addMinutes($minutes), 'sent_at' => null, 'done_at' => null]),
+            default => $reminder->update(['due_at' => now()->addMinutes($minutes), 'sent_at' => null, 'done_at' => null, 'rings' => 0, 'last_rung_at' => null]),
         };
     }
 }

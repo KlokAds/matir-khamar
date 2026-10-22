@@ -3,6 +3,7 @@ import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import AlarmHost from '@/components/AlarmHost.vue';
 import AppDialogHost from '@/components/AppDialogHost.vue';
 import MobileTabBar from '@/components/MobileTabBar.vue';
 import { Toaster } from '@/components/ui/sonner';
@@ -30,5 +31,6 @@ withDefaults(defineProps<Props>(), {
         <MobileTabBar />
         <Toaster />
         <AppDialogHost />
+        <AlarmHost />
     </AppShell>
 </template>

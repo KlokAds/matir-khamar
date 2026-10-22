@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $body
  * @property CarbonImmutable $due_at
  * @property string $repeat none, daily or weekly
+ * @property bool $alarm keeps ringing every two minutes until done or postponed
+ * @property int $rings how many times an alarm has rung
+ * @property CarbonImmutable|null $last_rung_at
  * @property int|null $cost_center_id
  * @property int|null $animal_id
  * @property CarbonImmutable|null $sent_at
@@ -32,10 +35,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CostCenter|null $costCenter
  * @property-read Animal|null $animal
  */
-#[Fillable(['created_by', 'for_user_id', 'title', 'body', 'due_at', 'repeat', 'cost_center_id', 'animal_id', 'sent_at', 'done_at', 'done_by'])]
+#[Fillable(['created_by', 'for_user_id', 'title', 'body', 'due_at', 'repeat', 'alarm', 'rings', 'last_rung_at', 'cost_center_id', 'animal_id', 'sent_at', 'done_at', 'done_by'])]
 class Reminder extends Model
 {
     use Auditable;
+
+    /** An alarm rings again this often, this many times at most. */
+    public const ALARM_EVERY_MINUTES = 2;
+
+    public const ALARM_MAX_RINGS = 10;
 
     public const REPEATS = ['none' => 'একবার', 'daily' => 'প্রতিদিন', 'weekly' => 'প্রতি সপ্তাহে'];
 
@@ -43,6 +51,9 @@ class Reminder extends Model
     {
         return [
             'due_at' => 'datetime',
+            'alarm' => 'boolean',
+            'rings' => 'integer',
+            'last_rung_at' => 'datetime',
             'sent_at' => 'datetime',
             'done_at' => 'datetime',
         ];
