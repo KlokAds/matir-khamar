@@ -100,6 +100,11 @@ async function signOut() {
 
             <div class="space-y-5 px-4 pt-4 pb-6">
                 <!-- Day-to-day pages, a tap away -->
+                <h3
+                    class="-mb-3 px-1 text-xs font-semibold tracking-wide text-muted-foreground"
+                >
+                    {{ t('প্রতিদিন') }}
+                </h3>
                 <div class="grid grid-cols-4 gap-2">
                     <component
                         :is="link.reload ? 'a' : Link"
