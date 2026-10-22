@@ -243,7 +243,7 @@ async function signOut() {
 }
 
 .tile-label {
-    @apply line-clamp-2 text-[12px] leading-snug font-medium break-words text-foreground;
+    @apply line-clamp-2 pt-0.5 text-[12px] leading-[1.6] font-medium break-words text-foreground;
 }
 
 .foot-btn {
