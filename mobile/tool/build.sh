@@ -23,8 +23,14 @@ rm -f test/widget_test.dart
 run "patch android" python3 tool/patch_android.py
 mkdir -p assets
 cp ../public/icons/icon-512.png assets/icon.png
-echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json || fail "google-services.json"
-echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_FILE" || fail "keystore"
+# The Firebase file may be pasted as it is or in base64; both work.
+if [[ "$(echo "$GOOGLE_SERVICES_JSON" | tr -d '[:space:]')" == \{* ]]; then
+    printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+else
+    echo "$GOOGLE_SERVICES_JSON" | tr -d '[:space:]' | base64 -d > android/app/google-services.json 2>>"$log" || fail "google-services.json (not valid base64 or JSON)"
+fi
+python3 -c "import json,sys; json.load(open('android/app/google-services.json'))" 2>>"$log" || fail "google-services.json (not valid JSON)"
+echo "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$KEYSTORE_FILE" 2>>"$log" || fail "keystore (not valid base64)"
 run "pub get" flutter pub get
 run "icons" dart run flutter_launcher_icons
 run "build apk" flutter build apk --release --build-number=$((100 + GITHUB_RUN_NUMBER)) --build-name="2.0.$GITHUB_RUN_NUMBER"
