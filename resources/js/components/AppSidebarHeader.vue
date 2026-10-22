@@ -17,6 +17,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 import { useAppearance } from '@/composables/useAppearance';
 import { currentLocale, t } from '@/lib/i18n';
 import { useCan } from '@/lib/khamar';
+import { mobileMenuOpen } from '@/lib/nav';
 import { pendingCount } from '@/lib/offlineQueue';
 import type { BreadcrumbItem } from '@/types';
 
@@ -34,7 +35,10 @@ const props = withDefaults(
     },
 );
 
-const { toggleSidebar } = useSidebar();
+// On a phone the stall button opens the app-style menu sheet; on a computer it folds the sidebar.
+const { toggleSidebar, isMobile } = useSidebar();
+const openMenu = () =>
+    isMobile.value ? (mobileMenuOpen.value = true) : toggleSidebar();
 const can = useCan();
 const page = usePage();
 const searching = ref(false);
@@ -123,7 +127,7 @@ const switchTo = (next: 'bn' | 'en') => {
             type="button"
             class="stall-btn group/stall"
             :aria-label="t('মেনু')"
-            @click="toggleSidebar"
+            @click="openMenu"
         >
             <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
                 <path

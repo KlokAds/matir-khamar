@@ -5,6 +5,7 @@ import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
 import AlarmHost from '@/components/AlarmHost.vue';
 import AppDialogHost from '@/components/AppDialogHost.vue';
+import MobileMenu from '@/components/MobileMenu.vue';
 import MobileTabBar from '@/components/MobileTabBar.vue';
 import { Toaster } from '@/components/ui/sonner';
 import type { BreadcrumbItem } from '@/types';
@@ -29,6 +30,7 @@ withDefaults(defineProps<Props>(), {
             <slot />
         </AppContent>
         <MobileTabBar />
+        <MobileMenu />
         <Toaster
             position="top-center"
             rich-colors
