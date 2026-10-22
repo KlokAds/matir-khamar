@@ -13,6 +13,8 @@ import {
 import { computed, ref } from 'vue';
 import DateField from '@/components/khamar/DateField.vue';
 import MoneyStory from '@/components/khamar/MoneyStory.vue';
+import SalesMargin from '@/components/khamar/SalesMargin.vue';
+import type { Sales } from '@/components/khamar/SalesMargin.vue';
 import type { Story } from '@/components/khamar/MoneyStory.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
@@ -32,6 +34,7 @@ const props = defineProps<{
     period: string;
     periods: Record<string, string>;
     story: Story;
+    sales: Sales;
     from: string;
     to: string;
     result: Result;
@@ -132,6 +135,9 @@ const share = (value: number, peak: number) =>
 
         <!-- The whole farm in plain words, always from the start -->
         <MoneyStory :story="story" />
+
+        <!-- What each sale really left -->
+        <SalesMargin :sales="sales" />
 
         <h2 class="-mb-2 font-display text-lg leading-normal">
             {{ t('সময় ধরে দেখুন') }}

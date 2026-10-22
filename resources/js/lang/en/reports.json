@@ -77,7 +77,7 @@
     "আয়": "Income",
     "মোট আয়": "Total income",
     "খরচ": "Expense",
-    "মোট খরচ": "Total expense",
+    "মোট খরচ": "Total cost",
     "নিট লাভ / ক্ষতি": "Net profit / loss",
     "ক্যাটাগরি / প্রজেক্ট অনুযায়ী": "By category / project",
     "ক্যাটাগরি": "Category",
@@ -236,5 +236,14 @@
     "অন্যকে দিতে হবে": "We owe",
     "শুরু থেকে আয় :in, খরচ :out — সবচেয়ে বেশি খরচ:": "Since the start: income :in, expense :out — biggest costs:",
     "পুরো হিসাবের সারাংশ — মাস, ৬ মাস, বছর": "Full summary — month, 6 months, year",
-    "সময় ধরে দেখুন": "By period"
+    "সময় ধরে দেখুন": "By period",
+    "বিক্রির পর আসল লাভ (মার্জিন)": "Real profit after sale (margin)",
+    "মার্জিন :pct%": "Margin :pct%",
+    "এখনো কিছু বিক্রি হয়নি। বিক্রি হলে এখানে দেখাবে: বিক্রি দাম থেকে কেনা দাম আর খাবার-ওষুধ-মজুরির ভাগ বাদ দিয়ে আসল লাভ কত থাকল।": "Nothing sold yet. After a sale this shows what was really left: sale price less purchase price and the share of feed, medicine and wages.",
+    "মোট বিক্রি": "Total sales",
+    "আসল লাভ": "Real profit",
+    "আসল ক্ষতি": "Real loss",
+    ":n দিন রাখা": "kept :n days",
+    "বিক্রি :sale − কেনা :buy − খাবার/ওষুধ/মজুরি :upkeep": "Sale :sale − bought :buy − feed/medicine/wages :upkeep",
+    "খাবার-মজুরির ভাগ: পশুটি যে ক্যাটাগরিতে যতদিন ছিল, তার খরচের দিন অনুযায়ী অংশ। \"সাধারণ\" খরচ মাস শেষে ভাগ করলে তার অংশও যোগ হয়।": "Feed and wages share: the part of its category's costs for the days it was there. \"General\" costs add their share once split at month end."
 }

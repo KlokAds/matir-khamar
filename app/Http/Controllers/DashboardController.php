@@ -42,6 +42,7 @@ class DashboardController extends Controller
             'today' => $request->user()->can('post-daily') ? $checklist->for($request->user()) : [],
             // Gain or loss so far, in plain words, at the top for those who see the money.
             'story' => $canSeeMoney ? $summary->story() : null,
+            'sales' => $canSeeMoney ? $summary->sales() : null,
             'month' => $from->format('Y-m'),
             'farm' => $canSeeMoney ? $reports->farmTotals($from, $to) : null,
             'farmYear' => $canSeeMoney ? $reports->farmTotals(now()->startOfYear(), $to) : null,

@@ -281,6 +281,49 @@ class SummaryBook
         ];
     }
 
+    /**
+     * What each sale really left after everything: sale price less purchase price and the
+     * animal's share of feed, medicine and wages while it was kept — the margin.
+     *
+     * @return array{rows: list<array{id:int, tag:string, center:string, sold_on:?string, days:int, sale:int, purchase:int, upkeep:int, profit:int, margin:float}>, sale:int, cost:int, profit:int, margin:float}
+     */
+    public function sales(): array
+    {
+        $allocation = app(AllocationService::class);
+        $rows = [];
+
+        foreach (Animal::query()->where('status', 'sold')->with(['costCenter:id,name', 'placements'])->orderByDesc('disposed_on')->get() as $animal) {
+            $cost = $this->reports->animalCost($animal, $allocation);
+            $sale = (int) $cost['sale'];
+            $upkeep = $cost['direct'] + $cost['shared'];
+            $profit = $sale - $cost['purchase'] - $upkeep;
+
+            $rows[] = [
+                'id' => $animal->id,
+                'tag' => $animal->tag,
+                'center' => $animal->costCenter->name,
+                'sold_on' => $animal->disposed_on?->toDateString(),
+                'days' => $animal->disposed_on ? (int) $animal->acquired_on->diffInDays($animal->disposed_on) : 0,
+                'sale' => $sale,
+                'purchase' => $cost['purchase'],
+                'upkeep' => $upkeep,
+                'profit' => $profit,
+                'margin' => $sale > 0 ? round($profit / $sale * 100, 1) : 0.0,
+            ];
+        }
+
+        $sale = array_sum(array_column($rows, 'sale'));
+        $profit = array_sum(array_column($rows, 'profit'));
+
+        return [
+            'rows' => $rows,
+            'sale' => $sale,
+            'cost' => $sale - $profit,
+            'profit' => $profit,
+            'margin' => $sale > 0 ? round($profit / $sale * 100, 1) : 0.0,
+        ];
+    }
+
     /** @return array{now:int, now_value:int, bought:int, bought_cost:int, sold:int, sold_amount:int, died:int, by_center: list<array{name:string, count:int}>} */
     public function herd(CarbonInterface $from, CarbonInterface $to): array
     {

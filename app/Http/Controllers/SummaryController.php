@@ -28,6 +28,7 @@ class SummaryController extends Controller
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'story' => $book->story(),
+            'sales' => $book->sales(),
             ...$book->build($from, $to),
         ]);
     }
