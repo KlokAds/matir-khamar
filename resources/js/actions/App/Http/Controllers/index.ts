@@ -22,7 +22,6 @@ import CashController from './CashController'
 import DebtController from './DebtController'
 import AllocationController from './AllocationController'
 import SetupController from './SetupController'
-import ImportController from './ImportController'
 import RoleController from './RoleController'
 import SystemController from './SystemController'
 import Settings from './Settings'
@@ -52,7 +51,6 @@ const Controllers = {
     DebtController: Object.assign(DebtController, DebtController),
     AllocationController: Object.assign(AllocationController, AllocationController),
     SetupController: Object.assign(SetupController, SetupController),
-    ImportController: Object.assign(ImportController, ImportController),
     RoleController: Object.assign(RoleController, RoleController),
     SystemController: Object.assign(SystemController, SystemController),
     Settings: Object.assign(Settings, Settings),

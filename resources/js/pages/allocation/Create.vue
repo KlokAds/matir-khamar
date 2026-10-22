@@ -155,7 +155,7 @@ const share = (id: number) =>
             </section>
 
             <form
-                class="rounded-xl border border-border bg-card p-4 lg:col-span-3"
+                class="min-w-0 rounded-xl border border-border bg-card p-4 lg:col-span-3"
                 @submit.prevent="f.post('/allocation')"
             >
                 <div
@@ -207,9 +207,9 @@ const share = (id: number) =>
                     <div
                         v-for="c in centers"
                         :key="c.id"
-                        class="grid grid-cols-[1fr_7rem_8rem] items-center gap-2 text-sm"
+                        class="grid grid-cols-[minmax(0,1fr)_5rem_6rem] items-center gap-2 text-sm sm:grid-cols-[1fr_7rem_8rem]"
                     >
-                        <span>{{ tCenter(c) }}</span>
+                        <span class="break-words">{{ tCenter(c) }}</span>
                         <Input
                             v-model="f.weights[String(c.id)]"
                             type="number"

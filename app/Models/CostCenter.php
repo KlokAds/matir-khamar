@@ -91,4 +91,59 @@ class CostCenter extends Model
 
         return $ids;
     }
+
+    /**
+     * Centers that are really running: on themselves and every project above them on too.
+     * Turning a project off hides everything inside it; its books stay as they are.
+     *
+     * @return list<int>
+     */
+    public static function runningIds(): array
+    {
+        $centers = static::query()->get(['id', 'parent_id', 'is_active'])->keyBy('id');
+        $ids = [];
+
+        foreach ($centers as $center) {
+            $node = $center;
+
+            while ($node && $node->is_active) {
+                $node = $node->parent_id ? $centers->get($node->parent_id) : null;
+
+                if ($node === null) {
+                    $ids[] = $center->id;
+                }
+            }
+        }
+
+        return $ids;
+    }
+
+    /** The animal kind kept here: goats under the goat project, cattle everywhere else. */
+    public static function speciesOf(?int $centerId): string
+    {
+        $goat = static::query()->where('code', 'CHAGOL')->first();
+
+        return $goat && $centerId && in_array($centerId, $goat->descendantIds(), true) ? 'goat' : 'cattle';
+    }
+
+    /**
+     * Which parts of the farm are running, for the menu and the pages: cattle, goats, milk,
+     * fattening, land and crops.
+     *
+     * @return array{cattle:bool, goat:bool, milk:bool, fattening:bool, land:bool}
+     */
+    public static function modules(): array
+    {
+        $running = static::runningIds();
+        $codes = static::query()->whereIn('id', $running)->pluck('code')->all();
+        $on = fn (string ...$c) => array_intersect($c, $codes) !== [];
+
+        return [
+            'cattle' => $on('GORU'),
+            'goat' => $on('CHAGOL'),
+            'milk' => $on('GAVI'),
+            'fattening' => $on('MOTATAJA'),
+            'land' => $on('GHAS', 'FOSOL', 'DHAN'),
+        ];
+    }
 }

@@ -29,7 +29,14 @@ withDefaults(defineProps<Props>(), {
             <slot />
         </AppContent>
         <MobileTabBar />
-        <Toaster />
+        <Toaster
+            position="top-center"
+            rich-colors
+            close-button
+            :offset="{ top: '4.5rem' }"
+            :mobile-offset="{ top: '4.25rem', left: '2.5rem', right: '2.5rem' }"
+            :toast-options="{ class: 'khamar-toast' }"
+        />
         <AppDialogHost />
         <AlarmHost />
     </AppShell>

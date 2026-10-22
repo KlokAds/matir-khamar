@@ -4,14 +4,17 @@ import {
     Bell,
     ChevronRight,
     CloudOff,
+    Moon,
     Plus,
     RefreshCw,
     Search,
+    Sun,
 } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import GlobalSearch from '@/components/GlobalSearch.vue';
 import QuickAddMenu from '@/components/QuickAddMenu.vue';
 import { useSidebar } from '@/components/ui/sidebar';
+import { useAppearance } from '@/composables/useAppearance';
 import { currentLocale, t } from '@/lib/i18n';
 import { useCan } from '@/lib/khamar';
 import { pendingCount } from '@/lib/offlineQueue';
@@ -35,6 +38,11 @@ const { toggleSidebar } = useSidebar();
 const can = useCan();
 const page = usePage();
 const searching = ref(false);
+
+// Light or dark in one tap from the top bar, not hidden away in Settings.
+const { resolvedAppearance, updateAppearance } = useAppearance();
+const toggleTheme = () =>
+    updateAppearance(resolvedAppearance.value === 'dark' ? 'light' : 'dark');
 
 const title = computed(
     () => props.breadcrumbs[props.breadcrumbs.length - 1]?.title ?? '',
@@ -109,7 +117,7 @@ const switchTo = (next: 'bn' | 'en') => {
 
 <template>
     <header
-        class="farm-bar sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 bg-background/85 px-3 backdrop-blur-md md:px-5"
+        class="farm-bar sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 bg-background/85 px-3 backdrop-blur-md sm:gap-3 md:px-5"
     >
         <button
             type="button"
@@ -137,28 +145,32 @@ const switchTo = (next: 'bn' | 'en') => {
             </svg>
         </button>
 
-        <div class="min-w-0 flex-1 leading-tight">
+        <div class="min-w-0 flex-1">
+            <!-- Bangla vowel signs rise above the line: normal leading keeps them from being clipped. -->
             <p
-                class="flex min-w-0 items-center gap-1 text-[11px] font-medium tracking-wide text-paddy"
+                class="flex min-w-0 items-center gap-1 pt-0.5 text-[11px] leading-[1.6] font-medium tracking-wide text-paddy"
             >
                 <span class="shrink-0">{{ todayLabel }}</span>
                 <template v-for="crumb in trail" :key="crumb.title">
                     <ChevronRight
-                        class="size-3 shrink-0 text-muted-foreground/60"
+                        class="hidden size-3 shrink-0 text-muted-foreground/60 sm:block"
                     />
                     <Link
                         :href="crumb.href"
-                        class="truncate text-muted-foreground hover:text-foreground"
+                        class="hidden truncate text-muted-foreground hover:text-foreground sm:block"
                         >{{ t(crumb.title) }}</Link
                     >
                 </template>
             </p>
-            <p class="truncate font-display text-lg md:text-xl">
+            <!-- On a phone a long title gets a smaller size and a second line instead of "…". -->
+            <p
+                class="line-clamp-2 py-px font-display text-[15px] leading-normal break-words sm:line-clamp-1 sm:py-0.5 sm:text-lg md:text-xl"
+            >
                 {{ t(title) }}
             </p>
         </div>
 
-        <div class="flex shrink-0 items-center gap-1.5">
+        <div class="flex shrink-0 items-center gap-1 sm:gap-1.5">
             <button
                 type="button"
                 class="search-btn"
@@ -205,6 +217,25 @@ const switchTo = (next: 'bn' | 'en') => {
                     >{{ remindersDue }}</span
                 >
             </Link>
+
+            <button
+                type="button"
+                class="bell"
+                :aria-label="
+                    resolvedAppearance === 'dark'
+                        ? t('আলো (লাইট) মোড')
+                        : t('অন্ধকার (ডার্ক) মোড')
+                "
+                :title="
+                    resolvedAppearance === 'dark'
+                        ? t('আলো (লাইট) মোড')
+                        : t('অন্ধকার (ডার্ক) মোড')
+                "
+                @click="toggleTheme"
+            >
+                <Sun v-if="resolvedAppearance === 'dark'" class="size-4" />
+                <Moon v-else class="size-4" />
+            </button>
 
             <div
                 class="lang flex items-center rounded-full border border-border bg-card p-0.5 text-xs font-semibold"
@@ -264,11 +295,11 @@ const switchTo = (next: 'bn' | 'en') => {
 }
 
 .stall-btn {
-    @apply flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-paddy shadow-xs transition-colors hover:bg-paddy hover:text-primary-foreground;
+    @apply flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-paddy shadow-xs transition-colors hover:bg-paddy hover:text-primary-foreground sm:size-10;
 }
 
 .search-btn {
-    @apply flex size-9 items-center justify-center gap-2 rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground lg:w-auto lg:min-w-52 lg:justify-start lg:px-3 lg:text-sm;
+    @apply flex size-8 items-center justify-center gap-2 rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground sm:size-9 lg:w-auto lg:min-w-52 lg:justify-start lg:px-3 lg:text-sm;
 }
 
 .search-btn kbd {
@@ -276,7 +307,7 @@ const switchTo = (next: 'bn' | 'en') => {
 }
 
 .bell {
-    @apply flex size-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground;
+    @apply flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground sm:size-9;
 }
 
 .pill {
@@ -284,7 +315,7 @@ const switchTo = (next: 'bn' | 'en') => {
 }
 
 .lang-opt {
-    @apply rounded-full px-2.5 py-1 text-muted-foreground transition-colors;
+    @apply rounded-full px-2 py-1 text-muted-foreground transition-colors sm:px-2.5;
 }
 
 .lang-opt.is-on {

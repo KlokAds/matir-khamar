@@ -42,7 +42,7 @@
     "এখানকার গরু": "Cattle here",
     "এখানে গরু": "Cattle here",
     "এখানে গরু থাকবে": "Cattle will be kept here",
-    "এখানে পশু থাকবে": "Animals will be kept here",
+    "এখানে পশু থাকবে": "Cattle will be kept here",
     "এখানে পশু থাকে": "Animals are kept here",
     "এগুলো আসবে না": "These won't be imported",
     "এটি :n এর বাতিল-এন্ট্রি।": "This is the reversal of :n.",
@@ -250,5 +250,6 @@
     "— সব —": "— All —",
     "— সবার উপরে —": "— Top level —",
     "— সবার ওপরে —": "— Top level —",
-    "✓ মিলেছে": "✓ Matches"
+    "✓ মিলেছে": "✓ Matches",
+    ":nটি পশু": ":n animals"
 }

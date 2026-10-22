@@ -52,7 +52,7 @@ const height = (value: number) =>
             <span
                 v-for="m in months"
                 :key="m.month"
-                class="flex-1 text-center text-[11px] text-muted-foreground"
+                class="min-w-0 flex-1 text-center text-[10px] leading-snug break-words text-muted-foreground sm:text-[11px]"
                 >{{ monthLabel(m.month) }}</span
             >
         </div>

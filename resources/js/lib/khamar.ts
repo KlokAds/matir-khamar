@@ -138,7 +138,6 @@ export type Abilities = Partial<
         | 'lock-periods'
         | 'reverse-entries'
         | 'view-audit'
-        | 'manage-import'
         | 'manage-roles'
         | 'manage-update'
         | 'investor-view',
@@ -152,6 +151,70 @@ export function useCan() {
     return computed(
         () => (page.props.auth as unknown as { can: Abilities }).can ?? {},
     );
+}
+
+export type Modules = {
+    cattle: boolean;
+    goat: boolean;
+    milk: boolean;
+    fattening: boolean;
+    land: boolean;
+};
+
+/** Which parts of the farm are running; a project turned off drops out of menus and pages. */
+export function useModules() {
+    const page = usePage();
+
+    return computed<Modules>(
+        () =>
+            (page.props.modules as Modules | null) ?? {
+                cattle: true,
+                goat: false,
+                milk: true,
+                fattening: true,
+                land: true,
+            },
+    );
+}
+
+/** Words for the herd: cows, goats, or animals when both are kept. */
+export function useHerdWords() {
+    const modules = useModules();
+
+    return computed(() => {
+        const kind =
+            modules.value.goat && !modules.value.cattle
+                ? 'goat'
+                : modules.value.goat
+                  ? 'both'
+                  : 'cattle';
+
+        return {
+            kind,
+            group: { cattle: 'গরু', goat: 'ছাগল', both: 'পশু' }[kind],
+            list: {
+                cattle: 'গরুর তালিকা',
+                goat: 'ছাগলের তালিকা',
+                both: 'পশুর তালিকা',
+            }[kind],
+            new: { cattle: 'নতুন গরু', goat: 'নতুন ছাগল', both: 'নতুন পশু' }[kind],
+            add: {
+                cattle: 'গরু যোগ করুন',
+                goat: 'ছাগল যোগ করুন',
+                both: 'পশু যোগ করুন',
+            }[kind],
+            none: {
+                cattle: 'এখানে কোনো গরু নেই।',
+                goat: 'এখানে কোনো ছাগল নেই।',
+                both: 'এখানে কোনো পশু নেই।',
+            }[kind],
+            feed: {
+                cattle: 'গরুকে খাবার দেওয়া',
+                goat: 'ছাগলকে খাবার দেওয়া',
+                both: 'পশুকে খাবার দেওয়া',
+            }[kind],
+        };
+    });
 }
 
 /** Indented label for the category tree in a native select. */

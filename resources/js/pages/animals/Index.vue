@@ -5,10 +5,10 @@ import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import { t, tAll } from '@/lib/i18n';
-import { day, taka, useCan } from '@/lib/khamar';
+import { day, taka, useCan, useHerdWords } from '@/lib/khamar';
 
 defineOptions({
-    layout: { breadcrumbs: [{ title: 'গরুর তালিকা', href: '/animals' }] },
+    layout: { breadcrumbs: [{ title: 'পশুর তালিকা', href: '/animals' }] },
 });
 
 defineProps<{
@@ -16,6 +16,7 @@ defineProps<{
     statuses: Record<string, string>;
     animals: {
         id: number;
+        species: 'cattle' | 'goat';
         tag: string;
         name: string | null;
         sex: string;
@@ -28,24 +29,25 @@ defineProps<{
 }>();
 
 const can = useCan();
+const herd = useHerdWords();
 </script>
 
 <template>
-    <Head :title="t('গরুর তালিকা')" />
+    <Head :title="t(herd.list)" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            :title="t('গরুর তালিকা')"
+            :title="t(herd.list)"
             :subtitle="
                 t(
-                    'প্রতিটি গরুর আলাদা কার্ড — কেনা দাম, কোন ক্যাটাগরিতে আছে, কত খরচ হলো, বিক্রিতে কত লাভ',
+                    'প্রতিটি পশুর আলাদা কার্ড — কেনা দাম, কোন ক্যাটাগরিতে আছে, কত খরচ হলো, বিক্রিতে কত লাভ',
                 )
             "
         >
             <template #actions>
                 <Button v-if="can['post-entries']" as-child
                     ><Link href="/animals/create"
-                        ><Plus /> {{ t('গরু যোগ করুন') }}</Link
+                        ><Plus /> {{ t(herd.add) }}</Link
                     ></Button
                 >
             </template>
@@ -87,9 +89,13 @@ const can = useCan();
                         </p>
                         <p class="text-xs text-muted-foreground">
                             {{
-                                a.sex === 'female'
-                                    ? t('গাভী/বকনা')
-                                    : t('ষাঁড়/এঁড়ে')
+                                a.species === 'goat'
+                                    ? a.sex === 'female'
+                                        ? t('ছাগী')
+                                        : t('খাসি/পাঁঠা')
+                                    : a.sex === 'female'
+                                      ? t('গাভী/বকনা')
+                                      : t('ষাঁড়/এঁড়ে')
                             }}<span v-if="a.breed"> · {{ a.breed }}</span>
                         </p>
                     </div>
@@ -118,7 +124,7 @@ const can = useCan();
                 v-if="!animals.length"
                 class="col-span-full rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground"
             >
-                {{ t('এখানে কোনো গরু নেই।') }}
+                {{ t(herd.none) }}
             </p>
         </div>
     </div>

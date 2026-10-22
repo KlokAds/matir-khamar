@@ -128,8 +128,8 @@ class CostCenterController extends Controller
             return back()->withErrors(['center' => __('":name"-এ হিসাব বা গরু আছে, তাই মোছা যাবে না — বন্ধ করে লুকিয়ে রাখুন।', ['name' => $center->name])]);
         }
 
-        // Light references (diary, goals, reminders, imports) let go of it rather than block.
-        foreach (['farm_notes', 'goals', 'reminders', 'import_mappings'] as $table) {
+        // Light references (diary, goals, reminders) let go of it rather than block.
+        foreach (['farm_notes', 'goals', 'reminders'] as $table) {
             if (DB::getSchemaBuilder()->hasColumn($table, 'cost_center_id')) {
                 DB::table($table)->where('cost_center_id', $center->id)->update(['cost_center_id' => null]);
             }

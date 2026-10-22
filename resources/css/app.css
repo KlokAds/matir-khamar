@@ -248,3 +248,15 @@
     overflow-y: visible;
     overflow-x: clip;
 }
+
+/* Toasts: small and just under the top bar, so the header buttons stay free to tap. */
+[data-sonner-toaster] {
+    --width: 300px;
+}
+
+[data-sonner-toast].khamar-toast {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    gap: 0.5rem;
+    min-height: 0;
+}

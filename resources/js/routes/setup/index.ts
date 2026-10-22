@@ -6,7 +6,6 @@ import accountsDb024e from './accounts'
 import partiesBccebf from './parties'
 import budget from './budget'
 import money from './money'
-import importMethod7367d2 from './import'
 import rolesF85c84 from './roles'
 import update603324 from './update'
 import investorsF3f70d from './investors'
@@ -173,87 +172,6 @@ partiesForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 })
 
 parties.form = partiesForm
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-export const importMethod = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: importMethod.url(options),
-    method: 'get',
-})
-
-importMethod.definition = {
-    methods: ["get","head"],
-    url: '/setup/import',
-} satisfies RouteDefinition<["get","head"]>
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-importMethod.url = (options?: RouteQueryOptions) => {
-    return importMethod.definition.url + queryParams(options)
-}
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-importMethod.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: importMethod.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-importMethod.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
-    url: importMethod.url(options),
-    method: 'head',
-})
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-const importMethodForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: importMethod.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-importMethodForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: importMethod.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ImportController::importMethod
-* @see app/Http/Controllers/ImportController.php:22
-* @route '/setup/import'
-*/
-importMethodForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: importMethod.url({
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'HEAD',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'get',
-})
-
-importMethod.form = importMethodForm
 
 /**
 * @see \App\Http\Controllers\RoleController::roles
@@ -749,7 +667,6 @@ const setup = {
     parties: Object.assign(parties, partiesBccebf),
     budget: Object.assign(budget, budget),
     money: Object.assign(money, money),
-    import: Object.assign(importMethod, importMethod7367d2),
     roles: Object.assign(roles, rolesF85c84),
     update: Object.assign(update, update603324),
     investors: Object.assign(investors, investorsF3f70d),

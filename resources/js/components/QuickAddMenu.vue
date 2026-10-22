@@ -8,16 +8,21 @@ import {
 } from 'reka-ui';
 import { computed, ref } from 'vue';
 import { t } from '@/lib/i18n';
-import { useCan } from '@/lib/khamar';
-import { quickActions } from '@/lib/quick';
+import { useCan, useModules } from '@/lib/khamar';
+import { moduleAllows, quickActions } from '@/lib/quick';
 
 /** The ＋ button: every everyday "write something" job, one tap away. */
 withDefaults(defineProps<{ side?: 'top' | 'bottom' }>(), { side: 'bottom' });
 
 const can = useCan();
+const modules = useModules();
 const open = ref(false);
 const actions = computed(() =>
-    quickActions.filter((a) => !a.ability || can.value[a.ability]),
+    quickActions.filter(
+        (a) =>
+            (!a.ability || can.value[a.ability]) &&
+            moduleAllows(a.href, modules.value),
+    ),
 );
 </script>
 

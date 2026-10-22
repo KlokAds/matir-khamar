@@ -44,7 +44,7 @@ class DashboardController extends Controller
             'trend' => $canSeeMoney ? $reports->monthlyTrend(6, null, true) : [],
             'money' => $canSeeMoney ? $reports->balances(['asset'])->filter(fn ($row) => in_array($row['subtype'], Account::MONEY_SUBTYPES, true))->values() : [],
             'milkThisMonth' => $reports->milkLiters($from, $to),
-            'animals' => Animal::query()->where('status', 'active')->with('costCenter:id,name')->get()
+            'animals' => Animal::query()->where('status', 'active')->whereIn('cost_center_id', CostCenter::runningIds())->with('costCenter:id,name')->get()
                 ->groupBy('cost_center_id')
                 ->map(fn ($group) => ['center' => $group->first()->costCenter->name, 'count' => $group->count()])
                 ->values(),
@@ -79,7 +79,7 @@ class DashboardController extends Controller
         $income = fn (array $totals, int $id): int => (int) (($totals[$id]['income'] ?? 0) + ($totals[$id]['internal_income'] ?? 0));
         $expense = fn (array $totals, int $id): int => (int) (($totals[$id]['expense'] ?? 0) + ($totals[$id]['internal_expense'] ?? 0));
 
-        $centers = CostCenter::query()->where('is_active', true)->whereNotIn('kind', ['group', 'overhead'])->orderBy('sort')->get();
+        $centers = CostCenter::query()->whereIn('id', CostCenter::runningIds())->whereNotIn('kind', ['group', 'overhead'])->orderBy('sort')->get();
         $cards = [];
 
         foreach ($centers as $center) {
