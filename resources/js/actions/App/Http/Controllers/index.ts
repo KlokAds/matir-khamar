@@ -3,6 +3,7 @@ import ReminderController from './ReminderController'
 import DashboardController from './DashboardController'
 import InvestorController from './InvestorController'
 import SearchController from './SearchController'
+import ManageController from './ManageController'
 import MilkController from './MilkController'
 import StockController from './StockController'
 import OfflineController from './OfflineController'
@@ -35,6 +36,7 @@ const Controllers = {
     DashboardController: Object.assign(DashboardController, DashboardController),
     InvestorController: Object.assign(InvestorController, InvestorController),
     SearchController: Object.assign(SearchController, SearchController),
+    ManageController: Object.assign(ManageController, ManageController),
     MilkController: Object.assign(MilkController, MilkController),
     StockController: Object.assign(StockController, StockController),
     OfflineController: Object.assign(OfflineController, OfflineController),

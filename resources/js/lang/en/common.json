@@ -240,5 +240,9 @@
     "মনে রাখা": "Reminders",
     "পুরো হিসাবের সারাংশ": "Full summary",
     "এ মাস, গত মাস, ৬ মাস, এ বছর বা নিজের বাছাই করা সময়": "This month, last month, 6 months, this year or your own dates",
-    "কোরবানি পরিকল্পনা": "Kurbani planning"
+    "কোরবানি পরিকল্পনা": "Kurbani planning",
+    "কোনো হিসাবে ব্যবহার না হলে পুরো মুছে যাবে; হিসাবে থাকলে শুধু তালিকা থেকে লুকানো হবে — পুরোনো হিসাব ঠিক থাকবে।": "If it was never used it is deleted; if it is in the books it is only hidden from the list — old entries stay right.",
+    "নতুনটির নাম": "Name of the new one",
+    "নতুন যোগ করুন": "Add new",
+    "\":name\" যোগ করুন": "Add \":name\""
 }

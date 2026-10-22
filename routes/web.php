@@ -15,6 +15,7 @@ use App\Http\Controllers\KurbaniController;
 use App\Http\Controllers\LabourController;
 use App\Http\Controllers\LandController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ManageController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
@@ -46,6 +47,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // An investor sees only the projects they put money into, nothing else.
     Route::get('investor', [InvestorController::class, 'index'])->middleware('can:investor-view')->name('investor.index');
     Route::get('search', SearchController::class)->middleware('throttle:120,1')->name('search');
+
+    // A dropdown's own add / rename / remove; the controller checks the ability for each kind.
+    Route::post('manage/{type}', [ManageController::class, 'store'])->middleware('throttle:60,1')->name('manage.store');
+    Route::put('manage/{type}/{id}', [ManageController::class, 'update'])->whereNumber('id')->name('manage.update');
+    Route::delete('manage/{type}/{id}', [ManageController::class, 'destroy'])->whereNumber('id')->name('manage.destroy');
 
     // Reminders and phone notifications: everyone signed in can set and receive their own.
     Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');

@@ -227,7 +227,7 @@ function submit() {
             >
                 <div class="grid gap-4 sm:grid-cols-2">
                     <Field :label="t('কোন মাল')" :error="f.errors.item_id">
-                        <NSelect v-model="f.item_id">
+                        <NSelect v-model="f.item_id" manage="item">
                             <option
                                 v-for="i in items"
                                 :key="i.id"
@@ -278,6 +278,7 @@ function submit() {
                             <NSelect
                                 v-model="split.cost_center_id"
                                 class="col-span-3 sm:col-span-1"
+                                manage="center"
                             >
                                 <option
                                     v-for="c in centerChoices"
@@ -452,7 +453,10 @@ function submit() {
                             :label="t('কোথা থেকে')"
                             :error="f.errors.money_account_id"
                         >
-                            <NSelect v-model="f.money_account_id">
+                            <NSelect
+                                v-model="f.money_account_id"
+                                manage="money"
+                            >
                                 <option
                                     v-for="a in moneyAccounts"
                                     :key="a.id"
