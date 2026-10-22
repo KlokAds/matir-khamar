@@ -162,6 +162,27 @@ class ReminderController extends Controller
     }
 
     /**
+     * The farm's own Android app hands over its Firebase token (through the page it shows), so
+     * notifications go straight to the app like a chat app's.
+     */
+    public function app(Request $request): HttpResponse
+    {
+        $data = $request->validate(['token' => ['required', 'string', 'min:20', 'max:4096']]);
+
+        PushSubscription::query()->updateOrCreate(['endpoint_hash' => hash('sha256', $data['token'])], [
+            'user_id' => $request->user()->id,
+            'kind' => 'fcm',
+            'endpoint' => $data['token'],
+            'public_key' => '',
+            'auth_token' => '',
+            'device' => mb_substr((string) $request->userAgent(), 0, 250),
+            'failures' => 0,
+        ]);
+
+        return response()->noContent();
+    }
+
+    /**
      * The phone's service worker says it received a push. No CSRF token in a service worker,
      * so this only ever marks the caller's own subscription.
      */

@@ -1,0 +1,61 @@
+name: Android app
+
+# Builds the farm's Android app (mobile/) in the cloud and publishes the APK as a release;
+# the login page's download button always points at the newest one.
+on:
+  push:
+    branches: [main]
+    paths: ['mobile/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Make the Android project
+        working-directory: mobile
+        run: |
+          flutter create --org com.klokads --project-name matirkhamar --platforms android .
+          rm -f test/widget_test.dart
+          python3 tool/patch_android.py
+          mkdir -p assets
+          cp ../public/icons/icon-512.png assets/icon.png
+          echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/khamar.keystore"
+          flutter pub get
+          dart run flutter_launcher_icons
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Build the APK
+        working-directory: mobile
+        run: |
+          flutter build apk --release --build-number=$((100 + GITHUB_RUN_NUMBER)) --build-name=2.0.$GITHUB_RUN_NUMBER
+          cp build/app/outputs/flutter-apk/app-release.apk matir-khamar.apk
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/khamar.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ github.run_number }}
+          name: মাটির খামার অ্যাপ ${{ github.run_number }}
+          body: The farm's Android app. Install over the earlier one; sign-in stays.
+          files: mobile/matir-khamar.apk
+          make_latest: true
