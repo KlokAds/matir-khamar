@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,7 +19,7 @@ const paper = Color(0xFFF4EDE1);
 
 final notifications = FlutterLocalNotificationsPlugin();
 
-/// "khamar_alerts" pops up with sound like a chat message; "khamar_alarm" rings like a clock.
+/// Pops up with sound like a chat message.
 const alerts = AndroidNotificationChannel(
   'khamar_alerts',
   'খামারের খবর',
@@ -25,33 +28,118 @@ const alerts = AndroidNotificationChannel(
   playSound: true,
   enableVibration: true,
 );
-final alarm = AndroidNotificationChannel(
-  'khamar_alarm',
-  'জরুরি অ্যালার্ম',
-  description: 'যে মনে করানোয় অ্যালার্ম দেওয়া — ঘড়ির মতো বাজে',
+
+/// Alarm reminders: the phone's usual sound, played over and over until the notification is touched.
+const ringing = AndroidNotificationChannel(
+  'khamar_ring',
+  'অ্যালার্ম রিমাইন্ডার',
+  description: 'অ্যালার্ম দেওয়া রিমাইন্ডার — ছোঁয়া পর্যন্ত বাজতে থাকে',
   importance: Importance.max,
   playSound: true,
   enableVibration: true,
-  sound: const UriAndroidNotificationSound('content://settings/system/alarm_alert'),
-  audioAttributesUsage: AudioAttributesUsage.alarm,
 );
+
+/// Android's "insistent" flag: the sound repeats until the notification is touched.
+const flagInsistent = 4;
 
 /// Where a tapped notification should open (set before the page is ready, read once it is).
 final opened = StreamController<String>.broadcast();
 String? openFirst;
 
+Future<void> setUpNotifications() async {
+  final android = notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+  await android?.createNotificationChannel(alerts);
+  await android?.createNotificationChannel(ringing);
+  await notifications.initialize(
+    const InitializationSettings(android: AndroidInitializationSettings('ic_notification')),
+    onDidReceiveNotificationResponse: (response) async {
+      if (await pressButton(response)) {
+        return;
+      }
+      go(response.payload);
+    },
+    onDidReceiveBackgroundNotificationResponse: onButtonInBackground,
+  );
+}
+
+/// "হয়ে গেছে" / "১ ঘণ্টা পরে" on the notification: a signed link, so no sign-in is needed.
+Future<bool> pressButton(NotificationResponse response) async {
+  final url = response.actionId;
+  if (url == null || !url.startsWith('http')) {
+    return false;
+  }
+  try {
+    await http.post(Uri.parse(url), headers: {'Accept': 'application/json'});
+  } catch (_) {
+    // No network: the reminder simply rings again later.
+  }
+  return true;
+}
+
+@pragma('vm:entry-point')
+void onButtonInBackground(NotificationResponse response) {
+  pressButton(response);
+}
+
+/// Shows a farm notification; an alarm rings on until touched, at most a minute each time
+/// (the server sends it again every two minutes until it is marked done).
+Future<void> showFarm(RemoteMessage message) async {
+  final data = message.data;
+  final title = message.notification?.title ?? data['title'] ?? 'মাটির খামার';
+  final body = message.notification?.body ?? data['body'] ?? '';
+  final ring = data['alarm'] == '1' || data['alarm'] == 'true';
+  final buttons = <AndroidNotificationAction>[];
+  try {
+    for (final a in (jsonDecode(data['actions'] ?? '[]') as List)) {
+      if (a is Map && a['url'] is String && a['title'] is String) {
+        buttons.add(AndroidNotificationAction(a['url'] as String, a['title'] as String, cancelNotification: true));
+      }
+    }
+  } catch (_) {}
+
+  await notifications.show(
+    (data['tag'] ?? title).hashCode,
+    title,
+    body,
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        ring ? ringing.id : alerts.id,
+        ring ? ringing.name : alerts.name,
+        importance: Importance.max,
+        priority: Priority.max,
+        icon: 'ic_notification',
+        color: brown,
+        styleInformation: BigTextStyleInformation(body),
+        category: ring ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.message,
+        fullScreenIntent: ring,
+        ongoing: ring,
+        timeoutAfter: ring ? 60000 : null,
+        additionalFlags: ring ? Int32List.fromList([flagInsistent]) : null,
+        actions: buttons,
+      ),
+    ),
+    payload: data['url'],
+  );
+}
+
+/// A message while the app is closed or in the background. Plain ones Android shows by itself;
+/// alarms come as data only and the app rings them.
+@pragma('vm:entry-point')
+Future<void> onBackgroundMessage(RemoteMessage message) async {
+  if (message.notification != null) {
+    return;
+  }
+  await Firebase.initializeApp();
+  await setUpNotifications();
+  await showFarm(message);
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: brown, statusBarIconBrightness: Brightness.light));
   await Firebase.initializeApp();
-
-  final android = notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-  await android?.createNotificationChannel(alerts);
-  await android?.createNotificationChannel(alarm);
-  await notifications.initialize(
-    const InitializationSettings(android: AndroidInitializationSettings('ic_notification')),
-    onDidReceiveNotificationResponse: (response) => go(response.payload),
-  );
+  FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+  await setUpNotifications();
 
   // Tapped while the app was closed: open that page once it starts.
   final first = await FirebaseMessaging.instance.getInitialMessage();
@@ -64,31 +152,7 @@ Future<void> main() async {
   FirebaseMessaging.onMessageOpenedApp.listen((message) => go(message.data['url']));
 
   // In the open app Android shows nothing by itself, so the app shows it.
-  FirebaseMessaging.onMessage.listen((message) {
-    final data = message.data;
-    final title = message.notification?.title ?? data['title'] ?? 'মাটির খামার';
-    final body = message.notification?.body ?? data['body'] ?? '';
-    final ring = data['alarm'] == '1' || data['alarm'] == 'true';
-    notifications.show(
-      (data['tag'] ?? title).hashCode,
-      title,
-      body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          ring ? alarm.id : alerts.id,
-          ring ? alarm.name : alerts.name,
-          importance: Importance.max,
-          priority: Priority.max,
-          icon: 'ic_notification',
-          color: brown,
-          styleInformation: BigTextStyleInformation(body),
-          category: ring ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.message,
-          fullScreenIntent: ring,
-        ),
-      ),
-      payload: data['url'],
-    );
-  });
+  FirebaseMessaging.onMessage.listen(showFarm);
 
   runApp(const KhamarApp());
 }
@@ -222,7 +286,7 @@ class _SitePageState extends State<SitePage> {
                 initialUrlRequest: URLRequest(url: WebUri('$site${openFirst ?? '/dashboard'}')),
                 pullToRefreshController: refresh,
                 initialSettings: InAppWebViewSettings(
-                  applicationNameForUserAgent: 'MatirKhamarApp/2',
+                  applicationNameForUserAgent: 'MatirKhamarApp/3',
                   javaScriptEnabled: true,
                   domStorageEnabled: true,
                   databaseEnabled: true,

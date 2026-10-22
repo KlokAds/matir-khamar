@@ -53,23 +53,32 @@ class FcmSender
         $reached = 0;
 
         foreach ($subscriptions as $subscription) {
+            // An alarm goes as data only: the app itself shows it, ringing on until touched
+            // (as an alarm clock does), with "done" and "later" buttons.
+            // Only app 3 and later can ring by itself; the earlier app is sent a plain notification.
+            $rings = preg_match('/MatirKhamarApp\/(\d+)/', (string) $subscription->device, $m) === 1 && (int) $m[1] >= 3;
+            $message = ! empty($payload['alarm']) && $rings
+                ? ['token' => $subscription->endpoint, 'data' => $data, 'android' => ['priority' => 'high', 'ttl' => '600s']]
+                : null;
+
             try {
                 $response = Http::withToken($token)->timeout(10)->post(
                     "https://fcm.googleapis.com/v1/projects/{$account['project_id']}/messages:send",
-                    ['message' => [
+                    ['message' => $message ?? [
                         'token' => $subscription->endpoint,
                         'notification' => [
                             'title' => (string) ($payload['title'] ?? 'মাটির খামার'),
                             'body' => (string) ($payload['body'] ?? ''),
                         ],
                         'data' => $data,
-                        // The app's own channels: "khamar_alerts" pops up with sound like a
-                        // chat message; "khamar_alarm" rings like a clock.
+                        // The app's "khamar_alerts" channel pops up with sound like a chat
+                        // message. Alarms use it too: the alarm channel's own ring stayed silent on
+                        // some phones, and an alarm already rings again every two minutes.
                         'android' => [
                             'priority' => 'high',
                             'ttl' => '21600s',
                             'notification' => array_filter([
-                                'channel_id' => ! empty($payload['alarm']) ? 'khamar_alarm' : 'khamar_alerts',
+                                'channel_id' => 'khamar_alerts',
                                 'sound' => 'default',
                                 'tag' => isset($payload['tag']) ? (string) $payload['tag'] : null,
                                 'notification_priority' => 'PRIORITY_MAX',
