@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\CashController;
 use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiaryController;
@@ -9,11 +10,14 @@ use App\Http\Controllers\EntryController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HerdController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\InvestorController;
+use App\Http\Controllers\LabourController;
 use App\Http\Controllers\LandController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
+use App\Http\Controllers\PriceController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
@@ -36,6 +40,8 @@ Route::post('reminders/{reminder}/act/{action}', [ReminderController::class, 'ac
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::inertia('guide', 'guide/Index')->name('guide');
+    // An investor sees only the projects they put money into, nothing else.
+    Route::get('investor', [InvestorController::class, 'index'])->middleware('can:investor-view')->name('investor.index');
     Route::get('search', SearchController::class)->middleware('throttle:120,1')->name('search');
 
     // Reminders and phone notifications: everyone signed in can set and receive their own.
@@ -59,6 +65,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('breedings/{breeding}', [HerdController::class, 'updateBreeding'])->name('breedings.update');
         Route::post('animals/{animal}/weights', [HerdController::class, 'storeWeight'])->name('weights.store');
         Route::post('health', [HealthController::class, 'store'])->name('health.store');
+        Route::post('prices', [PriceController::class, 'store'])->name('prices.store');
+        Route::post('labour/logs', [LabourController::class, 'storeLogs'])->name('labour.logs.store');
+        Route::delete('labour/logs/{log}', [LabourController::class, 'destroyLog'])->name('labour.logs.destroy');
+        Route::delete('prices/{price}', [PriceController::class, 'destroy'])->name('prices.destroy');
         Route::delete('health/{event}', [HealthController::class, 'destroy'])->name('health.destroy');
         Route::post('diary/notes', [DiaryController::class, 'storeNote'])->name('diary.notes.store');
         Route::put('diary/notes/{note}', [DiaryController::class, 'updateNote'])->name('diary.notes.update');
@@ -85,6 +95,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('health', [HealthController::class, 'index'])->name('health.index');
         Route::get('land', [LandController::class, 'index'])->name('land.index');
         Route::get('profit', [ProfitController::class, 'index'])->name('profit.index');
+        Route::get('prices', [PriceController::class, 'index'])->name('prices.index');
+        Route::get('labour', [LabourController::class, 'index'])->name('labour.index');
+        Route::get('cash', [CashController::class, 'index'])->name('cash.index');
         Route::get('land/seasons/{season}', [LandController::class, 'season'])->name('land.season');
         Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');
     });
@@ -103,6 +116,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('allocation', [AllocationController::class, 'create'])->name('allocation.create');
         Route::post('allocation', [AllocationController::class, 'store'])->name('allocation.store');
         Route::post('batches', [HerdController::class, 'storeBatch'])->name('batches.store');
+        Route::post('labour/workers', [LabourController::class, 'storeWorker'])->name('labour.workers.store');
+        Route::put('labour/workers/{worker}', [LabourController::class, 'updateWorker'])->name('labour.workers.update');
+        Route::post('labour/workers/{worker}/pay', [LabourController::class, 'pay'])->name('labour.workers.pay');
         Route::post('land/plots', [LandController::class, 'storePlot'])->name('land.plots.store');
         Route::put('land/plots/{plot}', [LandController::class, 'updatePlot'])->name('land.plots.update');
         Route::post('land/seasons', [LandController::class, 'storeSeason'])->name('land.seasons.store');
@@ -162,6 +178,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware('can:manage-users')->prefix('setup')->name('setup.')->group(function () {
+        Route::get('investors', [InvestorController::class, 'manage'])->name('investors');
+        Route::post('investors', [InvestorController::class, 'grant'])->name('investors.grant');
+        Route::delete('investors/{access}', [InvestorController::class, 'revoke'])->name('investors.revoke');
         Route::get('users', [SetupController::class, 'users'])->name('users');
         Route::post('users', [SetupController::class, 'storeUser'])->name('users.store');
         Route::put('users/{user}', [SetupController::class, 'updateUser'])->name('users.update');

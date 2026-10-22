@@ -5,12 +5,14 @@ use App\Models\Account;
 use App\Models\Animal;
 use App\Models\Batch;
 use App\Models\Breeding;
+use App\Models\BudgetHead;
 use App\Models\CostCenter;
 use App\Models\FarmNote;
 use App\Models\Goal;
 use App\Models\JournalEntry;
 use App\Models\User;
 use App\Services\HerdCare;
+use App\Services\Ledger;
 use Database\Seeders\KhamarSetupSeeder;
 
 beforeEach(function () {
@@ -131,4 +133,18 @@ it('adds animals bought together under one entry with running tags', function ()
     // Left blank, a single animal gets the next number too.
     ($this->addAnimal)(['tag' => ''])->assertRedirect();
     expect(Animal::query()->where('tag', 'M-06')->exists())->toBeTrue();
+});
+
+it('warns when an enterprise budget head is nearly used up', function () {
+    $head = BudgetHead::query()->orderBy('sort')->firstOrFail();
+    $spend = (int) round($head->approved_amount * 0.85);
+
+    app(Ledger::class)->post('expense', now()->toDateString(), 'যন্ত্রপাতি', [
+        ['account_id' => Account::byCode('5900')->id, 'debit' => $spend, 'budget_head_id' => $head->id],
+        ['account_id' => $this->cash->id, 'credit' => $spend],
+    ]);
+
+    $warnings = collect(app(HerdCare::class)->budgetWarnings(now()))->pluck('title')->implode(' ');
+
+    expect($warnings)->toContain('85%')->toContain('ভাউচার নেই');
 });

@@ -8,8 +8,8 @@ beforeEach(function () {
     $this->admin = User::factory()->create(['role' => Role::Admin]);
 });
 
-it('starts with the four built-in roles and their abilities', function () {
-    expect(AccessRole::query()->pluck('key')->sort()->values()->all())->toBe(['admin', 'entry', 'manager', 'viewer'])
+it('starts with the five built-in roles and their abilities', function () {
+    expect(AccessRole::query()->pluck('key')->sort()->values()->all())->toBe(['admin', 'entry', 'investor', 'manager', 'viewer'])
         ->and(User::factory()->create(['role' => Role::Entry])->abilities())->toBe(['post-daily']);
 });
 

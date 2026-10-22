@@ -140,7 +140,8 @@ export type Abilities = Partial<
         | 'view-audit'
         | 'manage-import'
         | 'manage-roles'
-        | 'manage-update',
+        | 'manage-update'
+        | 'investor-view',
         boolean
     >
 >;

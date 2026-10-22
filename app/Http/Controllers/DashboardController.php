@@ -12,14 +12,20 @@ use App\Services\HerdCare;
 use App\Services\PrepaidService;
 use App\Services\ReportService;
 use Carbon\CarbonInterface;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care): Response
+    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care): Response|RedirectResponse
     {
+        // An investor-only login goes straight to their own page.
+        if ($request->user()->abilities() === ['investor-view']) {
+            return to_route('investor.index');
+        }
+
         // Lease months that have started are moved into their category before anything is shown.
         $prepaid->amortizeDue();
 
