@@ -10,7 +10,6 @@ use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HerdController;
-use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\LabourController;
 use App\Http\Controllers\LandController;
@@ -155,19 +154,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('parties/{party}', [SetupController::class, 'updateParty'])->name('parties.update');
         Route::put('budget/{head}', [ReportController::class, 'updateBudgetHead'])->name('budget.update');
         Route::post('money', [MoneyController::class, 'store'])->name('money.store');
-    });
-
-    Route::middleware('can:manage-import')->prefix('setup')->name('setup.')->group(function () {
-        Route::get('import', [ImportController::class, 'index'])->name('import');
-        Route::put('import/connection', [ImportController::class, 'saveConnection'])->middleware('throttle:10,1')->name('import.connection');
-        Route::post('import/connection/test', [ImportController::class, 'testConnection'])->middleware('throttle:10,1')->name('import.connection.test');
-        Route::delete('import/connection', [ImportController::class, 'forgetConnection'])->middleware('throttle:10,1')->name('import.connection.forget');
-        Route::post('import/fetch', [ImportController::class, 'fetch'])->middleware('throttle:6,1')->name('import.fetch');
-        Route::post('import/post', [ImportController::class, 'post'])->middleware('throttle:6,1')->name('import.post');
-        Route::put('import/mappings/{mapping}', [ImportController::class, 'updateMapping'])->name('import.mapping');
-        Route::post('import/records/{record}/resolve', [ImportController::class, 'resolve'])->name('import.resolve');
-        Route::post('import/records/{record}/qty', [ImportController::class, 'setQty'])->name('import.qty');
-        Route::post('import/ignore-undecided', [ImportController::class, 'ignoreUndecided'])->name('import.ignore');
     });
 
     Route::middleware('can:manage-roles')->prefix('setup')->name('setup.')->group(function () {

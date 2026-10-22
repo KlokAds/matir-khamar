@@ -158,6 +158,54 @@ async function remove(row: Row) {
     }
 }
 
+/* A project that is off folds up: what is inside it stays hidden until opened. */
+const opened = ref<Set<number>>(new Set());
+const byId = computed(() => new Map(props.rows.map((r) => [r.id, r])));
+
+function folded(row: Row): boolean {
+    let parent = row.parent_id ? byId.value.get(row.parent_id) : undefined;
+
+    while (parent) {
+        if (!parent.is_active && !opened.value.has(parent.id)) {
+            return true;
+        }
+
+        parent = parent.parent_id
+            ? byId.value.get(parent.parent_id)
+            : undefined;
+    }
+
+    return false;
+}
+
+const shownRows = computed(() => props.rows.filter((r) => !folded(r)));
+
+function inside(row: Row): number {
+    const ids = new Set([row.id]);
+    let n = 0;
+
+    for (const r of props.rows) {
+        if (r.parent_id && ids.has(r.parent_id)) {
+            ids.add(r.id);
+            n++;
+        }
+    }
+
+    return n;
+}
+
+function unfold(row: Row) {
+    const next = new Set(opened.value);
+
+    if (next.has(row.id)) {
+        next.delete(row.id);
+    } else {
+        next.add(row.id);
+    }
+
+    opened.value = next;
+}
+
 const siblings = (row: Row) =>
     props.rows.filter((r) => r.parent_id === row.parent_id);
 const isFirst = (row: Row) => siblings(row)[0]?.id === row.id;
@@ -273,7 +321,7 @@ const whyNoDelete = (row: Row) =>
                     type="checkbox"
                     class="size-4 accent-[var(--primary)]"
                 />
-                {{ t('এখানে গরু থাকবে') }}</label
+                {{ t('এখানে পশু থাকবে') }}</label
             >
             <div class="flex gap-2 sm:justify-end">
                 <Button type="submit" :disabled="form.processing">{{
@@ -286,7 +334,7 @@ const whyNoDelete = (row: Row) =>
         </form>
 
         <ul class="space-y-1.5">
-            <li v-for="row in rows" :key="row.id">
+            <li v-for="row in shownRows" :key="row.id">
                 <div
                     :class="[
                         'rounded-xl border bg-card p-3 transition-opacity',
@@ -323,6 +371,23 @@ const whyNoDelete = (row: Row) =>
                                         class="rounded bg-muted px-1.5 text-[11px] font-normal text-muted-foreground"
                                         >{{ t('বন্ধ') }}</span
                                     >
+                                    <button
+                                        v-if="!row.is_active && inside(row)"
+                                        type="button"
+                                        class="rounded border border-border px-1.5 text-[11px] font-normal text-muted-foreground hover:bg-accent"
+                                        @click="unfold(row)"
+                                    >
+                                        {{
+                                            opened.has(row.id)
+                                                ? t('ভেতরেরগুলো লুকান')
+                                                : t(
+                                                      'ভেতরে :nটি লুকানো — দেখুন',
+                                                      {
+                                                          n: inside(row),
+                                                      },
+                                                  )
+                                        }}
+                                    </button>
                                 </p>
                                 <p
                                     class="truncate text-xs text-muted-foreground"
@@ -336,7 +401,7 @@ const whyNoDelete = (row: Row) =>
                                     ><template v-if="row.animals">
                                         ·
                                         {{
-                                            t(':nটি গরু', { n: row.animals })
+                                            t(':nটি পশু', { n: row.animals })
                                         }}</template
                                     >
                                 </p>
@@ -483,7 +548,7 @@ const whyNoDelete = (row: Row) =>
                                 type="checkbox"
                                 class="size-4 accent-[var(--primary)]"
                             />
-                            {{ t('এখানে গরু থাকবে') }}</label
+                            {{ t('এখানে পশু থাকবে') }}</label
                         >
                         <p
                             v-if="form.errors.holds_animals"

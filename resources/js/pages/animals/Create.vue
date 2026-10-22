@@ -9,14 +9,14 @@ import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
 import { Input } from '@/components/ui/input';
 import { t, tAll } from '@/lib/i18n';
-import { centerLabel, today } from '@/lib/khamar';
+import { centerLabel, today, useHerdWords } from '@/lib/khamar';
 import type { Center, Option } from '@/lib/khamar';
 
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'গরুর তালিকা', href: '/animals' },
-            { title: 'নতুন গরু', href: '/animals/create' },
+            { title: 'পশুর তালিকা', href: '/animals' },
+            { title: 'নতুন পশু', href: '/animals/create' },
         ],
     },
 });
@@ -43,6 +43,7 @@ const motherFromLink = Number(
     new URLSearchParams(window.location.search).get('mother') ?? 0,
 );
 
+const herd = useHerdWords();
 const f = useForm({
     tag: '',
     name: '',
@@ -96,14 +97,14 @@ watch(
 </script>
 
 <template>
-    <Head :title="t('নতুন গরু')" />
+    <Head :title="t(herd.new)" />
 
     <div class="flex flex-1 flex-col p-4 md:p-6">
         <PageTitle
-            :title="t('খামারে নতুন গরু')"
+            :title="t(herd.new)"
             :subtitle="
                 t(
-                    'যে গরু আগে থেকেই আছে সেগুলোও এখানে যোগ করুন — \'আগে থেকেই ছিল\' বেছে কেনা দাম দিন।',
+                    'যে পশু আগে থেকেই আছে সেগুলোও এখানে যোগ করুন — \'আগে থেকেই ছিল\' বেছে কেনা দাম দিন।',
                 )
             "
         />
@@ -114,7 +115,7 @@ watch(
         >
             <Field
                 v-if="f.acquisition !== 'born'"
-                :label="t('কয়টি গরু')"
+                :label="t('কয়টি')"
                 :error="f.errors.count"
                 :hint="
                     many
@@ -203,7 +204,7 @@ watch(
                 :error="f.errors.batch"
                 :hint="
                     t(
-                        'একসাথে কেনা গরু এক ব্যাচে — দিন, খরচ আর লাভ ব্যাচ ধরে দেখা যাবে',
+                        'একসাথে কেনা পশু এক ব্যাচে — দিন, খরচ আর লাভ ব্যাচ ধরে দেখা যাবে',
                     )
                 "
             >
@@ -372,9 +373,7 @@ watch(
             </div>
             <div class="sm:col-span-2 lg:col-span-3">
                 <Button type="submit" :disabled="f.processing">{{
-                    many
-                        ? t(':nটি গরু যোগ করুন', { n: f.count })
-                        : t('গরু যোগ করুন')
+                    many ? t(':nটি যোগ করুন', { n: f.count }) : t(herd.add)
                 }}</Button>
             </div>
         </form>

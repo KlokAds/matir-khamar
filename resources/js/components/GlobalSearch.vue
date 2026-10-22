@@ -29,8 +29,8 @@ import {
     watch,
 } from 'vue';
 import { t } from '@/lib/i18n';
-import { useCan } from '@/lib/khamar';
-import { pageLinks } from '@/lib/quick';
+import { useCan, useModules } from '@/lib/khamar';
+import { moduleAllows, pageLinks } from '@/lib/quick';
 
 /**
  * One box to find anything: a page or feature by name, an animal by its number, a person,
@@ -39,6 +39,7 @@ import { pageLinks } from '@/lib/quick';
  */
 const open = defineModel<boolean>('open', { default: false });
 const can = useCan();
+const modules = useModules();
 const query = ref('');
 const active = ref(0);
 const loading = ref(false);
@@ -68,7 +69,11 @@ type Hit = {
 
 const pages = computed<Hit[]>(() => {
     const needle = query.value.trim().toLowerCase();
-    const allowed = pageLinks.filter((p) => !p.ability || can.value[p.ability]);
+    const allowed = pageLinks.filter(
+        (p) =>
+            (!p.ability || can.value[p.ability]) &&
+            moduleAllows(p.href, modules.value),
+    );
     const matched = needle
         ? allowed.filter((p) =>
               `${p.title} ${t(p.title)} ${p.words}`

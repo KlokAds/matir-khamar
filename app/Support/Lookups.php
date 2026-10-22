@@ -21,17 +21,20 @@ final class Lookups
 
         $walk = function (int $parentId, int $depth) use (&$walk, &$flat, $byParent, $activeOnly) {
             foreach ($byParent->get($parentId, collect()) as $center) {
-                if (! $activeOnly || $center->is_active) {
-                    $flat[] = [
-                        'id' => $center->id,
-                        'name' => $center->name,
-                        'code' => $center->code,
-                        'kind' => $center->kind,
-                        'holds_animals' => $center->holds_animals,
-                        'depth' => $depth,
-                        'is_active' => $center->is_active,
-                    ];
+                // A project that is off hides everything inside it too.
+                if ($activeOnly && ! $center->is_active) {
+                    continue;
                 }
+
+                $flat[] = [
+                    'id' => $center->id,
+                    'name' => $center->name,
+                    'code' => $center->code,
+                    'kind' => $center->kind,
+                    'holds_animals' => $center->holds_animals,
+                    'depth' => $depth,
+                    'is_active' => $center->is_active,
+                ];
                 $walk($center->id, $depth + 1);
             }
         };

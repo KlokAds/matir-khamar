@@ -272,5 +272,10 @@
     "৬ মাস": "6 mo",
     "৭ মাস · দুধ বন্ধ": "7 mo · stop milking",
     "৯ মাস": "9 mo",
-    "— নয় —": "— None —"
+    "— নয় —": "— None —",
+    "প্রতিটি পশুর আলাদা কার্ড — কেনা দাম, কোন ক্যাটাগরিতে আছে, কত খরচ হলো, বিক্রিতে কত লাভ": "A card for every animal — purchase price, its category, how much it cost, profit on sale",
+    "যে পশু আগে থেকেই আছে সেগুলোও এখানে যোগ করুন — 'আগে থেকেই ছিল' বেছে কেনা দাম দিন।": "Add animals you already have here too — pick 'Already on the farm' and enter the purchase price.",
+    "একসাথে কেনা পশু এক ব্যাচে — দিন, খরচ আর লাভ ব্যাচ ধরে দেখা যাবে": "Animals bought together go in one batch — days, expense and profit are shown per batch",
+    "এই পশুর লেনদেন": "This animal's transactions",
+    "\"ক্যাটাগরির ভাগ\" = পশুটি যে ক্যাটাগরিতে যতদিন ছিল, সেই ক্যাটাগরির খাবার-ঔষধ-মজুরির খরচ থেকে পশু-দিন অনুযায়ী তার অংশ।": "\"Category share\" = for as long as the animal was in a category, its part of that category's feed, medicine and wage expense, by animal-days."
 }

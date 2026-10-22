@@ -5,7 +5,7 @@ import { computed } from 'vue';
 import QuickAddMenu from '@/components/QuickAddMenu.vue';
 import { useSidebar } from '@/components/ui/sidebar';
 import { t } from '@/lib/i18n';
-import { useCan } from '@/lib/khamar';
+import { useCan, useModules } from '@/lib/khamar';
 
 /**
  * The phone's bottom bar, like an app: today, milk, the big ＋, feed and the full menu, all
@@ -13,6 +13,7 @@ import { useCan } from '@/lib/khamar';
  */
 const { setOpenMobile } = useSidebar();
 const can = useCan();
+const modules = useModules();
 const page = usePage();
 const path = computed(() => page.url.split('?')[0]);
 
@@ -23,13 +24,15 @@ const tabs = computed(() =>
             href: '/milk',
             label: 'দুধ',
             icon: Milk,
-            show: !!can.value['post-daily'],
+            show: !!can.value['post-daily'] && modules.value.milk,
         },
         {
             href: '/stock/move?mode=issue',
             label: 'খাবার',
             icon: Wheat,
-            show: !!can.value['post-daily'],
+            show:
+                !!can.value['post-daily'] &&
+                (modules.value.cattle || modules.value.goat),
         },
     ].filter((tab) => tab.show),
 );

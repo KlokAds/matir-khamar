@@ -31,12 +31,16 @@ class AnimalController extends Controller
     public function index(Request $request): Response
     {
         $status = in_array($request->string('status')->toString(), ['active', 'sold', 'dead'], true) ? $request->string('status')->toString() : 'active';
+        // Animals of a project that is turned off stay in the books but leave the list.
+        $running = CostCenter::runningIds();
+        $goats = CostCenter::query()->where('code', 'CHAGOL')->first()?->descendantIds() ?? [];
 
         return Inertia::render('animals/Index', [
             'status' => $status,
             'statuses' => Tr::all(Animal::STATUSES),
-            'animals' => Animal::query()->with('costCenter:id,name')->where('status', $status)->orderBy('tag')->get()->map(fn (Animal $animal) => [
+            'animals' => Animal::query()->with('costCenter:id,name')->where('status', $status)->whereIn('cost_center_id', $running)->orderBy('tag')->get()->map(fn (Animal $animal) => [
                 'id' => $animal->id,
+                'species' => in_array($animal->cost_center_id, $goats, true) ? 'goat' : 'cattle',
                 'tag' => $animal->tag,
                 'name' => $animal->name,
                 'sex' => $animal->sex,

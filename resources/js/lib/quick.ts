@@ -18,9 +18,26 @@ import {
     Wheat,
 } from '@lucide/vue';
 import type { LucideIcon } from '@lucide/vue';
-import type { Abilities } from '@/lib/khamar';
+import type { Abilities, Modules } from '@/lib/khamar';
 
 type Ability = keyof Abilities;
+
+/** The farm part a page belongs to: it drops out when that project is turned off. */
+const moduleOf: Record<string, (m: Modules) => boolean> = {
+    '/milk': (m) => m.milk,
+    '/breeding': (m) => m.milk,
+    '/batches': (m) => m.fattening,
+    '/animals': (m) => m.cattle || m.goat,
+    '/animals/create': (m) => m.cattle || m.goat,
+    '/health': (m) => m.cattle || m.goat,
+    '/stock/move?mode=issue': (m) => m.cattle || m.goat,
+    '/stock/move?mode=produce': (m) => m.land,
+    '/land': (m) => m.land,
+};
+
+export function moduleAllows(href: string, modules: Modules): boolean {
+    return moduleOf[href]?.(modules) ?? true;
+}
 
 /**
  * What the ＋ button offers, and the pages the search box knows about. Each carries the

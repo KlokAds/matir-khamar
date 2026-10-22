@@ -7,6 +7,7 @@ import {
     CloudOff,
     HandCoins,
     LayoutGrid,
+    NotebookPen,
     Settings2,
     Sprout,
     Wheat,
@@ -25,12 +26,14 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { t } from '@/lib/i18n';
-import { useCan } from '@/lib/khamar';
+import { useCan, useHerdWords, useModules } from '@/lib/khamar';
 import { pendingCount } from '@/lib/offlineQueue';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const can = useCan();
+const modules = useModules();
+const herd = useHerdWords();
 
 /** A group with only the entries this user may open; a group left empty is dropped. */
 function group(
@@ -49,6 +52,9 @@ function group(
 
 const items = computed<NavItem[]>(() => {
     const c = can.value;
+    const m = modules.value;
+    const h = herd.value;
+    const herdOn = m.cattle || m.goat;
 
     // An investor-only login sees one page: their own projects.
     if (c['investor-view'] && Object.keys(c).length === 1) {
@@ -75,26 +81,34 @@ const items = computed<NavItem[]>(() => {
             href: '/reminders',
             icon: AlarmClock,
         },
-        ...group('গরু', Beef, [
-            ['গরুর তালিকা', '/animals', !!c['view-reports']],
-            ['নতুন গরু', '/animals/create', !!c['post-entries']],
-            ['দুধের হিসাব', '/milk', !!c['post-daily']],
-            ['গর্ভ ও বাছুর', '/breeding', !!c['view-reports']],
-            ['টিকা ও কৃমি', '/health', !!c['view-reports']],
-            ['মোটাতাজা ব্যাচ', '/batches', !!c['view-reports']],
-            ['খামার ডায়েরি ও লক্ষ্য', '/diary', !!c['view-reports']],
+        ...(c['view-reports']
+            ? [
+                  {
+                      title: t('খামার ডায়েরি ও লক্ষ্য'),
+                      href: '/diary',
+                      icon: NotebookPen,
+                  },
+              ]
+            : []),
+        // A project that is off leaves the menu; its books stay in the reports.
+        ...group(h.group, Beef, [
+            [h.list, '/animals', herdOn && !!c['view-reports']],
+            [h.new, '/animals/create', herdOn && !!c['post-entries']],
+            ['দুধের হিসাব', '/milk', m.milk && !!c['post-daily']],
+            ['গর্ভ ও বাছুর', '/breeding', m.milk && !!c['view-reports']],
+            ['টিকা ও কৃমি', '/health', herdOn && !!c['view-reports']],
+            ['মোটাতাজা ব্যাচ', '/batches', m.fattening && !!c['view-reports']],
         ]),
         ...group('জমি ও ফসল', Sprout, [
-            ['জমি ও মৌসুম', '/land', !!c['view-reports']],
-            ['প্রজেক্ট সাজান', '/setup/centers', !!c['manage-setup']],
+            ['জমি ও মৌসুম', '/land', m.land && !!c['view-reports']],
         ]),
         ...group('খাবার ও স্টক', Wheat, [
-            ['গরুকে খাবার দেওয়া', '/stock/move?mode=issue', !!c['post-daily']],
+            [h.feed, '/stock/move?mode=issue', herdOn && !!c['post-daily']],
             ['মাল কেনা', '/stock/move?mode=purchase', !!c['post-entries']],
             [
                 'নিজের উৎপাদন (ঘাস)',
                 '/stock/move?mode=produce',
-                !!c['post-entries'],
+                m.land && !!c['post-entries'],
             ],
             ['স্টকে কী আছে', '/stock', !!c['view-reports']],
             ['কোথায় কত কেজি গেল', '/reports/usage', !!c['view-reports']],
@@ -122,7 +136,6 @@ const items = computed<NavItem[]>(() => {
             ['প্রজেক্ট সাজান', '/setup/centers', !!c['manage-setup']],
             ['হিসাব খাত', '/setup/accounts', !!c['manage-setup']],
             ['ক্রেতা, বিনিয়োগকারী…', '/setup/parties', !!c['manage-setup']],
-            ['বিলিং থেকে আনা', '/setup/import', !!c['manage-import']],
             ['ব্যবহারকারী', '/setup/users', !!c['manage-users']],
             ['বিনিয়োগকারী', '/setup/investors', !!c['manage-users']],
             ['রোল ও অনুমতি', '/setup/roles', !!c['manage-roles']],

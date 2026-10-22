@@ -20,7 +20,15 @@ import StatTile from '@/components/khamar/StatTile.vue';
 import TrendBars from '@/components/khamar/TrendBars.vue';
 import { Button } from '@/components/ui/button';
 import { t } from '@/lib/i18n';
-import { day, monthFull, qty, taka, useCan } from '@/lib/khamar';
+import {
+    day,
+    monthFull,
+    qty,
+    taka,
+    useCan,
+    useHerdWords,
+    useModules,
+} from '@/lib/khamar';
 import type { TreeNode } from '@/lib/khamar';
 import { dashboard } from '@/routes';
 
@@ -70,6 +78,8 @@ const props = defineProps<{
 }>();
 
 const can = useCan();
+const modules = useModules();
+const herdWords = useHerdWords();
 const cashTotal = computed(() =>
     props.money.reduce((sum, row) => sum + row.balance, 0),
 );
@@ -93,10 +103,18 @@ const greeting = computed(() => {
             :subtitle="`${monthFull(month)} — ${t('গোপাই কাটখৈর, নওগাঁ সদর')}`"
         >
             <template #actions>
-                <Button v-if="can['post-daily']" as-child variant="secondary">
+                <Button
+                    v-if="can['post-daily'] && modules.milk"
+                    as-child
+                    variant="secondary"
+                >
                     <Link href="/milk"><Milk /> {{ t('দুধ লিখুন') }}</Link>
                 </Button>
-                <Button v-if="can['post-daily']" as-child variant="secondary">
+                <Button
+                    v-if="can['post-daily'] && (modules.cattle || modules.goat)"
+                    as-child
+                    variant="secondary"
+                >
                     <Link href="/stock/move?mode=issue"
                         ><Wheat /> {{ t('খাবার দিন') }}</Link
                     >
@@ -155,13 +173,15 @@ const greeting = computed(() => {
                 />
             </template>
             <StatTile
+                v-if="modules.milk"
                 :label="t('এ মাসে দুধ')"
                 :value="qty(milkThisMonth, t('লিটার'))"
                 :icon="Milk"
                 tone="pond"
             />
             <StatTile
-                :label="t('খামারে গরু')"
+                v-if="modules.cattle || modules.goat"
+                :label="t('খামারে :kind', { kind: t(herdWords.group) })"
                 :value="t(':nটি', { n: herd })"
                 :icon="Beef"
                 tone="clay"

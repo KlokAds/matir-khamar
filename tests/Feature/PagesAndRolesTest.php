@@ -22,7 +22,7 @@ it('opens every page for the hishab admin', function () {
         '/entries', '/entries/create', '/entries/create?form=lease', '/entries/'.JournalEntry::query()->value('id'),
         '/animals', '/animals/create', '/animals/'.Animal::query()->value('id'),
         '/allocation', '/reports', '/reports/budget', '/reports/usage', '/guide/split', '/breeding', '/batches', '/diary', '/land', '/profit', '/prices', '/labour', '/cash', '/health',
-        '/setup/accounts', '/setup/centers', '/setup/investors', '/reminders', '/setup/parties', '/setup/import', '/setup/users', '/setup/periods', '/setup/audit',
+        '/setup/accounts', '/setup/centers', '/setup/investors', '/reminders', '/setup/parties', '/setup/users', '/setup/periods', '/setup/audit',
     ];
 
     foreach ($pages as $page) {
@@ -36,7 +36,7 @@ it('keeps the daily entry role to milk and feed only', function () {
     $this->actingAs($entry)->get('/milk')->assertOk();
     $this->actingAs($entry)->get('/stock/move?mode=issue')->assertOk();
 
-    foreach (['/entries', '/reports', '/entries/create', '/setup/users', '/setup/import', '/animals'] as $page) {
+    foreach (['/entries', '/reports', '/entries/create', '/setup/users', '/animals'] as $page) {
         $this->actingAs($entry)->get($page)->assertForbidden();
     }
 });

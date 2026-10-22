@@ -35,9 +35,5 @@ return [
         ],
     ],
 
-    // Only rows of this Crater company are read. Leave empty to read all.
-    'crater' => [
-        'company_id' => env('CRATER_COMPANY_ID'),
-    ],
 
 ];

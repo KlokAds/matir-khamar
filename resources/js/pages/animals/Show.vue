@@ -69,7 +69,7 @@ const props = defineProps<{
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'গরুর তালিকা', href: '/animals' },
+            { title: 'পশুর তালিকা', href: '/animals' },
             { title: 'কার্ড', href: '#' },
         ],
     },
@@ -257,7 +257,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
         <p class="mt-2 text-xs text-muted-foreground">
             {{
                 t(
-                    '"ক্যাটাগরির ভাগ" = গরুটি যে ক্যাটাগরিতে যতদিন ছিল, সেই ক্যাটাগরির খাবার-ঔষধ-মজুরির খরচ থেকে পশু-দিন অনুযায়ী তার অংশ।',
+                    '"ক্যাটাগরির ভাগ" = পশুটি যে ক্যাটাগরিতে যতদিন ছিল, সেই ক্যাটাগরির খাবার-ঔষধ-মজুরির খরচ থেকে পশু-দিন অনুযায়ী তার অংশ।',
                 )
             }}
         </p>
@@ -319,7 +319,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 class="min-w-0 rounded-xl border border-border bg-card lg:col-span-2"
             >
                 <h2 class="border-b border-border p-4 font-display text-lg">
-                    {{ t('এই গরুর লেনদেন') }}
+                    {{ t('এই পশুর লেনদেন') }}
                 </h2>
                 <table class="w-full text-sm">
                     <tbody>

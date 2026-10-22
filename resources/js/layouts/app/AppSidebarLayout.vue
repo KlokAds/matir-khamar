@@ -29,7 +29,7 @@ withDefaults(defineProps<Props>(), {
             <slot />
         </AppContent>
         <MobileTabBar />
-        <Toaster />
+        <Toaster position="top-center" rich-colors close-button />
         <AppDialogHost />
         <AlarmHost />
     </AppShell>
