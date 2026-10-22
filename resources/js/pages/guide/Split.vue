@@ -216,7 +216,7 @@ const fertUsed = computed(() =>
                     <div
                         v-for="(c, i) in overhead.centers"
                         :key="i"
-                        class="grid grid-cols-[1fr_4.5rem_4.5rem_5rem] items-center gap-2 text-sm"
+                        class="grid grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_5rem] items-center gap-2 text-sm"
                     >
                         <span class="font-medium">{{ t(c.name) }}</span>
                         <label class="mini"
@@ -381,7 +381,7 @@ const fertUsed = computed(() =>
                 <div
                     v-for="(c, i) in feed.centers"
                     :key="i"
-                    class="grid grid-cols-[1fr_5.5rem_auto] items-center gap-2 py-1 text-sm"
+                    class="grid grid-cols-[minmax(0,1fr)_5.5rem_auto] items-center gap-2 py-1 text-sm"
                 >
                     <span class="font-medium"
                         ><i :class="['dot mr-2', COLORS[i]]" />{{ t(c.name) }}
@@ -505,7 +505,7 @@ const fertUsed = computed(() =>
                 <div
                     v-for="(c, i) in grass.centers"
                     :key="i"
-                    class="grid grid-cols-[1fr_5rem_4rem_4rem] items-center gap-2 py-1 text-sm"
+                    class="grid grid-cols-[minmax(0,1fr)_5rem_4rem_4rem] items-center gap-2 py-1 text-sm"
                 >
                     <span class="font-medium"
                         ><i :class="['dot mr-2', COLORS[i]]" />{{ t(c.name) }}
@@ -644,7 +644,7 @@ const fertUsed = computed(() =>
                 <div
                     v-for="(p, i) in fert.plots"
                     :key="i"
-                    class="grid grid-cols-[1fr_5rem_5rem_6rem] items-center gap-2 py-1 text-sm"
+                    class="grid grid-cols-[minmax(0,1fr)_5rem_5rem_6rem] items-center gap-2 py-1 text-sm"
                 >
                     <span class="font-medium"
                         ><i :class="['dot mr-2', COLORS[i]]" />{{ t(p.name) }}
@@ -732,7 +732,7 @@ const fertUsed = computed(() =>
     @apply mx-auto grid w-full max-w-3xl gap-1;
 }
 .step {
-    @apply rounded-xl border border-border bg-card p-4;
+    @apply min-w-0 rounded-xl border border-border bg-card p-4;
 }
 .step h3 {
     @apply mb-2 flex items-center gap-2 text-lg;
@@ -751,7 +751,7 @@ const fertUsed = computed(() =>
     @apply mx-auto my-1 size-5 text-muted-foreground;
 }
 .row-2 {
-    @apply grid grid-cols-[1fr_8rem] items-center gap-2 py-1 text-sm;
+    @apply grid grid-cols-[minmax(0,1fr)_8rem] items-center gap-2 py-1 text-sm;
 }
 .mini {
     @apply relative block;
@@ -772,7 +772,7 @@ const fertUsed = computed(() =>
     @apply inline-block size-2.5 shrink-0 rounded-full;
 }
 .result {
-    @apply grid grid-cols-[1fr_auto_6.5rem] items-center gap-3 border-b border-border/50 py-2 text-sm last:border-0;
+    @apply grid grid-cols-[minmax(0,1fr)_auto_6.5rem] items-center gap-3 border-b border-border/50 py-2 text-sm last:border-0;
 }
 .result b {
     @apply text-right;

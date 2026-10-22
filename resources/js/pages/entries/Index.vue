@@ -153,7 +153,7 @@ function apply() {
                         <td class="px-3 py-2.5">
                             <Link
                                 :href="`/entries/${entry.id}`"
-                                class="num font-medium text-primary hover:underline"
+                                class="num font-medium whitespace-nowrap text-primary hover:underline"
                                 >{{ entry.number }}</Link
                             >
                         </td>
@@ -168,7 +168,7 @@ function apply() {
                         <td class="max-w-80 px-3 py-2.5">
                             <span
                                 :class="[
-                                    'line-clamp-1',
+                                    'line-clamp-1 leading-normal',
                                     entry.reversed && 'line-through opacity-60',
                                 ]"
                                 >{{ entry.description }}</span

@@ -162,7 +162,7 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
             <section
                 v-for="g in byType"
                 :key="g.type"
-                class="rounded-xl border border-border bg-card p-4"
+                class="min-w-0 rounded-xl border border-border bg-card p-4"
             >
                 <h2 class="mb-2 font-display text-lg">
                     {{ tAll(types)[g.type] }}

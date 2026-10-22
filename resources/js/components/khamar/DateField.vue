@@ -241,6 +241,8 @@ function period(h: number): string {
 const clock12 = (h: number) => (h % 12 === 0 ? 12 : h % 12);
 
 /* ---------- what the box shows ---------- */
+// Date, weekday and a short d/m/y: a narrow box shows less instead of cutting the date off.
+const SEP = '|';
 const label = computed(() => {
     if (!model.value) {
         return '';
@@ -267,7 +269,7 @@ const label = computed(() => {
               : bn.value
                 ? WEEKDAY_BN[date.getDay()]
                 : date.toLocaleDateString('en-GB', { weekday: 'short' });
-    let text = `${num(d)} ${months.value[m - 1]} ${num(y)} · ${relative}`;
+    let text = `${num(d)} ${months.value[m - 1]} ${num(y)}${SEP}${relative}${SEP}${num(d)}/${num(m)}/${num(y)}`;
 
     if (props.mode === 'datetime' && model.value.length >= 16) {
         const h = Number(model.value.slice(11, 13));
@@ -305,7 +307,7 @@ const passThrough = computed(() => {
                 :data-state="open ? 'open' : 'closed'"
                 :class="
                     cn(
-                        'flex h-10 w-full min-w-0 items-center gap-2 rounded-md border border-input bg-card px-3 text-left text-[15px] shadow-xs transition-[color,box-shadow,border-color] outline-none hover:border-ring/60 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-ring data-[state=open]:ring-[3px] data-[state=open]:ring-ring/25',
+                        '@container flex h-10 w-full min-w-0 items-center gap-2 rounded-md border border-input bg-card px-3 text-left text-[15px] shadow-xs transition-[color,box-shadow,border-color] outline-none hover:border-ring/60 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-ring data-[state=open]:ring-[3px] data-[state=open]:ring-ring/25',
                         attrs.class as string,
                     )
                 "
@@ -317,10 +319,23 @@ const passThrough = computed(() => {
                 <Clock v-else class="size-4 shrink-0 text-paddy" />
                 <span
                     :class="[
-                        'min-w-0 flex-1 truncate',
+                        'min-w-0 flex-1 truncate py-px leading-normal',
                         !label && 'text-muted-foreground',
                     ]"
-                    >{{ label || placeholderText }}</span
+                    ><template v-if="label.includes(SEP)"
+                        ><span class="@[10.5rem]:hidden">{{
+                            label.split(SEP)[2]
+                        }}</span
+                        ><span class="hidden @[10.5rem]:inline">{{
+                            label.split(SEP)[0]
+                        }}</span></template
+                    ><template v-else>{{ label || placeholderText }}</template
+                    ><span
+                        v-if="label.includes(SEP)"
+                        class="hidden text-muted-foreground @[14rem]:inline"
+                    >
+                        · {{ label.split(SEP)[1] }}</span
+                    ></span
                 >
                 <span
                     v-if="model && clearable && !disabled"

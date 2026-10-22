@@ -68,15 +68,19 @@ const sum = (rows: { balance: number }[]) =>
         >
             <template #actions>
                 <form
-                    class="flex items-center gap-2 print:hidden"
+                    class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:w-auto print:hidden"
                     @submit.prevent="apply"
                 >
-                    <DateField v-model="range.from" class="w-36" />
+                    <DateField v-model="range.from" class="min-w-0 sm:w-36" />
                     <span class="text-muted-foreground">—</span>
-                    <DateField v-model="range.to" class="w-36" />
-                    <Button type="submit" size="sm" variant="secondary">{{
-                        t('দেখুন')
-                    }}</Button>
+                    <DateField v-model="range.to" class="min-w-0 sm:w-36" />
+                    <Button
+                        type="submit"
+                        size="sm"
+                        variant="secondary"
+                        class="col-span-3 sm:col-auto"
+                        >{{ t('দেখুন') }}</Button
+                    >
                 </form>
                 <Button
                     size="sm"

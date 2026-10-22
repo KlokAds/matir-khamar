@@ -20,7 +20,9 @@ defineProps<{
                     {{ subtitle }}
                 </p>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
+            <div
+                class="flex max-w-full flex-wrap items-center gap-2 has-[form]:max-sm:w-full"
+            >
                 <slot name="actions" />
             </div>
         </div>
