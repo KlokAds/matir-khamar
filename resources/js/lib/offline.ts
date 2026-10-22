@@ -2,7 +2,7 @@ import { ask } from '@/lib/dialog';
 import { t } from '@/lib/i18n';
 import { router } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
-import { watchQueue } from '@/lib/offlineQueue';
+import { enqueueForm, watchQueue } from '@/lib/offlineQueue';
 
 type Shared = {
     auth?: { user?: { id: number } | null; can?: Record<string, boolean> };
@@ -71,31 +71,123 @@ export function initializeOffline(): void {
         }
     };
 
-    start(sharedProps());
-    router.on('navigate', (event) =>
-        start((event as CustomEvent).detail.page.props as Shared),
-    );
+    let props = sharedProps();
+    start(props);
+    router.on('navigate', (event) => {
+        props = (event as CustomEvent).detail.page.props as Shared;
+        start(props);
+    });
 
-    // A page change that fails for lack of internet goes to the saved offline page.
-    router.on('networkError', () => {
+    /*
+     * Any form sent with no internet is kept on the phone and goes to the server, in order,
+     * once the net is back. The page then opens again from the phone's copy, empty, so the
+     * same entry is not given twice.
+     */
+    type Visit = { method: string; url: URL; data: unknown };
+    let lastSend: Visit | null = null;
+
+    const keep = async (visit: Visit) => {
+        const user = props.auth?.user;
+
+        if (!user || !('indexedDB' in window)) {
+            toast.error(t('নেট নেই — নেট এলে আবার পাঠান।'));
+
+            return;
+        }
+
+        await enqueueForm(user.id, document.title.split(' - ')[0], {
+            method: visit.method,
+            url: visit.url.pathname + visit.url.search,
+            data: visit.data,
+        });
+
+        try {
+            sessionStorage.setItem('khamar:kept-offline', '1');
+        } catch {
+            // ignore
+        }
+
+        window.location.reload();
+    };
+
+    router.on('before', (event) => {
+        const visit = (event as CustomEvent).detail.visit as Visit & {
+            prefetch?: boolean;
+        };
+
+        if (visit.method === 'get' || visit.prefetch) {
+            return;
+        }
+
+        lastSend = visit;
+
         if (!navigator.onLine) {
-            window.location.href = '/offline';
+            event.preventDefault();
+            void keep(visit);
         }
     });
 
-    window.addEventListener('offline', () => {
-        if (location.pathname !== '/offline') {
-            toast.warning(
-                t('নেট চলে গেছে। দুধ/খাবারের এন্ট্রি "অফলাইন এন্ট্রি" পাতায় দিন।'),
-                {
-                    action: {
-                        label: t('খুলুন'),
-                        onClick: () => (window.location.href = '/offline'),
-                    },
-                    duration: 10000,
-                },
+    let lastOpen: URL | null = null;
+    router.on('start', (event) => {
+        const visit = (event as CustomEvent).detail.visit as Visit & {
+            prefetch?: boolean;
+            async?: boolean;
+        };
+        // Only a real page change (not a link fetched ahead, nor a quiet reload of a part).
+        lastOpen =
+            visit.method === 'get' && !visit.prefetch && !visit.async
+                ? visit.url
+                : null;
+    });
+
+    router.on('networkError', (event) => {
+        if (lastSend) {
+            // Sent, but the net dropped on the way: keep it (the server books it once only).
+            event.preventDefault();
+            const visit = lastSend;
+            lastSend = null;
+            void keep(visit);
+
+            return;
+        }
+
+        // A page change that cannot reach the server: open it whole, which gives the phone's
+        // last copy of it, or else the offline page.
+        if (lastOpen) {
+            event.preventDefault();
+            window.location.href = lastOpen.href;
+        }
+    });
+    router.on('finish', () => {
+        lastSend = null;
+    });
+
+    try {
+        if (sessionStorage.getItem('khamar:kept-offline')) {
+            sessionStorage.removeItem('khamar:kept-offline');
+            // After the page's toaster is on screen.
+            window.setTimeout(
+                () =>
+                    toast.success(
+                        t(
+                            'নেট নেই — ফোনে রাখা হলো। নেট এলে নিজে থেকেই সার্ভারে যাবে।',
+                        ),
+                        { duration: 8000 },
+                    ),
+                600,
             );
         }
+    } catch {
+        // ignore
+    }
+
+    window.addEventListener('offline', () => {
+        toast.warning(
+            t(
+                'নেট চলে গেছে। কাজ চালিয়ে যান — এন্ট্রি ফোনে থাকবে, নেট এলে যাবে। পাতায় শেষবারের তথ্য দেখাবে।',
+            ),
+            { duration: 8000 },
+        );
     });
 }
 

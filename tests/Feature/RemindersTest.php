@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\Breeding;
 use App\Models\CostCenter;
 use App\Models\Item;
+use App\Models\OfflineSubmission;
 use App\Models\PushSubscription;
 use App\Models\Reminder;
 use App\Models\User;
@@ -89,6 +90,22 @@ it('gives the farm app the coming week\'s reminders to ring on the phone without
     auth()->logout();
     $this->postJson($items[0]['actions'][0]['url'])->assertOk();
     expect(Reminder::query()->where('title', 'সার দিতে হবে')->value('done_at'))->not->toBeNull();
+});
+
+it('books a form kept on a phone without internet once, even when the phone sends it twice', function () {
+    $key = '0b7c6a52-1d3e-4f5a-9b8c-7d6e5f4a3b21';
+    $headers = ['X-Inertia' => 'true', 'X-Offline-Key' => $key, 'X-Offline-At' => now()->subHours(2)->toIso8601String()];
+    $form = ['title' => 'মাঠে লেখা', 'due_at' => now()->addHour()->format('Y-m-d\TH:i'), 'repeat' => 'none'];
+
+    // Refused first (no title): nothing is marked, so the corrected one can go later.
+    $this->from('/reminders')->post('/reminders', [...$form, 'title' => ''], $headers)->assertSessionHasErrors('title');
+    expect(OfflineSubmission::query()->count())->toBe(0);
+
+    $this->from('/reminders')->post('/reminders', $form, $headers)->assertRedirect();
+    $this->from('/reminders')->post('/reminders', $form, $headers)->assertRedirect();
+
+    expect(Reminder::query()->where('title', 'মাঠে লেখা')->count())->toBe(1)
+        ->and(OfflineSubmission::query()->sole()->kind)->toBe('form');
 });
 
 it('does not let one person change another person\'s private reminder', function () {

@@ -1,16 +1,19 @@
 /*
  * Matir Khamar service worker.
  *
- * Keeps two things on the phone:
+ * Keeps on the phone:
  *  - the app's built files (they never change once built, so cache-first);
- *  - the /offline page, refreshed every time it is opened with internet.
- * With no internet, any page opens the saved /offline page, where daily
- * entries are written into the phone's queue. Nothing else is cached:
- * reports and the books always come fresh from the server.
+ *  - the /offline page, refreshed every time it is opened with internet;
+ *  - the last copy of every page opened (network first: with internet a page is
+ *    always fresh; with none, the last copy shows, so the app works offline).
+ * Forms sent with no internet wait in the page's own queue (offlineQueue.ts).
+ * Signing out deletes the kept pages.
  */
 const ASSETS = 'khamar-assets-v1';
 const PAGES = 'khamar-pages-v1';
+const DATA = 'khamar-data-v1';
 const OFFLINE_URL = '/offline';
+const KEEP = 80;
 
 const FALLBACK = `<!doctype html><html lang="bn"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>নেট নেই</title><body style="font-family:system-ui;background:#f7f2e7;color:#3b2f22;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px">
@@ -28,7 +31,7 @@ self.addEventListener('activate', (event) => {
                         .filter(
                             (key) =>
                                 key.startsWith('khamar-') &&
-                                ![ASSETS, PAGES].includes(key),
+                                ![ASSETS, PAGES, DATA].includes(key),
                         )
                         .map((key) => caches.delete(key)),
                 ),
@@ -39,7 +42,9 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
     if (event.data === 'clear-pages') {
-        event.waitUntil(caches.delete(PAGES));
+        event.waitUntil(
+            Promise.all([caches.delete(PAGES), caches.delete(DATA)]),
+        );
     }
 
     if (event.data === 'precache-offline') {
@@ -112,6 +117,73 @@ async function cacheFirst(request) {
     return response;
 }
 
+/** Pages that are never kept: signing in and out, and answers meant only for now. */
+function keepable(url) {
+    return !/^\/(login|logout|register|two-factor|forgot-password|reset-password|user\/confirm|push|notifications|offline\/sync|up)\b/.test(
+        url.pathname,
+    );
+}
+
+async function trim(cache) {
+    const keys = await cache.keys();
+
+    for (const key of keys.slice(0, Math.max(0, keys.length - KEEP))) {
+        await cache.delete(key);
+    }
+}
+
+/**
+ * The network first; a good answer is kept under `key`. With no internet, the kept copy.
+ * Only answers for the page asked for are kept (not one that sent the person to sign in).
+ */
+async function networkFirst(request, cacheName, key) {
+    try {
+        const response = await fetch(request);
+        const landed = new URL(response.url || request.url);
+
+        if (response.ok && !response.redirected && keepable(landed)) {
+            const cache = await caches.open(cacheName);
+            await cache.put(key, response.clone());
+            trim(cache);
+        }
+
+        return response;
+    } catch (error) {
+        const hit = await caches.match(key, { cacheName });
+
+        if (hit) {
+            return hit;
+        }
+
+        throw error;
+    }
+}
+
+/**
+ * A page change with no internet whose data was never kept on its own: taken from the kept
+ * copy of the whole page (opened by its address once), which carries the same data.
+ */
+async function dataFromKeptPage(key) {
+    const html = await caches.match(key, { cacheName: PAGES });
+    const match = html
+        ? (await html.text()).match(
+              /<script[^>]*data-page[^>]*>([\s\S]*?)<\/script>/,
+          )
+        : null;
+
+    if (!match) {
+        return null;
+    }
+
+    return new Response(match[1], {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Inertia': 'true',
+            Vary: 'X-Inertia',
+        },
+    });
+}
+
 async function offlinePage() {
     return (
         (await caches.match(OFFLINE_URL, { cacheName: PAGES })) ||
@@ -145,7 +217,35 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    if (url.origin !== self.location.origin || request.mode !== 'navigate') {
+    if (url.origin !== self.location.origin || !keepable(url)) {
+        return;
+    }
+
+    // A page change inside the app (Inertia): its data, the last copy when offline. Partial
+    // reloads ask for a few props only, so they are neither kept nor answered from a copy.
+    if (
+        request.mode !== 'navigate' &&
+        request.headers.get('X-Inertia') &&
+        !request.headers.get('X-Inertia-Partial-Data') &&
+        !request.headers.get('X-Inertia-Partial-Except')
+    ) {
+        const key = `${url.pathname}${url.search}`;
+        event.respondWith(
+            networkFirst(request, DATA, key).catch(async (error) => {
+                const kept = await dataFromKeptPage(key);
+
+                if (kept) {
+                    return kept;
+                }
+
+                throw error;
+            }),
+        );
+
+        return;
+    }
+
+    if (request.mode !== 'navigate') {
         return;
     }
 
@@ -157,8 +257,12 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Any other page: the network, and the saved offline page when there is none.
-    event.respondWith(fetch(request).catch(() => offlinePage()));
+    // Any other page: the network; with none, the page's last copy, else the offline page.
+    event.respondWith(
+        networkFirst(request, PAGES, `${url.pathname}${url.search}`).catch(() =>
+            offlinePage(),
+        ),
+    );
 });
 
 /*
