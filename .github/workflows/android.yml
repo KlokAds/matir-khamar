@@ -27,37 +27,12 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Make the Android project
+      - name: Make and build the APK
         working-directory: mobile
-        run: |
-          flutter create --org com.klokads --project-name matirkhamar --platforms android .
-          rm -f test/widget_test.dart
-          python3 tool/patch_android.py
-          mkdir -p assets
-          cp ../public/icons/icon-512.png assets/icon.png
-          echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/khamar.keystore"
-          flutter pub get
-          dart run flutter_launcher_icons
+        run: bash tool/build.sh
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-
-      - name: Build the APK
-        working-directory: mobile
-        run: |
-          set +e
-          flutter build apk --release --build-number=$((100 + GITHUB_RUN_NUMBER)) --build-name=2.0.$GITHUB_RUN_NUMBER 2>&1 | tee build.log
-          status=${PIPESTATUS[0]}
-          set -e
-          if [ "$status" != 0 ]; then
-            # The reason, readable from the run's annotations.
-            grep -iE "error|what went wrong|failed|exception" build.log | grep -v "^\s*at " | tail -n 40 | awk '{printf "%s%%0A", $0}' | sed 's/^/::error title=APK build::/'
-            echo
-            exit 1
-          fi
-          cp build/app/outputs/flutter-apk/app-release.apk matir-khamar.apk
-        env:
           KEYSTORE_FILE: ${{ runner.temp }}/khamar.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
