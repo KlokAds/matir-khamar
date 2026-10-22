@@ -140,7 +140,7 @@ export function useNav() {
                     'গর্ভ ও বাছুর',
                     '/breeding',
                     CalendarHeart,
-                    m.milk && !!c['view-reports'],
+                    m.cattle && !!c['view-reports'],
                 ],
                 [
                     'টিকা ও কৃমি',

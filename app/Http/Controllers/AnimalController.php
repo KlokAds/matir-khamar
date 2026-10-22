@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Models\Animal;
+use App\Models\AnimalWeight;
 use App\Models\Batch;
 use App\Models\Breeding;
 use App\Models\CostCenter;
@@ -21,19 +22,28 @@ use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AnimalController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, HerdCare $care): Response
     {
         $status = in_array($request->string('status')->toString(), ['active', 'sold', 'dead'], true) ? $request->string('status')->toString() : 'active';
         // Animals of a project that is turned off stay in the books but leave the list.
         $running = CostCenter::runningIds();
         $goats = CostCenter::query()->where('code', 'CHAGOL')->first()?->descendantIds() ?? [];
+
+        // What the board marks on each animal: carrying a calf, a vaccine or dose due, last weight.
+        $pregnant = Breeding::query()->where('result', 'pregnant')->whereNull('calved_on')->pluck('expected_on', 'animal_id')
+            ->map(fn ($date) => $date ? Date::parse($date)->toDateString() : null)->all();
+        $careDue = collect($care->healthDue(now()->startOfDay()))->pluck('href')
+            ->map(fn (string $href) => (int) Str::after($href, '/animals/'))->filter()->values()->all();
+        $weights = AnimalWeight::query()->whereIn('id', AnimalWeight::query()->selectRaw('MAX(id)')->groupBy('animal_id'))->pluck('kg', 'animal_id')->all();
 
         // Head count for the cards above the list: how many are here, sold and dead, and by category.
         $all = Animal::query()->with('costCenter:id,name,sort')->whereIn('cost_center_id', $running)->get();
@@ -57,8 +67,16 @@ class AnimalController extends Controller
             'status' => $status,
             'statuses' => Tr::all(Animal::STATUSES),
             'summary' => $summary,
-            'animals' => Animal::query()->with('costCenter:id,name')->where('status', $status)->whereIn('cost_center_id', $running)->orderBy('tag')->get()->map(fn (Animal $animal) => [
+            'animals' => Animal::query()->with(['costCenter:id,name,sort,code', 'batch:id,number,name'])->where('status', $status)->whereIn('cost_center_id', $running)->orderBy('tag')->get()->map(fn (Animal $animal) => [
                 'id' => $animal->id,
+                'center_id' => $animal->cost_center_id,
+                'center_code' => $animal->costCenter->code,
+                'center_sort' => $animal->costCenter->sort,
+                'batch' => $animal->batch?->label(),
+                'kg' => $weights[$animal->id] ?? null,
+                'pregnant_until' => $pregnant[$animal->id] ?? null,
+                'care_due' => in_array($animal->id, $careDue, true),
+                'book_value' => $animal->book_value,
                 'species' => in_array($animal->cost_center_id, $goats, true) ? 'goat' : 'cattle',
                 'tag' => $animal->tag,
                 'name' => $animal->name,
