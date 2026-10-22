@@ -12,6 +12,7 @@ import {
     NotebookPen,
     Package,
     Settings2,
+    Sprout,
     Truck,
     Wallet,
     Wheat,
@@ -179,6 +180,13 @@ export const pageLinks: PageLink[] = [
         words: 'pregnancy breeding calf বীজ বাচ্চা',
         href: '/breeding',
         icon: CalendarHeart,
+        ability: 'view-reports',
+    },
+    {
+        title: 'জমি ও ফসল',
+        words: 'land crop paddy rice potato mustard maize জমি ধান চাল আলু সরিষা ভুট্টা লিজ মৌসুম বিঘা',
+        href: '/land',
+        icon: Sprout,
         ability: 'view-reports',
     },
     {

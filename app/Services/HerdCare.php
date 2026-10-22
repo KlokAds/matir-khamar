@@ -336,6 +336,10 @@ class HerdCare
             $items[] = $due;
         }
 
+        foreach (app(CropBook::class)->leaseReminders($today) as $lease) {
+            $items[] = $lease;
+        }
+
         foreach ($this->milkDrops($today) as $drop) {
             $items[] = $drop;
         }
