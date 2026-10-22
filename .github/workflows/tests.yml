@@ -43,6 +43,5 @@ jobs:
       - name: Show the failure as an annotation
         if: failure()
         run: |
-          msg=$(tail -n 80 ci.log | sed -e 's/%/%25/g' | sed -e ':a;N;$!ba;s/
-/%0A/g' | sed -e 's//%0D/g')
+          msg=$(tail -n 80 ci.log | tr -d '\r' | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
           echo "::error title=Last lines of the failed check::${msg}"
