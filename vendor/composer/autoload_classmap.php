@@ -52,6 +52,7 @@ return array(
     'App\\Http\\Controllers\\SummaryController' => $baseDir . '/app/Http/Controllers/SummaryController.php',
     'App\\Http\\Controllers\\SystemController' => $baseDir . '/app/Http/Controllers/SystemController.php',
     'App\\Http\\Controllers\\UdyogController' => $baseDir . '/app/Http/Controllers/UdyogController.php',
+    'App\\Http\\Middleware\\BookOfflineFormOnce' => $baseDir . '/app/Http/Middleware/BookOfflineFormOnce.php',
     'App\\Http\\Middleware\\EnsureAccountIsSecure' => $baseDir . '/app/Http/Middleware/EnsureAccountIsSecure.php',
     'App\\Http\\Middleware\\HandleAppearance' => $baseDir . '/app/Http/Middleware/HandleAppearance.php',
     'App\\Http\\Middleware\\HandleInertiaRequests' => $baseDir . '/app/Http/Middleware/HandleInertiaRequests.php',

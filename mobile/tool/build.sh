@@ -36,5 +36,5 @@ run "pub get" flutter pub get
 grep -rl "proguard-android.txt" "$HOME/.pub-cache/hosted" --include=build.gradle 2>/dev/null \
     | xargs -r sed -i "s/proguard-android.txt/proguard-android-optimize.txt/g"
 run "icons" dart run flutter_launcher_icons
-run "build apk" flutter build apk --release --build-number=$((100 + GITHUB_RUN_NUMBER)) --build-name="3.0.$GITHUB_RUN_NUMBER"
+run "build apk" flutter build apk --release --build-number=$((100 + GITHUB_RUN_NUMBER)) --build-name="4.0.$GITHUB_RUN_NUMBER"
 cp build/app/outputs/flutter-apk/app-release.apk matir-khamar.apk

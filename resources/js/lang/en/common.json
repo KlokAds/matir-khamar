@@ -303,5 +303,8 @@
     "বদলান": "Change",
     "দুপুরের আগে/পরে বদলান": "Switch AM/PM",
     "ঘণ্টা": "Hour",
-    "মিনিট": "Minute"
+    "মিনিট": "Minute",
+    "নেট নেই — নেট এলে আবার পাঠান।": "No internet — send again when it is back.",
+    "নেট নেই — ফোনে রাখা হলো। নেট এলে নিজে থেকেই সার্ভারে যাবে।": "No internet — kept on this phone. It goes to the server by itself when the net is back.",
+    "নেট চলে গেছে। কাজ চালিয়ে যান — এন্ট্রি ফোনে থাকবে, নেট এলে যাবে। পাতায় শেষবারের তথ্য দেখাবে।": "The net is gone. Carry on — entries stay on the phone and go when it is back. Pages show the last figures seen."
 }

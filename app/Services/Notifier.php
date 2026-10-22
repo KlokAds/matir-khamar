@@ -42,11 +42,7 @@ class Notifier
         }
 
         foreach ($due as $reminder) {
-            $recipients = $reminder->for_user_id
-                ? User::query()->whereKey([$reminder->for_user_id, $reminder->created_by])->where('is_active', true)->get()
-                : $this->dailyWorkers();
-
-            $this->ring($reminder, $recipients);
+            $this->ring($reminder);
             $reminder->update(['sent_at' => now()]);
 
             if ($reminder->repeat !== 'none') {
@@ -60,6 +56,43 @@ class Notifier
     }
 
     /**
+     * Who a reminder is for: the named person and its writer, or everyone on daily work.
+     *
+     * @return Collection<int, User>
+     */
+    public function recipientsOf(Reminder $reminder): Collection
+    {
+        return $reminder->for_user_id
+            ? User::query()->whereKey([$reminder->for_user_id, $reminder->created_by])->where('is_active', true)->get()
+            : $this->dailyWorkers();
+    }
+
+    /**
+     * What a reminder's notification says, in the person's language, with its "done" and
+     * "later" buttons. The farm app also schedules these on the phone, to ring without internet.
+     *
+     * @return array<string, mixed>
+     */
+    public function reminderPayload(Reminder $reminder, User $user): array
+    {
+        return $this->inLanguageOf($user, fn () => [
+            'alarm' => $reminder->alarm,
+            'reminder_id' => $reminder->id,
+            // 0 on the first send: a phone that already rang it by itself skips that one.
+            'rings' => $reminder->rings,
+            'title' => ($reminder->alarm ? '🔔 ' : '⏰ ').$reminder->title,
+            'body' => $reminder->body ?: Tr::get('মনে করিয়ে দিচ্ছি — হয়ে গেলে "হয়ে গেছে" চাপুন।'),
+            'url' => '/reminders',
+            'tag' => "reminder-{$reminder->id}",
+            'requireInteraction' => true,
+            'actions' => [
+                ['action' => 'done', 'title' => Tr::get('হয়ে গেছে'), 'url' => $this->actionUrl($reminder, 'done', $user)],
+                ['action' => 'later', 'title' => Tr::get('১ ঘণ্টা পরে'), 'url' => $this->actionUrl($reminder, 'later', $user)],
+            ],
+        ]);
+    }
+
+    /**
      * Sends one reminder to its people. An alarm says so, so the phone keeps it on screen,
      * vibrates long, and an open app shows a full-screen ringing alarm.
      *
@@ -67,24 +100,10 @@ class Notifier
      */
     private function ring(Reminder $reminder, ?Collection $recipients = null): void
     {
-        $recipients ??= $reminder->for_user_id
-            ? User::query()->whereKey([$reminder->for_user_id, $reminder->created_by])->where('is_active', true)->get()
-            : $this->dailyWorkers();
+        $recipients ??= $this->recipientsOf($reminder);
 
         foreach ($recipients->filter(fn (User $u) => $u->wantsNotification('reminders')) as $user) {
-            $this->push->toUsers([$user], $this->inLanguageOf($user, fn () => [
-                'alarm' => $reminder->alarm,
-                'reminder_id' => $reminder->id,
-                'title' => ($reminder->alarm ? '🔔 ' : '⏰ ').$reminder->title,
-                'body' => $reminder->body ?: Tr::get('মনে করিয়ে দিচ্ছি — হয়ে গেলে "হয়ে গেছে" চাপুন।'),
-                'url' => '/reminders',
-                'tag' => "reminder-{$reminder->id}",
-                'requireInteraction' => true,
-                'actions' => [
-                    ['action' => 'done', 'title' => Tr::get('হয়ে গেছে'), 'url' => $this->actionUrl($reminder, 'done', $user)],
-                    ['action' => 'later', 'title' => Tr::get('১ ঘণ্টা পরে'), 'url' => $this->actionUrl($reminder, 'later', $user)],
-                ],
-            ]));
+            $this->push->toUsers([$user], $this->reminderPayload($reminder, $user));
         }
 
         if ($reminder->alarm) {
@@ -205,7 +224,8 @@ class Notifier
 
     private function actionUrl(Reminder $reminder, string $action, User $user): string
     {
-        return URL::temporarySignedRoute('reminders.act', now()->addDays(3), [
+        // Good until three days after it falls due, so buttons on a phone-scheduled alarm work too.
+        return URL::temporarySignedRoute('reminders.act', ($reminder->due_at->isFuture() ? $reminder->due_at : now())->addDays(3), [
             'reminder' => $reminder->id,
             'action' => $action,
             'user' => $user->id,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BookOfflineFormOnce;
 use App\Http\Middleware\EnsureAccountIsSecure;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             EnsureAccountIsSecure::class,
             SecurityHeaders::class,
+            BookOfflineFormOnce::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

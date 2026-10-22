@@ -55,9 +55,11 @@ class FcmSender
         foreach ($subscriptions as $subscription) {
             // An alarm goes as data only: the app itself shows it, ringing on until touched
             // (as an alarm clock does), with "done" and "later" buttons.
-            // Only app 3 and later can ring by itself; the earlier app is sent a plain notification.
-            $rings = preg_match('/MatirKhamarApp\/(\d+)/', (string) $subscription->device, $m) === 1 && (int) $m[1] >= 3;
-            $message = ! empty($payload['alarm']) && $rings
+            // App 3 rings alarms by itself; app 4 also schedules reminders on the phone, so it
+            // takes every reminder as data and skips one it already rang. Older apps are sent
+            // a plain notification.
+            $version = preg_match('/MatirKhamarApp\/(\d+)/', (string) $subscription->device, $m) === 1 ? (int) $m[1] : 0;
+            $message = (! empty($payload['alarm']) && $version >= 3) || (isset($payload['reminder_id']) && $version >= 4)
                 ? ['token' => $subscription->endpoint, 'data' => $data, 'android' => ['priority' => 'high', 'ttl' => '600s']]
                 : null;
 

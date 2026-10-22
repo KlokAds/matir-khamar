@@ -13,6 +13,12 @@ import { request } from '@/routes/password';
 import PasskeyVerify from '@/components/PasskeyVerify.vue';
 import { t } from '@/lib/i18n';
 
+// Inside the Android app, the phone's saved-password filler keeps refilling these boxes and
+// wipes what is typed; the app stays signed in anyway, so it does not offer to fill.
+const inApp =
+    typeof navigator !== 'undefined' &&
+    navigator.userAgent.includes('MatirKhamarApp');
+
 defineOptions({
     layout: {
         title: 'হিসাবের খাতা খুলুন',
@@ -54,7 +60,7 @@ defineProps<{
                     required
                     v-focus
                     :tabindex="1"
-                    autocomplete="email"
+                    :autocomplete="inApp ? 'off' : 'email'"
                     placeholder="email@example.com"
                 />
                 <InputError :message="errors.email" />
@@ -77,7 +83,7 @@ defineProps<{
                     name="password"
                     required
                     :tabindex="2"
-                    autocomplete="current-password"
+                    :autocomplete="inApp ? 'off' : 'current-password'"
                     :placeholder="t('পাসওয়ার্ড')"
                 />
                 <InputError :message="errors.password" />

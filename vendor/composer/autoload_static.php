@@ -692,6 +692,7 @@ class ComposerStaticInit37f95d202e43fa9dcdb43cb49f1aa054
         'App\\Http\\Controllers\\SummaryController' => __DIR__ . '/../..' . '/app/Http/Controllers/SummaryController.php',
         'App\\Http\\Controllers\\SystemController' => __DIR__ . '/../..' . '/app/Http/Controllers/SystemController.php',
         'App\\Http\\Controllers\\UdyogController' => __DIR__ . '/../..' . '/app/Http/Controllers/UdyogController.php',
+        'App\\Http\\Middleware\\BookOfflineFormOnce' => __DIR__ . '/../..' . '/app/Http/Middleware/BookOfflineFormOnce.php',
         'App\\Http\\Middleware\\EnsureAccountIsSecure' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureAccountIsSecure.php',
         'App\\Http\\Middleware\\HandleAppearance' => __DIR__ . '/../..' . '/app/Http/Middleware/HandleAppearance.php',
         'App\\Http\\Middleware\\HandleInertiaRequests' => __DIR__ . '/../..' . '/app/Http/Middleware/HandleInertiaRequests.php',

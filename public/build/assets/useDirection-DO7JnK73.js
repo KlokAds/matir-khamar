@@ -1,0 +1,1 @@
+import{r as e}from"./Presence-Bnaj4mYf.js";import{J as t,Xn as n}from"./dist-C7o1EvY9.js";function r(r){let i=e({dir:n(`ltr`)});return t(()=>r?.value||i.dir?.value||`ltr`)}export{r as t};
