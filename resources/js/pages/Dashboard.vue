@@ -20,6 +20,8 @@ import { computed } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
 import MoneyStory from '@/components/khamar/MoneyStory.vue';
+import SalesMargin from '@/components/khamar/SalesMargin.vue';
+import type { Sales } from '@/components/khamar/SalesMargin.vue';
 import type { Story } from '@/components/khamar/MoneyStory.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
@@ -45,6 +47,7 @@ defineOptions({
 const props = defineProps<{
     canSeeMoney: boolean;
     story: Story | null;
+    sales: Sales | null;
     today: {
         key: string;
         title: string;
@@ -144,6 +147,12 @@ const greeting = computed(() => {
 
         <!-- Gain or loss so far, in plain words -->
         <MoneyStory v-if="story" :story="story" compact class="mb-4" />
+        <SalesMargin
+            v-if="sales && sales.rows.length"
+            :sales="sales"
+            compact
+            class="mb-4"
+        />
 
         <!-- Today's jobs: they tick themselves off as the work is written -->
         <section
