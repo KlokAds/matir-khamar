@@ -91,7 +91,7 @@ async function unlock(id: number) {
                         {{ l.by }} · {{ l.at }}
                     </p>
                 </div>
-                <Button size="sm" variant="ghost" @click="unlock(l.id)">{{
+                <Button size="sm" variant="secondary" @click="unlock(l.id)">{{
                     t('লক খুলুন')
                 }}</Button>
             </div>

@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import {
     Beef,
     BellRing,
+    ChevronRight,
     CircleAlert,
     HandCoins,
     Milk,
@@ -191,6 +192,25 @@ const greeting = computed(() => {
             />
         </div>
 
+        <Link
+            v-if="canSeeMoney"
+            href="/summary"
+            class="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 transition-colors hover:bg-primary/10 active:bg-primary/10"
+        >
+            <span class="min-w-0">
+                <span class="block leading-normal font-medium">{{
+                    t('পুরো হিসাবের সারাংশ')
+                }}</span>
+                <span
+                    class="block text-xs leading-normal text-muted-foreground"
+                    >{{
+                        t('এ মাস, গত মাস, ৬ মাস, এ বছর বা নিজের বাছাই করা সময়')
+                    }}</span
+                >
+            </span>
+            <ChevronRight class="size-5 shrink-0 text-primary" />
+        </Link>
+
         <section
             v-if="reminders.length"
             class="mt-4 rounded-xl border border-border bg-card p-3"
@@ -239,22 +259,20 @@ const greeting = computed(() => {
         </div>
 
         <section v-if="canSeeMoney && projects.length" class="mt-6">
-            <div class="mb-3 flex items-center justify-between">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="font-display text-lg">
                     {{ t('প্রজেক্ট অনুযায়ী এ মাস') }}
                 </h2>
-                <Link
-                    href="/centers"
-                    class="text-sm text-primary hover:underline"
-                    >{{ t('সব ক্যাটাগরি') }}</Link
-                >
+                <Link href="/centers" class="btn-chip"
+                    >{{ t('সব ক্যাটাগরি') }} <ChevronRight
+                /></Link>
             </div>
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <Link
                     v-for="p in projects"
                     :key="p.id"
                     :href="`/centers/${p.id}`"
-                    class="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md"
+                    class="rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md active:bg-accent/40"
                 >
                     <div class="flex items-center gap-2">
                         <CenterIcon :kind="p.kind" />
@@ -310,15 +328,15 @@ const greeting = computed(() => {
             <section
                 class="min-w-0 rounded-xl border border-border bg-card p-4 xl:col-span-3"
             >
-                <div class="mb-3 flex items-center justify-between">
+                <div
+                    class="mb-3 flex flex-wrap items-center justify-between gap-2"
+                >
                     <h2 class="font-display text-lg">
                         {{ t('ক্যাটাগরি অনুযায়ী এ মাস') }}
                     </h2>
-                    <Link
-                        href="/centers"
-                        class="text-sm text-primary hover:underline"
-                        >{{ t('সব দেখুন') }}</Link
-                    >
+                    <Link href="/centers" class="btn-chip"
+                        >{{ t('সব দেখুন') }} <ChevronRight
+                    /></Link>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[520px] text-sm">
@@ -366,21 +384,19 @@ const greeting = computed(() => {
             v-if="canSeeMoney && recent.length"
             class="mt-6 rounded-xl border border-border bg-card p-4"
         >
-            <div class="mb-2 flex items-center justify-between">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h2 class="font-display text-lg">
                     {{ t('সাম্প্রতিক এন্ট্রি') }}
                 </h2>
-                <Link
-                    href="/entries"
-                    class="text-sm text-primary hover:underline"
-                    >{{ t('খাতা খুলুন') }}</Link
-                >
+                <Link href="/entries" class="btn-chip"
+                    >{{ t('খাতা খুলুন') }} <ChevronRight
+                /></Link>
             </div>
             <ul class="divide-y divide-border/70">
                 <li v-for="entry in recent" :key="entry.id">
                     <Link
                         :href="`/entries/${entry.id}`"
-                        class="flex items-center gap-3 py-2.5 text-sm hover:bg-accent/40"
+                        class="flex items-center gap-3 py-2.5 text-sm hover:bg-accent/40 active:bg-accent/60"
                     >
                         <span
                             class="w-24 shrink-0 text-xs text-muted-foreground"

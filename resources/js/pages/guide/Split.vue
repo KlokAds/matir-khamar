@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowDown, HandCoins, Leaf, Sprout, Wheat } from '@lucide/vue';
+import {
+    ArrowDown,
+    ChevronRight,
+    HandCoins,
+    Leaf,
+    Sprout,
+    Wheat,
+} from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Input } from '@/components/ui/input';
@@ -216,9 +223,12 @@ const fertUsed = computed(() =>
                     <div
                         v-for="(c, i) in overhead.centers"
                         :key="i"
-                        class="grid grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_5rem] items-center gap-2 text-sm"
+                        class="grid grid-cols-[4.5rem_4.5rem_minmax(0,1fr)] items-center gap-2 text-sm sm:grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_5rem]"
                     >
-                        <span class="font-medium">{{ t(c.name) }}</span>
+                        <span
+                            class="col-span-3 leading-snug font-medium sm:col-span-1"
+                            >{{ t(c.name) }}</span
+                        >
                         <label class="mini"
                             ><Input
                                 v-model="c.cows"
@@ -265,10 +275,13 @@ const fertUsed = computed(() =>
                     />
                 </div>
                 <div v-for="(c, i) in overhead.centers" :key="i" class="result">
-                    <span class="flex items-center gap-2"
-                        ><i :class="['dot', COLORS[i]]" />{{ t(c.name) }}</span
+                    <span class="flex min-w-0 items-center gap-2"
+                        ><i :class="['dot', COLORS[i]]" /><span
+                            class="min-w-0 leading-snug"
+                            >{{ t(c.name) }}</span
+                        ></span
                     >
-                    <span class="num text-muted-foreground"
+                    <span class="num text-xs text-muted-foreground sm:text-sm"
                         >{{ animalDays[i] }} ÷ {{ animalDaysTotal }} =
                         {{
                             animalDaysTotal
@@ -706,22 +719,25 @@ const fertUsed = computed(() =>
             </div>
         </div>
 
-        <p class="mt-6 text-sm text-muted-foreground">
-            {{ t('আসল কাজ করতে:') }}
-            <Link href="/allocation" class="underline">{{ t('খরচ ভাগ') }}</Link>
-            ·
-            <Link href="/stock/move?mode=issue" class="underline">{{
-                t('গরুকে খাবার দেওয়া')
-            }}</Link>
-            ·
-            <Link href="/stock/move?mode=produce" class="underline">{{
-                t('নিজের উৎপাদন')
-            }}</Link>
-            ·
-            <Link href="/reports/usage" class="underline">{{
-                t('কোথায় কত কেজি গেল')
-            }}</Link>
-        </p>
+        <div class="mt-6">
+            <p class="text-sm text-muted-foreground">
+                {{ t('আসল কাজ করতে:') }}
+            </p>
+            <div class="mt-2 flex flex-wrap gap-2">
+                <Link href="/allocation" class="btn-chip-primary"
+                    >{{ t('খরচ ভাগ') }} <ChevronRight
+                /></Link>
+                <Link href="/stock/move?mode=issue" class="btn-chip"
+                    >{{ t('গরুকে খাবার দেওয়া') }} <ChevronRight
+                /></Link>
+                <Link href="/stock/move?mode=produce" class="btn-chip"
+                    >{{ t('নিজের উৎপাদন') }} <ChevronRight
+                /></Link>
+                <Link href="/reports/usage" class="btn-chip"
+                    >{{ t('কোথায় কত কেজি গেল') }} <ChevronRight
+                /></Link>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -772,7 +788,7 @@ const fertUsed = computed(() =>
     @apply inline-block size-2.5 shrink-0 rounded-full;
 }
 .result {
-    @apply grid grid-cols-[minmax(0,1fr)_auto_6.5rem] items-center gap-3 border-b border-border/50 py-2 text-sm last:border-0;
+    @apply grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-border/50 py-2 text-sm last:border-0 sm:grid-cols-[minmax(0,1fr)_auto_6.5rem] sm:gap-3;
 }
 .result b {
     @apply text-right;

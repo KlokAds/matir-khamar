@@ -21,7 +21,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
         role="switch"
         :aria-checked="props.modelValue"
         :disabled="disabled"
-        class="inline-flex items-center gap-2 rounded-full py-1 pr-1 text-xs font-medium disabled:opacity-50"
+        class="inline-flex min-h-8 items-center gap-2 rounded-full pr-1 text-xs font-medium disabled:opacity-50"
         @click="emit('update:modelValue', !props.modelValue)"
     >
         <span

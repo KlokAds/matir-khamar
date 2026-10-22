@@ -108,7 +108,7 @@ const share = (id: number) =>
                 v-for="d in done"
                 :key="d.id"
                 :href="`/entries/${d.id}`"
-                class="ml-1 font-medium underline"
+                class="ml-1 font-medium text-primary underline underline-offset-2"
                 >{{ d.number }}</Link
             >.
             {{

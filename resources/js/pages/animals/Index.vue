@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { Plus } from '@lucide/vue';
+import { Beef, ChevronRight, Coins, HeartCrack, Plus } from '@lucide/vue';
+import { computed } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
@@ -11,9 +12,21 @@ defineOptions({
     layout: { breadcrumbs: [{ title: 'পশুর তালিকা', href: '/animals' }] },
 });
 
-defineProps<{
+type StatusKey = 'active' | 'sold' | 'dead';
+
+const props = defineProps<{
     status: string;
     statuses: Record<string, string>;
+    summary: Record<
+        StatusKey,
+        {
+            count: number;
+            female: number;
+            male: number;
+            amount: number;
+            by_center: { name: string; count: number }[];
+        }
+    >;
     animals: {
         id: number;
         species: 'cattle' | 'goat';
@@ -30,6 +43,59 @@ defineProps<{
 
 const can = useCan();
 const herd = useHerdWords();
+
+/** The three status cards: they show the totals and switch the list below. */
+const cards = computed(() => {
+    const goat = herd.value.kind === 'goat';
+    const female = t(goat ? 'ছাগী' : 'গাভী/বকনা');
+    const male = t(goat ? 'খাসি/পাঁঠা' : 'ষাঁড়/এঁড়ে');
+    const labels = tAll(props.statuses);
+    const centers = (key: StatusKey) =>
+        props.summary[key].by_center
+            .map((c) => `${t(c.name)} ${c.count}`)
+            .join(' · ');
+    const { active, sold, dead } = props.summary;
+
+    return [
+        {
+            key: 'active' as const,
+            label: labels.active,
+            count: active.count,
+            icon: Beef,
+            tone: 'bg-paddy/12 text-paddy',
+            lines: [
+                centers('active'),
+                active.count
+                    ? `${female} ${active.female} · ${male} ${active.male}`
+                    : '',
+                active.amount
+                    ? t('কেনা দাম :amount', { amount: taka(active.amount) })
+                    : '',
+            ],
+        },
+        {
+            key: 'sold' as const,
+            label: labels.sold,
+            count: sold.count,
+            icon: Coins,
+            tone: 'bg-turmeric/25 text-soil',
+            lines: [
+                sold.amount
+                    ? t('মোট বিক্রি :amount', { amount: taka(sold.amount) })
+                    : '',
+                centers('sold'),
+            ],
+        },
+        {
+            key: 'dead' as const,
+            label: labels.dead,
+            count: dead.count,
+            icon: HeartCrack,
+            tone: 'bg-muted text-muted-foreground',
+            lines: [centers('dead')],
+        },
+    ].map((card) => ({ ...card, lines: card.lines.filter(Boolean) }));
+});
 </script>
 
 <template>
@@ -53,28 +119,69 @@ const herd = useHerdWords();
             </template>
         </PageTitle>
 
-        <div class="mb-4 flex gap-1.5">
+        <nav
+            class="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3"
+            :aria-label="t(herd.list)"
+        >
             <Link
-                v-for="(label, key) in tAll(statuses)"
-                :key="key"
-                :href="`/animals?status=${key}`"
-                :class="[
-                    'rounded-full border px-3 py-1.5 text-sm',
-                    status === key
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-card hover:bg-accent',
-                ]"
+                v-for="card in cards"
+                :key="card.key"
+                :href="`/animals?status=${card.key}`"
                 preserve-state
-                >{{ label }}</Link
+                :aria-current="status === card.key ? 'page' : undefined"
+                :class="[
+                    'group relative rounded-xl border bg-card p-3 shadow-[0_1px_0_0_var(--border)] transition-colors hover:bg-accent/40 active:bg-accent/60 sm:p-4',
+                    card.key === 'active' && 'col-span-2 sm:col-span-1',
+                    status === card.key
+                        ? 'border-primary ring-2 ring-primary/25'
+                        : 'border-border',
+                    card.key === 'dead' &&
+                        !card.count &&
+                        status !== card.key &&
+                        'opacity-70',
+                ]"
             >
-        </div>
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p
+                            :class="[
+                                'text-[13px] leading-snug',
+                                status === card.key
+                                    ? 'font-medium text-primary'
+                                    : 'text-muted-foreground',
+                            ]"
+                        >
+                            {{ card.label }}
+                        </p>
+                        <p
+                            :class="[
+                                'num mt-1 text-2xl font-semibold tracking-tight',
+                                card.key === 'dead' && 'text-muted-foreground',
+                            ]"
+                        >
+                            {{ t(':nটি', { n: card.count }) }}
+                        </p>
+                    </div>
+                    <span :class="['shrink-0 rounded-lg p-2', card.tone]">
+                        <component :is="card.icon" class="size-5" />
+                    </span>
+                </div>
+                <p
+                    v-for="line in card.lines"
+                    :key="line"
+                    class="num mt-1 text-xs leading-snug text-muted-foreground"
+                >
+                    {{ line }}
+                </p>
+            </Link>
+        </nav>
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <Link
                 v-for="a in animals"
                 :key="a.id"
                 :href="`/animals/${a.id}`"
-                class="group rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md"
+                class="group rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md active:bg-accent/40"
             >
                 <div class="flex items-center gap-3">
                     <CenterIcon kind="livestock" />
@@ -102,6 +209,9 @@ const herd = useHerdWords();
                     <span class="rounded-full bg-accent px-2.5 py-1 text-xs">{{
                         t(a.center)
                     }}</span>
+                    <ChevronRight
+                        class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                    />
                 </div>
                 <div
                     class="mt-3 flex justify-between border-t border-dashed border-border pt-3 text-sm"

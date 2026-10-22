@@ -196,7 +196,9 @@ class AnimalService
 
             $this->closePlacement($animal, $date);
             AnimalPlacement::query()->create(['animal_id' => $animal->id, 'cost_center_id' => $to->id, 'from_date' => $date]);
-            $animal->update(['cost_center_id' => $to->id]);
+            // A fattening animal kept as a cow leaves its batch: the batch is about the ones sold.
+            $leavesBatch = $animal->batch_id !== null && $animal->batch?->cost_center_id !== $to->id;
+            $animal->update(['cost_center_id' => $to->id, ...($leavesBatch ? ['batch_id' => null] : [])]);
 
             return $entry;
         });

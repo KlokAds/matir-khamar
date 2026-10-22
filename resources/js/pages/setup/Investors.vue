@@ -214,9 +214,12 @@ async function revoke(user: InvestorUser, grant: Grant) {
                 <Button type="submit" :disabled="form.processing">{{
                     t('রাখুন')
                 }}</Button>
-                <Button type="button" variant="ghost" @click="open = false">{{
-                    t('বাদ দিন')
-                }}</Button>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    @click="open = false"
+                    >{{ t('বাদ দিন') }}</Button
+                >
             </div>
         </form>
 
@@ -288,16 +291,20 @@ async function revoke(user: InvestorUser, grant: Grant) {
                             </p>
                         </div>
                         <Button
-                            variant="ghost"
+                            variant="secondary"
                             size="icon"
                             :aria-label="t('বদলান')"
+                            :title="t('বদলান')"
+                            class="rounded-full hover:text-foreground"
                             @click="start(u, g)"
                             ><Pencil
                         /></Button>
                         <Button
-                            variant="ghost"
+                            variant="secondary"
                             size="icon"
                             :aria-label="t('সরিয়ে দিন')"
+                            :title="t('সরিয়ে দিন')"
+                            class="rounded-full text-muted-foreground hover:text-destructive"
                             @click="revoke(u, g)"
                             ><X
                         /></Button>

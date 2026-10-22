@@ -436,8 +436,9 @@ const share = (amount: number) =>
                 </h2>
                 <button
                     type="button"
-                    class="rounded-md p-1 text-muted-foreground hover:bg-accent"
+                    class="btn-icon"
                     :aria-label="t('বন্ধ')"
+                    :title="t('বন্ধ')"
                     @click="editing = null"
                 >
                     <X class="size-4" />
@@ -608,7 +609,7 @@ const share = (amount: number) =>
                                     :key="wt"
                                     type="button"
                                     :class="[
-                                        'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                                        'inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors',
                                         logForm.work_type === wt
                                             ? 'border-primary bg-primary text-primary-foreground'
                                             : 'border-input bg-card hover:bg-accent',
@@ -924,7 +925,7 @@ const share = (amount: number) =>
                                 </Button>
                                 <Button
                                     size="sm"
-                                    variant="ghost"
+                                    variant="secondary"
                                     @click="openWorker(w)"
                                 >
                                     <Pencil class="size-4" /> {{ t('বদলান') }}
@@ -1104,9 +1105,10 @@ const share = (amount: number) =>
                                     <button
                                         v-if="canLog && l.deletable"
                                         type="button"
-                                        class="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                                        class="btn-icon hover:text-destructive"
                                         :disabled="removing === l.id"
                                         :aria-label="t('মুছুন')"
+                                        :title="t('মুছুন')"
                                         @click="removeLog(l, g.date)"
                                     >
                                         <Trash2 class="size-4" />

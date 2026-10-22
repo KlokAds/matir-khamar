@@ -3,10 +3,12 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
     CalendarClock,
     Check,
+    CheckCheck,
     ClipboardList,
     History,
     Syringe,
     Trash2,
+    X,
 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import DateField from '@/components/khamar/DateField.vue';
@@ -273,7 +275,7 @@ async function remove(row: HistoryRow) {
                         >
                             <Link
                                 :href="d.href"
-                                class="-mx-2 flex items-start justify-between gap-3 rounded-md px-2 py-2.5 hover:bg-accent"
+                                class="-mx-2 flex items-start justify-between gap-3 rounded-md px-2 py-2.5 hover:bg-accent active:bg-accent"
                             >
                                 <span class="min-w-0">
                                     <span
@@ -323,13 +325,13 @@ async function remove(row: HistoryRow) {
                     </h2>
 
                     <div class="grid gap-3">
-                        <div class="flex flex-wrap gap-1.5">
+                        <div class="flex flex-wrap gap-2">
                             <button
                                 v-for="p in presets"
                                 :key="`${p.kind}-${p.name}`"
                                 type="button"
                                 :class="[
-                                    'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                                    'min-h-8 rounded-full border px-3 py-1 text-[13px] shadow-xs transition-colors',
                                     activePreset?.name === p.name &&
                                     activePreset?.kind === p.kind
                                         ? 'border-primary bg-primary text-primary-foreground'
@@ -399,7 +401,7 @@ async function remove(row: HistoryRow) {
                             class="rounded-lg border border-border bg-background/60"
                         >
                             <p
-                                class="flex items-center justify-between border-b border-border px-3 py-2 text-xs text-muted-foreground"
+                                class="flex min-h-12 items-center justify-between gap-2 border-b border-border px-3 py-2 text-xs text-muted-foreground"
                             >
                                 <span
                                     >{{ t('বাছাই:') }}
@@ -415,10 +417,10 @@ async function remove(row: HistoryRow) {
                                 <button
                                     v-if="form.animal_ids.length"
                                     type="button"
-                                    class="underline-offset-4 hover:underline"
+                                    class="btn-chip text-destructive"
                                     @click="form.animal_ids = []"
                                 >
-                                    {{ t('সব বাদ') }}
+                                    <X /> {{ t('সব বাদ') }}
                                 </button>
                             </p>
                             <div
@@ -431,7 +433,7 @@ async function remove(row: HistoryRow) {
                                     class="py-1.5"
                                 >
                                     <div
-                                        class="mb-1 flex items-center justify-between gap-2"
+                                        class="mb-1.5 flex items-center justify-between gap-2"
                                     >
                                         <span
                                             class="truncate text-xs font-semibold text-muted-foreground"
@@ -442,9 +444,11 @@ async function remove(row: HistoryRow) {
                                         >
                                         <button
                                             type="button"
-                                            class="shrink-0 text-xs font-medium text-paddy hover:underline"
+                                            class="btn-chip-primary"
                                             @click="toggleGroup(g.animals)"
                                         >
+                                            <X v-if="allPicked(g.animals)" />
+                                            <CheckCheck v-else />
                                             {{
                                                 allPicked(g.animals)
                                                     ? t('সব বাদ দিন')
@@ -605,7 +609,7 @@ async function remove(row: HistoryRow) {
                                 <Link
                                     v-if="r.animal_id"
                                     :href="`/animals/${r.animal_id}`"
-                                    class="hover:underline"
+                                    class="font-medium text-primary underline underline-offset-2"
                                     >{{ t(r.target) }}</Link
                                 >
                                 <template v-else>{{ t(r.target) }}</template>
@@ -644,9 +648,10 @@ async function remove(row: HistoryRow) {
                         <button
                             v-if="canWrite && deletable.has(r.id)"
                             type="button"
-                            class="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                            class="btn-icon hover:text-destructive"
                             :disabled="removing === r.id"
                             :aria-label="t('মুছুন')"
+                            :title="t('মুছুন')"
                             @click="remove(r)"
                         >
                             <Trash2 class="size-4" />

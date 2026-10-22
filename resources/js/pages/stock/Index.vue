@@ -115,8 +115,9 @@ const item = useForm({
         <div v-if="can['manage-setup']" class="mt-4">
             <Button
                 v-if="!adding"
-                variant="ghost"
+                variant="secondary"
                 size="sm"
+                class="h-auto min-h-9 py-2 text-left leading-snug whitespace-normal"
                 @click="adding = true"
                 ><Plus /> {{ t('নতুন মাল (যেমন: খৈল, লবণ, ভিটামিন)') }}</Button
             >
@@ -197,7 +198,7 @@ const item = useForm({
                     }}</Button>
                     <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         @click="adding = false"
                         >{{ t('বাদ') }}</Button
                     >
@@ -255,7 +256,7 @@ const item = useForm({
                             <td class="px-4 py-2.5">
                                 <Link
                                     :href="`/entries/${m.entry_id}`"
-                                    class="num text-primary hover:underline"
+                                    class="num font-medium text-primary underline underline-offset-2"
                                     >{{ m.number }}</Link
                                 >
                             </td>

@@ -172,9 +172,12 @@ const create = useForm({
                 <Button type="submit" :disabled="create.processing">{{
                     t('তৈরি করুন')
                 }}</Button>
-                <Button type="button" variant="ghost" @click="adding = false">{{
-                    t('বাদ')
-                }}</Button>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    @click="adding = false"
+                    >{{ t('বাদ') }}</Button
+                >
             </div>
         </form>
 
@@ -204,8 +207,9 @@ const create = useForm({
                         <button
                             v-else
                             type="button"
-                            class="rounded p-1 hover:bg-accent hover:text-destructive"
+                            class="btn-icon hover:text-destructive"
                             :aria-label="t('মুছুন')"
+                            :title="t('মুছুন')"
                             @click="remove(role)"
                         >
                             <Trash2 class="size-4" />

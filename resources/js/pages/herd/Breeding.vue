@@ -5,6 +5,8 @@ import {
     CalendarClock,
     Check,
     ChevronDown,
+    ChevronRight,
+    Eye,
     HeartPulse,
     Hourglass,
     Plus,
@@ -229,7 +231,7 @@ function saveCalving(card: BreedingCard) {
                         <div class="min-w-0">
                             <Link
                                 :href="`/animals/${card.animal_id}`"
-                                class="block truncate font-display text-lg leading-tight hover:underline"
+                                class="block truncate py-0.5 font-display text-lg leading-snug text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
                                 >{{ cowName(card) }}</Link
                             >
                             <p class="mt-0.5 text-sm text-foreground/80">
@@ -461,7 +463,7 @@ function saveCalving(card: BreedingCard) {
                             <Button
                                 type="button"
                                 size="sm"
-                                variant="ghost"
+                                variant="secondary"
                                 @click="calvingFor = null"
                                 >{{ t('বাদ দিন') }}</Button
                             >
@@ -492,7 +494,7 @@ function saveCalving(card: BreedingCard) {
                     <li v-for="cow in waiting" :key="cow.id">
                         <Link
                             :href="`/animals/${cow.id}`"
-                            class="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-2.5 hover:bg-accent"
+                            class="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-2.5 hover:bg-accent active:bg-accent"
                         >
                             <span class="min-w-0">
                                 <span
@@ -513,8 +515,14 @@ function saveCalving(card: BreedingCard) {
                                         >{{ day(cow.last_calved) }}</span
                                     ></template
                                 >
-                                <template v-else>{{ t('বীজ দিন →') }}</template>
+                                <span v-else class="btn-chip-primary">{{
+                                    t('বীজ দিন →')
+                                }}</span>
                             </span>
+                            <ChevronRight
+                                v-if="cow.last_calved"
+                                class="size-4 shrink-0 text-muted-foreground"
+                            />
                         </Link>
                     </li>
                 </ul>
@@ -536,12 +544,12 @@ function saveCalving(card: BreedingCard) {
                     <li
                         v-for="r in recent"
                         :key="r.id"
-                        class="flex items-start justify-between gap-3 py-2.5"
+                        class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-2.5"
                     >
                         <div class="min-w-0">
                             <Link
                                 :href="`/animals/${r.animal_id}`"
-                                class="block truncate text-sm font-medium hover:underline"
+                                class="block truncate py-0.5 text-sm font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
                                 >{{ cowName(r) }}</Link
                             >
                             <p class="text-xs text-muted-foreground">
@@ -552,17 +560,17 @@ function saveCalving(card: BreedingCard) {
                         <Link
                             v-if="r.calf_id"
                             :href="`/animals/${r.calf_id}`"
-                            class="shrink-0 rounded-full bg-paddy/12 px-2.5 py-1 text-xs font-medium text-paddy hover:bg-paddy/20"
-                            >{{ t('বাছুর দেখুন') }}</Link
+                            class="btn-chip"
+                            ><Eye /> {{ t('বাছুর দেখুন') }}</Link
                         >
                         <Link
                             v-else-if="
                                 r.outcome && liveOutcomes.includes(r.outcome)
                             "
                             :href="`/animals/create?mother=${r.animal_id}`"
-                            class="flex shrink-0 items-center gap-1 rounded-full bg-turmeric/25 px-2.5 py-1 text-xs font-medium text-soil hover:bg-turmeric/40"
+                            class="btn-chip-primary"
                         >
-                            <Plus class="size-3.5" />
+                            <Plus />
                             {{ t('বাছুরটি তালিকায় যোগ করুন') }}
                         </Link>
                     </li>

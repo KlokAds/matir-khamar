@@ -25,6 +25,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\SystemController;
 use Illuminate\Support\Facades\Route;
 
@@ -98,6 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('prices', [PriceController::class, 'index'])->name('prices.index');
         Route::get('labour', [LabourController::class, 'index'])->name('labour.index');
         Route::get('cash', [CashController::class, 'index'])->name('cash.index');
+        Route::get('summary', [SummaryController::class, 'index'])->name('summary.index');
         Route::get('debts', [DebtController::class, 'index'])->name('debts.index');
         Route::get('land/seasons/{season}', [LandController::class, 'season'])->name('land.season');
         Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');

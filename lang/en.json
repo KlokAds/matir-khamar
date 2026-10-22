@@ -441,5 +441,11 @@
     "ফেরতের পরিকল্পনা রাখা হলো।": "Repayment plan saved.",
     "কিস্তি/ফেরত: :name": "Instalment/repayment: :name",
     "ধার ও জামানতে লেখা তারিখ :date": "Date set in Loans & deposits: :date",
-    "ফেরত পাওয়ার কথা: :name": "Expected back: :name"
+    "ফেরত পাওয়ার কথা: :name": "Expected back: :name",
+    "এ মাস": "This month",
+    "গত মাস": "Last month",
+    "৬ মাস": "6 months",
+    "এ বছর": "This year",
+    "শুরু থেকে": "All time",
+    "নিজে বাছুন": "Custom"
 }

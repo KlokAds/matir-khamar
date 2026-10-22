@@ -19,6 +19,7 @@ import MoneyController from './MoneyController'
 import LandController from './LandController'
 import ProfitController from './ProfitController'
 import CashController from './CashController'
+import SummaryController from './SummaryController'
 import DebtController from './DebtController'
 import AllocationController from './AllocationController'
 import SetupController from './SetupController'
@@ -48,6 +49,7 @@ const Controllers = {
     LandController: Object.assign(LandController, LandController),
     ProfitController: Object.assign(ProfitController, ProfitController),
     CashController: Object.assign(CashController, CashController),
+    SummaryController: Object.assign(SummaryController, SummaryController),
     DebtController: Object.assign(DebtController, DebtController),
     AllocationController: Object.assign(AllocationController, AllocationController),
     SetupController: Object.assign(SetupController, SetupController),

@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { Milk, Pencil, Scale, TrendingDown, TrendingUp } from '@lucide/vue';
+import {
+    ChevronRight,
+    Milk,
+    Pencil,
+    Scale,
+    TrendingDown,
+    TrendingUp,
+} from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
@@ -125,7 +132,7 @@ const applyRange = () =>
                 <Button
                     v-if="can['manage-setup']"
                     size="sm"
-                    variant="ghost"
+                    variant="secondary"
                     @click="editing = !editing"
                     ><Pencil /> {{ t('বদলান') }}</Button
                 >
@@ -320,13 +327,14 @@ const applyRange = () =>
                     v-for="a in animals"
                     :key="a.id"
                     :href="`/animals/${a.id}`"
-                    class="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-accent"
+                    class="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-xs transition-colors hover:bg-accent active:bg-accent"
                 >
                     <CenterIcon kind="livestock" />
                     <span class="font-medium">{{ a.tag }}</span>
                     <span class="text-muted-foreground">{{
                         a.name ?? a.breed ?? ''
                     }}</span>
+                    <ChevronRight class="size-4 text-muted-foreground" />
                 </Link>
             </div>
         </section>
@@ -377,7 +385,7 @@ const applyRange = () =>
                             <td class="px-4 py-2.5">
                                 <Link
                                     :href="`/entries/${l.entry_id}`"
-                                    class="num text-primary hover:underline"
+                                    class="num font-medium text-primary underline underline-offset-2"
                                     >{{ l.number }}</Link
                                 >
                             </td>

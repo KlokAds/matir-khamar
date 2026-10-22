@@ -524,7 +524,7 @@ const passThrough = computed(() => {
 }
 
 .nav {
-    @apply flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground;
+    @apply flex size-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xs hover:bg-accent hover:text-foreground;
 }
 
 .stepper {

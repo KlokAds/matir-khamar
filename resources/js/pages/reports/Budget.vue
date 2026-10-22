@@ -89,9 +89,11 @@ const pct = (head: { approved: number; spent: number }) =>
             </p>
             <ul class="mt-2 space-y-1">
                 <li v-for="m in missing" :key="m.entry_id">
-                    <Link :href="`/entries/${m.entry_id}`" class="underline">{{
-                        m.number
-                    }}</Link>
+                    <Link
+                        :href="`/entries/${m.entry_id}`"
+                        class="font-medium text-primary underline underline-offset-2"
+                        >{{ m.number }}</Link
+                    >
                     · {{ day(m.date) }} · {{ m.description }}
                 </li>
             </ul>
@@ -175,7 +177,10 @@ const pct = (head: { approved: number; spent: number }) =>
                             <td class="px-4 py-3 text-right">
                                 <button
                                     v-if="can['manage-setup']"
-                                    class="rounded p-1 text-muted-foreground hover:bg-accent print:hidden"
+                                    type="button"
+                                    class="btn-icon print:hidden"
+                                    :aria-label="t('এডিট')"
+                                    :title="t('এডিট')"
                                     @click="start(h)"
                                 >
                                     <Pencil class="size-4" />

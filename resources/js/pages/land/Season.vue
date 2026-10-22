@@ -516,7 +516,7 @@ async function closeSeason() {
                         @click="closeSeason"
                         ><Flag /> {{ t('মৌসুম শেষ') }}</Button
                     >
-                    <Button variant="ghost" @click="startEdit"
+                    <Button variant="secondary" @click="startEdit"
                         ><Pencil /> {{ t('সম্পাদনা') }}</Button
                     >
                 </template>
@@ -717,7 +717,7 @@ async function closeSeason() {
                     />
                     <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         size="icon"
                         :aria-label="t('বাদ দিন')"
                         :disabled="edit.plots.length <= 1"
@@ -751,7 +751,7 @@ async function closeSeason() {
                 }}</Button>
                 <Button
                     type="button"
-                    variant="ghost"
+                    variant="secondary"
                     @click="editing = false"
                     >{{ t('বাদ') }}</Button
                 >
@@ -962,20 +962,34 @@ async function closeSeason() {
                 <p class="text-muted-foreground">
                     {{ t('খরচ যোগ করবেন কীভাবে:') }}
                 </p>
-                <Link
-                    href="/entries/create"
-                    class="font-medium text-primary underline-offset-4 hover:underline"
-                    >{{
-                        t('নতুন খরচ লিখুন — ক্যাটাগরি: :center', {
-                            center: t(season.center),
-                        })
-                    }}</Link
-                >
-                <Link
-                    href="/stock/move?mode=issue"
-                    class="font-medium text-primary underline-offset-4 hover:underline"
-                    >{{ t('স্টক থেকে সার/বীজ দিন (মাল খরচ)') }}</Link
-                >
+                <div class="flex flex-wrap gap-2">
+                    <Button
+                        as-child
+                        variant="secondary"
+                        size="sm"
+                        class="h-auto min-h-9 py-2 text-left leading-snug whitespace-normal"
+                    >
+                        <Link href="/entries/create"
+                            ><Receipt />
+                            {{
+                                t('নতুন খরচ লিখুন — ক্যাটাগরি: :center', {
+                                    center: t(season.center),
+                                })
+                            }}</Link
+                        >
+                    </Button>
+                    <Button
+                        as-child
+                        variant="secondary"
+                        size="sm"
+                        class="h-auto min-h-9 py-2 text-left leading-snug whitespace-normal"
+                    >
+                        <Link href="/stock/move?mode=issue"
+                            ><Wheat />
+                            {{ t('স্টক থেকে সার/বীজ দিন (মাল খরচ)') }}</Link
+                        >
+                    </Button>
+                </div>
             </div>
         </section>
 
@@ -1099,7 +1113,7 @@ async function closeSeason() {
                             >
                             <Button
                                 type="button"
-                                variant="ghost"
+                                variant="secondary"
                                 size="icon"
                                 :aria-label="t('বাদ দিন')"
                                 :disabled="harvest.rows.length <= 1"
@@ -1200,7 +1214,7 @@ async function closeSeason() {
                         >
                         <Button
                             type="button"
-                            variant="ghost"
+                            variant="secondary"
                             size="sm"
                             @click="itemOpen = !itemOpen"
                             ><PackagePlus /> {{ t('নতুন মাল') }}</Button
@@ -1258,7 +1272,7 @@ async function closeSeason() {
                             <Button
                                 v-if="harvested"
                                 type="button"
-                                variant="ghost"
+                                variant="secondary"
                                 @click="harvestOpen = false"
                                 >{{ t('বাদ') }}</Button
                             >

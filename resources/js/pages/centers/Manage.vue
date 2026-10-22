@@ -4,6 +4,7 @@ import {
     ArrowDown,
     ArrowUp,
     Eye,
+    EyeOff,
     Lock,
     Pencil,
     Plus,
@@ -327,7 +328,7 @@ const whyNoDelete = (row: Row) =>
                 <Button type="submit" :disabled="form.processing">{{
                     t('যোগ করুন')
                 }}</Button>
-                <Button type="button" variant="ghost" @click="close">{{
+                <Button type="button" variant="secondary" @click="close">{{
                     t('বাদ')
                 }}</Button>
             </div>
@@ -371,23 +372,6 @@ const whyNoDelete = (row: Row) =>
                                         class="rounded bg-muted px-1.5 text-[11px] font-normal text-muted-foreground"
                                         >{{ t('বন্ধ') }}</span
                                     >
-                                    <button
-                                        v-if="!row.is_active && inside(row)"
-                                        type="button"
-                                        class="rounded border border-border px-1.5 text-[11px] font-normal text-muted-foreground hover:bg-accent"
-                                        @click="unfold(row)"
-                                    >
-                                        {{
-                                            opened.has(row.id)
-                                                ? t('ভেতরেরগুলো লুকান')
-                                                : t(
-                                                      'ভেতরে :nটি লুকানো — দেখুন',
-                                                      {
-                                                          n: inside(row),
-                                                      },
-                                                  )
-                                        }}
-                                    </button>
                                 </p>
                                 <p
                                     class="truncate text-xs text-muted-foreground"
@@ -405,71 +389,97 @@ const whyNoDelete = (row: Row) =>
                                         }}</template
                                     >
                                 </p>
+                                <button
+                                    v-if="!row.is_active && inside(row)"
+                                    type="button"
+                                    class="btn-chip mt-1.5"
+                                    @click="unfold(row)"
+                                >
+                                    <EyeOff v-if="opened.has(row.id)" />
+                                    <Eye v-else />
+                                    {{
+                                        opened.has(row.id)
+                                            ? t('ভেতরেরগুলো লুকান')
+                                            : t('ভেতরে :nটি লুকানো — দেখুন', {
+                                                  n: inside(row),
+                                              })
+                                    }}
+                                </button>
                             </div>
                         </div>
 
-                        <div class="flex w-full items-center gap-1 sm:w-auto">
+                        <div
+                            class="flex w-full flex-wrap items-center gap-x-2 gap-y-2 sm:w-auto"
+                        >
                             <Toggle
                                 :model-value="row.is_active"
                                 on-text="চালু"
                                 off-text="বন্ধ"
                                 @update:model-value="toggle(row)"
                             />
-                            <span class="mx-1 h-6 w-px bg-border" />
-                            <button
-                                type="button"
-                                class="act"
-                                :title="t('এডিট')"
-                                @click="startEdit(row)"
-                            >
-                                <Pencil class="size-4" />
-                            </button>
-                            <button
-                                type="button"
-                                class="act"
-                                :title="t('ওপরে')"
-                                :disabled="isFirst(row)"
-                                @click="move(row, 'up')"
-                            >
-                                <ArrowUp class="size-4" />
-                            </button>
-                            <button
-                                type="button"
-                                class="act"
-                                :title="t('নিচে')"
-                                :disabled="isLast(row)"
-                                @click="move(row, 'down')"
-                            >
-                                <ArrowDown class="size-4" />
-                            </button>
-                            <button
-                                type="button"
-                                class="act"
-                                :title="t('ভেতরে নতুন')"
-                                @click="startAdd(row)"
-                            >
-                                <Plus class="size-4" />
-                            </button>
-                            <Link
-                                :href="`/centers/${row.id}`"
-                                class="act"
-                                :title="t('হিসাব দেখুন')"
-                            >
-                                <Eye class="size-4" />
-                            </Link>
-                            <button
-                                type="button"
-                                class="act hover:text-destructive"
-                                :title="
-                                    row.deletable
-                                        ? t('মুছুন')
-                                        : whyNoDelete(row)
-                                "
-                                :disabled="!row.deletable"
-                                @click="remove(row)"
-                            >
-                                <Trash2 class="size-4" />
-                            </button>
+                            <span class="hidden h-6 w-px bg-border sm:block" />
+                            <div class="flex items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    class="btn-icon"
+                                    :title="t('এডিট')"
+                                    :aria-label="t('এডিট')"
+                                    @click="startEdit(row)"
+                                >
+                                    <Pencil />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn-icon"
+                                    :title="t('ওপরে')"
+                                    :aria-label="t('ওপরে')"
+                                    :disabled="isFirst(row)"
+                                    @click="move(row, 'up')"
+                                >
+                                    <ArrowUp />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn-icon"
+                                    :title="t('নিচে')"
+                                    :aria-label="t('নিচে')"
+                                    :disabled="isLast(row)"
+                                    @click="move(row, 'down')"
+                                >
+                                    <ArrowDown />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn-icon"
+                                    :title="t('ভেতরে নতুন')"
+                                    :aria-label="t('ভেতরে নতুন')"
+                                    @click="startAdd(row)"
+                                >
+                                    <Plus />
+                                </button>
+                                <Link
+                                    :href="`/centers/${row.id}`"
+                                    class="btn-icon"
+                                    :title="t('হিসাব দেখুন')"
+                                    :aria-label="t('হিসাব দেখুন')"
+                                >
+                                    <Eye />
+                                </Link>
+                                <button
+                                    type="button"
+                                    class="btn-icon hover:text-destructive"
+                                    :title="
+                                        row.deletable
+                                            ? t('মুছুন')
+                                            : whyNoDelete(row)
+                                    "
+                                    :aria-label="t('মুছুন')"
+                                    :disabled="!row.deletable"
+                                    @click="remove(row)"
+                                >
+                                    <Trash2 />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -564,7 +574,7 @@ const whyNoDelete = (row: Row) =>
                             }}</Button>
                             <Button
                                 type="button"
-                                variant="ghost"
+                                variant="secondary"
                                 @click="close"
                                 >{{ t('বাদ') }}</Button
                             >
@@ -575,11 +585,3 @@ const whyNoDelete = (row: Row) =>
         </ul>
     </div>
 </template>
-
-<style scoped>
-@reference '../../../css/app.css';
-
-.act {
-    @apply flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-30;
-}
-</style>

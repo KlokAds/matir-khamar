@@ -505,7 +505,7 @@ const tipGroups: { title: string; icon: Component; items: string[] }[] = [
                         :key="y"
                         type="button"
                         :class="[
-                            'num rounded-full px-3 py-1 text-sm transition-colors',
+                            'num inline-flex min-h-8 items-center gap-1.5 rounded-full px-3 py-1 text-sm transition-colors',
                             y === year
                                 ? 'bg-primary text-primary-foreground'
                                 : 'text-muted-foreground hover:bg-accent',
@@ -755,7 +755,7 @@ const tipGroups: { title: string; icon: Component; items: string[] }[] = [
                             :key="f.key"
                             type="button"
                             :class="[
-                                'rounded-full border px-3 py-1 text-xs transition-colors',
+                                'inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors',
                                 filter === f.key
                                     ? 'border-primary bg-primary text-primary-foreground'
                                     : 'border-input bg-card hover:bg-accent',
@@ -779,7 +779,7 @@ const tipGroups: { title: string; icon: Component; items: string[] }[] = [
                                 <div class="min-w-0">
                                     <Link
                                         :href="`/animals/${a.id}`"
-                                        class="font-medium hover:underline"
+                                        class="font-medium text-primary underline underline-offset-2"
                                         >{{ a.tag
                                         }}<span
                                             v-if="a.name"

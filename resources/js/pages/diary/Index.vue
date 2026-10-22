@@ -649,8 +649,9 @@ const rules = [
                                     />
                                     <button
                                         type="button"
-                                        class="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-destructive"
+                                        class="btn-icon hover:text-destructive"
                                         :aria-label="t('সরিয়ে দিন')"
+                                        :title="t('সরিয়ে দিন')"
                                         @click="removePicked(p.key)"
                                     >
                                         <X class="size-4" />
@@ -802,7 +803,7 @@ const rules = [
                                     <Link
                                         v-if="n.animal && n.animal_id"
                                         :href="`/animals/${n.animal_id}`"
-                                        class="rounded-full border border-pond/40 px-2 py-0.5 text-pond hover:bg-pond/10"
+                                        class="rounded-full border border-pond/40 bg-pond/5 px-2 py-0.5 font-medium text-pond underline-offset-2 hover:bg-pond/10 hover:underline"
                                         >{{ n.animal }}</Link
                                     >
                                     <span
@@ -865,10 +866,12 @@ const rules = [
                                             :href="f.url"
                                             target="_blank"
                                             rel="noopener"
-                                            class="inline-flex items-center gap-1.5 text-sm text-pond hover:underline"
+                                            class="btn-chip max-w-full justify-self-start"
                                         >
-                                            <FileText class="size-4" />
-                                            {{ f.name }}
+                                            <FileText />
+                                            <span class="truncate">{{
+                                                f.name
+                                            }}</span>
                                         </a>
                                     </template>
                                 </div>
@@ -1099,12 +1102,12 @@ const rules = [
                     }}
                 </p>
 
-                <div class="mt-3 flex flex-wrap gap-1.5">
+                <div class="mt-3 flex flex-wrap gap-2">
                     <button
                         v-for="s in suggestions"
                         :key="s.title"
                         type="button"
-                        class="rounded-full border border-dashed border-paddy/50 bg-paddy/5 px-3 py-1.5 text-xs text-paddy hover:bg-paddy/15"
+                        class="min-h-8 rounded-full border border-dashed border-paddy/50 bg-paddy/5 px-3 py-1 text-[13px] text-paddy shadow-xs hover:bg-paddy/15"
                         @click="prefill(s)"
                     >
                         + {{ s.title }}

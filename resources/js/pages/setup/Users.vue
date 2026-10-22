@@ -187,14 +187,14 @@ async function resetPassword(user: {
                     >
                     <Button
                         size="sm"
-                        variant="ghost"
+                        variant="secondary"
                         @click="resetPassword(u)"
                         >{{ t('পাসওয়ার্ড বদল') }}</Button
                     >
                     <Button
                         v-if="u.two_factor"
                         size="sm"
-                        variant="ghost"
+                        variant="secondary"
                         @click="update(u, { reset_two_factor: true })"
                         >{{ t('2FA রিসেট (ফোন হারালে)') }}</Button
                     >

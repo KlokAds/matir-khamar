@@ -235,7 +235,7 @@ const help = computed<Record<string, string>>(() => ({
                 :key="key"
                 type="button"
                 :class="[
-                    'rounded-full border px-3 py-1.5 text-sm transition-colors',
+                    'inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors',
                     f.form === key
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-card hover:bg-accent',
@@ -553,7 +553,9 @@ const help = computed<Record<string, string>>(() => ({
                             <button
                                 v-if="f.lines.length > 1"
                                 type="button"
-                                class="absolute top-2 right-2 rounded p-1 text-muted-foreground hover:bg-accent"
+                                class="btn-icon absolute top-2 right-2 size-8 hover:text-destructive"
+                                :aria-label="t('মুছুন')"
+                                :title="t('মুছুন')"
                                 @click="f.lines.splice(index, 1)"
                             >
                                 <X class="size-4" />

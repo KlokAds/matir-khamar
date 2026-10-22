@@ -153,7 +153,7 @@ function apply() {
                         <td class="px-3 py-2.5">
                             <Link
                                 :href="`/entries/${entry.id}`"
-                                class="num font-medium whitespace-nowrap text-primary hover:underline"
+                                class="num font-medium whitespace-nowrap text-primary underline underline-offset-2"
                                 >{{ entry.number }}</Link
                             >
                         </td>

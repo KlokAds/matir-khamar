@@ -200,6 +200,13 @@ export const pageLinks: PageLink[] = [
         ability: 'view-reports',
     },
     {
+        title: 'হিসাবের সারাংশ',
+        words: 'summary overview dashboard month year সারাংশ সব হিসাব মাস বছর লাভ ক্ষতি',
+        href: '/summary',
+        icon: ChartColumnBig,
+        ability: 'view-reports',
+    },
+    {
         title: 'লাভের হিসাব ও পরিকল্পনা',
         words: 'profit planner what if লাভ ক্ষতি পরিকল্পনা যদি',
         href: '/profit',

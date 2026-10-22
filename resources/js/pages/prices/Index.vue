@@ -233,7 +233,7 @@ async function remove(card: Card, row: HistoryRow) {
                             :key="`${p.commodity}-${p.unit}`"
                             type="button"
                             :class="[
-                                'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                                'inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors',
                                 isPicked(p)
                                     ? 'border-primary bg-primary text-primary-foreground'
                                     : 'border-input bg-card hover:bg-accent',
@@ -354,7 +354,7 @@ async function remove(card: Card, row: HistoryRow) {
                     <button
                         type="button"
                         :class="[
-                            'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                            'inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors',
                             filter === null
                                 ? 'border-primary bg-primary text-primary-foreground'
                                 : 'border-input bg-card hover:bg-accent',
@@ -368,7 +368,7 @@ async function remove(card: Card, row: HistoryRow) {
                         :key="c"
                         type="button"
                         :class="[
-                            'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                            'inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors',
                             filter === c
                                 ? 'border-primary bg-primary text-primary-foreground'
                                 : 'border-input bg-card hover:bg-accent',
@@ -511,7 +511,8 @@ async function remove(card: Card, row: HistoryRow) {
 
                     <button
                         type="button"
-                        class="mt-2 flex w-full items-center justify-between rounded-md px-1 py-1.5 text-xs font-medium text-pond hover:bg-accent"
+                        class="btn-chip mt-2 w-full justify-between text-pond"
+                        :aria-expanded="open.has(c.key)"
                         @click="toggle(c.key)"
                     >
                         {{ t('আগের দাম (:nটি)', { n: c.count }) }}
@@ -556,9 +557,10 @@ async function remove(card: Card, row: HistoryRow) {
                             <button
                                 v-if="canWrite && r.deletable"
                                 type="button"
-                                class="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                                class="btn-icon hover:text-destructive"
                                 :disabled="removing === r.id"
                                 :aria-label="t('মুছুন')"
+                                :title="t('মুছুন')"
                                 @click="remove(c, r)"
                             >
                                 <Trash2 class="size-4" />

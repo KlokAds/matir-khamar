@@ -21,7 +21,7 @@ withDefaults(defineProps<Props>(), {
             <slot />
         </AppContent>
         <Toaster
-            position="top-center"
+            position="top-right"
             rich-colors
             close-button
             :offset="{ top: '4.5rem' }"

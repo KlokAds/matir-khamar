@@ -649,10 +649,7 @@ const bn = (n: number) =>
                         >
                             {{ step.body }}
                         </p>
-                        <Link
-                            :href="step.href"
-                            class="mt-2 inline-block text-sm font-medium text-paddy hover:underline"
-                        >
+                        <Link :href="step.href" class="btn-chip-primary mt-2">
                             {{ t(':label খুলুন →', { label: step.label }) }}
                         </Link>
                     </div>
@@ -711,13 +708,13 @@ const bn = (n: number) =>
                                 </li>
                             </ul>
                             <div
-                                class="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border/70 pt-3"
+                                class="mt-3 flex flex-wrap gap-2 border-t border-border/70 pt-3"
                             >
                                 <Link
                                     v-for="l in topic.links"
                                     :key="l.href"
                                     :href="l.href"
-                                    class="text-sm font-medium text-paddy hover:underline"
+                                    class="btn-chip"
                                 >
                                     {{
                                         topic.links.length > 1
