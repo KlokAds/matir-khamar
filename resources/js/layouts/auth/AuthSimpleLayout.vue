@@ -120,8 +120,7 @@ defineProps<{
                                 {{ t('Android অ্যাপ') }}
                             </span>
                             <a
-                                href="/downloads/matir-khamar.apk"
-                                download
+                                href="https://github.com/KlokAds/matir-khamar/releases/latest/download/matir-khamar.apk"
                                 class="btn-chip-primary"
                                 @click.stop
                                 ><Download /> {{ t('ডাউনলোড') }}</a

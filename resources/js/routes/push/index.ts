@@ -169,7 +169,7 @@ test.form = testForm
 
 /**
 * @see \App\Http\Controllers\ReminderController::received
-* @see app/Http/Controllers/ReminderController.php:168
+* @see app/Http/Controllers/ReminderController.php:189
 * @route '/push/received'
 */
 export const received = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -184,7 +184,7 @@ received.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::received
-* @see app/Http/Controllers/ReminderController.php:168
+* @see app/Http/Controllers/ReminderController.php:189
 * @route '/push/received'
 */
 received.url = (options?: RouteQueryOptions) => {
@@ -193,7 +193,7 @@ received.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReminderController::received
-* @see app/Http/Controllers/ReminderController.php:168
+* @see app/Http/Controllers/ReminderController.php:189
 * @route '/push/received'
 */
 received.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -203,7 +203,7 @@ received.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ReminderController::received
-* @see app/Http/Controllers/ReminderController.php:168
+* @see app/Http/Controllers/ReminderController.php:189
 * @route '/push/received'
 */
 const receivedForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -213,7 +213,7 @@ const receivedForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> 
 
 /**
 * @see \App\Http\Controllers\ReminderController::received
-* @see app/Http/Controllers/ReminderController.php:168
+* @see app/Http/Controllers/ReminderController.php:189
 * @route '/push/received'
 */
 receivedForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -223,11 +223,68 @@ receivedForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> =
 
 received.form = receivedForm
 
+/**
+* @see \App\Http\Controllers\ReminderController::app
+* @see app/Http/Controllers/ReminderController.php:168
+* @route '/push/app'
+*/
+export const app = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: app.url(options),
+    method: 'post',
+})
+
+app.definition = {
+    methods: ["post"],
+    url: '/push/app',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\ReminderController::app
+* @see app/Http/Controllers/ReminderController.php:168
+* @route '/push/app'
+*/
+app.url = (options?: RouteQueryOptions) => {
+    return app.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\ReminderController::app
+* @see app/Http/Controllers/ReminderController.php:168
+* @route '/push/app'
+*/
+app.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: app.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\ReminderController::app
+* @see app/Http/Controllers/ReminderController.php:168
+* @route '/push/app'
+*/
+const appForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: app.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\ReminderController::app
+* @see app/Http/Controllers/ReminderController.php:168
+* @route '/push/app'
+*/
+appForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: app.url(options),
+    method: 'post',
+})
+
+app.form = appForm
+
 const push = {
     subscribe: Object.assign(subscribe, subscribe),
     unsubscribe: Object.assign(unsubscribe, unsubscribe),
     test: Object.assign(test, test),
     received: Object.assign(received, received),
+    app: Object.assign(app, app),
 }
 
 export default push

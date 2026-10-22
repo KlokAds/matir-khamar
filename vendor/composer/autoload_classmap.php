@@ -109,6 +109,7 @@ return array(
     'App\\Services\\DailyChecklist' => $baseDir . '/app/Services/DailyChecklist.php',
     'App\\Services\\DebtBook' => $baseDir . '/app/Services/DebtBook.php',
     'App\\Services\\DuesBook' => $baseDir . '/app/Services/DuesBook.php',
+    'App\\Services\\FcmSender' => $baseDir . '/app/Services/FcmSender.php',
     'App\\Services\\HerdCare' => $baseDir . '/app/Services/HerdCare.php',
     'App\\Services\\InvestorBook' => $baseDir . '/app/Services/InvestorBook.php',
     'App\\Services\\KurbaniPlanner' => $baseDir . '/app/Services/KurbaniPlanner.php',

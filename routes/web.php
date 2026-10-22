@@ -69,6 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('notifications', [NotificationController::class, 'clear'])->name('notifications.clear');
     Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->whereNumber('notification')->name('notifications.destroy');
     Route::post('push/received', [ReminderController::class, 'received'])->middleware('throttle:120,1')->name('push.received');
+    Route::post('push/app', [ReminderController::class, 'app'])->middleware('throttle:20,1')->name('push.app');
     Route::put('notify-prefs', [ReminderController::class, 'prefs'])->name('notify.prefs');
 
     // Daily work: milk and feed use. Open to the entry role.

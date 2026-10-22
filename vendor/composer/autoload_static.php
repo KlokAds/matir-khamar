@@ -749,6 +749,7 @@ class ComposerStaticInit37f95d202e43fa9dcdb43cb49f1aa054
         'App\\Services\\DailyChecklist' => __DIR__ . '/../..' . '/app/Services/DailyChecklist.php',
         'App\\Services\\DebtBook' => __DIR__ . '/../..' . '/app/Services/DebtBook.php',
         'App\\Services\\DuesBook' => __DIR__ . '/../..' . '/app/Services/DuesBook.php',
+        'App\\Services\\FcmSender' => __DIR__ . '/../..' . '/app/Services/FcmSender.php',
         'App\\Services\\HerdCare' => __DIR__ . '/../..' . '/app/Services/HerdCare.php',
         'App\\Services\\InvestorBook' => __DIR__ . '/../..' . '/app/Services/InvestorBook.php',
         'App\\Services\\KurbaniPlanner' => __DIR__ . '/../..' . '/app/Services/KurbaniPlanner.php',

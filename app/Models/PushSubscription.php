@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $id
  * @property int $user_id
+ * @property string $kind web (browser push) or fcm (the farm's own Android app)
  * @property string $endpoint
  * @property string $endpoint_hash
  * @property string $public_key
@@ -27,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonImmutable|null $updated_at
  * @property-read User $user
  */
-#[Fillable(['user_id', 'endpoint', 'endpoint_hash', 'public_key', 'auth_token', 'content_encoding', 'device', 'failures', 'last_sent_at', 'last_received_at', 'mode'])]
+#[Fillable(['user_id', 'kind', 'endpoint', 'endpoint_hash', 'public_key', 'auth_token', 'content_encoding', 'device', 'failures', 'last_sent_at', 'last_received_at', 'mode'])]
 #[Hidden(['endpoint', 'public_key', 'auth_token'])]
 class PushSubscription extends Model
 {

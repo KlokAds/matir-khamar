@@ -103,10 +103,13 @@ class PushSender
             ]);
         }
 
-        $subscriptions = PushSubscription::query()->whereIn('user_id', $ids)->get();
+        $all = PushSubscription::query()->whereIn('user_id', $ids)->get();
+        // The farm's own Android app gets it straight through Firebase; browsers by web push.
+        $fromApp = app(FcmSender::class)->send($all->where('kind', 'fcm'), $payload);
+        $subscriptions = $all->where('kind', '!=', 'fcm')->values();
 
         if ($subscriptions->isEmpty()) {
-            return 0;
+            return $fromApp;
         }
 
         $keys = $this->keys();
@@ -160,6 +163,6 @@ class PushSender
             Log::warning('Push sending failed: '.$exception->getMessage());
         }
 
-        return $reached;
+        return $reached + $fromApp;
     }
 }
