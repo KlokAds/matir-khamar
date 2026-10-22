@@ -249,6 +249,38 @@ class SummaryBook
         return $out;
     }
 
+    /**
+     * The farm in plain words, from the start until today: what the owners put in, what the farm
+     * holds now, and so how much is gained or lost; where the money mostly went; and that the
+     * animals count at what they cost until they are sold.
+     *
+     * @return array{capital:int, worth:int, result:int, money:int, animals:int, animals_count:int, things:int, receivable:int, owed:int, income:int, expense:int, top_costs: list<array{name:string, amount:int}>, since:?string}
+     */
+    public function story(): array
+    {
+        $today = CarbonImmutable::today();
+        $position = $this->position($today);
+        $since = JournalEntry::query()->min('date');
+        $from = CarbonImmutable::parse((string) ($since ?? $today->toDateString()));
+        $result = $this->reports->farmTotals($from, $today->endOfDay());
+
+        return [
+            'capital' => $position['capital'],
+            'worth' => $position['net'],
+            'result' => $position['net'] - $position['capital'],
+            'money' => $position['money'],
+            'animals' => $position['animals'],
+            'animals_count' => Animal::query()->where('status', 'active')->count(),
+            'things' => $position['things'],
+            'receivable' => $position['receivable'],
+            'owed' => $position['owed'],
+            'income' => $result['income'],
+            'expense' => $result['expense'],
+            'top_costs' => array_slice($this->byAccount($from, $today->endOfDay(), 'expense'), 0, 4),
+            'since' => $since ? $from->toDateString() : null,
+        ];
+    }
+
     /** @return array{now:int, now_value:int, bought:int, bought_cost:int, sold:int, sold_amount:int, died:int, by_center: list<array{name:string, count:int}>} */
     public function herd(CarbonInterface $from, CarbonInterface $to): array
     {

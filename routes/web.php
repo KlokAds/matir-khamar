@@ -30,6 +30,7 @@ use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\SystemController;
+use App\Http\Controllers\UdyogController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard')->name('home');
@@ -95,7 +96,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('animals', [AnimalController::class, 'index'])->name('animals.index');
         Route::get('animals/{animal}', [AnimalController::class, 'show'])->whereNumber('animal')->name('animals.show');
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
+        Route::get('udyog', [UdyogController::class, 'index'])->name('udyog.index');
+        // The old budget page now lives in the Udyog loan page.
+        Route::redirect('reports/budget', '/udyog')->name('reports.budget');
         Route::get('reports/usage', [ReportController::class, 'usage'])->name('reports.usage');
         Route::get('reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');
         Route::inertia('guide/split', 'guide/Split')->name('guide.split');
@@ -149,6 +152,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('entries/{entry}/reverse', [EntryController::class, 'reverse'])->middleware('can:reverse-entries')->name('entries.reverse');
 
     Route::put('kurbani/eid', [KurbaniController::class, 'updateEid'])->middleware('can:manage-setup')->name('kurbani.eid');
+    Route::put('udyog', [UdyogController::class, 'update'])->middleware('can:manage-setup')->name('udyog.update');
+    Route::post('udyog/approve', [UdyogController::class, 'approve'])->middleware('can:manage-setup')->name('udyog.approve');
 
     Route::middleware('can:manage-setup')->prefix('setup')->name('setup.')->group(function () {
         Route::post('centers', [CostCenterController::class, 'store'])->name('centers.store');

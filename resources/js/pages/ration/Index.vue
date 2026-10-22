@@ -2,23 +2,29 @@
 import { Head, Link } from '@inertiajs/vue3';
 import {
     Baby,
+    Bean,
     BookOpen,
+    CalendarDays,
     ChevronDown,
     ChevronRight,
+    CircleCheck,
+    CircleHelp,
     Droplets,
     Info,
+    Leaf,
     Milk,
     Package,
     Pencil,
     RotateCcw,
     Scale,
     Settings2,
+    TrendingDown,
+    TrendingUp,
+    Wallet,
     Wheat,
-    X,
 } from '@lucide/vue';
-import { computed, reactive, ref } from 'vue';
+import { computed, nextTick, reactive, ref } from 'vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
-import StatTile from '@/components/khamar/StatTile.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { t } from '@/lib/i18n';
@@ -141,6 +147,17 @@ const overrides = reactive<Record<number, { weight: number; milk: number }>>(
 const editing = ref<number | null>(null);
 const showAssumptions = ref(false);
 const showRules = ref(false);
+const assumptionsPanel = ref<HTMLElement | null>(null);
+
+/** The header button opens the assumptions panel at the foot of the page and brings it into view. */
+async function openAssumptions() {
+    showAssumptions.value = true;
+    await nextTick();
+    assumptionsPanel.value?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+    });
+}
 
 function reset() {
     Object.assign(a, clone(props.defaults));
@@ -369,6 +386,8 @@ const suggestedPerDay = computed<Record<FeedKey, number>>(() => ({
     oilcake: total.value.oilcake,
 }));
 
+type CompareKind = 'more' | 'less' | 'ok' | 'none';
+
 const stockRows = computed(() =>
     props.stock.map((s) => {
         const need = suggestedPerDay.value[s.key];
@@ -377,7 +396,11 @@ const stockRows = computed(() =>
             s.actual_per_day !== null && need > 0
                 ? s.actual_per_day / need
                 : null;
-        let compare: { text: string; tone: string } | null = null;
+        let compare: {
+            text: string;
+            tone: string;
+            kind: CompareKind;
+        } | null = null;
 
         if (need > 0 && s.actual_per_day === null) {
             compare = {
@@ -385,6 +408,7 @@ const stockRows = computed(() =>
                     n: props.windowDays,
                 }),
                 tone: 'text-muted-foreground',
+                kind: 'none',
             };
         } else if (ratio !== null) {
             const pct = Math.round(Math.abs(ratio - 1) * 100);
@@ -396,6 +420,7 @@ const stockRows = computed(() =>
                               p: pct,
                           }),
                           tone: 'text-clay',
+                          kind: 'more',
                       }
                     : ratio < 0.85
                       ? {
@@ -403,10 +428,12 @@ const stockRows = computed(() =>
                                 p: pct,
                             }),
                             tone: 'text-clay',
+                            kind: 'less',
                         }
                       : {
                             text: t('প্রায় পরামর্শমতো দিচ্ছেন'),
                             tone: 'text-paddy',
+                            kind: 'ok',
                         };
         }
 
@@ -422,6 +449,115 @@ const stockRows = computed(() =>
         return { ...s, need, days, compare, tone };
     }),
 );
+
+// ---- Display helpers (presentation only) ----
+
+const feedIcons: Record<FeedKey, typeof Milk> = {
+    green: Leaf,
+    straw: Wheat,
+    bran: Bean,
+    concentrate: Package,
+    oilcake: Bean,
+};
+
+/** Stock level colours: green beyond 30 days, amber 7–30, red under 7. */
+function stockLevel(days: number | null) {
+    if (days === null) {
+        return {
+            bar: 'bg-muted-foreground/30',
+            text: 'text-muted-foreground',
+            chip: 'bg-muted text-muted-foreground',
+        };
+    }
+
+    if (days > 30) {
+        return {
+            bar: 'bg-paddy',
+            text: 'text-paddy',
+            chip: 'bg-paddy/12 text-paddy',
+        };
+    }
+
+    if (days >= 7) {
+        return {
+            bar: 'bg-turmeric',
+            text: 'text-soil',
+            chip: 'bg-turmeric/25 text-soil',
+        };
+    }
+
+    return {
+        bar: 'bg-destructive',
+        text: 'text-destructive',
+        chip: 'bg-destructive/10 text-destructive',
+    };
+}
+
+/** Bar length: 60 days of stock fills it. */
+const stockBar = (days: number | null) =>
+    days === null ? '0%' : `${Math.max(3, Math.min(100, (days / 60) * 100))}%`;
+
+const compareStyles: Record<CompareKind, { cls: string; icon: typeof Milk }> = {
+    more: { cls: 'border-clay/30 bg-clay/10 text-clay', icon: TrendingUp },
+    less: { cls: 'border-clay/30 bg-clay/10 text-clay', icon: TrendingDown },
+    ok: { cls: 'border-paddy/30 bg-paddy/10 text-paddy', icon: CircleCheck },
+    none: {
+        cls: 'border-border bg-muted text-muted-foreground',
+        icon: CircleHelp,
+    },
+};
+
+/** The farm-per-day strip at the top. */
+const farmStrip = computed(() => [
+    {
+        key: 'green',
+        label: 'কাঁচা ঘাস',
+        value: kg(total.value.green),
+        unit: 'কেজি',
+        icon: Leaf,
+        tile: 'border-paddy/25 bg-paddy/10',
+        chip: 'bg-paddy/15 text-paddy',
+    },
+    {
+        key: 'straw',
+        label: 'খড়',
+        value: kg(total.value.straw),
+        unit: 'কেজি',
+        icon: Wheat,
+        tile: 'border-turmeric/40 bg-turmeric/15',
+        chip: 'bg-turmeric/30 text-soil',
+    },
+    {
+        key: 'conc',
+        label: 'দানাদার',
+        value: kg(total.value.conc),
+        unit: 'কেজি',
+        icon: Bean,
+        tile: 'border-clay/25 bg-clay/10',
+        chip: 'bg-clay/15 text-clay',
+    },
+    {
+        key: 'water',
+        label: 'পানি',
+        value: whole(total.value.water),
+        unit: 'লিটার',
+        icon: Droplets,
+        tile: 'border-pond/25 bg-pond/10',
+        chip: 'bg-pond/15 text-pond',
+    },
+]);
+
+/** What the concentrate is made of, plus mineral and salt, for the whole farm. */
+const mixChips = computed<{ k: PriceKey; v: string; u: string }[]>(() => [
+    { k: 'bran', v: kg(total.value.bran), u: 'কেজি' },
+    { k: 'concentrate', v: kg(total.value.concentrate), u: 'কেজি' },
+    { k: 'oilcake', v: kg(total.value.oilcake), u: 'কেজি' },
+    { k: 'mineral', v: whole(total.value.mineral), u: 'গ্রাম' },
+    { k: 'salt', v: whole(total.value.salt), u: 'গ্রাম' },
+]);
+
+/** Fresh feed a group eats a day: grass + straw + concentrate. */
+const feedKg = (s: Sum) => s.green + s.straw + s.conc;
 
 // ---- Formatting ----
 
@@ -597,7 +733,7 @@ const rules = [
 <template>
     <Head :title="t('খাবারের রেশন হিসাব')" />
 
-    <div class="flex flex-1 flex-col p-4 pb-24 md:p-6">
+    <div class="flex flex-1 flex-col gap-5 p-4 pb-24 md:p-6 md:pb-6">
         <PageTitle
             :title="t('খাবারের রেশন হিসাব')"
             :subtitle="
@@ -610,15 +746,16 @@ const rules = [
                 <Button
                     variant="secondary"
                     :aria-expanded="showAssumptions"
-                    @click="showAssumptions = !showAssumptions"
+                    @click="openAssumptions"
                 >
                     <Settings2 /> {{ t('হিসাবের নিয়ম বদলান') }}
                 </Button>
             </template>
         </PageTitle>
 
+        <!-- Disclaimer -->
         <div
-            class="mb-4 flex items-start gap-3 rounded-xl border border-turmeric/50 bg-turmeric/15 p-3 text-sm leading-snug text-soil"
+            class="-mt-1 flex items-start gap-3 rounded-xl border border-turmeric/50 bg-turmeric/15 p-3 text-sm leading-normal text-soil"
             role="note"
         >
             <Info class="mt-0.5 size-4 shrink-0" />
@@ -632,156 +769,14 @@ const rules = [
             </p>
         </div>
 
-        <!-- Assumptions -->
-        <section
-            v-if="showAssumptions"
-            class="mb-4 rounded-xl border border-border bg-card p-4"
-        >
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    <h2 class="font-display text-lg leading-snug">
-                        {{ t('হিসাবের নিয়ম') }}
-                    </h2>
-                    <p class="text-[13px] text-muted-foreground">
-                        {{
-                            t(
-                                'বদলালে সঙ্গে সঙ্গে হিসাব বদলায়; এখানে কিছু সেভ হয় না।',
-                            )
-                        }}
-                    </p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" class="btn-chip" @click="reset">
-                        <RotateCcw /> {{ t('আগের মতো') }}
-                    </button>
-                    <button
-                        type="button"
-                        class="btn-icon"
-                        :aria-label="t('লুকান')"
-                        :title="t('লুকান')"
-                        @click="showAssumptions = false"
-                    >
-                        <X />
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
-                <div
-                    v-for="s in sections"
-                    :key="s.title"
-                    class="rounded-lg border border-border/70 p-3"
-                >
-                    <p class="text-sm font-semibold">{{ t(s.title) }}</p>
-                    <p
-                        v-if="s.hint"
-                        class="mb-1 text-xs leading-snug text-muted-foreground"
-                    >
-                        {{ t(s.hint) }}
-                    </p>
-                    <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-2.5">
-                        <label
-                            v-for="f in s.fields"
-                            :key="f.label"
-                            class="grid content-end gap-1"
-                        >
-                            <span
-                                class="text-xs leading-snug text-muted-foreground"
-                                >{{ t(f.label) }}</span
-                            >
-                            <span class="relative">
-                                <Input
-                                    type="number"
-                                    inputmode="decimal"
-                                    min="0"
-                                    :step="f.step"
-                                    class="num h-9 pr-12"
-                                    :model-value="f.get()"
-                                    @update:model-value="f.set(num($event))"
-                                />
-                                <span
-                                    class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-xs text-muted-foreground"
-                                    >{{ f.suffix }}</span
-                                >
-                            </span>
-                        </label>
-                    </div>
-                    <p
-                        v-if="s.title === 'দানাদার মিশ্রণ' && mixSum !== 100"
-                        class="mt-2 text-xs text-clay"
-                    >
-                        {{ t('মোট :n — ১০০ ধরে ভাগ করা হচ্ছে', { n: mixSum }) }}
-                    </p>
-                    <p
-                        v-if="s.title === 'দানাদার খাদ্য'"
-                        class="mt-2 text-xs leading-snug text-muted-foreground"
-                    >
-                        {{
-                            t('মোটাতাজা: ওজনের :p% দানাদার', {
-                                p: round(fatteningPct(a.fattening_gain_g), 2),
-                            })
-                        }}
-                    </p>
-                </div>
-
-                <div
-                    class="rounded-lg border border-border/70 p-3 lg:col-span-2"
-                >
-                    <p class="text-sm font-semibold">
-                        {{ t('দাম (৳ / কেজি)') }}
-                    </p>
-                    <div
-                        class="mt-2 grid grid-cols-2 gap-x-3 gap-y-2.5 sm:grid-cols-4 lg:grid-cols-7"
-                    >
-                        <label
-                            v-for="k in priceKeys"
-                            :key="k"
-                            class="grid content-end gap-1"
-                        >
-                            <span
-                                class="text-xs leading-snug text-muted-foreground"
-                                >{{ t(feedLabels[k]) }}</span
-                            >
-                            <Input
-                                v-model.number="priceTaka[k]"
-                                type="number"
-                                inputmode="decimal"
-                                min="0"
-                                step="0.5"
-                                class="num h-9"
-                            />
-                            <span
-                                class="text-[11px] leading-snug text-muted-foreground"
-                            >
-                                {{ t(sourceLabels[prices[k].source]) }}
-                                <template
-                                    v-if="
-                                        prices[k].market_price &&
-                                        prices[k].source === 'stock'
-                                    "
-                                >
-                                    ·
-                                    {{
-                                        t('হাটে :p', {
-                                            p: taka(prices[k].market_price),
-                                        })
-                                    }}
-                                </template>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <div
             v-if="animals.length === 0"
             class="rounded-xl border border-dashed border-border bg-card p-6 text-center"
         >
-            <p class="font-medium">
+            <p class="leading-normal font-medium">
                 {{ t('চালু ক্যাটাগরিতে কোনো গরু নেই।') }}
             </p>
-            <p class="mt-1 text-sm text-muted-foreground">
+            <p class="mt-1 text-sm leading-normal text-muted-foreground">
                 {{ t('গরু যোগ করলে এখানে প্রতিটির রেশন দেখাবে।') }}
             </p>
             <Button as-child variant="secondary" class="mt-4">
@@ -792,97 +787,123 @@ const rules = [
         </div>
 
         <template v-else>
-            <!-- Farm totals -->
+            <!-- Cost -->
             <div class="grid grid-cols-2 gap-3">
-                <StatTile
-                    :label="t('দিনে খরচ')"
-                    :value="wholeTaka(total.cost)"
-                    :hint="t(':n টি গরু', { n: total.count })"
-                />
-                <StatTile
-                    :label="t('মাসে খরচ (৩০ দিন)')"
-                    :value="wholeTaka(total.cost * 30)"
-                    :hint="t('আনুমানিক')"
-                />
+                <div
+                    class="min-w-0 rounded-2xl border border-paddy/30 bg-paddy/8 p-4 sm:p-5"
+                >
+                    <div class="flex items-start justify-between gap-3">
+                        <p
+                            class="text-[13px] leading-normal text-muted-foreground sm:text-sm"
+                        >
+                            {{ t('দিনে খরচ') }}
+                        </p>
+                        <span
+                            class="hidden rounded-lg bg-paddy/15 p-2 text-paddy sm:inline-flex"
+                        >
+                            <Wallet class="size-5" />
+                        </span>
+                    </div>
+                    <p
+                        class="num mt-1 truncate text-2xl leading-tight font-semibold tracking-tight sm:text-4xl"
+                    >
+                        {{ wholeTaka(total.cost) }}
+                    </p>
+                    <p
+                        class="mt-1 text-xs leading-normal text-muted-foreground"
+                    >
+                        {{ t(':n টি গরু', { n: total.count }) }}
+                    </p>
+                </div>
+                <div
+                    class="min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-5"
+                >
+                    <div class="flex items-start justify-between gap-3">
+                        <p
+                            class="text-[13px] leading-normal text-muted-foreground sm:text-sm"
+                        >
+                            {{ t('মাসে খরচ (৩০ দিন)') }}
+                        </p>
+                        <span
+                            class="hidden rounded-lg bg-clay/12 p-2 text-clay sm:inline-flex"
+                        >
+                            <CalendarDays class="size-5" />
+                        </span>
+                    </div>
+                    <p
+                        class="num mt-1 truncate text-2xl leading-tight font-semibold tracking-tight sm:text-4xl"
+                    >
+                        {{ wholeTaka(total.cost * 30) }}
+                    </p>
+                    <p
+                        class="mt-1 text-xs leading-normal text-muted-foreground"
+                    >
+                        {{ t('আনুমানিক') }}
+                    </p>
+                </div>
             </div>
 
-            <section class="mt-4 rounded-xl border border-border bg-card p-4">
-                <h2 class="font-display text-lg leading-snug">
+            <!-- Whole farm per day -->
+            <section
+                class="rounded-2xl border border-border bg-card p-4 sm:p-5"
+            >
+                <h2 class="font-display text-lg leading-normal">
                     {{ t('পুরো খামারে দিনে') }}
                 </h2>
                 <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div class="rounded-lg bg-paddy/10 p-3">
-                        <dt class="text-xs text-muted-foreground">
-                            {{ t('কাঁচা ঘাস') }}
+                    <div
+                        v-for="f in farmStrip"
+                        :key="f.key"
+                        :class="[
+                            'min-w-0 rounded-xl border p-3 sm:p-4',
+                            f.tile,
+                        ]"
+                    >
+                        <dt
+                            class="flex items-center gap-2 text-[13px] leading-normal text-muted-foreground"
+                        >
+                            <span :class="['rounded-md p-1.5', f.chip]">
+                                <component :is="f.icon" class="size-4" />
+                            </span>
+                            {{ t(f.label) }}
                         </dt>
-                        <dd class="num text-xl font-semibold">
-                            {{ kg(total.green) }}
-                            <span class="text-sm font-normal">{{
-                                t('কেজি')
-                            }}</span>
-                        </dd>
-                    </div>
-                    <div class="rounded-lg bg-turmeric/20 p-3">
-                        <dt class="text-xs text-muted-foreground">
-                            {{ t('খড়') }}
-                        </dt>
-                        <dd class="num text-xl font-semibold">
-                            {{ kg(total.straw) }}
-                            <span class="text-sm font-normal">{{
-                                t('কেজি')
-                            }}</span>
-                        </dd>
-                    </div>
-                    <div class="rounded-lg bg-clay/10 p-3">
-                        <dt class="text-xs text-muted-foreground">
-                            {{ t('দানাদার') }}
-                        </dt>
-                        <dd class="num text-xl font-semibold">
-                            {{ kg(total.conc) }}
-                            <span class="text-sm font-normal">{{
-                                t('কেজি')
-                            }}</span>
-                        </dd>
-                    </div>
-                    <div class="rounded-lg bg-pond/10 p-3">
-                        <dt class="text-xs text-muted-foreground">
-                            {{ t('পানি') }}
-                        </dt>
-                        <dd class="num text-xl font-semibold">
-                            {{ whole(total.water) }}
-                            <span class="text-sm font-normal">{{
-                                t('লিটার')
-                            }}</span>
+                        <dd
+                            class="num mt-2 truncate text-2xl leading-tight font-semibold"
+                        >
+                            {{ f.value }}
+                            <span
+                                class="text-sm font-normal text-muted-foreground"
+                                >{{ t(f.unit) }}</span
+                            >
                         </dd>
                     </div>
                 </dl>
-                <p
-                    class="num mt-3 text-sm leading-relaxed text-muted-foreground"
-                >
-                    {{
-                        t(
-                            'দানাদারের মধ্যে ভুসি :b কেজি, দানাদার খাদ্য :c কেজি, খৈল :o কেজি · খনিজ :m গ্রাম · লবণ :s গ্রাম',
-                            {
-                                b: kg(total.bran),
-                                c: kg(total.concentrate),
-                                o: kg(total.oilcake),
-                                m: whole(total.mineral),
-                                s: whole(total.salt),
-                            },
-                        )
-                    }}
-                </p>
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    <span
+                        v-for="m in mixChips"
+                        :key="m.k"
+                        class="inline-flex items-baseline gap-1 rounded-full bg-muted px-2.5 py-1 text-xs leading-normal text-muted-foreground"
+                    >
+                        {{ t(feedLabels[m.k]) }}
+                        <span class="num font-semibold text-foreground">{{
+                            m.v
+                        }}</span>
+                        {{ t(m.u) }}
+                    </span>
+                </div>
             </section>
 
             <!-- Stock -->
-            <section class="mt-4 rounded-xl border border-border bg-card p-4">
+            <section
+                class="rounded-2xl border border-border bg-card p-4 sm:p-5"
+            >
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="min-w-0">
-                        <h2 class="font-display text-lg leading-snug">
+                        <h2 class="font-display text-lg leading-normal">
                             {{ t('স্টক কত দিন চলবে') }}
                         </h2>
                         <p
-                            class="text-[13px] leading-snug text-muted-foreground"
+                            class="text-[13px] leading-normal text-muted-foreground"
                         >
                             {{
                                 t(
@@ -898,31 +919,52 @@ const rules = [
                 </div>
 
                 <ul
-                    class="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 xl:grid-cols-3"
+                    class="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 xl:grid-cols-3"
                 >
                     <li
                         v-for="s in stockRows"
                         :key="s.key"
-                        class="rounded-lg border border-border/70 p-3"
+                        class="flex min-w-0 flex-col rounded-xl border border-border/70 p-3.5"
                     >
-                        <div class="flex items-start justify-between gap-2">
-                            <p class="leading-snug font-medium">
-                                {{ t(feedLabels[s.key]) }}
-                            </p>
-                            <span
-                                :class="[
-                                    'num shrink-0 rounded-full px-2 py-0.5 text-xs font-medium',
-                                    s.tone,
-                                ]"
-                                >{{
-                                    s.days === null
-                                        ? '—'
-                                        : t(':n দিন', { n: whole(s.days) })
-                                }}</span
+                        <div class="flex items-center justify-between gap-3">
+                            <p
+                                class="flex min-w-0 items-center gap-2 leading-normal font-medium"
                             >
+                                <component
+                                    :is="feedIcons[s.key]"
+                                    class="size-4 shrink-0 text-muted-foreground"
+                                />
+                                <span class="truncate">{{
+                                    t(feedLabels[s.key])
+                                }}</span>
+                            </p>
+                            <p
+                                :class="[
+                                    'num shrink-0 text-2xl leading-tight font-semibold',
+                                    stockLevel(s.days).text,
+                                ]"
+                            >
+                                {{ s.days === null ? '—' : whole(s.days) }}
+                                <span
+                                    v-if="s.days !== null"
+                                    class="text-sm font-normal"
+                                    >{{ t('দিন') }}</span
+                                >
+                            </p>
+                        </div>
+                        <div
+                            class="mt-2 h-2 overflow-hidden rounded-full bg-muted"
+                        >
+                            <div
+                                :class="[
+                                    'h-2 rounded-full',
+                                    stockLevel(s.days).bar,
+                                ]"
+                                :style="{ width: stockBar(s.days) }"
+                            />
                         </div>
                         <p
-                            class="num mt-1 text-sm leading-snug text-muted-foreground"
+                            class="num mt-2 text-[13px] leading-normal text-muted-foreground"
                         >
                             {{
                                 t('আছে :q কেজি · দরকার :n কেজি/দিন', {
@@ -933,7 +975,7 @@ const rules = [
                         </p>
                         <p
                             v-if="s.actual_per_day !== null"
-                            class="num text-sm leading-snug text-muted-foreground"
+                            class="num text-[13px] leading-normal text-muted-foreground"
                         >
                             {{
                                 t('আসলে গেছে :a কেজি/দিন', {
@@ -941,22 +983,26 @@ const rules = [
                                 })
                             }}
                         </p>
-                        <p
+                        <span
                             v-if="s.compare"
                             :class="[
-                                'mt-1 text-[13px] leading-snug',
-                                s.compare.tone,
+                                'mt-2.5 inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs leading-normal font-medium',
+                                compareStyles[s.compare.kind].cls,
                             ]"
                         >
-                            {{ s.compare.text }}
-                        </p>
+                            <component
+                                :is="compareStyles[s.compare.kind].icon"
+                                class="size-3.5 shrink-0"
+                            />
+                            <span class="min-w-0">{{ s.compare.text }}</span>
+                        </span>
                         <p
                             v-if="
                                 s.key === 'green' &&
                                 s.days !== null &&
                                 s.days < 7
                             "
-                            class="mt-1 text-[13px] leading-snug text-clay"
+                            class="mt-2 text-[13px] leading-normal text-clay"
                         >
                             {{
                                 t(
@@ -966,7 +1012,7 @@ const rules = [
                         </p>
                         <p
                             v-if="s.items.length"
-                            class="mt-1 truncate text-[11px] text-muted-foreground"
+                            class="mt-auto truncate pt-2 text-[11px] leading-normal text-muted-foreground"
                         >
                             {{ s.items.map((i) => t(i)).join(' · ') }}
                         </p>
@@ -978,67 +1024,422 @@ const rules = [
             <section
                 v-for="g in groups"
                 :key="g.key"
-                class="mt-4 rounded-xl border border-border bg-card p-4"
+                class="overflow-hidden rounded-2xl border border-border bg-card"
             >
-                <div class="flex flex-wrap items-start justify-between gap-2">
-                    <div class="flex min-w-0 items-center gap-2.5">
-                        <span class="rounded-lg bg-paddy/12 p-2 text-paddy">
+                <header
+                    class="flex flex-col gap-3 border-b border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                >
+                    <div class="flex min-w-0 items-center gap-3">
+                        <span
+                            class="shrink-0 rounded-lg bg-paddy/12 p-2 text-paddy"
+                        >
                             <component :is="g.icon" class="size-5" />
                         </span>
                         <div class="min-w-0">
-                            <h2 class="font-display text-lg leading-snug">
+                            <h2 class="font-display text-lg leading-normal">
                                 {{ t(g.label) }}
                             </h2>
-                            <p class="text-[13px] text-muted-foreground">
-                                {{ t(':n টি গরু', { n: g.total.count }) }}
+                            <p
+                                class="num text-[13px] leading-normal text-muted-foreground"
+                            >
+                                {{
+                                    t(
+                                        'মোট দিনে: ঘাস :g কেজি · খড় :s কেজি · দানাদার :c কেজি',
+                                        {
+                                            g: kg(g.total.green),
+                                            s: kg(g.total.straw),
+                                            c: kg(g.total.conc),
+                                        },
+                                    )
+                                }}
                             </p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="num font-semibold">
-                            {{ t(':c/দিন', { c: taka(g.total.cost) }) }}
-                        </p>
-                        <p class="num text-xs text-muted-foreground">
-                            {{ t(':c/মাস', { c: taka(g.total.cost * 30) }) }}
-                        </p>
-                    </div>
+                    <dl class="grid shrink-0 grid-cols-3 gap-2 sm:flex">
+                        <div
+                            class="rounded-lg border border-border/70 bg-card px-3 py-2 sm:min-w-20"
+                        >
+                            <dt
+                                class="text-[11px] leading-normal text-muted-foreground"
+                            >
+                                {{ t('গরু') }}
+                            </dt>
+                            <dd class="num leading-tight font-semibold">
+                                {{ g.total.count }}
+                            </dd>
+                        </div>
+                        <div
+                            class="rounded-lg border border-border/70 bg-card px-3 py-2 sm:min-w-24"
+                        >
+                            <dt
+                                class="text-[11px] leading-normal text-muted-foreground"
+                            >
+                                {{ t('কেজি / দিন') }}
+                            </dt>
+                            <dd class="num leading-tight font-semibold">
+                                {{ kg(feedKg(g.total)) }}
+                            </dd>
+                        </div>
+                        <div
+                            class="rounded-lg border border-paddy/30 bg-paddy/8 px-3 py-2 sm:min-w-28"
+                        >
+                            <dt
+                                class="text-[11px] leading-normal text-muted-foreground"
+                            >
+                                {{ t('খরচ / দিন') }}
+                            </dt>
+                            <dd class="num leading-tight font-semibold">
+                                {{ wholeTaka(g.total.cost) }}
+                            </dd>
+                            <dd
+                                class="num text-[11px] leading-normal text-muted-foreground"
+                            >
+                                {{
+                                    t(':c/মাস', {
+                                        c: wholeTaka(g.total.cost * 30),
+                                    })
+                                }}
+                            </dd>
+                        </div>
+                    </dl>
+                </header>
+
+                <!-- Wide screens: a table -->
+                <div class="hidden xl:block">
+                    <table class="w-full table-fixed text-sm">
+                        <colgroup>
+                            <col />
+                            <col class="w-24" />
+                            <col class="w-22" />
+                            <col class="w-40" />
+                            <col class="w-36" />
+                            <col class="w-24" />
+                            <col class="w-26" />
+                            <col class="w-14" />
+                        </colgroup>
+                        <thead>
+                            <tr
+                                class="border-b border-border text-left text-xs leading-normal text-muted-foreground"
+                            >
+                                <th class="px-5 py-2.5 font-medium">
+                                    {{ t('গরু') }}
+                                </th>
+                                <th class="px-3 py-2.5 text-right font-medium">
+                                    {{ t('কাঁচা ঘাস') }}
+                                </th>
+                                <th class="px-3 py-2.5 text-right font-medium">
+                                    {{ t('খড়') }}
+                                </th>
+                                <th class="px-3 py-2.5 text-right font-medium">
+                                    {{ t('দানাদার') }}
+                                </th>
+                                <th class="px-3 py-2.5 text-right font-medium">
+                                    {{ t('পানি') }}
+                                </th>
+                                <th class="px-3 py-2.5 text-right font-medium">
+                                    {{ t('শুকনো খাদ্য') }}
+                                </th>
+                                <th class="px-3 py-2.5 text-right font-medium">
+                                    {{ t('খরচ / দিন') }}
+                                </th>
+                                <th class="px-4 py-2.5">
+                                    <span class="sr-only">{{
+                                        t('ওজন / দুধ বদলে দেখুন')
+                                    }}</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody
+                            v-for="row in g.rows"
+                            :key="row.id"
+                            class="border-b border-border/70 last:border-0"
+                        >
+                            <tr class="align-top">
+                                <td class="px-5 py-3">
+                                    <Link
+                                        :href="`/animals/${row.id}`"
+                                        class="leading-normal font-medium text-primary underline underline-offset-2"
+                                        >{{ row.tag
+                                        }}<template v-if="row.name">
+                                            · {{ row.name }}</template
+                                        ></Link
+                                    >
+                                    <p
+                                        class="num text-[13px] leading-normal text-muted-foreground"
+                                    >
+                                        {{
+                                            t(':w কেজি', { w: kg(row.weight) })
+                                        }}
+                                        <template
+                                            v-if="row.category === 'gavi'"
+                                        >
+                                            ·
+                                            {{
+                                                t(':l লি. দুধ/দিন', {
+                                                    l: kg(row.milk),
+                                                })
+                                            }}
+                                        </template>
+                                        <template
+                                            v-if="
+                                                row.category === 'motataja' &&
+                                                row.gain_g !== null
+                                            "
+                                        >
+                                            ·
+                                            {{
+                                                t('বাড়ছে :g গ্রাম/দিন', {
+                                                    g: row.gain_g,
+                                                })
+                                            }}
+                                        </template>
+                                    </p>
+                                    <div
+                                        class="mt-1.5 flex flex-wrap gap-1.5 empty:hidden"
+                                    >
+                                        <span
+                                            v-if="
+                                                row.weight_estimated &&
+                                                !row.edited
+                                            "
+                                            class="tag bg-turmeric/25 text-soil"
+                                            >{{
+                                                t('ওজন লেখা নেই — আনুমানিক')
+                                            }}</span
+                                        >
+                                        <span
+                                            v-if="row.edited"
+                                            class="tag bg-pond/12 text-pond"
+                                            >{{ t('বদলানো হিসাব') }}</span
+                                        >
+                                        <span
+                                            v-if="row.pregnant"
+                                            class="tag bg-paddy/12 text-paddy"
+                                            >{{
+                                                row.expected_on
+                                                    ? t('গর্ভবতী · বাচ্চা :d', {
+                                                          d: day(
+                                                              row.expected_on,
+                                                          ),
+                                                      })
+                                                    : t('গর্ভবতী')
+                                            }}{{
+                                                row.late_pregnancy
+                                                    ? ` · ${t('+দানাদার')}`
+                                                    : ''
+                                            }}</span
+                                        >
+                                        <span
+                                            v-if="
+                                                row.milk_source === 'center' &&
+                                                !row.edited
+                                            "
+                                            class="tag bg-muted text-muted-foreground"
+                                            >{{
+                                                t('দুধ: ক্যাটাগরির গড়')
+                                            }}</span
+                                        >
+                                        <span
+                                            v-if="
+                                                row.category === 'gavi' &&
+                                                row.milk_source === null &&
+                                                !row.edited
+                                            "
+                                            class="tag bg-muted text-muted-foreground"
+                                            >{{
+                                                t(
+                                                    'গত :n দিনে দুধের হিসাব নেই',
+                                                    {
+                                                        n: milkDays,
+                                                    },
+                                                )
+                                            }}</span
+                                        >
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3 text-right">
+                                    <span class="num font-semibold">{{
+                                        kg(row.r.green)
+                                    }}</span>
+                                    <span class="unit">{{ t('কেজি') }}</span>
+                                </td>
+                                <td class="px-3 py-3 text-right">
+                                    <span class="num font-semibold">{{
+                                        kg(row.r.straw)
+                                    }}</span>
+                                    <span class="unit">{{ t('কেজি') }}</span>
+                                </td>
+                                <td class="px-3 py-3 text-right">
+                                    <span class="num font-semibold">{{
+                                        kg(row.r.conc)
+                                    }}</span>
+                                    <span class="unit">{{ t('কেজি') }}</span>
+                                    <p
+                                        class="num mt-0.5 text-[11px] leading-normal text-muted-foreground"
+                                    >
+                                        {{
+                                            t(
+                                                'ভুসি :b · দানাদার :c · খৈল :o কেজি',
+                                                {
+                                                    b: kg(row.r.bran),
+                                                    c: kg(row.r.concentrate),
+                                                    o: kg(row.r.oilcake),
+                                                },
+                                            )
+                                        }}
+                                    </p>
+                                </td>
+                                <td class="px-3 py-3 text-right">
+                                    <span class="num font-semibold">{{
+                                        row.r.water
+                                    }}</span>
+                                    <span class="unit">{{ t('লিটার') }}</span>
+                                    <p
+                                        class="num mt-0.5 text-[11px] leading-normal text-muted-foreground"
+                                    >
+                                        {{
+                                            t('খনিজ :m · লবণ :s গ্রাম', {
+                                                m: row.r.mineral,
+                                                s: row.r.salt,
+                                            })
+                                        }}
+                                    </p>
+                                </td>
+                                <td class="px-3 py-3 text-right">
+                                    <span class="num font-semibold">{{
+                                        kg(row.r.dm)
+                                    }}</span>
+                                    <span class="unit">{{ t('কেজি') }}</span>
+                                    <p
+                                        class="num mt-0.5 text-[11px] leading-normal text-muted-foreground"
+                                    >
+                                        {{ t('ওজনের :p%', { p: row.r.dmPct }) }}
+                                    </p>
+                                </td>
+                                <td
+                                    class="num px-3 py-3 text-right font-semibold whitespace-nowrap"
+                                >
+                                    {{ taka(row.r.cost) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-right">
+                                    <button
+                                        type="button"
+                                        :class="[
+                                            'btn-icon size-8',
+                                            editing === row.id
+                                                ? 'border-primary/40 bg-primary/10 text-primary'
+                                                : '',
+                                        ]"
+                                        :aria-label="t('ওজন / দুধ বদলে দেখুন')"
+                                        :title="t('ওজন / দুধ বদলে দেখুন')"
+                                        :aria-expanded="editing === row.id"
+                                        @click="startEdit(row)"
+                                    >
+                                        <Pencil />
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr
+                                v-if="
+                                    (editing === row.id && overrides[row.id]) ||
+                                    row.r.concShare > 50
+                                "
+                            >
+                                <td colspan="8" class="px-5 pb-3">
+                                    <p
+                                        v-if="row.r.concShare > 50"
+                                        class="text-[13px] leading-normal text-clay"
+                                    >
+                                        {{
+                                            t(
+                                                'দানাদার শুকনো খাদ্যের :p% — খড়-ঘাস বাড়ান, হঠাৎ দানাদার বাড়াবেন না',
+                                                {
+                                                    p: Math.round(
+                                                        row.r.concShare,
+                                                    ),
+                                                },
+                                            )
+                                        }}
+                                    </p>
+                                    <div
+                                        v-if="
+                                            editing === row.id &&
+                                            overrides[row.id]
+                                        "
+                                        class="mt-1 flex flex-wrap items-end gap-3 rounded-lg bg-muted/50 p-3"
+                                    >
+                                        <label class="grid w-40 gap-1">
+                                            <span
+                                                class="text-xs leading-normal text-muted-foreground"
+                                                >{{ t('ওজন (কেজি)') }}</span
+                                            >
+                                            <Input
+                                                v-model.number="
+                                                    overrides[row.id].weight
+                                                "
+                                                type="number"
+                                                inputmode="decimal"
+                                                min="0"
+                                                class="num h-9"
+                                            />
+                                        </label>
+                                        <label
+                                            v-if="row.category === 'gavi'"
+                                            class="grid w-40 gap-1"
+                                        >
+                                            <span
+                                                class="text-xs leading-normal text-muted-foreground"
+                                                >{{
+                                                    t('দুধ (লিটার/দিন)')
+                                                }}</span
+                                            >
+                                            <Input
+                                                v-model.number="
+                                                    overrides[row.id].milk
+                                                "
+                                                type="number"
+                                                inputmode="decimal"
+                                                min="0"
+                                                step="0.5"
+                                                class="num h-9"
+                                            />
+                                        </label>
+                                        <button
+                                            type="button"
+                                            class="btn-chip mb-0.5"
+                                            @click="clearEdit(row.id)"
+                                        >
+                                            <RotateCcw />
+                                            {{ t('আসল হিসাবে ফেরত') }}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <p
-                    class="num mt-2 text-sm leading-relaxed text-muted-foreground"
-                >
-                    {{
-                        t(
-                            'মোট দিনে: ঘাস :g কেজি · খড় :s কেজি · দানাদার :c কেজি',
-                            {
-                                g: kg(g.total.green),
-                                s: kg(g.total.straw),
-                                c: kg(g.total.conc),
-                            },
-                        )
-                    }}
-                </p>
-
+                <!-- Phones and tablets: compact cards -->
                 <ul
-                    class="mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-2 xl:grid-cols-3"
+                    class="grid grid-cols-[minmax(0,1fr)] gap-3 p-3 sm:p-4 md:grid-cols-2 xl:hidden"
                 >
                     <li
                         v-for="row in g.rows"
                         :key="row.id"
-                        class="rounded-lg border border-border/70 p-3"
+                        class="min-w-0 rounded-xl border border-border/70 p-3"
                     >
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
                                 <Link
                                     :href="`/animals/${row.id}`"
-                                    class="font-medium text-primary underline underline-offset-2"
+                                    class="block truncate leading-normal font-medium text-primary underline underline-offset-2"
                                     >{{ row.tag
                                     }}<template v-if="row.name">
                                         · {{ row.name }}</template
                                     ></Link
                                 >
                                 <p
-                                    class="num mt-0.5 text-[13px] leading-snug text-muted-foreground"
+                                    class="num text-[13px] leading-normal text-muted-foreground"
                                 >
                                     {{ t(':w কেজি', { w: kg(row.weight) }) }}
                                     <template v-if="row.category === 'gavi'">
@@ -1064,36 +1465,44 @@ const rules = [
                                     </template>
                                 </p>
                             </div>
-                            <button
-                                type="button"
-                                :class="[
-                                    'btn-icon size-8',
-                                    editing === row.id
-                                        ? 'border-primary/40 bg-primary/10 text-primary'
-                                        : '',
-                                ]"
-                                :aria-label="t('ওজন / দুধ বদলে দেখুন')"
-                                :title="t('ওজন / দুধ বদলে দেখুন')"
-                                @click="startEdit(row)"
-                            >
-                                <Pencil />
-                            </button>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <p
+                                    class="num text-right leading-tight font-semibold whitespace-nowrap"
+                                >
+                                    {{ t(':c/দিন', { c: taka(row.r.cost) }) }}
+                                </p>
+                                <button
+                                    type="button"
+                                    :class="[
+                                        'btn-icon size-8',
+                                        editing === row.id
+                                            ? 'border-primary/40 bg-primary/10 text-primary'
+                                            : '',
+                                    ]"
+                                    :aria-label="t('ওজন / দুধ বদলে দেখুন')"
+                                    :title="t('ওজন / দুধ বদলে দেখুন')"
+                                    :aria-expanded="editing === row.id"
+                                    @click="startEdit(row)"
+                                >
+                                    <Pencil />
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="mt-1.5 flex flex-wrap gap-1.5">
+                        <div class="mt-1.5 flex flex-wrap gap-1.5 empty:hidden">
                             <span
                                 v-if="row.weight_estimated && !row.edited"
-                                class="rounded bg-turmeric/25 px-1.5 py-0.5 text-[11px] leading-snug text-soil"
+                                class="tag bg-turmeric/25 text-soil"
                                 >{{ t('ওজন লেখা নেই — আনুমানিক') }}</span
                             >
                             <span
                                 v-if="row.edited"
-                                class="rounded bg-pond/12 px-1.5 py-0.5 text-[11px] leading-snug text-pond"
+                                class="tag bg-pond/12 text-pond"
                                 >{{ t('বদলানো হিসাব') }}</span
                             >
                             <span
                                 v-if="row.pregnant"
-                                class="rounded bg-paddy/12 px-1.5 py-0.5 text-[11px] leading-snug text-paddy"
+                                class="tag bg-paddy/12 text-paddy"
                                 >{{
                                     row.expected_on
                                         ? t('গর্ভবতী · বাচ্চা :d', {
@@ -1110,7 +1519,7 @@ const rules = [
                                 v-if="
                                     row.milk_source === 'center' && !row.edited
                                 "
-                                class="rounded bg-muted px-1.5 py-0.5 text-[11px] leading-snug text-muted-foreground"
+                                class="tag bg-muted text-muted-foreground"
                                 >{{ t('দুধ: ক্যাটাগরির গড়') }}</span
                             >
                             <span
@@ -1119,7 +1528,7 @@ const rules = [
                                     row.milk_source === null &&
                                     !row.edited
                                 "
-                                class="rounded bg-muted px-1.5 py-0.5 text-[11px] leading-snug text-muted-foreground"
+                                class="tag bg-muted text-muted-foreground"
                                 >{{
                                     t('গত :n দিনে দুধের হিসাব নেই', {
                                         n: milkDays,
@@ -1130,12 +1539,13 @@ const rules = [
 
                         <div
                             v-if="editing === row.id && overrides[row.id]"
-                            class="mt-2 grid grid-cols-2 gap-2 rounded-md bg-muted/50 p-2"
+                            class="mt-2 grid grid-cols-2 gap-2 rounded-lg bg-muted/50 p-2.5"
                         >
-                            <label class="grid gap-1">
-                                <span class="text-xs text-muted-foreground">{{
-                                    t('ওজন (কেজি)')
-                                }}</span>
+                            <label class="grid min-w-0 gap-1">
+                                <span
+                                    class="text-xs leading-normal text-muted-foreground"
+                                    >{{ t('ওজন (কেজি)') }}</span
+                                >
                                 <Input
                                     v-model.number="overrides[row.id].weight"
                                     type="number"
@@ -1146,11 +1556,12 @@ const rules = [
                             </label>
                             <label
                                 v-if="row.category === 'gavi'"
-                                class="grid gap-1"
+                                class="grid min-w-0 gap-1"
                             >
-                                <span class="text-xs text-muted-foreground">{{
-                                    t('দুধ (লিটার/দিন)')
-                                }}</span>
+                                <span
+                                    class="text-xs leading-normal text-muted-foreground"
+                                    >{{ t('দুধ (লিটার/দিন)') }}</span
+                                >
                                 <Input
                                     v-model.number="overrides[row.id].milk"
                                     type="number"
@@ -1160,7 +1571,7 @@ const rules = [
                                     class="num h-9"
                                 />
                             </label>
-                            <div class="col-span-2 flex flex-wrap gap-2">
+                            <div class="col-span-2">
                                 <button
                                     type="button"
                                     class="btn-chip"
@@ -1171,9 +1582,11 @@ const rules = [
                             </div>
                         </div>
 
-                        <dl class="mt-2 grid grid-cols-3 gap-1.5 text-center">
+                        <dl class="mt-2.5 grid grid-cols-3 gap-1.5 text-center">
                             <div class="rounded-md bg-paddy/10 px-1 py-1.5">
-                                <dt class="text-[11px] text-muted-foreground">
+                                <dt
+                                    class="text-[11px] leading-normal text-muted-foreground"
+                                >
                                     {{ t('কাঁচা ঘাস') }}
                                 </dt>
                                 <dd class="num font-semibold">
@@ -1181,7 +1594,9 @@ const rules = [
                                 </dd>
                             </div>
                             <div class="rounded-md bg-turmeric/20 px-1 py-1.5">
-                                <dt class="text-[11px] text-muted-foreground">
+                                <dt
+                                    class="text-[11px] leading-normal text-muted-foreground"
+                                >
                                     {{ t('খড়') }}
                                 </dt>
                                 <dd class="num font-semibold">
@@ -1189,7 +1604,9 @@ const rules = [
                                 </dd>
                             </div>
                             <div class="rounded-md bg-clay/10 px-1 py-1.5">
-                                <dt class="text-[11px] text-muted-foreground">
+                                <dt
+                                    class="text-[11px] leading-normal text-muted-foreground"
+                                >
                                     {{ t('দানাদার') }}
                                 </dt>
                                 <dd class="num font-semibold">
@@ -1198,40 +1615,50 @@ const rules = [
                             </div>
                         </dl>
                         <p
-                            class="mt-1 text-center text-[11px] text-muted-foreground"
+                            class="mt-1 text-center text-[11px] leading-normal text-muted-foreground"
                         >
                             {{ t('কেজি / দিন') }}
                         </p>
 
-                        <p
-                            class="num mt-1.5 text-[13px] leading-snug text-muted-foreground"
+                        <div
+                            class="num mt-2 space-y-0.5 border-t border-border/70 pt-2 text-[13px] leading-normal text-muted-foreground"
                         >
-                            {{
-                                t('ভুসি :b · দানাদার :c · খৈল :o কেজি', {
-                                    b: kg(row.r.bran),
-                                    c: kg(row.r.concentrate),
-                                    o: kg(row.r.oilcake),
-                                })
-                            }}
-                        </p>
-                        <p
-                            class="num flex flex-wrap items-center gap-x-1 text-[13px] leading-snug text-muted-foreground"
-                        >
-                            <Droplets class="size-3.5 text-pond" />
-                            {{
-                                t(
-                                    'পানি :w লি. · খনিজ :m গ্রাম · লবণ :s গ্রাম',
-                                    {
-                                        w: row.r.water,
-                                        m: row.r.mineral,
-                                        s: row.r.salt,
-                                    },
-                                )
-                            }}
-                        </p>
+                            <p>
+                                {{
+                                    t('ভুসি :b · দানাদার :c · খৈল :o কেজি', {
+                                        b: kg(row.r.bran),
+                                        c: kg(row.r.concentrate),
+                                        o: kg(row.r.oilcake),
+                                    })
+                                }}
+                            </p>
+                            <p class="flex items-start gap-1">
+                                <Droplets
+                                    class="mt-1 size-3.5 shrink-0 text-pond"
+                                />
+                                <span>{{
+                                    t(
+                                        'পানি :w লি. · খনিজ :m গ্রাম · লবণ :s গ্রাম',
+                                        {
+                                            w: row.r.water,
+                                            m: row.r.mineral,
+                                            s: row.r.salt,
+                                        },
+                                    )
+                                }}</span>
+                            </p>
+                            <p class="text-xs">
+                                {{
+                                    t('শুকনো খাদ্য :d কেজি (ওজনের :p%)', {
+                                        d: kg(row.r.dm),
+                                        p: row.r.dmPct,
+                                    })
+                                }}
+                            </p>
+                        </div>
                         <p
                             v-if="row.r.concShare > 50"
-                            class="mt-1 text-[13px] leading-snug text-clay"
+                            class="mt-1.5 text-[13px] leading-normal text-clay"
                         >
                             {{
                                 t(
@@ -1240,36 +1667,198 @@ const rules = [
                                 )
                             }}
                         </p>
-
-                        <div
-                            class="mt-2 flex items-baseline justify-between gap-2 border-t border-border/70 pt-2"
-                        >
-                            <span class="num text-xs text-muted-foreground">{{
-                                t('শুকনো খাদ্য :d কেজি (ওজনের :p%)', {
-                                    d: kg(row.r.dm),
-                                    p: row.r.dmPct,
-                                })
-                            }}</span>
-                            <span class="num text-sm font-semibold">{{
-                                t(':c/দিন', { c: taka(row.r.cost) })
-                            }}</span>
-                        </div>
                     </li>
                 </ul>
             </section>
         </template>
 
-        <!-- Rules of thumb -->
-        <section class="mt-4 rounded-xl border border-border bg-card p-4">
+        <!-- Assumptions (collapsible) -->
+        <section
+            ref="assumptionsPanel"
+            class="scroll-mt-20 overflow-hidden rounded-2xl border border-border bg-card"
+        >
             <button
                 type="button"
-                class="flex w-full items-center justify-between gap-2 text-left"
+                class="flex w-full items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-accent/40 sm:px-5"
+                :aria-expanded="showAssumptions"
+                @click="showAssumptions = !showAssumptions"
+            >
+                <span class="flex min-w-0 items-center gap-3">
+                    <span class="shrink-0 rounded-lg bg-pond/12 p-2 text-pond">
+                        <Settings2 class="size-5" />
+                    </span>
+                    <span class="min-w-0">
+                        <span
+                            class="block font-display text-lg leading-normal"
+                            >{{ t('হিসাবের নিয়ম') }}</span
+                        >
+                        <span
+                            class="block text-[13px] leading-normal text-muted-foreground"
+                            >{{
+                                t(
+                                    'বদলালে সঙ্গে সঙ্গে হিসাব বদলায়; এখানে কিছু সেভ হয় না।',
+                                )
+                            }}</span
+                        >
+                    </span>
+                </span>
+                <span class="btn-icon size-8">
+                    <ChevronDown
+                        :class="[
+                            'transition-transform',
+                            showAssumptions ? 'rotate-180' : '',
+                        ]"
+                    />
+                </span>
+            </button>
+
+            <div
+                v-if="showAssumptions"
+                class="border-t border-border p-4 sm:p-5"
+            >
+                <div class="mb-4 flex justify-end">
+                    <button type="button" class="btn-chip" @click="reset">
+                        <RotateCcw /> {{ t('আগের মতো') }}
+                    </button>
+                </div>
+
+                <div
+                    class="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 2xl:grid-cols-3"
+                >
+                    <div
+                        v-for="s in sections"
+                        :key="s.title"
+                        class="min-w-0 rounded-xl border border-border/70 bg-muted/20 p-3.5"
+                    >
+                        <p class="text-sm leading-normal font-semibold">
+                            {{ t(s.title) }}
+                        </p>
+                        <p
+                            v-if="s.hint"
+                            class="text-xs leading-normal text-muted-foreground"
+                        >
+                            {{ t(s.hint) }}
+                        </p>
+                        <div class="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-2.5">
+                            <label
+                                v-for="f in s.fields"
+                                :key="f.label"
+                                class="grid min-w-0 content-end gap-1"
+                            >
+                                <span
+                                    class="text-xs leading-normal text-muted-foreground"
+                                    >{{ t(f.label) }}</span
+                                >
+                                <span class="relative">
+                                    <Input
+                                        type="number"
+                                        inputmode="decimal"
+                                        min="0"
+                                        :step="f.step"
+                                        class="num h-9 bg-card pr-12"
+                                        :model-value="f.get()"
+                                        @update:model-value="f.set(num($event))"
+                                    />
+                                    <span
+                                        class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-xs text-muted-foreground"
+                                        >{{ f.suffix }}</span
+                                    >
+                                </span>
+                            </label>
+                        </div>
+                        <p
+                            v-if="
+                                s.title === 'দানাদার মিশ্রণ' && mixSum !== 100
+                            "
+                            class="mt-2 text-xs leading-normal text-clay"
+                        >
+                            {{
+                                t('মোট :n — ১০০ ধরে ভাগ করা হচ্ছে', {
+                                    n: mixSum,
+                                })
+                            }}
+                        </p>
+                        <p
+                            v-if="s.title === 'দানাদার খাদ্য'"
+                            class="mt-2 text-xs leading-normal text-muted-foreground"
+                        >
+                            {{
+                                t('মোটাতাজা: ওজনের :p% দানাদার', {
+                                    p: round(
+                                        fatteningPct(a.fattening_gain_g),
+                                        2,
+                                    ),
+                                })
+                            }}
+                        </p>
+                    </div>
+
+                    <div
+                        class="min-w-0 rounded-xl border border-border/70 bg-muted/20 p-3.5 md:col-span-2 2xl:col-span-3"
+                    >
+                        <p class="text-sm leading-normal font-semibold">
+                            {{ t('দাম (৳ / কেজি)') }}
+                        </p>
+                        <div
+                            class="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-4 xl:grid-cols-7"
+                        >
+                            <label
+                                v-for="k in priceKeys"
+                                :key="k"
+                                class="grid min-w-0 content-start gap-1"
+                            >
+                                <span
+                                    class="text-xs leading-normal text-muted-foreground"
+                                    >{{ t(feedLabels[k]) }}</span
+                                >
+                                <Input
+                                    v-model.number="priceTaka[k]"
+                                    type="number"
+                                    inputmode="decimal"
+                                    min="0"
+                                    step="0.5"
+                                    class="num h-9 bg-card"
+                                />
+                                <span
+                                    class="text-[11px] leading-normal text-muted-foreground"
+                                >
+                                    {{ t(sourceLabels[prices[k].source]) }}
+                                    <template
+                                        v-if="
+                                            prices[k].market_price &&
+                                            prices[k].source === 'stock'
+                                        "
+                                    >
+                                        ·
+                                        {{
+                                            t('হাটে :p', {
+                                                p: taka(prices[k].market_price),
+                                            })
+                                        }}
+                                    </template>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rules of thumb (collapsible) -->
+        <section
+            class="overflow-hidden rounded-2xl border border-border bg-card"
+        >
+            <button
+                type="button"
+                class="flex w-full items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-accent/40 sm:px-5"
                 :aria-expanded="showRules"
                 @click="showRules = !showRules"
             >
-                <span class="flex items-center gap-2">
-                    <BookOpen class="size-5 text-soil" />
-                    <span class="font-display text-lg leading-snug">{{
+                <span class="flex min-w-0 items-center gap-3">
+                    <span class="shrink-0 rounded-lg bg-soil/10 p-2 text-soil">
+                        <BookOpen class="size-5" />
+                    </span>
+                    <span class="font-display text-lg leading-normal">{{
                         t('যে নিয়মে হিসাব')
                     }}</span>
                 </span>
@@ -1284,7 +1873,7 @@ const rules = [
             </button>
             <ul
                 v-if="showRules"
-                class="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed"
+                class="grid list-disc gap-x-8 gap-y-1.5 border-t border-border py-4 pr-4 pl-9 text-sm leading-relaxed sm:pr-5 lg:grid-cols-2"
             >
                 <li v-for="r in rules" :key="r">{{ t(r) }}</li>
                 <li>
@@ -1311,9 +1900,18 @@ const rules = [
                     }}
                 </li>
             </ul>
-            <p class="mt-3 text-[13px] font-medium text-soil">
-                {{ t(DISCLAIMER) }}
-            </p>
         </section>
     </div>
 </template>
+
+<style scoped>
+@reference '../../../css/app.css';
+
+.tag {
+    @apply rounded px-1.5 py-0.5 text-[11px] leading-normal;
+}
+
+.unit {
+    @apply ml-1 text-xs text-muted-foreground;
+}
+</style>

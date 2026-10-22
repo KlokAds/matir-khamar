@@ -227,6 +227,231 @@ RedirectController980bb49ee7ae63891f1d891d2fbcf1c9.form = RedirectController980b
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
 * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+const RedirectController66fec06eace2c69db2b341ac7ac986f4 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'get',
+})
+
+RedirectController66fec06eace2c69db2b341ac7ac986f4.definition = {
+    methods: ["get","head","post","put","patch","delete","options","query"],
+    url: '/reports/budget',
+} satisfies RouteDefinition<["get","head","post","put","patch","delete","options","query"]>
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.url = (options?: RouteQueryOptions) => {
+    return RedirectController66fec06eace2c69db2b341ac7ac986f4.definition.url + queryParams(options)
+}
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'head',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'put',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'patch',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'delete',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'options',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4.query = (options?: RouteQueryOptions): RouteDefinition<'query'> => ({
+    url: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'query',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+const RedirectController66fec06eace2c69db2b341ac7ac986f4Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url(options),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'DELETE',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.options = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'OPTIONS',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+RedirectController66fec06eace2c69db2b341ac7ac986f4Form.query = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: RedirectController66fec06eace2c69db2b341ac7ac986f4.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'QUERY',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+RedirectController66fec06eace2c69db2b341ac7ac986f4.form = RedirectController66fec06eace2c69db2b341ac7ac986f4Form
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/settings'
 */
 const RedirectController4b87d2df7e3aa853f6720faea796e36c = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -458,6 +683,7 @@ RedirectController4b87d2df7e3aa853f6720faea796e36c.form = RedirectController4b87
 */
 const RedirectController = {
     '/': RedirectController980bb49ee7ae63891f1d891d2fbcf1c9,
+    '/reports/budget': RedirectController66fec06eace2c69db2b341ac7ac986f4,
     '/settings': RedirectController4b87d2df7e3aa853f6720faea796e36c,
 }
 

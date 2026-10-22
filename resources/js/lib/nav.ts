@@ -86,6 +86,9 @@ export function useNav() {
 
         return [
             { title: 'আজকের খামার', href: '/dashboard', icon: LayoutGrid },
+            ...(c['view-reports']
+                ? [{ title: 'হিসাবের সারাংশ', href: '/summary', icon: Gauge }]
+                : []),
             ...(c['post-daily']
                 ? [
                       {
@@ -219,7 +222,6 @@ export function useNav() {
                 ],
             ]),
             ...group('রিপোর্ট', ChartColumnBig, 'paddy', [
-                ['হিসাবের সারাংশ', '/summary', Gauge, !!c['view-reports']],
                 [
                     'লাভের হিসাব ও পরিকল্পনা',
                     '/profit',
@@ -245,12 +247,7 @@ export function useNav() {
                     FileText,
                     !!c['view-reports'],
                 ],
-                [
-                    'উদ্যোগ বাজেট',
-                    '/reports/budget',
-                    PiggyBank,
-                    !!c['view-reports'],
-                ],
+                ['উদ্যোগ ঋণ (সরকারি)', '/udyog', PiggyBank, !!c['view-reports']],
                 [
                     'ভাগ কীভাবে হয় (উদাহরণ)',
                     '/guide/split',

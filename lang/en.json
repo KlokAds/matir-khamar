@@ -468,5 +468,15 @@
     "খড়, ঘাস, দানাদার — যা দেওয়া হলো": "Straw, grass, concentrate — whatever was given",
     "ওজন মাপুন: :tags": "Weigh: :tags",
     "মাসে অন্তত একবার — বাড়ছে কি না বোঝা যায়": "At least once a month — to see the gain",
-    "আগের দিনের — বাকি আছে": "From an earlier day — still open"
+    "আগের দিনের — বাকি আছে": "From an earlier day — still open",
+    "উদ্যোগ ঋণ অনুমোদন হলে বাজেটের সাথে আসল খরচ মিলিয়ে দেখুন।": "Once the Udyog loan is approved, check real spending against its budget.",
+    "আবেদন করা হয়েছে": "Applied",
+    "অনুমোদন হয়েছে": "Approved",
+    "হয়নি / বাদ": "Not granted / dropped",
+    "অনুমোদনের পর ঋণের হিসাব খোলা হয়েছে — এখান থেকে ফেরানো যায় না।": "The loan account was opened on approval — it cannot be undone from here.",
+    "উদ্যোগ ঋণ আগেই অনুমোদন হিসেবে লেখা আছে।": "The Udyog loan is already recorded as approved.",
+    ":rate% সুদ, :years বছরে শোধ": ":rate% interest, repaid over :years years",
+    "প্রতি কিস্তিতে আসল; সুদ আলাদা খরচ হিসেবে \"ঋণের সুদ\" খাতে লিখুন।": "Each instalment is principal; write the interest separately as an expense under \"Loan interest\".",
+    "উদ্যোগ ঋণের তথ্য রাখা হলো।": "Udyog loan details saved.",
+    "উদ্যোগ ঋণ অনুমোদন লেখা হলো — \"ধার ও জামানত\"-এ কিস্তিসহ ঋণ খোলা হয়েছে।": "Udyog loan approval recorded — the loan and its instalments are open in \"Loans & deposits\"."
 }

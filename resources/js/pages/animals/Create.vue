@@ -321,7 +321,7 @@ watch(
                     >
                 </Field>
                 <Field
-                    v-if="f.acquisition === 'purchase'"
+                    v-if="budgetHeads.length && f.acquisition === 'purchase'"
                     :label="t('উদ্যোগ বাজেট খাত')"
                 >
                     <NSelect v-model="f.budget_head_id"

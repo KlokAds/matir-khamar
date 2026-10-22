@@ -18,6 +18,7 @@ import RationController from './RationController'
 import EntryController from './EntryController'
 import AnimalController from './AnimalController'
 import ReportController from './ReportController'
+import UdyogController from './UdyogController'
 import MoneyController from './MoneyController'
 import LandController from './LandController'
 import ProfitController from './ProfitController'
@@ -51,6 +52,7 @@ const Controllers = {
     EntryController: Object.assign(EntryController, EntryController),
     AnimalController: Object.assign(AnimalController, AnimalController),
     ReportController: Object.assign(ReportController, ReportController),
+    UdyogController: Object.assign(UdyogController, UdyogController),
     MoneyController: Object.assign(MoneyController, MoneyController),
     LandController: Object.assign(LandController, LandController),
     ProfitController: Object.assign(ProfitController, ProfitController),

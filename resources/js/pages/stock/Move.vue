@@ -486,7 +486,11 @@ function submit() {
                                 </option>
                             </NSelect>
                         </Field>
-                        <Field :label="t('উদ্যোগ বাজেট খাত')">
+                        <!-- Only once the Udyog loan is approved (Lookups::budgetHeads). -->
+                        <Field
+                            v-if="budgetHeads.length"
+                            :label="t('উদ্যোগ বাজেট খাত')"
+                        >
                             <NSelect v-model="f.budget_head_id">
                                 <option :value="null">
                                     {{ t('— নয় —') }}

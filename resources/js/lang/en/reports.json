@@ -222,5 +222,19 @@
     "যা আছে, তা থেকে দেনা বাদ দিলে। মালিকরা দিয়েছেন :capital; বাকিটা লাভ বা ক্ষতি।": "What it has, less what it owes. The owners put in :capital; the rest is profit or loss.",
     "আগের সমান সময়ে :amount": "Same length before: :amount",
     "টাকা গেল": "Money out",
-    "খামারের অবস্থা": "Where the farm stands"
+    "খামারের অবস্থা": "Where the farm stands",
+    "সহজ কথায় খামারের হিসাব": "The farm in plain words",
+    "সহজ কথায় — শুরু থেকে আজ পর্যন্ত": "In plain words — from the start until today",
+    "এখন পর্যন্ত লাভ": "Gain so far",
+    "এখন পর্যন্ত ক্ষতি": "Loss so far",
+    "মালিকরা দিয়েছেন :capital। খামারে এখন যা আছে তার দাম :worth। তাই :what :amount — দেওয়া টাকার :pct%।": "The owners put in :capital. What the farm holds now is worth :worth. So the :what is :amount — :pct% of what was put in.",
+    "গরু এখানে কেনা দামে ধরা — বিক্রি না হওয়া পর্যন্ত বাড়তি দাম (লাভ) গোনা হয় না, অথচ খাবার-বেতনের খরচ রোজ গোনা হয়। তাই মোটাতাজা বা গাভী থেকে আয় না আসা পর্যন্ত হিসাবে ক্ষতি দেখানোই স্বাভাবিক।": "Cattle count at what they cost — the gain is not counted until they are sold, while feed and wages count every day. So a loss on paper is normal until fattening or milk brings money in.",
+    "খামারে এখন যা আছে": "What the farm holds now",
+    ":nটি পশু (কেনা দামে)": ":n animals (at cost)",
+    "জিনিস, ঘর, মাল": "Equipment, shed, stock",
+    "অন্যের কাছে পাওনা": "Owed to us",
+    "অন্যকে দিতে হবে": "We owe",
+    "শুরু থেকে আয় :in, খরচ :out — সবচেয়ে বেশি খরচ:": "Since the start: income :in, expense :out — biggest costs:",
+    "পুরো হিসাবের সারাংশ — মাস, ৬ মাস, বছর": "Full summary — month, 6 months, year",
+    "সময় ধরে দেখুন": "By period"
 }

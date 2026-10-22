@@ -81,87 +81,6 @@ indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 index.form = indexForm
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-export const budget = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: budget.url(options),
-    method: 'get',
-})
-
-budget.definition = {
-    methods: ["get","head"],
-    url: '/reports/budget',
-} satisfies RouteDefinition<["get","head"]>
-
-/**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-budget.url = (options?: RouteQueryOptions) => {
-    return budget.definition.url + queryParams(options)
-}
-
-/**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-budget.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: budget.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-budget.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
-    url: budget.url(options),
-    method: 'head',
-})
-
-/**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-const budgetForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: budget.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-budgetForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: budget.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
-* @route '/reports/budget'
-*/
-budgetForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: budget.url({
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'HEAD',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'get',
-})
-
-budget.form = budgetForm
-
-/**
 * @see \App\Http\Controllers\ReportController::usage
 * @see app/Http/Controllers/ReportController.php:51
 * @route '/reports/usage'
@@ -413,6 +332,6 @@ updateBudgetHeadForm.put = (args: { head: number | { id: number } } | [head: num
 
 updateBudgetHead.form = updateBudgetHeadForm
 
-const ReportController = { index, budget, usage, monthly, updateBudgetHead }
+const ReportController = { index, usage, monthly, updateBudgetHead }
 
 export default ReportController

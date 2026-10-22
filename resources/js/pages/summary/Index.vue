@@ -12,6 +12,8 @@ import {
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import DateField from '@/components/khamar/DateField.vue';
+import MoneyStory from '@/components/khamar/MoneyStory.vue';
+import type { Story } from '@/components/khamar/MoneyStory.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import TrendBars from '@/components/khamar/TrendBars.vue';
@@ -29,6 +31,7 @@ type Result = { income: number; expense: number; profit: number };
 const props = defineProps<{
     period: string;
     periods: Record<string, string>;
+    story: Story;
     from: string;
     to: string;
     result: Result;
@@ -126,6 +129,13 @@ const share = (value: number, peak: number) =>
             :title="t('হিসাবের সারাংশ')"
             :subtitle="`${day(from)} — ${day(to)}`"
         />
+
+        <!-- The whole farm in plain words, always from the start -->
+        <MoneyStory :story="story" />
+
+        <h2 class="-mb-2 font-display text-lg leading-normal">
+            {{ t('সময় ধরে দেখুন') }}
+        </h2>
 
         <!-- Period -->
         <div class="flex flex-col gap-3">

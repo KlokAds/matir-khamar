@@ -27,6 +27,7 @@ class SummaryController extends Controller
             'periods' => Tr::all(SummaryBook::PERIODS),
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
+            'story' => $book->story(),
             ...$book->build($from, $to),
         ]);
     }

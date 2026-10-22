@@ -87,5 +87,9 @@
     "শুকনো খাদ্য :d কেজি (ওজনের :p%)": "Dry matter :d kg (:p% of weight)",
     "যে নিয়মে হিসাব": "Rules of thumb used",
     "ওজন লেখা না থাকলে ধরা হয়েছে: গাভী :g, বকনা :b, মোটাতাজা :m, বাছুর :c কেজি।": "Where no weight is recorded we assume: cow :g, heifer :b, fattening :m, calf :c kg.",
-    "দুধ: গত :n দিনের দুধের হিসাব থেকে গাভীপ্রতি দিনের গড়।": "Milk: average per cow per day from the last :n days of milk records."
+    "দুধ: গত :n দিনের দুধের হিসাব থেকে গাভীপ্রতি দিনের গড়।": "Milk: average per cow per day from the last :n days of milk records.",
+    "খরচ / দিন": "Cost / day",
+    "শুকনো খাদ্য": "Dry matter",
+    "খনিজ :m · লবণ :s গ্রাম": "Mineral :m · salt :s g",
+    "ওজনের :p%": ":p% of weight"
 }

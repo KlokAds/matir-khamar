@@ -81,8 +81,8 @@ indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 index.form = indexForm
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 export const budget = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -91,13 +91,13 @@ export const budget = (options?: RouteQueryOptions): RouteDefinition<'get'> => (
 })
 
 budget.definition = {
-    methods: ["get","head"],
+    methods: ["get","head","post","put","patch","delete","options","query"],
     url: '/reports/budget',
-} satisfies RouteDefinition<["get","head"]>
+} satisfies RouteDefinition<["get","head","post","put","patch","delete","options","query"]>
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 budget.url = (options?: RouteQueryOptions) => {
@@ -105,8 +105,8 @@ budget.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 budget.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -115,8 +115,8 @@ budget.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 budget.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -125,8 +125,68 @@ budget.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budget.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: budget.url(options),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budget.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: budget.url(options),
+    method: 'put',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budget.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: budget.url(options),
+    method: 'patch',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budget.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: budget.url(options),
+    method: 'delete',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budget.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
+    url: budget.url(options),
+    method: 'options',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budget.query = (options?: RouteQueryOptions): RouteDefinition<'query'> => ({
+    url: budget.url(options),
+    method: 'query',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 const budgetForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -135,8 +195,8 @@ const budgetForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 })
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 budgetForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -145,8 +205,8 @@ budgetForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 })
 
 /**
-* @see \App\Http\Controllers\ReportController::budget
-* @see app/Http/Controllers/ReportController.php:194
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
 * @route '/reports/budget'
 */
 budgetForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -157,6 +217,91 @@ budgetForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
         }
     }),
     method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budgetForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: budget.url(options),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budgetForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: budget.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budgetForm.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: budget.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budgetForm.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: budget.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'DELETE',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budgetForm.options = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: budget.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'OPTIONS',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/reports/budget'
+*/
+budgetForm.query = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: budget.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'QUERY',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
 })
 
 budget.form = budgetForm
