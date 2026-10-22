@@ -3,7 +3,7 @@ import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { initializeFlashToast } from '@/lib/flashToast';
+import { initializeFlashToast, initializePushBanner } from '@/lib/flashToast';
 import { t } from '@/lib/i18n';
 import { initializeOffline } from '@/lib/offline';
 
@@ -40,6 +40,9 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+// A notification that arrives while the app is open also shows inside it.
+initializePushBanner();
 
 // Installable app + offline entries: the service worker keeps the offline
 // page on the phone, and waiting entries are sent whenever the net returns.

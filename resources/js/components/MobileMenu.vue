@@ -100,39 +100,44 @@ async function signOut() {
 
             <div class="space-y-5 px-4 pt-4 pb-6">
                 <!-- Day-to-day pages, a tap away -->
-                <h3
-                    class="-mb-3 px-1 text-xs font-semibold tracking-wide text-muted-foreground"
-                >
-                    {{ t('প্রতিদিন') }}
-                </h3>
-                <div class="grid grid-cols-4 gap-2">
-                    <component
-                        :is="link.reload ? 'a' : Link"
-                        v-for="link in nav.top.value"
-                        :key="link.href"
-                        :href="link.href"
-                        :class="['tile relative', isOn(link.href) && 'is-on']"
-                        @click="close"
+                <section>
+                    <h3
+                        class="mb-2 px-1 py-px text-xs leading-normal font-semibold tracking-wide text-muted-foreground"
                     >
-                        <span class="tile-icon bg-paddy/15 text-paddy">
-                            <component :is="link.icon" class="size-5" />
-                        </span>
-                        <span class="tile-label">{{ t(link.title) }}</span>
-                        <b
-                            v-if="
-                                (link.href === '/reminders' &&
-                                    remindersDue > 0) ||
-                                (link.badge ?? 0) > 0
-                            "
-                            class="num absolute top-1 right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] text-white"
-                            >{{
-                                link.href === '/reminders'
-                                    ? remindersDue
-                                    : link.badge
-                            }}</b
+                        {{ t('প্রতিদিন') }}
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <component
+                            :is="link.reload ? 'a' : Link"
+                            v-for="link in nav.top.value"
+                            :key="link.href"
+                            :href="link.href"
+                            :class="[
+                                'tile relative',
+                                isOn(link.href) && 'is-on',
+                            ]"
+                            @click="close"
                         >
-                    </component>
-                </div>
+                            <span class="tile-icon bg-paddy/15 text-paddy">
+                                <component :is="link.icon" class="size-5" />
+                            </span>
+                            <span class="tile-label">{{ t(link.title) }}</span>
+                            <b
+                                v-if="
+                                    (link.href === '/reminders' &&
+                                        remindersDue > 0) ||
+                                    (link.badge ?? 0) > 0
+                                "
+                                class="num absolute top-1 right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] text-white"
+                                >{{
+                                    link.href === '/reminders'
+                                        ? remindersDue
+                                        : link.badge
+                                }}</b
+                            >
+                        </component>
+                    </div>
+                </section>
 
                 <!-- One section per part of the farm -->
                 <section v-for="g in nav.groups.value" :key="g.title">

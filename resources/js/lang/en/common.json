@@ -265,5 +265,18 @@
     "ছবি তুলুন": "Take photo",
     "ফাইল / গ্যালারি": "File / gallery",
     "গ্যালারি": "Gallery",
-    "আপলোড হচ্ছে…": "Uploading…"
+    "আপলোড হচ্ছে…": "Uploading…",
+    "মাটির খামার — এই ফোনের পরীক্ষা": "Matir Khamar — test on this phone",
+    "এটা দেখা গেলে ফোন অ্যাপের নোটিফিকেশন দেখাতে পারে।": "If you see this, the phone can show the app’s notifications.",
+    "এই ফোনে দেখান": "Show on this phone",
+    "পাঠানো হলো — ফোনে আসার অপেক্ষা…": "Sent — waiting for the phone…",
+    "ফোনে এসে পৌঁছেছে ✓ — উপরে নোটিফিকেশন না দেখালে নিচের সেটিং দেখুন (পপ-আপ, শব্দ)।": "It reached the phone ✓ — if no notification showed, check the settings below (pop-up, sound).",
+    "৩০ সেকেন্ডেও ফোনে পৌঁছায়নি — ফোন অ্যাপটাকে ঘুম পাড়িয়ে রাখছে। নিচের ব্যাটারি ও অটোস্টার্ট সেটিং দিন।": "Not on the phone after 30 seconds — the phone keeps the app asleep. Set battery and autostart below.",
+    "ফোন নিজে দেখাতে পারে। উপরে না এলে নিচের সেটিংয়ে নোটিফিকেশন চালু করুন।": "The phone can show it. If nothing appeared, turn notifications on below.",
+    "ফোন নোটিফিকেশন দেখাতে দিচ্ছে না — নিচের সেটিংয়ে নোটিফিকেশন চালু করুন।": "The phone does not allow notifications — turn them on below.",
+    "WhatsApp-এর মতো শব্দ করে আসতে — ফোনের সেটিং (একবার)": "To arrive with sound like WhatsApp — phone settings (once)",
+    "ফোনের Settings → Apps → “মাটির খামার” (অ্যাপ না থাকলে Chrome) → Notifications: চালু। ভেতরের প্রতিটি ধরনে “Pop-up / Floating / ব্যানার” আর “Sound” চালু করুন।": "Phone Settings → Apps → “Matir Khamar” (or Chrome without the app) → Notifications: on. In each category turn on “Pop-up / Floating / Banner” and “Sound”.",
+    "একই জায়গায় Battery / Battery saver → “No restrictions” বা “Unrestricted”।": "In the same place, Battery / Battery saver → “No restrictions” or “Unrestricted”.",
+    "Xiaomi/Redmi/Vivo/Oppo/Realme ফোনে: “Autostart” চালু করুন (Security বা Phone Manager অ্যাপে)। রিসেন্ট অ্যাপ থেকে অ্যাপটা লক করে রাখুন, যাতে সরিয়ে না দেয়।": "On Xiaomi/Redmi/Vivo/Oppo/Realme: turn on “Autostart” (in Security or Phone Manager). Lock the app in recent apps so it is not cleared.",
+    "“Do not disturb” বন্ধ আছে কি না দেখুন। তারপর আবার “পরীক্ষা পাঠান” চাপুন।": "Check “Do not disturb” is off. Then tap “Send test” again."
 }

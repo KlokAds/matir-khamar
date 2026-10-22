@@ -206,6 +206,20 @@ self.addEventListener('push', (event) => {
                     title: a.title,
                 })),
             }),
+            // An open app hears of every notification too: it shows a banner, and the
+            // test on the reminders page learns that the phone really received it.
+            self.clients
+                .matchAll({ type: 'window', includeUncontrolled: true })
+                .then((windows) =>
+                    windows.forEach((w) =>
+                        w.postMessage({
+                            type: 'khamar-push',
+                            title: data.title,
+                            body: data.body,
+                            tag: data.tag,
+                        }),
+                    ),
+                ),
             // If the app is open, it rings on screen too.
             alarm
                 ? self.clients
