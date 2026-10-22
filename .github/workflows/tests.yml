@@ -35,4 +35,17 @@ jobs:
         run: composer setup
 
       - name: Run CI Checks
-        run: composer ci:check
+        run: |
+          set -o pipefail
+          composer ci:check 2>&1 | tee ci.log
+
+      # Job logs need a GitHub login; the run summary does not, so a failure is readable there.
+      - name: Show the failure on the run page
+        if: failure()
+        run: |
+          {
+            echo '### Last lines of the failed check'
+            echo '```'
+            tail -n 120 ci.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
