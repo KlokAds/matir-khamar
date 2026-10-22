@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Models\CostCenter;
 use App\Models\User;
+use App\Support\Lookups;
 use Database\Seeders\KhamarSetupSeeder;
 
 beforeEach(function () {
@@ -52,7 +53,7 @@ it('keeps the code of a system category', function () {
 it('hides everything inside a project that is off, from the menu and the lists', function () {
     ($this->code)('GORU')->update(['is_active' => false]);
 
-    $codes = array_column(\App\Support\Lookups::centers(), 'code');
+    $codes = array_column(Lookups::centers(), 'code');
     expect($codes)->not->toContain('GAVI')->not->toContain('MOTATAJA')
         ->and(CostCenter::modules())->toMatchArray(['cattle' => false, 'milk' => false, 'fattening' => false])
         ->and(CostCenter::runningIds())->not->toContain(($this->code)('GAVI')->id);
