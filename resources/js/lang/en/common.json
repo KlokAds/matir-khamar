@@ -300,5 +300,8 @@
     "রিমাইন্ডার বদলান": "Change reminder",
     "বদলে রাখুন": "Save changes",
     "বাতিল": "Cancel",
-    "বদলান": "Change"
+    "বদলান": "Change",
+    "দুপুরের আগে/পরে বদলান": "Switch AM/PM",
+    "ঘণ্টা": "Hour",
+    "মিনিট": "Minute"
 }

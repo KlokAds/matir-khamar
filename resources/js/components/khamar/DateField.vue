@@ -205,6 +205,29 @@ function setTime(h: number, m: number) {
 }
 
 const stepHour = (by: number) => setTime(hour.value + by, minute.value);
+
+/** Typed straight in: hour 1–12 on the shown side of noon, minute 0–59. */
+function typeHour(event: Event) {
+    const n = Number((event.target as HTMLInputElement).value);
+
+    if (Number.isInteger(n) && n >= 1 && n <= 12) {
+        setTime((n % 12) + (hour.value >= 12 ? 12 : 0), minute.value);
+    } else {
+        (event.target as HTMLInputElement).value = String(clock12(hour.value));
+    }
+}
+
+function typeMinute(event: Event) {
+    const n = Number((event.target as HTMLInputElement).value);
+
+    if (Number.isInteger(n) && n >= 0 && n <= 59) {
+        setTime(hour.value, n);
+    } else {
+        (event.target as HTMLInputElement).value = pad(minute.value);
+    }
+}
+
+const flipNoon = () => setTime(hour.value + 12, minute.value);
 const stepMinute = (by: number) => {
     const total =
         (((hour.value * 60 + minute.value + by) % 1440) + 1440) % 1440;
@@ -473,25 +496,51 @@ const passThrough = computed(() => {
                         </button>
                     </div>
                     <div class="flex items-center justify-center gap-2">
-                        <span class="text-sm text-muted-foreground">{{
-                            period(hour)
-                        }}</span>
+                        <button
+                            type="button"
+                            class="quick"
+                            style="flex: none"
+                            :title="t('দুপুরের আগে/পরে বদলান')"
+                            @click="flipNoon"
+                        >
+                            {{ period(hour) }}
+                        </button>
                         <div class="stepper">
                             <button type="button" @click="stepHour(-1)">
                                 −
                             </button>
-                            <b class="num">{{ num(pad(clock12(hour))) }}</b>
+                            <input
+                                class="num"
+                                inputmode="numeric"
+                                maxlength="2"
+                                :aria-label="t('ঘণ্টা')"
+                                :value="clock12(hour)"
+                                @change="typeHour"
+                                @focus="
+                                    ($event.target as HTMLInputElement).select()
+                                "
+                            />
                             <button type="button" @click="stepHour(1)">
                                 +
                             </button>
                         </div>
                         <span class="font-bold">:</span>
                         <div class="stepper">
-                            <button type="button" @click="stepMinute(-5)">
+                            <button type="button" @click="stepMinute(-1)">
                                 −
                             </button>
-                            <b class="num">{{ num(pad(minute)) }}</b>
-                            <button type="button" @click="stepMinute(5)">
+                            <input
+                                class="num"
+                                inputmode="numeric"
+                                maxlength="2"
+                                :aria-label="t('মিনিট')"
+                                :value="pad(minute)"
+                                @change="typeMinute"
+                                @focus="
+                                    ($event.target as HTMLInputElement).select()
+                                "
+                            />
+                            <button type="button" @click="stepMinute(1)">
                                 +
                             </button>
                         </div>
@@ -535,7 +584,7 @@ const passThrough = computed(() => {
     @apply h-9 w-9 text-lg text-muted-foreground hover:bg-accent hover:text-foreground;
 }
 
-.stepper b {
-    @apply w-9 text-center text-base;
+.stepper input {
+    @apply h-9 w-10 bg-transparent text-center text-base font-bold outline-none focus:bg-accent;
 }
 </style>
