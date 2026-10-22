@@ -30,9 +30,16 @@ class ClockCommand extends Command
         $stopAt = now()->addHours((int) $this->option('hours'));
 
         do {
-            // Another clock took over (e.g. after a restart): this one steps aside.
-            if (Cache::get(WebCron::CLOCK_OWNER) !== $me) {
+            // Another clock took over (e.g. after a restart): this one steps aside. An empty
+            // cache (an app update clears it) is no rival: this clock simply claims it again.
+            $owner = Cache::get(WebCron::CLOCK_OWNER);
+
+            if ($owner !== null && $owner !== $me) {
                 return self::SUCCESS;
+            }
+
+            if ($owner === null) {
+                Cache::put(WebCron::CLOCK_OWNER, $me, 3600 * 24);
             }
 
             Cache::put(WebCron::CLOCK_BEAT, now()->toIso8601String(), 180);

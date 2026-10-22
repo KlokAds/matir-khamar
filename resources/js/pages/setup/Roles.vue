@@ -252,6 +252,19 @@ const create = useForm({
                     <ShieldCheck class="size-4 text-paddy" />
                     {{ t('২-ধাপ যাচাই (2FA) বাধ্যতামূলক') }}
                 </label>
+                <p
+                    class="mt-1 pl-6 text-xs leading-normal text-muted-foreground"
+                >
+                    {{
+                        drafts[role.id].requires_two_factor
+                            ? t(
+                                  'টিক আছে: এই রোলের সবাইকে 2FA চালু করতে হবে, লগইনে কোড লাগবে।',
+                              )
+                            : t(
+                                  'টিক নেই: এই রোলের কাউকে কোথাও 2FA কোড চাওয়া হবে না।',
+                              )
+                    }}
+                </p>
 
                 <div class="mt-3 flex justify-end">
                     <Button

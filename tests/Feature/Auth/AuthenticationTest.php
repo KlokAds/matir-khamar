@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Enums\Role;
+use App\Models\AccessRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -51,6 +53,26 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('two-factor.login'));
         $response->assertSessionHas('login.id', $user->id);
         $this->assertGuest();
+    }
+
+    public function test_a_role_without_the_two_factor_tick_is_never_stopped_at_a_code()
+    {
+        $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+
+        Features::twoFactorAuthentication([
+            'confirm' => true,
+            'confirmPassword' => true,
+        ]);
+
+        AccessRole::query()->where('key', 'entry')->update(['requires_two_factor' => false]);
+        $user = User::factory()->withTwoFactor()->create(['role' => Role::Entry]);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_users_can_not_authenticate_with_invalid_password()
