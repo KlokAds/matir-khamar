@@ -84,3 +84,15 @@ it('uses the farm\'s own bigha size', function () {
 
     expect(app(CropBook::class)->bigha(100))->toEqual(2.0);
 });
+
+it('counts each plot in its own bigha', function () {
+    $a = Plot::query()->create(['name' => 'ক', 'area_decimals' => 33, 'bigha_decimals' => 33, 'tenure' => 'own']);
+    $b = Plot::query()->create(['name' => 'খ', 'area_decimals' => 50, 'bigha_decimals' => 50, 'tenure' => 'own']);
+    $season = CropSeason::query()->create(['cost_center_id' => $this->dhan->id, 'crop' => 'ধান', 'name' => 'বোরো', 'started_on' => now()->toDateString()]);
+    $season->plots()->sync([$a->id => ['area_decimals' => 33], $b->id => ['area_decimals' => 50]]);
+
+    $book = app(CropBook::class);
+
+    expect($book->seasonCard($season->fresh())['bigha'])->toEqual(2.0)
+        ->and($book->plotRow($b)['bigha'])->toEqual(1.0);
+});

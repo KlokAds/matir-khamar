@@ -36,9 +36,15 @@ class CropBook
         return $value > 0 ? $value : 33.0;
     }
 
-    public function bigha(float $decimals): float
+    public function bigha(float $decimals, ?float $bighaSize = null): float
     {
-        return round($decimals / $this->bighaDecimals(), 2);
+        return round($decimals / ($bighaSize ?: $this->bighaDecimals()), 2);
+    }
+
+    /** A plot's bigha size: its own, or the farm's usual one. */
+    public function plotBigha(Plot $plot): float
+    {
+        return $plot->bigha_decimals ?: $this->bighaDecimals();
     }
 
     /** @return array<string, mixed> */
@@ -53,7 +59,9 @@ class CropBook
             'cost_center_id' => $plot->cost_center_id,
             'center' => $plot->costCenter?->name,
             'area_decimals' => $plot->area_decimals,
-            'bigha' => $this->bigha($plot->area_decimals),
+            'bigha_decimals' => $plot->bigha_decimals,
+            'bigha_size' => $this->plotBigha($plot),
+            'bigha' => $this->bigha($plot->area_decimals, $plot->bigha_decimals),
             'tenure' => $plot->tenure,
             'tenure_label' => Tr::get(Plot::TENURES[$plot->tenure] ?? $plot->tenure),
             'owner_name' => $plot->owner_name,
@@ -62,7 +70,7 @@ class CropBook
             'lease_to' => $plot->lease_to?->toDateString(),
             'lease_days_left' => $leftDays,
             'yearly_rent' => $plot->yearly_rent,
-            'rent_per_bigha' => $plot->yearly_rent && $plot->area_decimals > 0 ? (int) round($plot->yearly_rent / $this->bigha($plot->area_decimals)) : null,
+            'rent_per_bigha' => $plot->yearly_rent && $plot->area_decimals > 0 ? (int) round($plot->yearly_rent / max(0.01, $this->bigha($plot->area_decimals, $plot->bigha_decimals))) : null,
             'notes' => $plot->notes,
             'is_active' => $plot->is_active,
         ];
@@ -86,7 +94,7 @@ class CropBook
             $names[] = $season->name;
         }
 
-        $bigha = $this->bigha($plot->area_decimals);
+        $bigha = $this->bigha($plot->area_decimals, $plot->bigha_decimals);
 
         return [
             'year' => $year,
@@ -148,7 +156,8 @@ class CropBook
         $cost = (int) $costs->sum('amount');
         $value = (int) $outputs->sum('value');
         $decimals = $season->areaDecimals();
-        $bigha = $this->bigha($decimals);
+        // Each plot counts in its own bigha, so a 33-decimal plot and a 50-decimal one add up right.
+        $bigha = round((float) $season->plots->sum(fn (Plot $p) => (float) $p->getRelationValue('pivot')->area_decimals / $this->plotBigha($p)), 2);
         // The main crop is the largest product (paddy); straw and the rest are by-products.
         $main = $outputs->firstWhere('kind', 'product') ?? $outputs->first();
         $byProducts = $main ? $value - $main['value'] : 0;
@@ -175,6 +184,7 @@ class CropBook
                 'id' => $p->id,
                 'name' => $p->name,
                 'area_decimals' => (float) $p->getRelationValue('pivot')->area_decimals,
+                'bigha_size' => $this->plotBigha($p),
             ])->values(),
             'area_decimals' => $decimals,
             'bigha' => $bigha,

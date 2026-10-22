@@ -179,7 +179,7 @@ class ProfitBook
     {
         $plots = Plot::query()->where('tenure', 'lease')->whereNotNull('yearly_rent')->get();
         $rentPerBigha = $plots->isNotEmpty()
-            ? (int) round($plots->sum(fn (Plot $p) => $p->yearly_rent / max(0.01, $this->crops->bigha($p->area_decimals))) / $plots->count() / 100)
+            ? (int) round($plots->sum(fn (Plot $p) => $p->yearly_rent / max(0.01, $this->crops->bigha($p->area_decimals, $p->bigha_decimals))) / $plots->count() / 100)
             : 15000;
 
         $last = CropSeason::query()->whereNotNull('harvested_on')->orderByDesc('harvested_on')->first();

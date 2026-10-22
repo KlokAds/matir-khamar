@@ -96,5 +96,8 @@
     "বোরো": "Boro",
     "আউশ": "Aus",
     "রবি": "Rabi",
-    "খরিফ": "Kharif"
+    "খরিফ": "Kharif",
+    "এই জমির বিঘা কত শতাংশে": "How many decimals make a bigha here",
+    "এলাকা ভেদে বিঘা আলাদা — মালিক যে মাপে বলেন সেটা বাছুন": "A bigha differs by area — pick the size the owner uses",
+    "নিজে লিখুন": "Type it"
 }

@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $name
  * @property int|null $cost_center_id
  * @property float $area_decimals
+ * @property float|null $bigha_decimals this plot's bigha in decimals; null = the farm's usual size
  * @property string $tenure own, lease or share
  * @property string|null $owner_name
  * @property string|null $owner_phone
@@ -29,10 +30,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property CarbonImmutable|null $updated_at
  * @property-read CostCenter|null $costCenter
  */
-#[Fillable(['name', 'cost_center_id', 'area_decimals', 'tenure', 'owner_name', 'owner_phone', 'lease_from', 'lease_to', 'yearly_rent', 'notes', 'is_active'])]
+#[Fillable(['name', 'cost_center_id', 'area_decimals', 'bigha_decimals', 'tenure', 'owner_name', 'owner_phone', 'lease_from', 'lease_to', 'yearly_rent', 'notes', 'is_active'])]
 class Plot extends Model
 {
     use Auditable;
+
+    /** Bigha sizes in common use around Naogaon, in decimals. Any other size can be typed in. */
+    public const BIGHA_SIZES = [33, 50];
 
     public const TENURES = ['own' => 'নিজের', 'lease' => 'লিজ নেওয়া', 'share' => 'বর্গা / ভাগে'];
 
@@ -40,6 +44,7 @@ class Plot extends Model
     {
         return [
             'area_decimals' => 'float',
+            'bigha_decimals' => 'float',
             'lease_from' => 'date',
             'lease_to' => 'date',
             'yearly_rent' => 'integer',
