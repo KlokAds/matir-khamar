@@ -23,3 +23,13 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# The Android app download, and the file that proves the app belongs to this site.
+<IfModule mod_mime.c>
+    AddType application/vnd.android.package-archive .apk
+</IfModule>
+<IfModule mod_headers.c>
+    <Files "assetlinks.json">
+        Header set Content-Type "application/json"
+    </Files>
+</IfModule>

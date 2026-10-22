@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Download, Smartphone } from '@lucide/vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { t } from '@/lib/i18n';
 
@@ -106,6 +107,59 @@ defineProps<{
                         </div>
                     </div>
                     <slot />
+
+                    <!-- The Android app: the same site, with its own notifications and sound. -->
+                    <details
+                        class="group rounded-xl border border-border bg-card/70 text-sm"
+                    >
+                        <summary
+                            class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden"
+                        >
+                            <span class="flex items-center gap-2 font-medium">
+                                <Smartphone class="size-4 text-paddy" />
+                                {{ t('Android অ্যাপ') }}
+                            </span>
+                            <a
+                                href="/downloads/matir-khamar.apk"
+                                download
+                                class="btn-chip-primary"
+                                @click.stop
+                                ><Download /> {{ t('ডাউনলোড') }}</a
+                            >
+                        </summary>
+                        <ol
+                            class="list-decimal space-y-1 border-t border-border px-4 py-3 pl-8 text-xs leading-normal text-muted-foreground"
+                        >
+                            <li>
+                                {{
+                                    t(
+                                        '“ডাউনলোড” চাপুন, ফাইলটি নামা পর্যন্ত অপেক্ষা করুন।',
+                                    )
+                                }}
+                            </li>
+                            <li>
+                                {{
+                                    t(
+                                        'ফাইলটি খুলুন। “অজানা উৎস থেকে ইনস্টল” চাইলে এই একবার অনুমতি দিন।',
+                                    )
+                                }}
+                            </li>
+                            <li>
+                                {{
+                                    t(
+                                        'ইনস্টল হলে অ্যাপ খুলে লগইন করুন, নোটিফিকেশনের অনুমতি দিন।',
+                                    )
+                                }}
+                            </li>
+                            <li>
+                                {{
+                                    t(
+                                        'সাইটে যা নতুন আসে, অ্যাপেও সাথে সাথে চলে আসে — অ্যাপ আবার নামাতে হয় না।',
+                                    )
+                                }}
+                            </li>
+                        </ol>
+                    </details>
                 </div>
             </div>
             <p class="text-xs text-muted-foreground">

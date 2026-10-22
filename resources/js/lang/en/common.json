@@ -255,5 +255,11 @@
     "প্রতিদিন": "Every day",
     "খামার": "Farm",
     "টাকা ও রিপোর্ট": "Money & reports",
-    "সেটআপ": "Setup"
+    "সেটআপ": "Setup",
+    "Android অ্যাপ": "Android app",
+    "ডাউনলোড": "Download",
+    "“ডাউনলোড” চাপুন, ফাইলটি নামা পর্যন্ত অপেক্ষা করুন।": "Tap “Download” and wait for the file.",
+    "ফাইলটি খুলুন। “অজানা উৎস থেকে ইনস্টল” চাইলে এই একবার অনুমতি দিন।": "Open the file. If asked to allow installs from unknown sources, allow it this once.",
+    "ইনস্টল হলে অ্যাপ খুলে লগইন করুন, নোটিফিকেশনের অনুমতি দিন।": "Once installed, open the app, log in and allow notifications.",
+    "সাইটে যা নতুন আসে, অ্যাপেও সাথে সাথে চলে আসে — অ্যাপ আবার নামাতে হয় না।": "Whatever is new on the site is in the app at once — no need to download it again."
 }
