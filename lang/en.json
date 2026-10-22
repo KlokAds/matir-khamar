@@ -447,5 +447,10 @@
     "৬ মাস": "6 months",
     "এ বছর": "This year",
     "শুরু থেকে": "All time",
-    "নিজে বাছুন": "Custom"
+    "নিজে বাছুন": "Custom",
+    "কোরবানির জন্য গরু কেনার সময় শুরু": "Time to buy cattle for Kurbani",
+    "ঈদ :date — :from থেকে :to এর মধ্যে কিনলে ৯০–১২০ দিন খাওয়ানো যাবে": "Eid :date — buy between :from and :to to feed 90–120 days",
+    "কোরবানির :n দিন বাকি — ব্যাচ বিক্রির প্রস্তুতি": ":n days to Kurbani — get the batch ready to sell",
+    "ঈদ :date — ওজন মাপুন, হাট ও পরিবহন ঠিক করুন": "Eid :date — weigh the cattle, arrange the haat and transport",
+    "ঈদের তারিখ :date ধরা হলো।": "Eid date set to :date."
 }

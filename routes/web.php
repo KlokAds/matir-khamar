@@ -11,6 +11,7 @@ use App\Http\Controllers\EntryController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HerdController;
 use App\Http\Controllers\InvestorController;
+use App\Http\Controllers\KurbaniController;
 use App\Http\Controllers\LabourController;
 use App\Http\Controllers\LandController;
 use App\Http\Controllers\LocaleController;
@@ -78,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('can:view-reports')->group(function () {
         Route::get('centers', [CostCenterController::class, 'index'])->name('centers.index');
         Route::get('centers/{center}', [CostCenterController::class, 'show'])->name('centers.show');
+        Route::get('kurbani', [KurbaniController::class, 'index'])->name('kurbani.index');
         Route::get('entries', [EntryController::class, 'index'])->name('entries.index');
         Route::get('entries/{entry}', [EntryController::class, 'show'])->whereNumber('entry')->name('entries.show');
         Route::get('attachments/{attachment}', [EntryController::class, 'attachment'])->name('attachments.show');
@@ -137,6 +139,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::post('entries/{entry}/reverse', [EntryController::class, 'reverse'])->middleware('can:reverse-entries')->name('entries.reverse');
+
+    Route::put('kurbani/eid', [KurbaniController::class, 'updateEid'])->middleware('can:manage-setup')->name('kurbani.eid');
 
     Route::middleware('can:manage-setup')->prefix('setup')->name('setup.')->group(function () {
         Route::post('centers', [CostCenterController::class, 'store'])->name('centers.store');
