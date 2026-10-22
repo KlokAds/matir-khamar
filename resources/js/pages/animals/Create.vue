@@ -4,6 +4,7 @@ import { computed, watch } from 'vue';
 import { Paperclip } from '@lucide/vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
+import PhotoPicker from '@/components/khamar/PhotoPicker.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
@@ -339,30 +340,7 @@ watch(
                     v-if="f.acquisition === 'purchase'"
                     :label="t('হাটের রসিদ / ছবি')"
                 >
-                    <label
-                        class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm hover:bg-accent"
-                    >
-                        <Paperclip class="size-4 text-muted-foreground" />
-                        <span class="truncate">{{
-                            f.attachments.length
-                                ? f.attachments.map((x) => x.name).join(', ')
-                                : t('ছবি / PDF')
-                        }}</span>
-                        <input
-                            type="file"
-                            class="sr-only"
-                            accept="image/*,application/pdf"
-                            capture="environment"
-                            multiple
-                            @change="
-                                (e) =>
-                                    (f.attachments = Array.from(
-                                        (e.target as HTMLInputElement).files ??
-                                            [],
-                                    ))
-                            "
-                        />
-                    </label>
+                    <PhotoPicker v-model:files="f.attachments" />
                 </Field>
             </template>
             <div class="sm:col-span-2 lg:col-span-3">

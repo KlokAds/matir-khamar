@@ -4,6 +4,7 @@ import { Paperclip, Plus, X } from '@lucide/vue';
 import { computed, watch } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
+import PhotoPicker from '@/components/khamar/PhotoPicker.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import { Button } from '@/components/ui/button';
 import DateField from '@/components/khamar/DateField.vue';
@@ -150,11 +151,6 @@ watch(
 
 const animalsFor = (centerId: number | null) =>
     props.animals.filter((a) => a.cost_center_id === centerId);
-
-function pickFiles(event: Event) {
-    const input = event.target as HTMLInputElement;
-    f.attachments = Array.from(input.files ?? []).slice(0, 5);
-}
 
 function submit(stay = false) {
     f.stay = stay;
@@ -740,28 +736,7 @@ const help = computed<Record<string, string>>(() => ({
                                 )
                             "
                         >
-                            <label
-                                class="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input bg-background px-3 py-2.5 text-sm hover:bg-accent"
-                            >
-                                <Paperclip
-                                    class="size-4 text-muted-foreground"
-                                />
-                                <span class="truncate">{{
-                                    f.attachments.length
-                                        ? f.attachments
-                                              .map((file) => file.name)
-                                              .join(', ')
-                                        : t('ছবি তুলুন বা ফাইল বাছুন')
-                                }}</span>
-                                <input
-                                    type="file"
-                                    class="sr-only"
-                                    accept="image/*,application/pdf"
-                                    capture="environment"
-                                    multiple
-                                    @change="pickFiles"
-                                />
-                            </label>
+                            <PhotoPicker v-model:files="f.attachments" />
                         </Field>
                     </div>
                 </section>
