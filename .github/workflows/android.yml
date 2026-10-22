@@ -1,11 +1,12 @@
 name: Android app
 
 # Builds the farm's Android app (mobile/) in the cloud and publishes the APK as a release;
-# the login page's download button always points at the newest one.
+# the login page's download button always points at the newest one. One version a week at
+# most: Friday night (Bangladesh), and only when mobile/ changed since the last release. It
+# can also be started by hand from the Actions tab.
 on:
-  push:
-    branches: [main]
-    paths: ['mobile/**', '.github/workflows/android.yml']
+  schedule:
+    - cron: '0 16 * * 5'
   workflow_dispatch:
 
 permissions:
@@ -16,18 +17,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Anything new for the app this week?
+        id: changed
+        run: |
+          last=$(git tag -l 'android-v*' --sort=-creatordate | head -n 1)
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -n "$last" ] && git diff --quiet "$last" HEAD -- mobile/; then
+            echo "No app changes since $last."
+            echo "build=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=yes" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/setup-java@v4
+        if: steps.changed.outputs.build == 'yes'
         with:
           distribution: temurin
           java-version: '17'
 
       - uses: subosito/flutter-action@v2
+        if: steps.changed.outputs.build == 'yes'
         with:
           channel: stable
           cache: true
 
       - name: Make and build the APK
+        if: steps.changed.outputs.build == 'yes'
         working-directory: mobile
         run: bash tool/build.sh
         env:
@@ -37,6 +54,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
       - uses: softprops/action-gh-release@v2
+        if: steps.changed.outputs.build == 'yes'
         with:
           tag_name: android-v${{ github.run_number }}
           name: মাটির খামার অ্যাপ ${{ github.run_number }}
