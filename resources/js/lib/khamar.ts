@@ -14,7 +14,8 @@ export function taka(
         maximumFractionDigits: 2,
     });
 
-    return withSymbol ? `${sign}৳ ${text}` : `${sign}${text}`;
+    // A narrow no-break space: ৳ and the figure stay on one line on a phone.
+    return withSymbol ? `${sign}৳ ${text}` : `${sign}${text}`;
 }
 
 export function qty(value: number | null | undefined, unit = ''): string {

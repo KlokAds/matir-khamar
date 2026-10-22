@@ -104,6 +104,11 @@
         font-feature-settings: 'tnum';
     }
 
+    /* An amount never breaks between ৳ and its figure; a long one shrinks its line instead. */
+    .num:not(:has(*)) {
+        overflow-wrap: normal;
+    }
+
     /* Ploughed-field stripes, used under page titles and on the login page. */
     .furrows {
         background-image: repeating-linear-gradient(

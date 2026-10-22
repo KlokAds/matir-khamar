@@ -16,6 +16,7 @@ use App\Support\Tr;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -262,8 +263,42 @@ class SetupController extends Controller
 
     public function audit(Request $request): Response
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'action' => ['nullable', 'string', 'max:40'],
+            'user' => ['nullable', 'integer'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+        ]);
+        $q = trim((string) ($filters['q'] ?? ''));
+
+        $logs = AuditLog::query()->with('user:id,name')
+            ->when($q !== '', function ($query) use ($q) {
+                // Values are stored as JSON, where Bangla is written as \u escapes: look for both.
+                $escaped = trim((string) json_encode($q), '"');
+
+                // MySQL's LIKE reads a backslash as an escape, SQLite's does not.
+                if (DB::connection()->getDriverName() !== 'sqlite') {
+                    $escaped = str_replace('\\', '\\\\', $escaped);
+                }
+
+                $query->where(fn ($w) => $w
+                    ->where('old_values', 'like', "%{$q}%")->orWhere('new_values', 'like', "%{$q}%")
+                    ->orWhere('old_values', 'like', "%{$escaped}%")->orWhere('new_values', 'like', "%{$escaped}%")
+                    ->orWhere('auditable_type', 'like', "%{$q}%")->orWhere('ip', 'like', "%{$q}%")
+                    ->orWhere('auditable_id', ctype_digit($q) ? (int) $q : -1)
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$q}%")));
+            })
+            ->when($filters['action'] ?? null, fn ($query, $action) => $query->where('action', $action))
+            ->when($filters['user'] ?? null, fn ($query, $user) => $query->where('user_id', $user))
+            ->when($filters['from'] ?? null, fn ($query, $from) => $query->whereDate('created_at', '>=', $from))
+            ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('created_at', '<=', $to))
+            ->latest('id');
+
         return Inertia::render('setup/Audit', [
-            'logs' => AuditLog::query()->with('user:id,name')->latest('id')->paginate(50)->through(fn (AuditLog $log) => [
+            'filters' => (object) array_filter($filters, fn ($v) => $v !== null && $v !== ''),
+            'users' => User::query()->where('is_super', false)->orWhere('id', $request->user()->id)->orderBy('name')->get(['id', 'name']),
+            'logs' => $logs->paginate(50)->withQueryString()->through(fn (AuditLog $log) => [
                 'id' => $log->id,
                 'at' => $log->created_at->toDateTimeString(),
                 'user' => $log->user?->name,

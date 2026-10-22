@@ -1,13 +1,26 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Search, X } from '@lucide/vue';
+import { reactive, watch } from 'vue';
+import DateField from '@/components/khamar/DateField.vue';
+import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
+import { Input } from '@/components/ui/input';
 import { t } from '@/lib/i18n';
 
 defineOptions({
     layout: { breadcrumbs: [{ title: 'অডিট লগ', href: '/setup/audit' }] },
 });
 
-defineProps<{
+const props = defineProps<{
+    filters: {
+        q?: string;
+        action?: string;
+        user?: number | string;
+        from?: string;
+        to?: string;
+    };
+    users: { id: number; name: string }[];
     logs: {
         data: {
             id: number;
@@ -33,6 +46,35 @@ const actions: Record<string, string> = {
     login_failed: 'ভুল লগইন চেষ্টা',
     period_unlocked: 'মাসের লক খোলা',
 };
+
+/* Search and filters: the list follows as you type (a short pause first). */
+const filter = reactive({
+    q: props.filters.q ?? '',
+    action: props.filters.action ?? '',
+    user: props.filters.user ? Number(props.filters.user) : null,
+    from: props.filters.from ?? '',
+    to: props.filters.to ?? '',
+});
+let timer: ReturnType<typeof setTimeout> | undefined;
+
+watch(filter, () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+        const query = Object.fromEntries(
+            Object.entries(filter).filter(([, v]) => v !== '' && v !== null),
+        );
+        router.get('/setup/audit', query, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    }, 350);
+});
+
+const clear = () =>
+    Object.assign(filter, { q: '', action: '', user: null, from: '', to: '' });
+const filtered = () =>
+    !!(filter.q || filter.action || filter.user || filter.from || filter.to);
 
 const tone = (action: string) =>
     ['login_failed', 'deleted', 'period_unlocked'].includes(action)
@@ -68,7 +110,63 @@ const short = (values: Record<string, unknown> | null) =>
             "
         />
 
-        <div class="overflow-x-auto rounded-xl border border-border bg-card">
+        <div
+            class="mb-4 grid gap-2 rounded-xl border border-border bg-card p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))_auto]"
+        >
+            <div class="relative sm:col-span-2 lg:col-span-1">
+                <Search
+                    class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    v-model="filter.q"
+                    type="search"
+                    class="pl-9"
+                    :placeholder="t('খুঁজুন: নাম, টাকা, এন্ট্রি নম্বর, IP…')"
+                />
+            </div>
+            <NSelect v-model="filter.action">
+                <option value="">{{ t('সব কাজ') }}</option>
+                <option v-for="(label, key) in actions" :key="key" :value="key">
+                    {{ t(label) }}
+                </option>
+            </NSelect>
+            <NSelect v-model="filter.user">
+                <option :value="null">{{ t('সবাই') }}</option>
+                <option v-for="u in users" :key="u.id" :value="u.id">
+                    {{ u.name }}
+                </option>
+            </NSelect>
+            <DateField
+                v-model="filter.from"
+                clearable
+                :placeholder="t('থেকে')"
+            />
+            <DateField
+                v-model="filter.to"
+                clearable
+                :placeholder="t('পর্যন্ত')"
+            />
+            <button
+                v-if="filtered()"
+                type="button"
+                class="btn-chip h-10"
+                @click="clear"
+            >
+                <X /> {{ t('মুছুন') }}
+            </button>
+        </div>
+
+        <p
+            v-if="!logs.data.length"
+            class="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground"
+        >
+            {{ t('এই খোঁজে কিছু পাওয়া যায়নি।') }}
+        </p>
+
+        <div
+            v-else
+            class="overflow-x-auto rounded-xl border border-border bg-card"
+        >
             <table class="w-full min-w-[820px] text-sm">
                 <tbody>
                     <tr
