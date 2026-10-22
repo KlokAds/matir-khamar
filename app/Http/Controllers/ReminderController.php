@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\PushSubscription;
 use App\Models\Reminder;
 use App\Models\User;
+use App\Services\Notifier;
 use App\Services\PushSender;
 use App\Services\StockForecast;
 use App\Support\Lookups;
@@ -92,6 +93,28 @@ class ReminderController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('মনে করিয়ে দেওয়া হবে :when।', ['when' => $reminder->due_at->format('d M, g:i A')])]);
 
         return back();
+    }
+
+    /**
+     * The next week's reminders for this person, for the farm app to schedule on the phone so
+     * they ring without internet. The app asks again whenever it is online, so changes and
+     * deletions reach the phone then.
+     */
+    public function upcoming(Request $request, Notifier $notifier): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->wantsNotification('reminders')) {
+            return response()->json([]);
+        }
+
+        $items = Reminder::query()->whereNull('done_at')->whereNull('sent_at')
+            ->whereBetween('due_at', [now(), now()->addDays(7)])->orderBy('due_at')->limit(60)->get()
+            ->filter(fn (Reminder $r) => $notifier->recipientsOf($r)->contains('id', $user->id))
+            ->map(fn (Reminder $r) => [...$notifier->reminderPayload($r, $user), 'at' => $r->due_at->toIso8601String()])
+            ->values();
+
+        return response()->json($items);
     }
 
     /** Changed words, time or alarm: it rings afresh at the new time. */

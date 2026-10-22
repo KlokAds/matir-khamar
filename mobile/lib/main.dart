@@ -11,6 +11,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:local_auth/local_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
 
 /// The farm's site, shown whole inside the app, so every change on the site is in the app at once.
@@ -82,45 +85,97 @@ void onButtonInBackground(NotificationResponse response) {
   pressButton(response);
 }
 
-/// Shows a farm notification; an alarm rings on until touched, at most a minute each time
+/// How a farm notification looks; an alarm rings on until touched, at most a minute each time
 /// (the server sends it again every two minutes until it is marked done).
-Future<void> showFarm(RemoteMessage message) async {
-  final data = message.data;
-  final title = message.notification?.title ?? data['title'] ?? 'মাটির খামার';
-  final body = message.notification?.body ?? data['body'] ?? '';
-  final ring = data['alarm'] == '1' || data['alarm'] == 'true';
+NotificationDetails farmDetails(Map<String, dynamic> data, String body) {
+  final ring = data['alarm'] == true || data['alarm'] == '1' || data['alarm'] == 'true';
   final buttons = <AndroidNotificationAction>[];
   try {
-    for (final a in (jsonDecode(data['actions'] ?? '[]') as List)) {
+    final actions = data['actions'] is String ? jsonDecode(data['actions'] as String) : data['actions'];
+    for (final a in (actions as List? ?? [])) {
       if (a is Map && a['url'] is String && a['title'] is String) {
         buttons.add(AndroidNotificationAction(a['url'] as String, a['title'] as String, cancelNotification: true));
       }
     }
   } catch (_) {}
 
-  await notifications.show(
-    (data['tag'] ?? title).hashCode,
-    title,
-    body,
-    NotificationDetails(
-      android: AndroidNotificationDetails(
-        ring ? ringing.id : alerts.id,
-        ring ? ringing.name : alerts.name,
-        importance: Importance.max,
-        priority: Priority.max,
-        icon: 'ic_notification',
-        color: brown,
-        styleInformation: BigTextStyleInformation(body),
-        category: ring ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.message,
-        fullScreenIntent: ring,
-        ongoing: ring,
-        timeoutAfter: ring ? 60000 : null,
-        additionalFlags: ring ? Int32List.fromList([flagInsistent]) : null,
-        actions: buttons,
-      ),
+  return NotificationDetails(
+    android: AndroidNotificationDetails(
+      ring ? ringing.id : alerts.id,
+      ring ? ringing.name : alerts.name,
+      importance: Importance.max,
+      priority: Priority.max,
+      icon: 'ic_notification',
+      color: brown,
+      styleInformation: BigTextStyleInformation(body),
+      category: ring ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.message,
+      fullScreenIntent: ring,
+      ongoing: ring,
+      timeoutAfter: ring ? 60000 : null,
+      additionalFlags: ring ? Int32List.fromList([flagInsistent]) : null,
+      actions: buttons,
     ),
-    payload: data['url'],
   );
+}
+
+Future<void> showFarm(RemoteMessage message) async {
+  final data = message.data;
+  final title = message.notification?.title ?? data['title'] ?? 'মাটির খামার';
+  final body = message.notification?.body ?? data['body'] ?? '';
+
+  // The phone already rang this reminder by itself (scheduled while online): the server's
+  // first send is not rung again. Later alarm rings still are.
+  final id = data['reminder_id'];
+  if (id != null && (data['rings'] ?? '0') == '0') {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final at = DateTime.tryParse(prefs.getString('rang.$id') ?? '');
+    if (at != null && !at.isAfter(DateTime.now().add(const Duration(minutes: 1)))) {
+      return;
+    }
+  }
+
+  await notifications.show((data['tag'] ?? title).hashCode, title, body, farmDetails(data, body), payload: data['url']);
+}
+
+/// Puts the coming week's reminders on the phone itself, so they ring even without internet.
+/// Run whenever the app is online and signed in; it replaces what it put there before, so
+/// changed and deleted reminders follow.
+Future<void> scheduleReminders(List<dynamic> items) async {
+  final prefs = await SharedPreferences.getInstance();
+  for (final id in prefs.getStringList('scheduled') ?? <String>[]) {
+    await notifications.cancel(int.parse(id));
+  }
+  for (final key in prefs.getKeys().where((k) => k.startsWith('rang.')).toList()) {
+    await prefs.remove(key);
+  }
+
+  final android = notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+  final exact = await android?.canScheduleExactNotifications() ?? false;
+  final ids = <String>[];
+  for (final item in items) {
+    if (item is! Map<String, dynamic>) {
+      continue;
+    }
+    final at = DateTime.tryParse(item['at'] as String? ?? '');
+    if (at == null || at.isBefore(DateTime.now())) {
+      continue;
+    }
+    final id = (item['tag'] as String? ?? '').hashCode;
+    final body = item['body'] as String? ?? '';
+    await notifications.zonedSchedule(
+      id,
+      item['title'] as String? ?? 'মাটির খামার',
+      body,
+      tz.TZDateTime.from(at.toUtc(), tz.UTC),
+      farmDetails(item, body),
+      androidScheduleMode: exact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: item['url'] as String?,
+    );
+    ids.add('$id');
+    await prefs.setString('rang.${item['reminder_id']}', at.toIso8601String());
+  }
+  await prefs.setStringList('scheduled', ids);
 }
 
 /// A message while the app is closed or in the background. Plain ones Android shows by itself;
@@ -139,6 +194,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: brown, statusBarIconBrightness: Brightness.light));
   await Firebase.initializeApp();
+  tzdata.initializeTimeZones();
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
   await setUpNotifications();
 
@@ -300,6 +356,7 @@ class _SitePageState extends State<SitePage> {
   String? token;
   String? handedOver;
   double progress = 0;
+  DateTime? syncedAt;
 
   @override
   void initState() {
@@ -320,6 +377,11 @@ class _SitePageState extends State<SitePage> {
 
   Future<void> askPermissions() async {
     await FirebaseMessaging.instance.requestPermission(alert: true, badge: true, sound: true);
+    // Exact times for reminders scheduled on the phone (Android asks once, in its settings).
+    final android = notifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (!(await android?.canScheduleExactNotifications() ?? true)) {
+      await android?.requestExactAlarmsPermission();
+    }
     await [Permission.camera].request();
     token = await FirebaseMessaging.instance.getToken();
     FirebaseMessaging.instance.onTokenRefresh.listen((fresh) {
@@ -332,6 +394,27 @@ class _SitePageState extends State<SitePage> {
   void open(String url) {
     final target = url.startsWith('http') ? url : '$site${url.startsWith('/') ? '' : '/'}$url';
     web?.loadUrl(urlRequest: URLRequest(url: WebUri(target)));
+  }
+
+  /// Fetches the coming week's reminders (as the signed-in person) and schedules them here.
+  Future<void> syncReminders() async {
+    final controller = web;
+    if (controller == null || (syncedAt != null && DateTime.now().difference(syncedAt!) < const Duration(minutes: 1))) {
+      return;
+    }
+    final url = await controller.getUrl();
+    if (url == null || url.host != Uri.parse(site).host || url.path.startsWith('/login') || url.path.startsWith('/two-factor')) {
+      return;
+    }
+    final result = await controller.callAsyncJavaScript(functionBody: '''
+      const r = await fetch('/reminders/upcoming', { credentials: 'same-origin', headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+      return r.ok ? await r.text() : null;
+    ''');
+    final text = result?.value;
+    if (text is String) {
+      syncedAt = DateTime.now();
+      await scheduleReminders(jsonDecode(text) as List<dynamic>);
+    }
   }
 
   /// Gives the server this phone's Firebase token under whoever is signed in, once per sign-in.
@@ -395,7 +478,7 @@ class _SitePageState extends State<SitePage> {
                 initialUrlRequest: URLRequest(url: WebUri('$site${openFirst ?? '/dashboard'}')),
                 pullToRefreshController: refresh,
                 initialSettings: InAppWebViewSettings(
-                  applicationNameForUserAgent: 'MatirKhamarApp/3',
+                  applicationNameForUserAgent: 'MatirKhamarApp/4',
                   javaScriptEnabled: true,
                   domStorageEnabled: true,
                   databaseEnabled: true,
@@ -436,6 +519,7 @@ class _SitePageState extends State<SitePage> {
                     openFirst = null;
                   }
                   await handOver();
+                  await syncReminders();
                 },
                 onReceivedError: (controller, request, error) => refresh?.endRefreshing(),
               ),

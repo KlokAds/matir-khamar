@@ -70,6 +70,27 @@ it('changes a reminder that was already sent, so it rings again at the new time,
     expect(Reminder::query()->count())->toBe(0);
 });
 
+it('gives the farm app the coming week\'s reminders to ring on the phone without internet', function () {
+    $this->post('/reminders', ['title' => 'সার দিতে হবে', 'due_at' => now()->addHours(3)->format('Y-m-d\TH:i'), 'repeat' => 'none', 'alarm' => true]);
+    $this->post('/reminders', ['title' => 'অনেক পরে', 'due_at' => now()->addDays(20)->format('Y-m-d\TH:i'), 'repeat' => 'none']);
+    $other = User::factory()->create(['role' => Role::Manager]);
+    Reminder::query()->create(['title' => 'অন্যের', 'due_at' => now()->addHour(), 'repeat' => 'none', 'created_by' => $other->id, 'for_user_id' => $other->id]);
+
+    $items = $this->getJson('/reminders/upcoming')->assertOk()->json();
+
+    expect($items)->toHaveCount(1)
+        ->and($items[0]['title'])->toBe('🔔 সার দিতে হবে')
+        ->and($items[0]['alarm'])->toBeTrue()
+        ->and($items[0]['at'])->toBe(Reminder::query()->where('title', 'সার দিতে হবে')->value('due_at')->toIso8601String())
+        ->and($items[0]['actions'])->toHaveCount(2);
+
+    // The "done" button still works once the reminder falls due, days from now.
+    $this->travel(3)->hours();
+    auth()->logout();
+    $this->postJson($items[0]['actions'][0]['url'])->assertOk();
+    expect(Reminder::query()->where('title', 'সার দিতে হবে')->value('done_at'))->not->toBeNull();
+});
+
 it('does not let one person change another person\'s private reminder', function () {
     $other = User::factory()->create(['role' => Role::Manager]);
     $reminder = Reminder::query()->create(['title' => 'নিজের', 'due_at' => now()->addHour(), 'repeat' => 'none', 'created_by' => $other->id, 'for_user_id' => $other->id]);
