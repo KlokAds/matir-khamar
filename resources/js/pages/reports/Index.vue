@@ -76,17 +76,12 @@ const sum = (rows: { balance: number }[]) =>
                     <DateField v-model="range.to" class="min-w-0 sm:w-36" />
                     <Button
                         type="submit"
-                        size="sm"
                         variant="secondary"
                         class="col-span-3 sm:col-auto"
                         >{{ t('দেখুন') }}</Button
                     >
                 </form>
-                <Button
-                    size="sm"
-                    variant="secondary"
-                    class="print:hidden"
-                    @click="print"
+                <Button variant="secondary" class="print:hidden" @click="print"
                     ><Printer /> {{ t('প্রিন্ট / PDF') }}</Button
                 >
             </template>

@@ -63,6 +63,7 @@ const props = defineProps<{
         capital: number;
         earned: number;
         money_places: { name: string; balance: number }[];
+        receivable_list: { name: string; balance: number }[];
     };
     herd: {
         now: number;
@@ -419,6 +420,21 @@ const share = (value: number, peak: number) =>
                         <dt>{{ t('অন্যের কাছে পাওনা / জামানত') }}</dt>
                         <dd class="num">{{ taka(position.receivable) }}</dd>
                     </div>
+                    <ul
+                        v-if="position.receivable_list.length"
+                        class="-mt-1 space-y-0.5 text-xs leading-normal text-muted-foreground"
+                    >
+                        <li
+                            v-for="r in position.receivable_list"
+                            :key="r.name"
+                            class="flex justify-between gap-3"
+                        >
+                            <span>{{ t(r.name) }}</span>
+                            <span class="num whitespace-nowrap">{{
+                                taka(r.balance)
+                            }}</span>
+                        </li>
+                    </ul>
                     <div class="row font-semibold">
                         <dt>{{ t('মোট') }}</dt>
                         <dd class="num">{{ taka(position.assets) }}</dd>

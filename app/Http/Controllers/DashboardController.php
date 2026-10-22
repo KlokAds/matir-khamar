@@ -8,6 +8,7 @@ use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\JournalEntry;
 use App\Models\MilkRecord;
+use App\Services\DailyChecklist;
 use App\Services\HerdCare;
 use App\Services\PrepaidService;
 use App\Services\ReportService;
@@ -19,7 +20,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care): Response|RedirectResponse
+    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care, DailyChecklist $checklist): Response|RedirectResponse
     {
         // An investor-only login goes straight to their own page.
         if ($request->user()->abilities() === ['investor-view']) {
@@ -36,6 +37,8 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'canSeeMoney' => $canSeeMoney,
             'reminders' => $care->reminders(),
+            // The day's own jobs for whoever writes milk and feed; each ticks itself off.
+            'today' => $request->user()->can('post-daily') ? $checklist->for($request->user()) : [],
             'month' => $from->format('Y-m'),
             'farm' => $canSeeMoney ? $reports->farmTotals($from, $to) : null,
             'farmYear' => $canSeeMoney ? $reports->farmTotals(now()->startOfYear(), $to) : null,

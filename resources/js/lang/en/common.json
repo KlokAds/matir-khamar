@@ -247,5 +247,7 @@
     "\":name\" যোগ করুন": "Add \":name\"",
     "হয়নি, আবার চেষ্টা করুন।": "That did not work — try again.",
     "নাম": "Name",
-    "যোগ করুন": "Add"
+    "যোগ করুন": "Add",
+    "আজকের কাজ": "Today's jobs",
+    ":done/:all হয়েছে": ":done/:all done"
 }
