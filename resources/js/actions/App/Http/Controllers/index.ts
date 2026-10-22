@@ -13,6 +13,7 @@ import LabourController from './LabourController'
 import DiaryController from './DiaryController'
 import CostCenterController from './CostCenterController'
 import KurbaniController from './KurbaniController'
+import RationController from './RationController'
 import EntryController from './EntryController'
 import AnimalController from './AnimalController'
 import ReportController from './ReportController'
@@ -44,6 +45,7 @@ const Controllers = {
     DiaryController: Object.assign(DiaryController, DiaryController),
     CostCenterController: Object.assign(CostCenterController, CostCenterController),
     KurbaniController: Object.assign(KurbaniController, KurbaniController),
+    RationController: Object.assign(RationController, RationController),
     EntryController: Object.assign(EntryController, EntryController),
     AnimalController: Object.assign(AnimalController, AnimalController),
     ReportController: Object.assign(ReportController, ReportController),
