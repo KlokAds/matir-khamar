@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { AlarmClock, Bell, BellOff } from '@lucide/vue';
+import { AlarmClock, Bell, BellOff, Trash2, X } from '@lucide/vue';
 import {
     PopoverContent,
     PopoverPortal,
@@ -94,6 +94,30 @@ function ago(iso: string | null): string {
     return new Date(iso).toLocaleDateString();
 }
 
+async function send(method: string, url: string) {
+    await fetch(url, {
+        method,
+        credentials: 'same-origin',
+        headers: {
+            Accept: 'application/json',
+            'X-XSRF-TOKEN': xsrf(),
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    });
+}
+
+async function removeOne(item: Item) {
+    items.value = items.value.filter((i) => i.id !== item.id);
+    await send('DELETE', `/notifications/${item.id}`);
+    router.reload({ only: ['notificationsUnread'] });
+}
+
+async function clearAll() {
+    items.value = [];
+    await send('DELETE', '/notifications');
+    router.reload({ only: ['notificationsUnread'] });
+}
+
 function go(item: Item) {
     open.value = false;
 
@@ -132,11 +156,21 @@ function go(item: Item) {
                     <p class="font-display text-base leading-normal">
                         {{ t('নোটিফিকেশন') }}
                     </p>
-                    <span
-                        v-if="unread"
-                        class="num rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive"
-                        >{{ t(':nটি নতুন', { n: unread }) }}</span
-                    >
+                    <div class="flex items-center gap-2">
+                        <span
+                            v-if="unread"
+                            class="num rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive"
+                            >{{ t(':nটি নতুন', { n: unread }) }}</span
+                        >
+                        <button
+                            v-if="items.length"
+                            type="button"
+                            class="btn-chip h-7 text-xs"
+                            @click="clearAll"
+                        >
+                            <Trash2 /> {{ t('সব মুছুন') }}
+                        </button>
+                    </div>
                 </div>
                 <ul class="max-h-[60vh] overflow-y-auto">
                     <li
@@ -147,33 +181,46 @@ function go(item: Item) {
                             !item.read && 'bg-primary/5',
                         ]"
                     >
-                        <button
-                            type="button"
-                            class="flex w-full gap-3 px-4 py-3 text-left hover:bg-accent/50"
-                            @click="go(item)"
-                        >
-                            <span
-                                :class="[
-                                    'mt-1.5 size-2 shrink-0 rounded-full',
-                                    item.read ? 'bg-transparent' : 'bg-primary',
-                                ]"
-                            />
-                            <span class="min-w-0 flex-1">
+                        <div class="flex items-start">
+                            <button
+                                type="button"
+                                class="flex min-w-0 flex-1 gap-3 py-3 pl-4 text-left hover:bg-accent/50"
+                                @click="go(item)"
+                            >
                                 <span
-                                    class="block text-sm leading-normal font-medium"
-                                    >{{ item.title }}</span
-                                >
-                                <span
-                                    v-if="item.body"
-                                    class="block text-xs leading-normal text-muted-foreground"
-                                    >{{ item.body }}</span
-                                >
-                                <span
-                                    class="mt-0.5 block text-[11px] text-muted-foreground"
-                                    >{{ ago(item.at) }}</span
-                                >
-                            </span>
-                        </button>
+                                    :class="[
+                                        'mt-1.5 size-2 shrink-0 rounded-full',
+                                        item.read
+                                            ? 'bg-transparent'
+                                            : 'bg-primary',
+                                    ]"
+                                />
+                                <span class="min-w-0 flex-1">
+                                    <span
+                                        class="block text-sm leading-normal font-medium"
+                                        >{{ item.title }}</span
+                                    >
+                                    <span
+                                        v-if="item.body"
+                                        class="block text-xs leading-normal text-muted-foreground"
+                                        >{{ item.body }}</span
+                                    >
+                                    <span
+                                        class="mt-0.5 block text-[11px] text-muted-foreground"
+                                        >{{ ago(item.at) }}</span
+                                    >
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                class="m-2 flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-destructive"
+                                :aria-label="t('মুছুন')"
+                                :title="t('মুছুন')"
+                                @click="removeOne(item)"
+                            >
+                                <X class="size-4" />
+                            </button>
+                        </div>
                     </li>
                     <li
                         v-if="!loading && !items.length"

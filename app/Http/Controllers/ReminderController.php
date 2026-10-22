@@ -55,6 +55,15 @@ class ReminderController extends Controller
             'animals' => Animal::query()->where('status', 'active')->orderBy('tag')->get(['id', 'tag', 'name']),
             'vapidKey' => $push->publicKey(),
             'devices' => PushSubscription::query()->where('user_id', $user->id)->count(),
+            // Each phone: when something was last sent, and when it last said it got one.
+            'deviceList' => PushSubscription::query()->where('user_id', $user->id)->latest('id')->get()
+                ->map(fn (PushSubscription $s) => [
+                    'id' => $s->id,
+                    'device' => $s->device,
+                    'sent' => $s->last_sent_at?->toIso8601String(),
+                    'received' => $s->last_received_at?->toIso8601String(),
+                    'mode' => $s->mode,
+                ])->values(),
             'prefs' => [
                 'reminders' => $user->wantsNotification('reminders'),
                 'morning' => $user->wantsNotification('morning'),
@@ -150,6 +159,21 @@ class ReminderController extends Controller
             : ['type' => 'error', 'message' => __('কোনো ফোনে পৌঁছায়নি — এই ফোনে নোটিফিকেশন চালু করুন।')]);
 
         return back();
+    }
+
+    /**
+     * The phone's service worker says it received a push. No CSRF token in a service worker,
+     * so this only ever marks the caller's own subscription.
+     */
+    public function received(Request $request): HttpResponse
+    {
+        $data = $request->validate(['endpoint' => ['required', 'string', 'max:2000']]);
+
+        PushSubscription::query()->where('user_id', $request->user()->id)
+            ->where('endpoint_hash', hash('sha256', $data['endpoint']))
+            ->update(['last_received_at' => now()]);
+
+        return response()->noContent();
     }
 
     public function prefs(Request $request): RedirectResponse

@@ -21,11 +21,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $device
  * @property int $failures
  * @property CarbonImmutable|null $last_sent_at
+ * @property CarbonImmutable|null $last_received_at
+ * @property string $mode payload (words in the push) or tickle (empty push; the phone fetches the words)
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property-read User $user
  */
-#[Fillable(['user_id', 'endpoint', 'endpoint_hash', 'public_key', 'auth_token', 'content_encoding', 'device', 'failures', 'last_sent_at'])]
+#[Fillable(['user_id', 'endpoint', 'endpoint_hash', 'public_key', 'auth_token', 'content_encoding', 'device', 'failures', 'last_sent_at', 'last_received_at', 'mode'])]
 #[Hidden(['endpoint', 'public_key', 'auth_token'])]
 class PushSubscription extends Model
 {
@@ -33,6 +35,7 @@ class PushSubscription extends Model
     {
         return [
             'last_sent_at' => 'datetime',
+            'last_received_at' => 'datetime',
             'failures' => 'integer',
         ];
     }

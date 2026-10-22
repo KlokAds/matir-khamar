@@ -34,14 +34,29 @@ class NotificationController extends Controller
         return response()->noContent();
     }
 
+    public function clear(Request $request): Response
+    {
+        AppNotification::query()->where('user_id', $request->user()->id)->delete();
+
+        return response()->noContent();
+    }
+
+    public function destroy(Request $request, AppNotification $notification): Response
+    {
+        abort_unless($notification->user_id === $request->user()->id, 404);
+        $notification->delete();
+
+        return response()->noContent();
+    }
+
     /**
      * For the phone's service worker when a push arrives without its words (or they cannot be
-     * read): the newest unseen notifications of the last few minutes.
+     * read): the notifications of the last few minutes.
      */
     public function latest(Request $request): JsonResponse
     {
         return response()->json(AppNotification::query()->where('user_id', $request->user()->id)
-            ->whereNull('read_at')->where('created_at', '>=', now()->subMinutes(15))
+            ->where('created_at', '>=', now()->subMinutes(5))
             ->latest('id')->limit(3)->get(['id', 'title', 'body', 'url', 'tag']));
     }
 }

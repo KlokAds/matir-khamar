@@ -119,12 +119,20 @@ class PushSender
         $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         foreach ($subscriptions as $subscription) {
+            // A phone that got pushes with words but never said so cannot read them: from then on
+            // it is sent empty pushes, on which it fetches the words from the app itself.
+            if ($subscription->mode === 'payload' && $subscription->last_sent_at
+                && $subscription->last_sent_at->lessThan(now()->subMinutes(2))
+                && ($subscription->last_received_at === null || $subscription->last_received_at->lessThan($subscription->last_sent_at))) {
+                $subscription->update(['mode' => 'tickle']);
+            }
+
             $push->queueNotification(Subscription::create([
                 'endpoint' => $subscription->endpoint,
                 'publicKey' => $subscription->public_key,
                 'authToken' => $subscription->auth_token,
                 'contentEncoding' => $subscription->content_encoding,
-            ]), $body);
+            ]), $subscription->mode === 'tickle' ? null : $body);
         }
 
         $reached = 0;
