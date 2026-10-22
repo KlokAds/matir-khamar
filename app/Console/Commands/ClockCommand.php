@@ -47,9 +47,7 @@ class ClockCommand extends Command
             sleep(max(1, 60 - (int) now()->format('s')));
         } while (now()->lessThan($stopAt));
 
-        if (! $this->option('once')) {
-            app(WebCron::class)->spawnClock();
-        }
+        app(WebCron::class)->spawnClock();
 
         return self::SUCCESS;
     }
