@@ -36,6 +36,7 @@ type Row = {
     body: string | null;
     due_at: string;
     repeat: string;
+    alarm: boolean;
     for: string | null;
     by: string | null;
     center: string | null;
@@ -155,6 +156,7 @@ const f = useForm({
     body: '',
     due_at: local(presets[0].at()),
     repeat: 'none',
+    alarm: false,
     for_user_id: null as number | null,
     cost_center_id: null as number | null,
     animal_id: null as number | null,
@@ -453,6 +455,24 @@ const trackedStock = computed(() =>
                             />
                         </Field>
 
+                        <label
+                            class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-turmeric/40 bg-turmeric/8 px-3 py-2.5"
+                        >
+                            <span class="text-sm">
+                                <b class="flex items-center gap-1.5 font-medium"
+                                    >🔔 {{ t('অ্যালার্মের মতো বাজবে') }}</b
+                                >
+
+                                <small class="block text-muted-foreground">{{
+                                    t(
+                                        '"হয়ে গেছে" না চাপা পর্যন্ত প্রতি ২ মিনিটে আবার বাজবে (২০ মিনিট পর্যন্ত)',
+                                    )
+                                }}</small>
+                            </span>
+
+                            <Toggle v-model="f.alarm" />
+                        </label>
+
                         <div class="grid grid-cols-2 gap-3">
                             <Field :label="t('কতবার')">
                                 <NSelect v-model="f.repeat">
@@ -632,7 +652,10 @@ const trackedStock = computed(() =>
                                         <Check class="size-3.5" />
                                     </button>
                                     <div class="min-w-0 flex-1">
-                                        <p class="font-medium">{{ r.title }}</p>
+                                        <p class="font-medium">
+                                            {{ r.alarm ? '🔔 ' : ''
+                                            }}{{ r.title }}
+                                        </p>
                                         <p
                                             v-if="r.body"
                                             class="text-sm text-muted-foreground"

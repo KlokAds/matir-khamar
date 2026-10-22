@@ -224,5 +224,8 @@
     "২-ধাপ যাচাই (2FA) বাধ্যতামূলক": "Two-step verification (2FA) required",
     "৩ ঘণ্টা পরে": "In 3 hours",
     "৫ দিনের কম থাকলে সকালের তালিকাতেও আসবে।": "Under 5 days left also shows in the morning list.",
-    "→ সবাই": "→ Everyone"
+    "→ সবাই": "→ Everyone",
+    "অ্যালার্মের মতো বাজবে": "Ring like an alarm",
+    "\"হয়ে গেছে\" না চাপা পর্যন্ত প্রতি ২ মিনিটে আবার বাজবে (২০ মিনিট পর্যন্ত)": "Rings again every 2 minutes until \"Done\" is pressed (up to 20 minutes)",
+    "১০ মিনিট পরে": "In 10 minutes"
 }

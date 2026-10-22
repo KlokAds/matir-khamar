@@ -100,3 +100,25 @@ it('keeps one subscription per phone', function () {
     expect(PushSubscription::query()->count())->toBe(1);
     $this->get('/reminders')->assertOk();
 });
+
+it('keeps ringing an alarm every two minutes until it is answered', function () {
+    $alarm = Reminder::query()->create(['title' => 'গাভী দোহানো', 'due_at' => now()->subMinute(), 'alarm' => true, 'created_by' => $this->admin->id]);
+    $notifier = app(Notifier::class);
+
+    $notifier->sendDueReminders();
+    expect($this->sent)->toHaveCount(1)->and($this->sent[0]['payload']['alarm'])->toBeTrue();
+
+    // Not yet two minutes: quiet.
+    $notifier->sendDueReminders();
+    expect($this->sent)->toHaveCount(1);
+
+    $this->travel(2)->minutes();
+    $notifier->sendDueReminders();
+    expect($this->sent)->toHaveCount(2)->and($alarm->fresh()->rings)->toBe(2);
+
+    // Answered: no more rings.
+    $alarm->update(['done_at' => now()]);
+    $this->travel(3)->minutes();
+    $notifier->sendDueReminders();
+    expect($this->sent)->toHaveCount(2);
+});

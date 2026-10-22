@@ -31,35 +31,65 @@ class Notifier
     {
         $due = Reminder::query()->whereNull('sent_at')->whereNull('done_at')->where('due_at', '<=', now())->orderBy('due_at')->limit(50)->get();
 
+        // Alarms already sent ring again until someone answers them.
+        $ringing = Reminder::query()->where('alarm', true)->whereNotNull('sent_at')->whereNull('done_at')
+            ->where('rings', '<', Reminder::ALARM_MAX_RINGS)
+            ->where('last_rung_at', '<=', now()->subMinutes(Reminder::ALARM_EVERY_MINUTES)->addSeconds(5))
+            ->limit(50)->get();
+
+        foreach ($ringing as $reminder) {
+            $this->ring($reminder);
+        }
+
         foreach ($due as $reminder) {
             $recipients = $reminder->for_user_id
                 ? User::query()->whereKey([$reminder->for_user_id, $reminder->created_by])->where('is_active', true)->get()
                 : $this->dailyWorkers();
 
-            foreach ($recipients->filter(fn (User $u) => $u->wantsNotification('reminders')) as $user) {
-                $this->push->toUsers([$user], $this->inLanguageOf($user, fn () => [
-                    'title' => '⏰ '.$reminder->title,
-                    'body' => $reminder->body ?: Tr::get('মনে করিয়ে দিচ্ছি — হয়ে গেলে "হয়ে গেছে" চাপুন।'),
-                    'url' => '/reminders',
-                    'tag' => "reminder-{$reminder->id}",
-                    'requireInteraction' => true,
-                    'actions' => [
-                        ['action' => 'done', 'title' => Tr::get('হয়ে গেছে'), 'url' => $this->actionUrl($reminder, 'done', $user)],
-                        ['action' => 'later', 'title' => Tr::get('১ ঘণ্টা পরে'), 'url' => $this->actionUrl($reminder, 'later', $user)],
-                    ],
-                ]));
-            }
-
+            $this->ring($reminder, $recipients);
             $reminder->update(['sent_at' => now()]);
 
             if ($reminder->repeat !== 'none') {
-                $reminder->replicate(['sent_at', 'done_at', 'done_by'])->fill([
+                $reminder->replicate(['sent_at', 'done_at', 'done_by', 'rings', 'last_rung_at'])->fill([
                     'due_at' => $reminder->repeat === 'weekly' ? $reminder->due_at->addWeek() : $reminder->due_at->addDay(),
                 ])->save();
             }
         }
 
-        return $due->count();
+        return $due->count() + $ringing->count();
+    }
+
+    /**
+     * Sends one reminder to its people. An alarm says so, so the phone keeps it on screen,
+     * vibrates long, and an open app shows a full-screen ringing alarm.
+     *
+     * @param  Collection<int, User>|null  $recipients
+     */
+    private function ring(Reminder $reminder, ?Collection $recipients = null): void
+    {
+        $recipients ??= $reminder->for_user_id
+            ? User::query()->whereKey([$reminder->for_user_id, $reminder->created_by])->where('is_active', true)->get()
+            : $this->dailyWorkers();
+
+        foreach ($recipients->filter(fn (User $u) => $u->wantsNotification('reminders')) as $user) {
+            $this->push->toUsers([$user], $this->inLanguageOf($user, fn () => [
+                'alarm' => $reminder->alarm,
+                'reminder_id' => $reminder->id,
+                'title' => ($reminder->alarm ? '🔔 ' : '⏰ ').$reminder->title,
+                'body' => $reminder->body ?: Tr::get('মনে করিয়ে দিচ্ছি — হয়ে গেলে "হয়ে গেছে" চাপুন।'),
+                'url' => '/reminders',
+                'tag' => "reminder-{$reminder->id}",
+                'requireInteraction' => true,
+                'actions' => [
+                    ['action' => 'done', 'title' => Tr::get('হয়ে গেছে'), 'url' => $this->actionUrl($reminder, 'done', $user)],
+                    ['action' => 'later', 'title' => Tr::get('১ ঘণ্টা পরে'), 'url' => $this->actionUrl($reminder, 'later', $user)],
+                ],
+            ]));
+        }
+
+        if ($reminder->alarm) {
+            $reminder->update(['rings' => $reminder->rings + 1, 'last_rung_at' => now()]);
+        }
     }
 
     /**
