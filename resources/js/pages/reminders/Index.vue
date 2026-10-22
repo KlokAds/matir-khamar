@@ -633,7 +633,11 @@ const trackedStock = computed(() =>
                         </label>
                         <label class="flex items-center justify-between gap-3">
                             <span
-                                >{{ t('সন্ধ্যা ৭টায়, দুধ/খাবার না লিখলে') }}
+                                >{{
+                                    t(
+                                        'রাত ৮টায় (আবার ৯:৩০-এ), দুধ/খাবার না লিখলে',
+                                    )
+                                }}
                                 <small class="block text-muted-foreground">{{
                                     t('সেদিন লেখা হয়ে থাকলে আসবে না')
                                 }}</small></span
