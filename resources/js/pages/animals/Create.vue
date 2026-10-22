@@ -309,7 +309,7 @@ watch(
                     :label="t('টাকা কোথা থেকে')"
                     :error="f.errors.paid_from_account_id"
                 >
-                    <NSelect v-model="f.paid_from_account_id"
+                    <NSelect v-model="f.paid_from_account_id" manage="money"
                         ><option
                             v-for="a in moneyAccounts"
                             :key="a.id"

@@ -165,7 +165,7 @@ const place = useForm({
             @submit.prevent="sendMove"
         >
             <Field :label="t('কোথা থেকে')" :error="move.errors.from_account_id">
-                <NSelect v-model="move.from_account_id">
+                <NSelect v-model="move.from_account_id" manage="money">
                     <option
                         v-for="a in moneyAccounts"
                         :key="a.id"
@@ -176,7 +176,7 @@ const place = useForm({
                 </NSelect>
             </Field>
             <Field :label="t('কোথায়')" :error="move.errors.to_account_id">
-                <NSelect v-model="move.to_account_id">
+                <NSelect v-model="move.to_account_id" manage="money">
                     <option
                         v-for="a in moneyAccounts"
                         :key="a.id"

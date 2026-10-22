@@ -176,7 +176,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                     required
             /></Field>
             <Field :label="t('টাকা কোথায় এল')"
-                ><NSelect v-model="sell.money_account_id"
+                ><NSelect v-model="sell.money_account_id" manage="money"
                     ><option
                         v-for="a in moneyAccounts"
                         :key="a.id"
@@ -187,7 +187,10 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                 ></Field
             >
             <Field :label="t('ক্রেতা')"
-                ><NSelect v-model="sell.party_id"
+                ><NSelect
+                    v-model="sell.party_id"
+                    manage="party"
+                    :manage-extra="{ party_type: 'customer' }"
                     ><option :value="null">—</option>
                     <option v-for="p in customers" :key="p.id" :value="p.id">
                         {{ p.name }}

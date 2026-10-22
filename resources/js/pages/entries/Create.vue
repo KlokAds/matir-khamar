@@ -317,7 +317,10 @@ const help = computed<Record<string, string>>(() => ({
                             "
                             :error="f.errors.money_account_id"
                         >
-                            <NSelect v-model="f.money_account_id">
+                            <NSelect
+                                v-model="f.money_account_id"
+                                manage="money"
+                            >
                                 <option
                                     v-for="a in moneyAccounts"
                                     :key="a.id"
@@ -333,7 +336,10 @@ const help = computed<Record<string, string>>(() => ({
                                 :label="t('কোথা থেকে')"
                                 :error="f.errors.from_account_id"
                             >
-                                <NSelect v-model="f.from_account_id">
+                                <NSelect
+                                    v-model="f.from_account_id"
+                                    manage="money"
+                                >
                                     <option
                                         v-for="a in moneyAccounts"
                                         :key="a.id"
@@ -347,7 +353,10 @@ const help = computed<Record<string, string>>(() => ({
                                 :label="t('কোথায়')"
                                 :error="f.errors.to_account_id"
                             >
-                                <NSelect v-model="f.to_account_id">
+                                <NSelect
+                                    v-model="f.to_account_id"
+                                    manage="money"
+                                >
                                     <option
                                         v-for="a in moneyAccounts"
                                         :key="a.id"
@@ -369,11 +378,17 @@ const help = computed<Record<string, string>>(() => ({
                             :error="f.errors.party_id"
                             :hint="
                                 t(
-                                    'তালিকায় না থাকলে সেটআপ → ক্রেতা, বিনিয়োগকারী… থেকে যোগ করুন',
+                                    'তালিকায় না থাকলে তালিকার নিচে “নতুন যোগ করুন” চাপুন',
                                 )
                             "
                         >
-                            <NSelect v-model="f.party_id">
+                            <NSelect
+                                v-model="f.party_id"
+                                manage="party"
+                                :manage-extra="{
+                                    party_type: partyFilter ?? 'other',
+                                }"
+                            >
                                 <option :value="null">
                                     {{ t('— বাছুন —') }}
                                 </option>
@@ -416,7 +431,7 @@ const help = computed<Record<string, string>>(() => ({
                             "
                             :error="f.errors.cost_center_id"
                         >
-                            <NSelect v-model="f.cost_center_id">
+                            <NSelect v-model="f.cost_center_id" manage="center">
                                 <option
                                     v-for="c in centers"
                                     :key="c.id"
@@ -570,6 +585,13 @@ const help = computed<Record<string, string>>(() => ({
                                     <NSelect
                                         v-model="line.account_id"
                                         :placeholder="t('বাছুন')"
+                                        manage="account"
+                                        :manage-extra="{
+                                            group:
+                                                f.form === 'expense'
+                                                    ? '5000'
+                                                    : '4000',
+                                        }"
                                     >
                                         <option
                                             v-for="a in lineAccounts"
@@ -584,7 +606,10 @@ const help = computed<Record<string, string>>(() => ({
                                     :label="t('ক্যাটাগরি')"
                                     :error="lineError(index, 'cost_center_id')"
                                 >
-                                    <NSelect v-model="line.cost_center_id">
+                                    <NSelect
+                                        v-model="line.cost_center_id"
+                                        manage="center"
+                                    >
                                         <option
                                             v-for="c in centers"
                                             :key="c.id"

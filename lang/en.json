@@ -452,5 +452,16 @@
     "ঈদ :date — :from থেকে :to এর মধ্যে কিনলে ৯০–১২০ দিন খাওয়ানো যাবে": "Eid :date — buy between :from and :to to feed 90–120 days",
     "কোরবানির :n দিন বাকি — ব্যাচ বিক্রির প্রস্তুতি": ":n days to Kurbani — get the batch ready to sell",
     "ঈদ :date — ওজন মাপুন, হাট ও পরিবহন ঠিক করুন": "Eid :date — weigh the cattle, arrange the haat and transport",
-    "ঈদের তারিখ :date ধরা হলো।": "Eid date set to :date."
+    "ঈদের তারিখ :date ধরা হলো।": "Eid date set to :date.",
+    "এটা এখান থেকে যোগ করা যায় না।": "This cannot be added from here.",
+    "এটা অ্যাপের নিজের — মোছা বা লুকানো যায় না, শুধু নাম বদলানো যায়।": "This belongs to the app — it cannot be deleted or hidden, only renamed.",
+    "এখানে এখনো টাকা আছে — আগে অন্য জায়গায় সরিয়ে নিন।": "There is still money here — move it elsewhere first.",
+    "এখানে এখনো পশু আছে — আগে অন্য ক্যাটাগরিতে নিন।": "There are still animals here — move them to another category first.",
+    "খুঁজে পাওয়া যায়নি।": "Not found.",
+    "কোন ধরনের খাত, বোঝা যায়নি।": "Could not tell which kind of head this is.",
+    "নাম দিন (১২০ অক্ষরের মধ্যে)।": "Enter a name (up to 120 characters).",
+    "\":name\" নামে আগে থেকেই আছে।": "\":name\" already exists.",
+    "\":name\" যোগ হলো।": "\":name\" added.",
+    "নাম বদলানো হলো।": "Renamed.",
+    "\":name\" হিসাবে ব্যবহার হয়েছে, তাই লুকিয়ে রাখা হলো — পুরোনো হিসাব ঠিক থাকবে।": "\":name\" is used in the books, so it was hidden — old entries stay right."
 }

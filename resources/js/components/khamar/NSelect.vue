@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { Check, ChevronDown, Search } from '@lucide/vue';
+import { router, usePage } from '@inertiajs/vue3';
+import {
+    Check,
+    ChevronDown,
+    Pencil,
+    Plus,
+    Search,
+    Trash2,
+    X,
+} from '@lucide/vue';
 import {
     PopoverContent,
     PopoverPortal,
@@ -16,7 +25,10 @@ import {
     useSlots,
 } from 'vue';
 import type { VNode } from 'vue';
+import { ask } from '@/lib/dialog';
 import { t } from '@/lib/i18n';
+import { useCan } from '@/lib/khamar';
+import type { Abilities } from '@/lib/khamar';
 import { cn } from '@/lib/utils';
 
 /**
@@ -30,8 +42,20 @@ const props = withDefaults(
     defineProps<{
         placeholder?: string;
         disabled?: boolean;
+        /**
+         * What the choices are (account, money, center, party, item, worker): turns on rename
+         * and remove beside each choice and "add new" at the bottom, for those allowed to.
+         */
+        manage?: 'account' | 'money' | 'center' | 'party' | 'item' | 'worker';
+        /** Sent with a new one, e.g. { group: '5000' } for an expense head. */
+        manageExtra?: Record<string, string>;
     }>(),
-    { placeholder: '', disabled: false },
+    {
+        placeholder: '',
+        disabled: false,
+        manage: undefined,
+        manageExtra: undefined,
+    },
 );
 
 type Value = string | number | null | undefined;
@@ -171,6 +195,8 @@ async function onOpen(value: boolean) {
     open.value = value;
 
     if (!value) {
+        stopEditing();
+
         return;
     }
 
@@ -235,6 +261,10 @@ function onKey(event: KeyboardEvent) {
         event.preventDefault();
         move(-1);
     } else if (event.key === 'Enter') {
+        if (adding.value || editing.value !== null) {
+            return;
+        }
+
         event.preventDefault();
         const choice = shown.value[active.value];
 
@@ -242,6 +272,145 @@ function onKey(event: KeyboardEvent) {
             pick(choice);
         }
     }
+}
+
+/* ---------- add, rename, remove from the list itself ---------- */
+const NEEDS: Record<string, keyof Abilities> = {
+    account: 'manage-setup',
+    money: 'manage-setup',
+    center: 'manage-setup',
+    party: 'post-entries',
+    item: 'post-entries',
+    worker: 'post-entries',
+};
+const can = useCan();
+const page = usePage();
+const canManage = computed(
+    () => !!props.manage && !!can.value[NEEDS[props.manage]],
+);
+const adding = ref(false);
+const editing = ref<Value>(null);
+const draft = ref('');
+const busy = ref(false);
+// Shows the server's answer (e.g. "already exists") only after a try from this list.
+const tried = ref(false);
+const manageError = computed(
+    () => (page.props.errors as Record<string, string> | undefined)?.name,
+);
+const manageable = (choice: Choice) =>
+    canManage.value &&
+    !choice.disabled &&
+    choice.value !== null &&
+    choice.value !== undefined &&
+    choice.value !== '' &&
+    !Number.isNaN(Number(choice.value));
+
+/** With a name already typed in the search box, add it in one tap; otherwise ask for a name. */
+function startAdd() {
+    editing.value = null;
+    draft.value = query.value.trim();
+
+    if (draft.value) {
+        saveNew();
+
+        return;
+    }
+
+    adding.value = true;
+}
+
+function startEdit(choice: Choice) {
+    adding.value = false;
+    editing.value = choice.value;
+    draft.value = choice.label;
+}
+
+function stopEditing() {
+    tried.value = false;
+    adding.value = false;
+    editing.value = null;
+    draft.value = '';
+}
+
+const isEditing = (choice: Choice) =>
+    editing.value !== null && String(editing.value) === String(choice.value);
+
+function saveNew() {
+    if (!draft.value.trim() || busy.value) {
+        return;
+    }
+
+    const before = new Set(choices.value.map((c) => String(c.value)));
+    busy.value = true;
+    tried.value = true;
+    router.post(
+        `/manage/${props.manage}`,
+        { name: draft.value.trim(), extra: props.manageExtra ?? {} },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: async () => {
+                await nextTick();
+                // The new choice is the one that was not there before: pick it.
+                const added = choices.value.find(
+                    (c) => !c.disabled && !before.has(String(c.value)),
+                );
+
+                if (added) {
+                    model.value = added.value;
+                    open.value = false;
+                }
+
+                stopEditing();
+            },
+            onFinish: () => (busy.value = false),
+        },
+    );
+}
+
+function saveEdit() {
+    if (!draft.value.trim() || busy.value) {
+        return;
+    }
+
+    busy.value = true;
+    tried.value = true;
+    router.put(
+        `/manage/${props.manage}/${editing.value}`,
+        { name: draft.value.trim() },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: stopEditing,
+            onFinish: () => (busy.value = false),
+        },
+    );
+}
+
+async function remove(choice: Choice) {
+    const ok = await ask.confirm({
+        title: t('":name" মুছবেন?', { name: choice.label }),
+        body: t(
+            'কোনো হিসাবে ব্যবহার না হলে পুরো মুছে যাবে; হিসাবে থাকলে শুধু তালিকা থেকে লুকানো হবে — পুরোনো হিসাব ঠিক থাকবে।',
+        ),
+        confirmText: t('মুছুন'),
+        danger: true,
+    });
+
+    if (!ok) {
+        return;
+    }
+
+    tried.value = true;
+    router.delete(`/manage/${props.manage}/${choice.value}`, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+            if (String(model.value) === String(choice.value)) {
+                model.value = null;
+            }
+        },
+    });
 }
 
 function onTriggerKey(event: KeyboardEvent) {
@@ -291,7 +460,7 @@ function onTriggerKey(event: KeyboardEvent) {
                 @open-auto-focus.prevent
             >
                 <div
-                    v-if="searchable"
+                    v-if="searchable && !adding"
                     class="flex items-center gap-2 border-b border-border px-3"
                 >
                     <Search class="size-4 shrink-0 text-muted-foreground" />
@@ -312,61 +481,125 @@ function onTriggerKey(event: KeyboardEvent) {
                     :tabindex="searchable ? -1 : 0"
                     class="max-h-72 overflow-y-auto p-1 outline-none"
                 >
-                    <button
+                    <template
                         v-for="(choice, index) in shown"
                         :key="choice.key"
-                        type="button"
-                        role="option"
-                        :data-index="index"
-                        :aria-selected="choice === selected"
-                        :disabled="choice.disabled"
-                        :class="[
-                            'flex min-h-10 w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[15px] leading-snug',
-                            isTree && !query && 'min-h-9 py-1',
-                            choice.disabled
-                                ? isTree
-                                    ? 'cursor-default text-[13px] font-semibold text-muted-foreground'
-                                    : 'cursor-default text-xs text-muted-foreground'
-                                : 'cursor-pointer',
-                            index === active && !choice.disabled && 'bg-accent',
-                            choice === selected && 'font-medium text-primary',
-                        ]"
-                        @mousemove="!choice.disabled && (active = index)"
-                        @click="pick(choice)"
                     >
-                        <template v-if="isTree && !query">
-                            <span
-                                v-for="level in choice.depth"
-                                :key="level"
-                                aria-hidden="true"
-                                class="relative w-3 shrink-0 self-stretch before:absolute before:-inset-y-1.5 before:left-1 before:border-l before:border-muted-foreground/25"
-                            />
-                            <span
-                                v-if="!choice.disabled"
-                                aria-hidden="true"
-                                :class="[
-                                    'shrink-0 rounded-full',
-                                    choice.parent
-                                        ? 'size-2 bg-paddy'
-                                        : 'size-1.5 bg-muted-foreground/50',
-                                ]"
-                            />
-                        </template>
-                        <span
-                            :class="[
-                                'min-w-0 flex-1',
-                                isTree && choice.parent && 'font-semibold',
-                                isTree &&
-                                    choice.depth === 0 &&
-                                    'text-foreground',
-                            ]"
-                            >{{ choice.label || '—' }}</span
+                        <form
+                            v-if="isEditing(choice)"
+                            class="flex items-center gap-1.5 px-1 py-1"
+                            @submit.prevent="saveEdit"
                         >
-                        <Check
-                            v-if="choice === selected"
-                            class="size-4 shrink-0"
-                        />
-                    </button>
+                            <input
+                                v-model="draft"
+                                v-focus
+                                type="text"
+                                class="h-9 min-w-0 flex-1 rounded-md border border-input bg-card px-2.5 text-[15px] outline-none focus:border-ring"
+                                :aria-label="t('নতুন নাম')"
+                                @keydown.esc.stop.prevent="stopEditing"
+                            />
+                            <button
+                                type="submit"
+                                class="btn-icon size-8 text-primary"
+                                :disabled="busy"
+                                :aria-label="t('রাখুন')"
+                                :title="t('রাখুন')"
+                            >
+                                <Check />
+                            </button>
+                            <button
+                                type="button"
+                                class="btn-icon size-8"
+                                :aria-label="t('বাদ')"
+                                :title="t('বাদ')"
+                                @click="stopEditing"
+                            >
+                                <X />
+                            </button>
+                        </form>
+                        <div v-else class="flex items-center gap-0.5">
+                            <button
+                                type="button"
+                                role="option"
+                                :data-index="index"
+                                :aria-selected="choice === selected"
+                                :disabled="choice.disabled"
+                                :class="[
+                                    'flex min-h-10 w-full min-w-0 flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[15px] leading-snug',
+                                    isTree && !query && 'min-h-9 py-1',
+                                    choice.disabled
+                                        ? isTree
+                                            ? 'cursor-default text-[13px] font-semibold text-muted-foreground'
+                                            : 'cursor-default text-xs text-muted-foreground'
+                                        : 'cursor-pointer',
+                                    index === active &&
+                                        !choice.disabled &&
+                                        'bg-accent',
+                                    choice === selected &&
+                                        'font-medium text-primary',
+                                ]"
+                                @mousemove="
+                                    !choice.disabled && (active = index)
+                                "
+                                @click="pick(choice)"
+                            >
+                                <template v-if="isTree && !query">
+                                    <span
+                                        v-for="level in choice.depth"
+                                        :key="level"
+                                        aria-hidden="true"
+                                        class="relative w-3 shrink-0 self-stretch before:absolute before:-inset-y-1.5 before:left-1 before:border-l before:border-muted-foreground/25"
+                                    />
+                                    <span
+                                        v-if="!choice.disabled"
+                                        aria-hidden="true"
+                                        :class="[
+                                            'shrink-0 rounded-full',
+                                            choice.parent
+                                                ? 'size-2 bg-paddy'
+                                                : 'size-1.5 bg-muted-foreground/50',
+                                        ]"
+                                    />
+                                </template>
+                                <span
+                                    :class="[
+                                        'min-w-0 flex-1',
+                                        isTree &&
+                                            choice.parent &&
+                                            'font-semibold',
+                                        isTree &&
+                                            choice.depth === 0 &&
+                                            'text-foreground',
+                                    ]"
+                                    >{{ choice.label || '—' }}</span
+                                >
+                                <Check
+                                    v-if="choice === selected"
+                                    class="size-4 shrink-0"
+                                />
+                            </button>
+                            <template v-if="manageable(choice)">
+                                <button
+                                    type="button"
+                                    class="row-act"
+                                    :aria-label="t('নাম বদলান')"
+                                    :title="t('নাম বদলান')"
+                                    @click.stop="startEdit(choice)"
+                                >
+                                    <Pencil />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="row-act hover:text-destructive"
+                                    :aria-label="t('মুছুন')"
+                                    :title="t('মুছুন')"
+                                    @click.stop="remove(choice)"
+                                >
+                                    <Trash2 />
+                                </button>
+                            </template>
+                        </div>
+                    </template>
                     <p
                         v-if="shown.length === 0"
                         class="px-2.5 py-3 text-sm text-muted-foreground"
@@ -374,7 +607,66 @@ function onTriggerKey(event: KeyboardEvent) {
                         {{ t('কিছু মেলেনি') }}
                     </p>
                 </div>
+
+                <div v-if="canManage" class="border-t border-border p-1.5">
+                    <form
+                        v-if="adding"
+                        class="flex items-center gap-1.5"
+                        @submit.prevent="saveNew"
+                    >
+                        <input
+                            v-model="draft"
+                            v-focus
+                            type="text"
+                            class="h-9 min-w-0 flex-1 rounded-md border border-input bg-card px-2.5 text-[15px] outline-none focus:border-ring"
+                            :placeholder="t('নতুনটির নাম')"
+                            @keydown.esc.stop.prevent="stopEditing"
+                        />
+                        <button
+                            type="submit"
+                            class="btn-chip-primary h-9"
+                            :disabled="busy || !draft.trim()"
+                        >
+                            <Plus /> {{ t('যোগ') }}
+                        </button>
+                        <button
+                            type="button"
+                            class="btn-icon size-8"
+                            :aria-label="t('বাদ')"
+                            @click="stopEditing"
+                        >
+                            <X />
+                        </button>
+                    </form>
+                    <button
+                        v-else
+                        type="button"
+                        class="flex h-9 w-full items-center gap-2 rounded-md px-2.5 text-sm font-medium text-primary hover:bg-primary/10"
+                        @click="startAdd"
+                    >
+                        <Plus class="size-4" />
+                        {{
+                            query.trim()
+                                ? t('":name" যোগ করুন', { name: query.trim() })
+                                : t('নতুন যোগ করুন')
+                        }}
+                    </button>
+                    <p
+                        v-if="manageError && tried"
+                        class="px-1 pt-1 text-xs leading-normal text-destructive"
+                    >
+                        {{ manageError }}
+                    </p>
+                </div>
             </PopoverContent>
         </PopoverPortal>
     </PopoverRoot>
 </template>
+
+<style scoped>
+@reference '../../../css/app.css';
+
+.row-act {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&_svg]:size-3.5;
+}
+</style>
