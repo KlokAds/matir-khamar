@@ -14,6 +14,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
+use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
@@ -83,6 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('diary', [DiaryController::class, 'index'])->name('diary.index');
         Route::get('health', [HealthController::class, 'index'])->name('health.index');
         Route::get('land', [LandController::class, 'index'])->name('land.index');
+        Route::get('profit', [ProfitController::class, 'index'])->name('profit.index');
         Route::get('land/seasons/{season}', [LandController::class, 'season'])->name('land.season');
         Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');
     });

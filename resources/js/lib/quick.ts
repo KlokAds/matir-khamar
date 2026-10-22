@@ -183,6 +183,13 @@ export const pageLinks: PageLink[] = [
         ability: 'view-reports',
     },
     {
+        title: 'লাভের হিসাব ও পরিকল্পনা',
+        words: 'profit planner what if লাভ ক্ষতি পরিকল্পনা যদি',
+        href: '/profit',
+        icon: ChartColumnBig,
+        ability: 'view-reports',
+    },
+    {
         title: 'জমি ও ফসল',
         words: 'land crop paddy rice potato mustard maize জমি ধান চাল আলু সরিষা ভুট্টা লিজ মৌসুম বিঘা',
         href: '/land',
