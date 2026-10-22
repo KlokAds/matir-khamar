@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:local_auth/local_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -172,7 +173,115 @@ class KhamarApp extends StatelessWidget {
       title: 'মাটির খামার',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: brown, scaffoldBackgroundColor: paper),
-      home: const SitePage(),
+      home: const LockGate(child: SitePage()),
+    );
+  }
+}
+
+/// The app stays signed in, so it asks for the fingerprint (or the phone's PIN or pattern) when
+/// opened, and again after five minutes away. A phone with no screen lock opens straight in.
+class LockGate extends StatefulWidget {
+  const LockGate({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<LockGate> createState() => _LockGateState();
+}
+
+class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
+  final auth = LocalAuthentication();
+  bool locked = true;
+  bool asking = false;
+  DateTime? leftAt;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unlock();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The fingerprint prompt itself sends the app to the background for a moment.
+    if (asking) {
+      return;
+    }
+    if (state == AppLifecycleState.paused) {
+      leftAt = DateTime.now();
+    } else if (state == AppLifecycleState.resumed && leftAt != null) {
+      if (DateTime.now().difference(leftAt!) > const Duration(minutes: 5)) {
+        setState(() => locked = true);
+        unlock();
+      }
+      leftAt = null;
+    }
+  }
+
+  Future<void> unlock() async {
+    if (asking) {
+      return;
+    }
+    asking = true;
+    var ok = false;
+    try {
+      if (!await auth.isDeviceSupported()) {
+        ok = true;
+      } else {
+        ok = await auth.authenticate(
+          localizedReason: 'মাটির খামার খুলতে আঙুলের ছাপ দিন',
+          options: const AuthenticationOptions(stickyAuth: true),
+        );
+      }
+    } on PlatformException catch (e) {
+      // No screen lock set on the phone: nothing to ask for.
+      ok = e.code == 'NotAvailable' || e.code == 'PasscodeNotSet' || e.code == 'NotEnrolled';
+    } finally {
+      asking = false;
+    }
+    if (mounted) {
+      setState(() => locked = !ok);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        widget.child,
+        if (locked)
+          Positioned.fill(
+            child: ColoredBox(
+              color: paper,
+              child: SafeArea(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.fingerprint, size: 72, color: brown),
+                      const SizedBox(height: 16),
+                      const Text('মাটির খামার', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: brown)),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(backgroundColor: brown),
+                        onPressed: unlock,
+                        icon: const Icon(Icons.lock_open),
+                        label: const Text('আঙুলের ছাপ দিয়ে খুলুন'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
