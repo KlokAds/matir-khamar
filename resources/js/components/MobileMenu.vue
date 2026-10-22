@@ -69,10 +69,14 @@ async function signOut() {
     <Sheet v-model:open="mobileMenuOpen">
         <SheetContent
             side="bottom"
-            class="max-h-[92dvh] gap-0 overflow-y-auto rounded-t-3xl p-0 md:hidden [&>button:last-child]:top-6 [&>button:last-child]:z-20 [&>button:last-child]:rounded-full [&>button:last-child]:border [&>button:last-child]:border-border [&>button:last-child]:bg-card [&>button:last-child]:p-2 [&>button:last-child]:opacity-100"
+            class="max-h-[92dvh] gap-0 overflow-y-auto overscroll-contain rounded-t-3xl p-0 md:hidden [&>button:last-child]:top-6 [&>button:last-child]:z-20 [&>button:last-child]:rounded-full [&>button:last-child]:border [&>button:last-child]:border-border [&>button:last-child]:bg-card [&>button:last-child]:p-2 [&>button:last-child]:opacity-100"
+            @open-auto-focus.prevent
+            @close-auto-focus.prevent
         >
+            <!-- No focus on open: Android's web view scrolls to a focused element while the
+                 sheet is still sliding up, which makes it jump. -->
             <div
-                class="sticky top-0 z-10 border-b border-border bg-background/95 px-4 pt-2 pb-3 backdrop-blur"
+                class="sticky top-0 z-10 border-b border-border bg-background px-4 pt-2 pb-3"
             >
                 <div class="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
                 <div class="flex items-center gap-3 pr-8">
