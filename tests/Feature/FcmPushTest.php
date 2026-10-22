@@ -36,7 +36,7 @@ it('sends to the farm app through Firebase, and forgets an uninstalled app', fun
     foreach (['good-token-'.str_repeat('g', 20), 'gone-token-'.str_repeat('x', 20)] as $token) {
         PushSubscription::query()->create([
             'user_id' => $this->user->id, 'kind' => 'fcm', 'endpoint' => $token, 'endpoint_hash' => hash('sha256', $token),
-            'public_key' => '', 'auth_token' => '',
+            'public_key' => '', 'auth_token' => '', 'device' => 'Mozilla/5.0 (Linux; Android 10) MatirKhamarApp/3',
         ]);
     }
 
@@ -51,7 +51,15 @@ it('sends to the farm app through Firebase, and forgets an uninstalled app', fun
 
     expect($reached)->toBe(1)->and(PushSubscription::query()->pluck('endpoint')->all())->toBe(['good-token-'.str_repeat('g', 20)]);
 
+    // An alarm goes as data only, for the app to ring until touched.
     Http::assertSent(fn ($request) => str_contains($request->url(), 'messages:send')
-        && $request['message']['android']['notification']['channel_id'] === 'khamar_alarm'
+        && ! isset($request['message']['notification'])
+        && $request['message']['data']['alarm'] === '1'
         && $request['message']['data']['url'] === '/milk');
+
+    app(PushSender::class)->toUsers([$this->user], ['title' => 'সকালের কাজ', 'url' => '/dashboard']);
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'messages:send')
+        && ($request['message']['notification']['title'] ?? null) === 'সকালের কাজ'
+        && $request['message']['android']['notification']['channel_id'] === 'khamar_alerts');
 });
