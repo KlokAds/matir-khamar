@@ -648,6 +648,7 @@ class ComposerStaticInit37f95d202e43fa9dcdb43cb49f1aa054
     public static $classMap = array (
         'AllowDynamicProperties' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/AllowDynamicProperties.php',
         'App\\Actions\\Fortify\\CreateNewUser' => __DIR__ . '/../..' . '/app/Actions/Fortify/CreateNewUser.php',
+        'App\\Actions\\Fortify\\RedirectIfTwoFactorRequired' => __DIR__ . '/../..' . '/app/Actions/Fortify/RedirectIfTwoFactorRequired.php',
         'App\\Actions\\Fortify\\ResetUserPassword' => __DIR__ . '/../..' . '/app/Actions/Fortify/ResetUserPassword.php',
         'App\\Concerns\\PasswordValidationRules' => __DIR__ . '/../..' . '/app/Concerns/PasswordValidationRules.php',
         'App\\Concerns\\ProfileValidationRules' => __DIR__ . '/../..' . '/app/Concerns/ProfileValidationRules.php',

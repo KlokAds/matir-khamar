@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'AllowDynamicProperties' => $vendorDir . '/symfony/polyfill-php82/Resources/stubs/AllowDynamicProperties.php',
     'App\\Actions\\Fortify\\CreateNewUser' => $baseDir . '/app/Actions/Fortify/CreateNewUser.php',
+    'App\\Actions\\Fortify\\RedirectIfTwoFactorRequired' => $baseDir . '/app/Actions/Fortify/RedirectIfTwoFactorRequired.php',
     'App\\Actions\\Fortify\\ResetUserPassword' => $baseDir . '/app/Actions/Fortify/ResetUserPassword.php',
     'App\\Concerns\\PasswordValidationRules' => $baseDir . '/app/Concerns/PasswordValidationRules.php',
     'App\\Concerns\\ProfileValidationRules' => $baseDir . '/app/Concerns/ProfileValidationRules.php',
