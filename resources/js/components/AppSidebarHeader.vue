@@ -137,23 +137,26 @@ const switchTo = (next: 'bn' | 'en') => {
             </svg>
         </button>
 
-        <div class="min-w-0 flex-1 leading-tight">
+        <div class="min-w-0 flex-1">
+            <!-- Bangla vowel signs rise above the line: normal leading keeps them from being clipped. -->
             <p
-                class="flex min-w-0 items-center gap-1 text-[11px] font-medium tracking-wide text-paddy"
+                class="flex min-w-0 items-center gap-1 text-[11px] leading-normal font-medium tracking-wide text-paddy"
             >
                 <span class="shrink-0">{{ todayLabel }}</span>
                 <template v-for="crumb in trail" :key="crumb.title">
                     <ChevronRight
-                        class="size-3 shrink-0 text-muted-foreground/60"
+                        class="hidden size-3 shrink-0 text-muted-foreground/60 sm:block"
                     />
                     <Link
                         :href="crumb.href"
-                        class="truncate text-muted-foreground hover:text-foreground"
+                        class="hidden truncate text-muted-foreground hover:text-foreground sm:block"
                         >{{ t(crumb.title) }}</Link
                     >
                 </template>
             </p>
-            <p class="truncate font-display text-lg md:text-xl">
+            <p
+                class="truncate py-0.5 font-display text-lg leading-snug md:text-xl"
+            >
                 {{ t(title) }}
             </p>
         </div>
