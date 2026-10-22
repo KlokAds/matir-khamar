@@ -278,5 +278,13 @@
     "ফোনের Settings → Apps → “মাটির খামার” (অ্যাপ না থাকলে Chrome) → Notifications: চালু। ভেতরের প্রতিটি ধরনে “Pop-up / Floating / ব্যানার” আর “Sound” চালু করুন।": "Phone Settings → Apps → “Matir Khamar” (or Chrome without the app) → Notifications: on. In each category turn on “Pop-up / Floating / Banner” and “Sound”.",
     "একই জায়গায় Battery / Battery saver → “No restrictions” বা “Unrestricted”।": "In the same place, Battery / Battery saver → “No restrictions” or “Unrestricted”.",
     "Xiaomi/Redmi/Vivo/Oppo/Realme ফোনে: “Autostart” চালু করুন (Security বা Phone Manager অ্যাপে)। রিসেন্ট অ্যাপ থেকে অ্যাপটা লক করে রাখুন, যাতে সরিয়ে না দেয়।": "On Xiaomi/Redmi/Vivo/Oppo/Realme: turn on “Autostart” (in Security or Phone Manager). Lock the app in recent apps so it is not cleared.",
-    "“Do not disturb” বন্ধ আছে কি না দেখুন। তারপর আবার “পরীক্ষা পাঠান” চাপুন।": "Check “Do not disturb” is off. Then tap “Send test” again."
+    "“Do not disturb” বন্ধ আছে কি না দেখুন। তারপর আবার “পরীক্ষা পাঠান” চাপুন।": "Check “Do not disturb” is off. Then tap “Send test” again.",
+    "নোটিফিকেশন": "Notifications",
+    "এইমাত্র": "just now",
+    ":n মিনিট আগে": ":n min ago",
+    ":n ঘণ্টা আগে": ":n h ago",
+    ":nটি নতুন": ":n new",
+    "এখনো কোনো নোটিফিকেশন নেই।": "No notifications yet.",
+    "লোড হচ্ছে…": "Loading…",
+    "আজ :n": "today :n"
 }

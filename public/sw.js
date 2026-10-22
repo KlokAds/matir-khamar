@@ -166,12 +166,20 @@ self.addEventListener('fetch', (event) => {
  * the action buttons ("হয়ে গেছে", "১ ঘণ্টা পরে") post to their signed link, no app needed.
  */
 self.addEventListener('push', (event) => {
+    // A push that comes without its words (or with words the phone cannot read) fetches the
+    // newest unseen notifications from the app instead, so nothing is lost silently.
+    if (!event.data) {
+        event.waitUntil(showLatest());
+
+        return;
+    }
+
     let data = {};
 
     try {
-        data = event.data ? event.data.json() : {};
+        data = event.data.json();
     } catch {
-        data = { title: 'মাটির খামার', body: event.data ? event.data.text() : '' };
+        data = { title: 'মাটির খামার', body: event.data.text() };
     }
 
     const actions = (data.actions || []).slice(0, 2);
@@ -186,7 +194,9 @@ self.addEventListener('push', (event) => {
             self.registration.showNotification(data.title || 'মাটির খামার', {
                 body: data.body || '',
                 tag: data.tag,
+                // Every notification makes its sound, even one that replaces an older one.
                 renotify: Boolean(data.tag),
+                silent: false,
                 requireInteraction: Boolean(data.requireInteraction) || alarm,
                 icon: '/icons/icon-192.png',
                 badge: '/icons/icon-192.png',
@@ -238,6 +248,47 @@ self.addEventListener('push', (event) => {
         ]),
     );
 });
+
+/** The newest unseen notifications, read from the app with the phone's own login. */
+async function showLatest() {
+    let items = [];
+
+    try {
+        const response = await fetch('/notifications/latest', {
+            credentials: 'include',
+            headers: { Accept: 'application/json' },
+        });
+        items = response.ok ? await response.json() : [];
+    } catch {
+        items = [];
+    }
+
+    if (!items.length) {
+        items = [
+            {
+                title: 'মাটির খামার',
+                body: 'নতুন নোটিফিকেশন — অ্যাপ খুলে দেখুন।',
+                url: '/dashboard',
+            },
+        ];
+    }
+
+    await Promise.all(
+        items.map((n) =>
+            self.registration.showNotification(n.title || 'মাটির খামার', {
+                body: n.body || '',
+                tag: n.tag || `n-${n.id ?? Date.now()}`,
+                renotify: true,
+                silent: false,
+                icon: '/icons/icon-192.png',
+                badge: '/icons/icon-192.png',
+                vibrate: [300, 120, 300, 120, 600],
+                lang: 'bn',
+                data: { url: n.url || '/dashboard', actions: {} },
+            }),
+        ),
+    );
+}
 
 self.addEventListener('notificationclick', (event) => {
     const { url, actions } = event.notification.data || {};

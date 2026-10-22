@@ -12,6 +12,7 @@ import {
 } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import GlobalSearch from '@/components/GlobalSearch.vue';
+import NotificationBell from '@/components/NotificationBell.vue';
 import QuickAddMenu from '@/components/QuickAddMenu.vue';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useAppearance } from '@/composables/useAppearance';
@@ -209,18 +210,7 @@ const switchTo = (next: 'bn' | 'en') => {
                 <b v-if="pendingCount > 0" class="num">{{ pendingCount }}</b>
             </Link>
 
-            <Link
-                href="/reminders"
-                class="bell relative"
-                :aria-label="t('মনে করিয়ে দিন')"
-            >
-                <Bell class="size-4" />
-                <span
-                    v-if="remindersDue > 0"
-                    class="num absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white"
-                    >{{ remindersDue }}</span
-                >
-            </Link>
+            <NotificationBell />
 
             <button
                 type="button"

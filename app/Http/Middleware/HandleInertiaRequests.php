@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AppNotification;
 use App\Models\CostCenter;
 use App\Models\Reminder;
 use Illuminate\Http\Request;
@@ -53,6 +54,10 @@ class HandleInertiaRequests extends Middleware
                 : 0,
             // Parts of the farm that are running; a project turned off drops out of the menu.
             'modules' => fn () => $request->user() ? CostCenter::modules() : null,
+            // Notifications not yet seen in the bell.
+            'notificationsUnread' => fn () => $request->user()
+                ? AppNotification::query()->where('user_id', $request->user()->id)->whereNull('read_at')->count()
+                : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

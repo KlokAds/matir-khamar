@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AppNotification;
 use App\Models\PushSubscription;
 use App\Models\Setting;
 use App\Models\User;
@@ -89,6 +90,17 @@ class PushSender
 
         if ($ids === []) {
             return 0;
+        }
+
+        // The bell in the app keeps every one, so a phone that missed it still finds it there.
+        foreach ($ids as $id) {
+            AppNotification::query()->create([
+                'user_id' => $id,
+                'title' => mb_substr((string) ($payload['title'] ?? 'মাটির খামার'), 0, 250),
+                'body' => isset($payload['body']) ? (string) $payload['body'] : null,
+                'url' => isset($payload['url']) ? mb_substr((string) $payload['url'], 0, 250) : null,
+                'tag' => isset($payload['tag']) ? mb_substr((string) $payload['tag'], 0, 80) : null,
+            ]);
         }
 
         $subscriptions = PushSubscription::query()->whereIn('user_id', $ids)->get();
