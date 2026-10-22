@@ -12,7 +12,7 @@ import {
     Smartphone,
     Undo2,
 } from '@lucide/vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
@@ -102,7 +102,84 @@ async function turnOff() {
     router.reload({ only: ['devices'] });
 }
 
-const sendTest = () => router.post('/push/test', {}, { preserveScroll: true });
+/*
+ * Two checks to find where a notification gets stuck. "Show here" asks this phone to show one
+ * by itself — no server; if even that does not appear, the phone blocks the app's notifications.
+ * "Send test" goes through the server; the open app hears when the phone receives it.
+ */
+const check = ref<'' | 'waiting' | 'received' | 'lost' | 'shown' | 'blocked'>(
+    '',
+);
+let waitTimer: ReturnType<typeof setTimeout> | undefined;
+
+function onPushMessage(event: MessageEvent) {
+    const data = event.data as { type?: string } | undefined;
+
+    if (data?.type === 'khamar-push' && check.value === 'waiting') {
+        check.value = 'received';
+        clearTimeout(waitTimer);
+    }
+}
+
+onMounted(() =>
+    navigator.serviceWorker?.addEventListener('message', onPushMessage),
+);
+onBeforeUnmount(() => {
+    navigator.serviceWorker?.removeEventListener('message', onPushMessage);
+    clearTimeout(waitTimer);
+});
+
+function sendTest() {
+    check.value = 'waiting';
+    clearTimeout(waitTimer);
+    waitTimer = setTimeout(() => {
+        if (check.value === 'waiting') {
+            check.value = 'lost';
+        }
+    }, 30000);
+    router.post('/push/test', {}, { preserveScroll: true });
+}
+
+const checkText = computed<Record<string, string>>(() => ({
+    waiting: t('পাঠানো হলো — ফোনে আসার অপেক্ষা…'),
+    received: t(
+        'ফোনে এসে পৌঁছেছে ✓ — উপরে নোটিফিকেশন না দেখালে নিচের সেটিং দেখুন (পপ-আপ, শব্দ)।',
+    ),
+    lost: t(
+        '৩০ সেকেন্ডেও ফোনে পৌঁছায়নি — ফোন অ্যাপটাকে ঘুম পাড়িয়ে রাখছে। নিচের ব্যাটারি ও অটোস্টার্ট সেটিং দিন।',
+    ),
+    shown: t(
+        'ফোন নিজে দেখাতে পারে। উপরে না এলে নিচের সেটিংয়ে নোটিফিকেশন চালু করুন।',
+    ),
+    blocked: t(
+        'ফোন নোটিফিকেশন দেখাতে দিচ্ছে না — নিচের সেটিংয়ে নোটিফিকেশন চালু করুন।',
+    ),
+}));
+
+const phoneSteps = [
+    'ফোনের Settings → Apps → “মাটির খামার” (অ্যাপ না থাকলে Chrome) → Notifications: চালু। ভেতরের প্রতিটি ধরনে “Pop-up / Floating / ব্যানার” আর “Sound” চালু করুন।',
+    'একই জায়গায় Battery / Battery saver → “No restrictions” বা “Unrestricted”।',
+    'Xiaomi/Redmi/Vivo/Oppo/Realme ফোনে: “Autostart” চালু করুন (Security বা Phone Manager অ্যাপে)। রিসেন্ট অ্যাপ থেকে অ্যাপটা লক করে রাখুন, যাতে সরিয়ে না দেয়।',
+    '“Do not disturb” বন্ধ আছে কি না দেখুন। তারপর আবার “পরীক্ষা পাঠান” চাপুন।',
+];
+
+async function showHere() {
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification(
+            t('মাটির খামার — এই ফোনের পরীক্ষা'),
+            {
+                body: t('এটা দেখা গেলে ফোন অ্যাপের নোটিফিকেশন দেখাতে পারে।'),
+                icon: '/icons/icon-192.png',
+                badge: '/icons/icon-192.png',
+                tag: 'local-test',
+            },
+        );
+        check.value = 'shown';
+    } catch {
+        check.value = 'blocked';
+    }
+}
 
 const prefs = ref({ ...props.prefs });
 const savePrefs = () =>
@@ -312,6 +389,12 @@ const trackedStock = computed(() =>
                             <Button
                                 size="sm"
                                 variant="secondary"
+                                @click="showHere"
+                                ><BellRing /> {{ t('এই ফোনে দেখান') }}</Button
+                            >
+                            <Button
+                                size="sm"
+                                variant="secondary"
                                 @click="sendTest"
                                 ><Send /> {{ t('পরীক্ষা পাঠান') }}</Button
                             >
@@ -323,6 +406,40 @@ const trackedStock = computed(() =>
                                 ><BellOff /> {{ t('এই ফোনে বন্ধ') }}</Button
                             >
                         </div>
+                        <p
+                            v-if="check"
+                            :class="[
+                                'mt-3 rounded-lg px-3 py-2 text-sm leading-normal',
+                                check === 'received' || check === 'shown'
+                                    ? 'bg-paddy/10 text-paddy'
+                                    : check === 'waiting'
+                                      ? 'bg-muted text-muted-foreground'
+                                      : 'bg-clay/10 text-clay',
+                            ]"
+                        >
+                            {{ checkText[check] }}
+                        </p>
+                        <details
+                            class="mt-3 rounded-lg border border-border bg-background/60 text-sm"
+                            :open="check === 'lost' || check === 'blocked'"
+                        >
+                            <summary
+                                class="cursor-pointer px-3 py-2 font-medium"
+                            >
+                                {{
+                                    t(
+                                        'WhatsApp-এর মতো শব্দ করে আসতে — ফোনের সেটিং (একবার)',
+                                    )
+                                }}
+                            </summary>
+                            <ol
+                                class="list-decimal space-y-1.5 border-t border-border px-3 py-3 pl-7 leading-normal text-muted-foreground"
+                            >
+                                <li v-for="step in phoneSteps" :key="step">
+                                    {{ t(step) }}
+                                </li>
+                            </ol>
+                        </details>
                     </template>
                     <template v-else-if="state === 'off'">
                         <p class="mb-3 text-sm text-muted-foreground">
