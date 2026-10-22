@@ -86,6 +86,9 @@ export function useNav() {
 
         return [
             { title: 'আজকের খামার', href: '/dashboard', icon: LayoutGrid },
+            ...(c['view-reports']
+                ? [{ title: 'হিসাবের সারাংশ', href: '/summary', icon: Gauge }]
+                : []),
             ...(c['post-daily']
                 ? [
                       {
@@ -219,7 +222,6 @@ export function useNav() {
                 ],
             ]),
             ...group('রিপোর্ট', ChartColumnBig, 'paddy', [
-                ['হিসাবের সারাংশ', '/summary', Gauge, !!c['view-reports']],
                 [
                     'লাভের হিসাব ও পরিকল্পনা',
                     '/profit',

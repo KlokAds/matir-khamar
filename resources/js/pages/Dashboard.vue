@@ -19,6 +19,8 @@ import {
 import { computed } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
+import MoneyStory from '@/components/khamar/MoneyStory.vue';
+import type { Story } from '@/components/khamar/MoneyStory.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import TrendBars from '@/components/khamar/TrendBars.vue';
@@ -42,6 +44,7 @@ defineOptions({
 
 const props = defineProps<{
     canSeeMoney: boolean;
+    story: Story | null;
     today: {
         key: string;
         title: string;
@@ -138,6 +141,9 @@ const greeting = computed(() => {
                 </Button>
             </template>
         </PageTitle>
+
+        <!-- Gain or loss so far, in plain words -->
+        <MoneyStory v-if="story" :story="story" compact class="mb-4" />
 
         <!-- Today's jobs: they tick themselves off as the work is written -->
         <section
@@ -279,25 +285,6 @@ const greeting = computed(() => {
                 "
             />
         </div>
-
-        <Link
-            v-if="canSeeMoney"
-            href="/summary"
-            class="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 transition-colors hover:bg-primary/10 active:bg-primary/10"
-        >
-            <span class="min-w-0">
-                <span class="block leading-normal font-medium">{{
-                    t('পুরো হিসাবের সারাংশ')
-                }}</span>
-                <span
-                    class="block text-xs leading-normal text-muted-foreground"
-                    >{{
-                        t('এ মাস, গত মাস, ৬ মাস, এ বছর বা নিজের বাছাই করা সময়')
-                    }}</span
-                >
-            </span>
-            <ChevronRight class="size-5 shrink-0 text-primary" />
-        </Link>
 
         <section
             v-if="reminders.length"

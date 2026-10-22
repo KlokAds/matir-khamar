@@ -12,6 +12,7 @@ use App\Services\DailyChecklist;
 use App\Services\HerdCare;
 use App\Services\PrepaidService;
 use App\Services\ReportService;
+use App\Services\SummaryBook;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care, DailyChecklist $checklist): Response|RedirectResponse
+    public function __invoke(Request $request, ReportService $reports, PrepaidService $prepaid, HerdCare $care, DailyChecklist $checklist, SummaryBook $summary): Response|RedirectResponse
     {
         // An investor-only login goes straight to their own page.
         if ($request->user()->abilities() === ['investor-view']) {
@@ -39,6 +40,8 @@ class DashboardController extends Controller
             'reminders' => $care->reminders(),
             // The day's own jobs for whoever writes milk and feed; each ticks itself off.
             'today' => $request->user()->can('post-daily') ? $checklist->for($request->user()) : [],
+            // Gain or loss so far, in plain words, at the top for those who see the money.
+            'story' => $canSeeMoney ? $summary->story() : null,
             'month' => $from->format('Y-m'),
             'farm' => $canSeeMoney ? $reports->farmTotals($from, $to) : null,
             'farmYear' => $canSeeMoney ? $reports->farmTotals(now()->startOfYear(), $to) : null,
