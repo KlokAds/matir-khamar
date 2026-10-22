@@ -118,6 +118,63 @@ const monthsParts = t('গর্ভের :months চলছে')
     .split(':months')
     .map((part) => part.trim());
 
+/* The ring counts down the 283 days; the steps are the dates that matter on the way. */
+const ring = { length: 2 * Math.PI * 52 };
+const ringOffset = (card: BreedingCard) =>
+    ring.length * (1 - Math.min(100, Math.max(0, card.progress)) / 100);
+
+const addDays = (iso: string, n: number) => {
+    const d = new Date(`${iso}T00:00:00`);
+    d.setDate(d.getDate() + n);
+
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+function milestones(card: BreedingCard) {
+    const steps = [
+        {
+            key: 'served',
+            title: t('বীজ দেওয়া'),
+            date: card.served_on,
+            done: true,
+        },
+        {
+            key: 'check',
+            title:
+                card.result === 'pregnant'
+                    ? t('গর্ভ নিশ্চিত')
+                    : t('গর্ভ পরীক্ষা (২–৩ মাসে)'),
+            date: card.checked_on ?? addDays(card.served_on, 60),
+            done: card.result === 'pregnant',
+        },
+        {
+            key: 'dry',
+            title: t('দুধ বন্ধ / শুকানো (৭ মাস)'),
+            date: addDays(card.served_on, 210),
+            done: card.day >= 210,
+        },
+        {
+            key: 'ready',
+            title: t('প্রসবের প্রস্তুতি — আলাদা জায়গা'),
+            date: addDays(card.expected_on, -14),
+            done: card.day >= GESTATION - 14,
+        },
+        {
+            key: 'calving',
+            title: t('প্রসব'),
+            date: card.expected_on,
+            done: !!card.calved_on,
+        },
+    ];
+    const next = steps.findIndex((s) => !s.done);
+
+    return steps.map((s, i) => ({
+        ...s,
+        next: i === next,
+        when: day(s.date),
+    }));
+}
+
 const busy = ref<number | null>(null);
 
 async function check(card: BreedingCard, result: 'pregnant' | 'empty') {
@@ -221,259 +278,303 @@ function saveCalving(card: BreedingCard) {
                 }}
             </div>
 
-            <div v-else class="grid gap-4 lg:grid-cols-2">
+            <div v-else class="grid gap-4">
                 <article
                     v-for="card in open"
                     :key="card.id"
-                    class="rounded-xl border border-border bg-card p-4 shadow-[0_1px_0_0_var(--border)]"
+                    class="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_0_0_var(--border)]"
                 >
-                    <header class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <Link
-                                :href="`/animals/${card.animal_id}`"
-                                class="block truncate py-0.5 font-display text-lg leading-snug text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-                                >{{ cowName(card) }}</Link
-                            >
-                            <p class="mt-0.5 text-sm text-foreground/80">
-                                {{ monthsParts[0] }}
-                                <span class="num font-medium">{{
-                                    card.months
-                                }}</span>
-                                {{ monthsParts[1] }}
+                    <div
+                        class="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,1fr)]"
+                    >
+                        <!-- Who, and how long to go -->
+                        <div
+                            class="flex items-center gap-4 lg:flex-col lg:items-start"
+                        >
+                            <div class="relative size-28 shrink-0">
+                                <svg
+                                    viewBox="0 0 120 120"
+                                    class="size-28 -rotate-90"
+                                >
+                                    <circle
+                                        cx="60"
+                                        cy="60"
+                                        r="52"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="10"
+                                        class="text-muted"
+                                    />
+                                    <circle
+                                        cx="60"
+                                        cy="60"
+                                        r="52"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="10"
+                                        stroke-linecap="round"
+                                        :stroke-dasharray="ring.length"
+                                        :stroke-dashoffset="ringOffset(card)"
+                                        :class="
+                                            card.days_left !== null &&
+                                            card.days_left <= 30
+                                                ? 'text-clay'
+                                                : 'text-paddy'
+                                        "
+                                    />
+                                </svg>
+                                <div
+                                    class="absolute inset-0 flex flex-col items-center justify-center text-center"
+                                >
+                                    <span
+                                        class="num font-display text-3xl leading-none"
+                                        >{{
+                                            card.days_left !== null
+                                                ? Math.abs(card.days_left)
+                                                : '—'
+                                        }}</span
+                                    >
+                                    <span
+                                        class="mt-1 text-[11px] leading-normal text-muted-foreground"
+                                        >{{
+                                            card.days_left !== null &&
+                                            card.days_left < 0
+                                                ? t('দিন পার')
+                                                : t('দিন বাকি')
+                                        }}</span
+                                    >
+                                </div>
+                            </div>
+                            <div class="min-w-0">
+                                <Link
+                                    :href="`/animals/${card.animal_id}`"
+                                    class="block truncate py-0.5 font-display text-xl leading-snug text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+                                    >{{ cowName(card) }}</Link
+                                >
+                                <p
+                                    class="mt-0.5 text-sm leading-normal text-foreground/80"
+                                >
+                                    {{ monthsParts[0] }}
+                                    <span class="num font-medium">{{
+                                        card.months
+                                    }}</span>
+                                    {{ monthsParts[1] }}
+                                    <span
+                                        v-if="card.estimated"
+                                        class="text-muted-foreground"
+                                        >{{ t('(আনুমানিক)') }}</span
+                                    >
+                                </p>
                                 <span
-                                    v-if="card.estimated"
-                                    class="text-muted-foreground"
-                                    >{{ t('(আনুমানিক)') }}</span
+                                    :class="[
+                                        'mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium',
+                                        card.result === 'pregnant'
+                                            ? 'bg-paddy/12 text-paddy'
+                                            : 'bg-turmeric/25 text-soil',
+                                    ]"
+                                    >{{ t(card.result_label) }}</span
+                                >
+                                <p
+                                    class="mt-2 flex items-center gap-1.5 text-sm leading-normal"
+                                >
+                                    <CalendarClock class="size-4 text-pond" />
+                                    {{ t('সম্ভাব্য প্রসব:') }}
+                                    <span class="num font-semibold">{{
+                                        day(card.expected_on)
+                                    }}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- The road to calving -->
+                        <ol
+                            class="relative space-y-3 lg:border-l lg:border-border lg:pl-5"
+                        >
+                            <li
+                                v-for="step in milestones(card)"
+                                :key="step.key"
+                                class="flex items-start gap-3"
+                            >
+                                <span
+                                    :class="[
+                                        'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border',
+                                        step.done
+                                            ? 'border-paddy bg-paddy text-primary-foreground'
+                                            : step.next
+                                              ? 'border-clay bg-clay/10 text-clay'
+                                              : 'border-border bg-card text-muted-foreground',
+                                    ]"
+                                >
+                                    <Check v-if="step.done" class="size-3.5" />
+                                    <span
+                                        v-else
+                                        class="size-1.5 rounded-full bg-current"
+                                    />
+                                </span>
+                                <span class="min-w-0">
+                                    <span
+                                        :class="[
+                                            'block text-sm leading-normal font-medium',
+                                            step.next && 'text-clay',
+                                        ]"
+                                        >{{ step.title }}</span
+                                    >
+                                    <span
+                                        class="num block text-xs leading-normal text-muted-foreground"
+                                        >{{ step.when }}</span
+                                    >
+                                </span>
+                            </li>
+                        </ol>
+
+                        <!-- What to do now -->
+                        <div class="min-w-0">
+                            <div
+                                v-if="card.stage"
+                                class="rounded-xl border border-paddy/25 bg-paddy/5 p-3"
+                            >
+                                <p
+                                    class="text-sm leading-normal font-medium text-paddy"
+                                >
+                                    {{
+                                        t('এখন যা দরকার — :stage', {
+                                            stage: card.stage.title,
+                                        })
+                                    }}
+                                </p>
+                                <ul class="mt-2 space-y-1.5">
+                                    <li
+                                        v-for="(task, i) in card.stage.tasks"
+                                        :key="i"
+                                        class="flex gap-2 text-sm leading-normal"
+                                    >
+                                        <span
+                                            class="mt-1 size-1.5 shrink-0 rounded-full bg-paddy"
+                                        />
+                                        <span>{{ task }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <p
+                                class="mt-2 text-xs leading-normal text-muted-foreground"
+                            >
+                                {{ t(card.method)
+                                }}<template v-if="card.sire">
+                                    ·
+                                    {{
+                                        t('ষাঁড়/বীজ: :sire', {
+                                            sire: card.sire,
+                                        })
+                                    }}</template
+                                ><template v-if="card.by_whom">
+                                    ·
+                                    {{
+                                        t('দিয়েছেন: :name', {
+                                            name: card.by_whom,
+                                        })
+                                    }}</template
                                 >
                             </p>
-                        </div>
-                        <span
-                            :class="[
-                                'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium',
-                                card.result === 'pregnant'
-                                    ? 'bg-paddy/12 text-paddy'
-                                    : 'bg-turmeric/25 text-soil',
-                            ]"
-                            >{{ t(card.result_label) }}</span
-                        >
-                    </header>
-
-                    <!-- Progress through 283 days -->
-                    <div class="mt-4">
-                        <div class="relative h-4 text-[10px]">
-                            <span
-                                v-for="m in markers.filter((x) => x.row === 1)"
-                                :key="m.at"
-                                class="absolute bottom-0 -translate-x-1/2 whitespace-nowrap text-muted-foreground"
-                                :class="m.pct > 90 && '-translate-x-full!'"
-                                :style="{ left: `${m.pct}%` }"
-                                >{{ m.label }}</span
-                            >
-                        </div>
-                        <div
-                            class="relative mt-0.5 h-3 overflow-hidden rounded-full bg-muted"
-                        >
-                            <div
-                                class="h-full rounded-full bg-linear-to-r from-paddy/70 to-paddy transition-[width]"
-                                :style="{
-                                    width: `${Math.min(100, Math.max(0, card.progress))}%`,
-                                }"
-                            />
-                            <span
-                                v-for="m in markers"
-                                :key="m.at"
-                                :class="[
-                                    'absolute inset-y-0 w-px',
-                                    m.key ? 'bg-clay' : 'bg-background/80',
-                                ]"
-                                :style="{ left: `${m.pct}%` }"
-                            />
-                        </div>
-                        <div class="relative mt-0.5 h-4 text-[10px]">
-                            <span
-                                v-for="m in markers.filter((x) => x.row === 0)"
-                                :key="m.at"
-                                :class="[
-                                    'absolute top-0 -translate-x-1/2 whitespace-nowrap',
-                                    m.key
-                                        ? 'font-medium text-clay'
-                                        : 'text-muted-foreground',
-                                ]"
-                                :style="{ left: `${m.pct}%` }"
-                                >{{ m.label }}</span
-                            >
-                        </div>
-                    </div>
-
-                    <div
-                        class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-pond/8 px-3 py-2"
-                    >
-                        <span class="flex items-center gap-1.5 text-sm">
-                            <CalendarClock class="size-4 text-pond" />
-                            {{ t('সম্ভাব্য প্রসব:') }}
-                            <span class="num font-medium">{{
-                                day(card.expected_on)
-                            }}</span>
-                        </span>
-                        <span
-                            v-if="card.days_left !== null"
-                            :class="[
-                                'num text-sm font-semibold',
-                                card.days_left < 0
-                                    ? 'text-expense'
-                                    : card.days_left <= 30
-                                      ? 'text-clay'
-                                      : 'text-foreground',
-                            ]"
-                            >{{ leftText(card.days_left) }}</span
-                        >
-                    </div>
-
-                    <p class="mt-2 text-xs text-muted-foreground">
-                        {{ t('বীজ:') }}
-                        <span class="num">{{ day(card.served_on) }}</span> ·
-                        {{ t(card.method) }}
-                        <template v-if="card.sire">
-                            ·
-                            {{
-                                t('ষাঁড়/বীজ: :sire', { sire: card.sire })
-                            }}</template
-                        >
-                        <template v-if="card.by_whom">
-                            ·
-                            {{
-                                t('দিয়েছেন: :name', { name: card.by_whom })
-                            }}</template
-                        >
-                        <template v-if="card.checked_on">
-                            · {{ t('পরীক্ষা:') }}
-                            <span class="num">{{
-                                day(card.checked_on)
-                            }}</span></template
-                        >
-                    </p>
-
-                    <div
-                        v-if="card.stage"
-                        class="mt-3 rounded-lg border border-paddy/25 bg-paddy/5 p-3"
-                    >
-                        <p class="text-sm font-medium text-paddy">
-                            {{
-                                t('এখন যা দরকার — :stage', {
-                                    stage: card.stage.title,
-                                })
-                            }}
-                        </p>
-                        <ul class="mt-2 space-y-1.5">
-                            <li
-                                v-for="(task, i) in card.stage.tasks"
-                                :key="i"
-                                class="flex gap-2 text-sm leading-snug"
-                            >
-                                <span
-                                    class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border border-paddy/50 bg-card"
-                                >
-                                    <Check class="size-3 text-paddy/60" />
-                                </span>
-                                <span>{{ task }}</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <template v-if="card.result === 'pending'">
-                            <Button
-                                size="sm"
-                                :disabled="busy === card.id"
-                                @click="check(card, 'pregnant')"
-                            >
-                                <HeartPulse class="size-4" />
-                                {{ t('গর্ভ হয়েছে') }}
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                :disabled="busy === card.id"
-                                @click="check(card, 'empty')"
-                            >
-                                <X class="size-4" />
-                                {{ t('গর্ভ হয়নি') }}
-                            </Button>
-                        </template>
-                        <Button
-                            size="sm"
-                            :variant="
-                                calvingFor === card.id ? 'secondary' : 'outline'
-                            "
-                            @click="openCalving(card)"
-                        >
-                            <Baby class="size-4" />
-                            {{ t('বাচ্চা হয়েছে') }}
-                        </Button>
-                    </div>
-
-                    <form
-                        v-if="calvingFor === card.id"
-                        class="mt-3 grid gap-3 rounded-lg border border-border bg-background/60 p-3"
-                        @submit.prevent="saveCalving(card)"
-                    >
-                        <div class="grid grid-cols-2 gap-3">
-                            <Field
-                                :label="t('তারিখ')"
-                                :error="calving.errors.calved_on"
-                            >
-                                <DateField
-                                    v-model="calving.calved_on"
-                                    :max="today()"
-                                    class="h-10"
-                                />
-                            </Field>
-                            <Field
-                                :label="t('কী হয়েছে')"
-                                :error="calving.errors.outcome"
-                            >
-                                <NSelect v-model="calving.outcome">
-                                    <option
-                                        v-for="(label, key) in outcomes"
-                                        :key="key"
-                                        :value="key"
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <template v-if="card.result === 'pending'">
+                                    <Button
+                                        size="sm"
+                                        :disabled="busy === card.id"
+                                        @click="check(card, 'pregnant')"
                                     >
-                                        {{ label }}
-                                    </option>
-                                </NSelect>
-                            </Field>
-                        </div>
-                        <Field
-                            :label="t('নোট (ইচ্ছামতো)')"
-                            :error="calving.errors.notes"
-                        >
-                            <Input
-                                v-model="calving.notes"
-                                class="h-10"
-                                :placeholder="t('যেমন: সহজে প্রসব, ফুল পড়েছে')"
-                            />
-                        </Field>
-                        <div class="flex gap-2">
-                            <Button
-                                type="submit"
-                                size="sm"
-                                :disabled="calving.processing"
-                                >{{ t('রাখুন') }}</Button
+                                        <HeartPulse class="size-4" />
+                                        {{ t('গর্ভ হয়েছে') }}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        :disabled="busy === card.id"
+                                        @click="check(card, 'empty')"
+                                    >
+                                        <X class="size-4" />
+                                        {{ t('গর্ভ হয়নি') }}
+                                    </Button>
+                                </template>
+                                <Button
+                                    size="sm"
+                                    :variant="
+                                        calvingFor === card.id
+                                            ? 'secondary'
+                                            : 'outline'
+                                    "
+                                    @click="openCalving(card)"
+                                >
+                                    <Baby class="size-4" />
+                                    {{ t('বাচ্চা হয়েছে') }}
+                                </Button>
+                            </div>
+
+                            <form
+                                v-if="calvingFor === card.id"
+                                class="mt-3 grid gap-3 rounded-lg border border-border bg-background/60 p-3"
+                                @submit.prevent="saveCalving(card)"
                             >
-                            <Button
-                                type="button"
-                                size="sm"
-                                variant="secondary"
-                                @click="calvingFor = null"
-                                >{{ t('বাদ দিন') }}</Button
-                            >
+                                <div class="grid grid-cols-2 gap-3">
+                                    <Field
+                                        :label="t('তারিখ')"
+                                        :error="calving.errors.calved_on"
+                                    >
+                                        <DateField
+                                            v-model="calving.calved_on"
+                                            :max="today()"
+                                            class="h-10"
+                                        />
+                                    </Field>
+                                    <Field
+                                        :label="t('কী হয়েছে')"
+                                        :error="calving.errors.outcome"
+                                    >
+                                        <NSelect v-model="calving.outcome">
+                                            <option
+                                                v-for="(label, key) in outcomes"
+                                                :key="key"
+                                                :value="key"
+                                            >
+                                                {{ label }}
+                                            </option>
+                                        </NSelect>
+                                    </Field>
+                                </div>
+                                <Field
+                                    :label="t('নোট (ইচ্ছামতো)')"
+                                    :error="calving.errors.notes"
+                                >
+                                    <Input
+                                        v-model="calving.notes"
+                                        class="h-10"
+                                        :placeholder="
+                                            t('যেমন: সহজে প্রসব, ফুল পড়েছে')
+                                        "
+                                    />
+                                </Field>
+                                <div class="flex gap-2">
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        :disabled="calving.processing"
+                                        >{{ t('রাখুন') }}</Button
+                                    >
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="secondary"
+                                        @click="calvingFor = null"
+                                        >{{ t('বাদ দিন') }}</Button
+                                    >
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </article>
             </div>
         </section>
 
-        <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
             <!-- Waiting for service -->
             <section class="rounded-xl border border-border bg-card p-4">
                 <h2 class="font-display text-lg">
@@ -489,40 +590,37 @@ function saveCalving(card: BreedingCard) {
 
                 <ul
                     v-if="waiting.length"
-                    class="mt-3 divide-y divide-border/70"
+                    class="mt-3 grid gap-2 sm:grid-cols-2"
                 >
                     <li v-for="cow in waiting" :key="cow.id">
                         <Link
                             :href="`/animals/${cow.id}`"
-                            class="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-2.5 hover:bg-accent active:bg-accent"
+                            class="flex items-center gap-3 rounded-xl border border-border bg-background/60 p-3 transition-colors hover:border-primary/50 active:bg-accent"
                         >
-                            <span class="min-w-0">
+                            <span
+                                class="flex size-10 shrink-0 items-center justify-center rounded-full bg-clay/12 text-clay"
+                            >
+                                <HeartPulse class="size-5" />
+                            </span>
+                            <span class="min-w-0 flex-1">
                                 <span
-                                    class="block truncate text-sm font-medium"
+                                    class="block truncate py-px text-sm leading-normal font-semibold"
                                     >{{ cowName(cow) }}</span
                                 >
                                 <span
-                                    class="block truncate text-xs text-muted-foreground"
-                                    >{{ t(cow.center) }}</span
+                                    class="block truncate py-px text-xs leading-normal text-muted-foreground"
+                                    >{{
+                                        cow.last_calved
+                                            ? t('শেষ বাচ্চা :date', {
+                                                  date: day(cow.last_calved),
+                                              })
+                                            : t(cow.center)
+                                    }}</span
                                 >
                             </span>
-                            <span
-                                class="shrink-0 text-right text-xs text-muted-foreground"
-                            >
-                                <template v-if="cow.last_calved"
-                                    >{{ t('শেষ বাচ্চা') }}<br /><span
-                                        class="num"
-                                        >{{ day(cow.last_calved) }}</span
-                                    ></template
-                                >
-                                <span v-else class="btn-chip-primary">{{
-                                    t('বীজ দিন →')
-                                }}</span>
-                            </span>
-                            <ChevronRight
-                                v-if="cow.last_calved"
-                                class="size-4 shrink-0 text-muted-foreground"
-                            />
+                            <span class="btn-chip-primary">{{
+                                t('বীজ দিন')
+                            }}</span>
                         </Link>
                     </li>
                 </ul>
@@ -577,9 +675,14 @@ function saveCalving(card: BreedingCard) {
                 </ul>
                 <p
                     v-else
-                    class="py-8 text-center text-sm text-muted-foreground"
+                    class="mt-3 flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-3 text-sm leading-normal text-muted-foreground"
                 >
-                    {{ t('এখনো কোনো বাচ্চা হওয়ার হিসাব নেই।') }}
+                    <Baby class="size-4 shrink-0" />
+                    {{
+                        t(
+                            'এখনো কোনো বাচ্চা হওয়ার হিসাব নেই। বাচ্চা হলে গর্ভের কার্ডে “বাচ্চা হয়েছে” চাপুন।',
+                        )
+                    }}
                 </p>
             </section>
         </div>
