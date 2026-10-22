@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\AnimalWeight;
 use App\Models\Batch;
 use App\Models\Breeding;
+use App\Models\CostCenter;
 use App\Models\FarmNote;
 use App\Models\HealthEvent;
 use App\Models\MilkRecord;
@@ -322,11 +323,10 @@ class HerdCare
     }
 
     /** Whether the farm has cows in the dairy category, so missing milk is worth a nudge. */
+    /** Milk is asked for only once there is milk to write, as on the menu's milk pages. */
     public function hasMilkingCows(): bool
     {
-        return Animal::query()->where('status', 'active')
-            ->whereHas('costCenter', fn ($query) => $query->where('code', 'GAVI'))
-            ->exists();
+        return CostCenter::modules()['milk'];
     }
 
     /**

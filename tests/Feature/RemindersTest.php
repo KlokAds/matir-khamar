@@ -2,6 +2,8 @@
 
 use App\Enums\Role;
 use App\Models\Account;
+use App\Models\Animal;
+use App\Models\Breeding;
 use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\PushSubscription;
@@ -12,6 +14,8 @@ use App\Services\PushSender;
 use App\Services\StockForecast;
 use App\Services\StockService;
 use Database\Seeders\KhamarSetupSeeder;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
@@ -112,6 +116,38 @@ it('warns in the morning when feed is about to run out', function () {
     app(Notifier::class)->sendMorningDigest();
 
     expect(collect($this->sent)->pluck('payload.body')->implode(' '))->toContain('ভুসি আর 3 দিন চলবে');
+});
+
+it('nudges at 8 pm and once more at 9:30, even when an update clears the cache', function () {
+    [$first, $again] = collect(app(Schedule::class)->events())
+        ->filter(fn ($event) => str_contains((string) $event->command, 'khamar:notify --evening'))->values()->all();
+
+    $this->travelTo(now()->setTime(19, 30));
+    expect($first->filtersPass(app()))->toBeFalse();
+
+    $this->travelTo(now()->setTime(20, 1));
+    expect($first->filtersPass(app()))->toBeTrue()
+        ->and($again->filtersPass(app()))->toBeFalse();
+    Cache::flush();
+    expect($first->filtersPass(app()))->toBeFalse();
+
+    $this->travelTo(now()->setTime(21, 31));
+    expect($again->filtersPass(app()))->toBeTrue()
+        ->and($again->filtersPass(app()))->toBeFalse();
+
+    $this->travel(1)->days();
+    expect($first->filtersPass(app()))->toBeTrue();
+});
+
+it('asks for milk only once there is milk to write', function () {
+    $cow = Animal::query()->create(['tag' => 'G-01', 'sex' => 'female', 'status' => 'active', 'acquisition' => 'born', 'acquired_on' => now()->subYears(3)->toDateString(), 'cost_center_id' => CostCenter::query()->where('code', 'GAVI')->value('id')]);
+
+    app(Notifier::class)->sendEveningCheck();
+    expect($this->sent[0]['payload']['title'])->not->toContain('দুধ');
+
+    Breeding::query()->create(['animal_id' => $cow->id, 'served_on' => now()->subDays(290)->toDateString(), 'method' => 'ai', 'result' => 'pregnant', 'expected_on' => now()->subDays(7)->toDateString(), 'calved_on' => now()->subDays(3)->toDateString()]);
+    app(Notifier::class)->sendEveningCheck();
+    expect($this->sent[1]['payload']['title'])->toContain('দুধ');
 });
 
 it('nudges in the evening only when nothing was written today', function () {

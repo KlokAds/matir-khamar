@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use App\Services\Notifier;
 use App\Services\PrepaidService;
 use Illuminate\Foundation\Inspiring;
@@ -43,12 +44,26 @@ Schedule::command('khamar:backup')->everyMinute()->withoutOverlapping(30)
 Schedule::command('khamar:amortize')->everyMinute()->when($oncePer('amortize', 3600));
 
 // Reminders go out within a minute of falling due: the background clock (khamar:clock, started
-// by the first web visit) runs this every minute. Morning list after 07:00, evening nudge after 19:00.
+// by the first web visit) runs this every minute. Morning list after 07:00; evening nudges below.
 Schedule::command('khamar:notify')->everyMinute()->withoutOverlapping(5);
+// "Sent today" is kept in the database, not the cache: every app update clears the cache, and
+// the evening nudge then went out again after each one.
+$oncePerDay = function (string $key): bool {
+    if (Setting::get("schedule.{$key}") === now()->toDateString()) {
+        return false;
+    }
+
+    Setting::put("schedule.{$key}", now()->toDateString());
+
+    return true;
+};
 Schedule::command('khamar:notify --morning')->everyMinute()
-    ->when(fn (): bool => now()->hour >= 7 && now()->hour < 11 && Cache::add('khamar:schedule:morning-'.now()->toDateString(), true, 86400));
+    ->when(fn (): bool => now()->hour >= 7 && now()->hour < 11 && $oncePerDay('morning'));
+// Evening: at 8 pm if today's milk or feed is not written, and once more at 9:30 if still not.
 Schedule::command('khamar:notify --evening')->everyMinute()
-    ->when(fn (): bool => now()->hour >= 19 && now()->hour < 22 && Cache::add('khamar:schedule:evening-'.now()->toDateString(), true, 86400));
+    ->when(fn (): bool => now()->hour >= 20 && now()->hour < 23 && $oncePerDay('evening'));
+Schedule::command('khamar:notify --evening')->everyMinute()
+    ->when(fn (): bool => now()->format('H:i') >= '21:30' && now()->hour < 23 && $oncePerDay('evening-again'));
 
 if (config('khamar.updates.auto')) {
     Schedule::command('khamar:update --if-behind')->everyMinute()->withoutOverlapping(20)->when($oncePer('update', 600));
