@@ -20,6 +20,7 @@ use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\ProfitController;
+use App\Http\Controllers\RationController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
@@ -80,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('centers', [CostCenterController::class, 'index'])->name('centers.index');
         Route::get('centers/{center}', [CostCenterController::class, 'show'])->name('centers.show');
         Route::get('kurbani', [KurbaniController::class, 'index'])->name('kurbani.index');
+        Route::get('ration', [RationController::class, 'index'])->name('ration.index');
         Route::get('entries', [EntryController::class, 'index'])->name('entries.index');
         Route::get('entries/{entry}', [EntryController::class, 'show'])->whereNumber('entry')->name('entries.show');
         Route::get('attachments/{attachment}', [EntryController::class, 'attachment'])->name('attachments.show');

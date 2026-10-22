@@ -2,6 +2,7 @@ import {
     AlarmClock,
     ArrowLeftRight,
     Banknote,
+    Calculator,
     Beef,
     BookOpen,
     CalendarHeart,
@@ -190,6 +191,12 @@ export function useNav() {
                     '/reports/usage',
                     Scale,
                     !!c['view-reports'],
+                ],
+                [
+                    'খাবারের রেশন হিসাব',
+                    '/ration',
+                    Calculator,
+                    herdOn && !!c['view-reports'],
                 ],
             ]),
             ...group('টাকার হিসাব', HandCoins, 'pond', [

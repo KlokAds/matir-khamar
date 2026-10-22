@@ -28,6 +28,7 @@ const moduleOf: Record<string, (m: Modules) => boolean> = {
     '/breeding': (m) => m.cattle,
     '/batches': (m) => m.fattening,
     '/kurbani': (m) => m.fattening,
+    '/ration': (m) => m.cattle,
     '/animals': (m) => m.cattle || m.goat,
     '/animals/create': (m) => m.cattle || m.goat,
     '/health': (m) => m.cattle || m.goat,
@@ -205,6 +206,13 @@ export const pageLinks: PageLink[] = [
         words: 'summary overview dashboard month year সারাংশ সব হিসাব মাস বছর লাভ ক্ষতি',
         href: '/summary',
         icon: ChartColumnBig,
+        ability: 'view-reports',
+    },
+    {
+        title: 'খাবারের রেশন হিসাব',
+        words: 'ration feed diet রেশন খাবার কত কেজি খড় ঘাস দানাদার',
+        href: '/ration',
+        icon: Wheat,
         ability: 'view-reports',
     },
     {
