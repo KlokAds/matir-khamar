@@ -229,5 +229,11 @@
     "\"হয়ে গেছে\" না চাপা পর্যন্ত প্রতি ২ মিনিটে আবার বাজবে (২০ মিনিট পর্যন্ত)": "Rings again every 2 minutes until \"Done\" is pressed (up to 20 minutes)",
     "১০ মিনিট পরে": "In 10 minutes",
     "টিক আছে: এই রোলের সবাইকে 2FA চালু করতে হবে, লগইনে কোড লাগবে।": "Ticked: everyone in this role must turn on 2FA and enter a code at login.",
-    "টিক নেই: এই রোলের কাউকে কোথাও 2FA কোড চাওয়া হবে না।": "Not ticked: no one in this role is ever asked for a 2FA code."
+    "টিক নেই: এই রোলের কাউকে কোথাও 2FA কোড চাওয়া হবে না।": "Not ticked: no one in this role is ever asked for a 2FA code.",
+    "খুঁজুন: নাম, টাকা, এন্ট্রি নম্বর, IP…": "Search: name, amount, entry number, IP…",
+    "সব কাজ": "All actions",
+    "সবাই": "Everyone",
+    "থেকে": "From",
+    "পর্যন্ত": "To",
+    "এই খোঁজে কিছু পাওয়া যায়নি।": "Nothing matches this search."
 }
