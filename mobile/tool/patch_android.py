@@ -45,7 +45,13 @@ patch(manifest, r'(<manifest[^>]*>)', r'''\1
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />''')
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />''')
+
+# The fingerprint prompt needs a FragmentActivity.
+activity = next(Path('android/app/src/main/kotlin').rglob('MainActivity.kt'))
+patch(activity, r'io\.flutter\.embedding\.android\.FlutterActivity', 'io.flutter.embedding.android.FlutterFragmentActivity')
+patch(activity, r':\s*FlutterActivity\(\)', ': FlutterFragmentActivity()')
 patch(manifest, r'android:label="[^"]*"', 'android:label="মাটির খামার"')
 patch(manifest, r'(\n(\s*)<activity)', r'''
         <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="khamar_alerts" />
