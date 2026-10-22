@@ -463,5 +463,15 @@
     "\":name\" নামে আগে থেকেই আছে।": "\":name\" already exists.",
     "\":name\" যোগ হলো।": "\":name\" added.",
     "\":name\" হিসাবে ব্যবহার হয়েছে, তাই লুকিয়ে রাখা হলো — পুরোনো হিসাব ঠিক থাকবে।": "\":name\" is used in the books, so it was hidden — old entries stay right.",
-    "\":old\" এখন থেকে \":new\" নামে।": "\":old\" is now called \":new\"."
+    "\":old\" এখন থেকে \":new\" নামে।": "\":old\" is now called \":new\".",
+    "সকালের দুধ লিখুন": "Write the morning milk",
+    "বিকালের দুধ লিখুন": "Write the evening milk",
+    ":n লিটার লেখা হয়েছে": ":n litres written",
+    "এখনো লেখা হয়নি": "Not written yet",
+    "আজ কী খাবার দেওয়া হলো, লিখুন": "Write the feed given today",
+    ":nটি লেখা হয়েছে": ":n written",
+    "খড়, ঘাস, দানাদার — যা দেওয়া হলো": "Straw, grass, concentrate — whatever was given",
+    "ওজন মাপুন: :tags": "Weigh: :tags",
+    "মাসে অন্তত একবার — বাড়ছে কি না বোঝা যায়": "At least once a month — to see the gain",
+    "আগের দিনের — বাকি আছে": "From an earlier day — still open"
 }

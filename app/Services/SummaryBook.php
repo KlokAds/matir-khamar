@@ -204,7 +204,7 @@ class SummaryBook
     /**
      * What the farm owns and owes at the end of the period.
      *
-     * @return array{money:int, animals:int, things:int, receivable:int, assets:int, owed:int, net:int, capital:int, earned:int, money_places: list<array{name:string, balance:int}>}
+     * @return array{money:int, animals:int, things:int, receivable:int, assets:int, owed:int, net:int, capital:int, earned:int, money_places: list<array{name:string, balance:int}>, receivable_list: list<array{name:string, balance:int}>}
      */
     public function position(CarbonInterface $at): array
     {
@@ -217,6 +217,7 @@ class SummaryBook
 
         $out = ['money' => 0, 'animals' => 0, 'things' => 0, 'receivable' => 0, 'owed' => 0, 'capital' => 0, 'earned' => 0];
         $places = [];
+        $owedToUs = [];
         $capitalRoot = Account::query()->where('code', AccountCodes::CAPITAL)->value('id');
 
         foreach (Account::query()->get() as $account) {
@@ -231,7 +232,7 @@ class SummaryBook
             match (true) {
                 in_array($account->subtype, Account::MONEY_SUBTYPES, true) => [$out['money'] += $balance, $places[] = ['name' => $account->name, 'balance' => $balance]],
                 $account->code === AccountCodes::LIVESTOCK => $out['animals'] += $balance,
-                $account->type === 'asset' && ($account->code === AccountCodes::RECEIVABLE || $account->subtype === 'lent') => $out['receivable'] += $balance,
+                $account->type === 'asset' && ($account->code === AccountCodes::RECEIVABLE || $account->subtype === 'lent') => [$out['receivable'] += $balance, $owedToUs[] = ['name' => $account->name, 'balance' => $balance]],
                 $account->type === 'asset' => $out['things'] += $balance,
                 $account->type === 'liability' => $out['owed'] += $balance,
                 $account->type === 'equity' && ($account->id === $capitalRoot || $account->parent_id === $capitalRoot) => $out['capital'] += $balance,
@@ -243,6 +244,7 @@ class SummaryBook
         $out['assets'] = $out['money'] + $out['animals'] + $out['things'] + $out['receivable'];
         $out['net'] = $out['assets'] - $out['owed'];
         $out['money_places'] = $places;
+        $out['receivable_list'] = $owedToUs;
 
         return $out;
     }

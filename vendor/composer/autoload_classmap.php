@@ -102,6 +102,7 @@ return array(
     'App\\Services\\AnimalService' => $baseDir . '/app/Services/AnimalService.php',
     'App\\Services\\CashForecast' => $baseDir . '/app/Services/CashForecast.php',
     'App\\Services\\CropBook' => $baseDir . '/app/Services/CropBook.php',
+    'App\\Services\\DailyChecklist' => $baseDir . '/app/Services/DailyChecklist.php',
     'App\\Services\\DebtBook' => $baseDir . '/app/Services/DebtBook.php',
     'App\\Services\\DuesBook' => $baseDir . '/app/Services/DuesBook.php',
     'App\\Services\\HerdCare' => $baseDir . '/app/Services/HerdCare.php',

@@ -742,6 +742,7 @@ class ComposerStaticInit37f95d202e43fa9dcdb43cb49f1aa054
         'App\\Services\\AnimalService' => __DIR__ . '/../..' . '/app/Services/AnimalService.php',
         'App\\Services\\CashForecast' => __DIR__ . '/../..' . '/app/Services/CashForecast.php',
         'App\\Services\\CropBook' => __DIR__ . '/../..' . '/app/Services/CropBook.php',
+        'App\\Services\\DailyChecklist' => __DIR__ . '/../..' . '/app/Services/DailyChecklist.php',
         'App\\Services\\DebtBook' => __DIR__ . '/../..' . '/app/Services/DebtBook.php',
         'App\\Services\\DuesBook' => __DIR__ . '/../..' . '/app/Services/DuesBook.php',
         'App\\Services\\HerdCare' => __DIR__ . '/../..' . '/app/Services/HerdCare.php',

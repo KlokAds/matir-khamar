@@ -123,7 +123,6 @@ const applyRange = () =>
                     <DateField v-model="range.to" class="min-w-0 sm:w-36" />
                     <Button
                         type="submit"
-                        size="sm"
                         variant="secondary"
                         class="col-span-3 sm:col-auto"
                         >{{ t('দেখুন') }}</Button
@@ -131,7 +130,6 @@ const applyRange = () =>
                 </form>
                 <Button
                     v-if="can['manage-setup']"
-                    size="sm"
                     variant="secondary"
                     @click="editing = !editing"
                     ><Pencil /> {{ t('বদলান') }}</Button

@@ -12,7 +12,6 @@ import {
 import { computed, ref, watch } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
 import DateField from '@/components/khamar/DateField.vue';
-import Field from '@/components/khamar/Field.vue';
 import PageTitle from '@/components/khamar/PageTitle.vue';
 import StatTile from '@/components/khamar/StatTile.vue';
 import { Button } from '@/components/ui/button';
@@ -264,13 +263,17 @@ function share() {
                 "
             >
                 <template #actions>
-                    <Field :label="t('মাস')" class="w-44">
-                        <DateField mode="month" v-model="month" />
-                    </Field>
-                    <Button size="sm" variant="secondary" @click="print"
+                    <!-- One row, one height: the month box and both buttons line up. -->
+                    <DateField
+                        v-model="month"
+                        mode="month"
+                        class="w-44"
+                        :aria-label="t('মাস')"
+                    />
+                    <Button variant="secondary" @click="print"
                         ><Printer /> {{ t('প্রিন্ট / PDF সেভ') }}</Button
                     >
-                    <Button size="sm" @click="share"
+                    <Button @click="share"
                         ><Send /> {{ t('WhatsApp-এ পাঠান') }}</Button
                     >
                 </template>

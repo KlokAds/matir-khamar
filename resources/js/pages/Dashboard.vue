@@ -12,6 +12,9 @@ import {
     TrendingUp,
     Wallet,
     Wheat,
+    Circle,
+    CircleCheck,
+    ListChecks,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import CenterIcon from '@/components/khamar/CenterIcon.vue';
@@ -39,6 +42,13 @@ defineOptions({
 
 const props = defineProps<{
     canSeeMoney: boolean;
+    today: {
+        key: string;
+        title: string;
+        detail: string;
+        href: string;
+        done: boolean;
+    }[];
     reminders: {
         kind: string;
         title: string;
@@ -79,6 +89,7 @@ const props = defineProps<{
 }>();
 
 const can = useCan();
+const todayDone = computed(() => props.today.filter((i) => i.done).length);
 const modules = useModules();
 const herdWords = useHerdWords();
 const cashTotal = computed(() =>
@@ -127,6 +138,83 @@ const greeting = computed(() => {
                 </Button>
             </template>
         </PageTitle>
+
+        <!-- Today's jobs: they tick themselves off as the work is written -->
+        <section
+            v-if="today.length"
+            class="mb-4 rounded-xl border border-border bg-card p-4"
+        >
+            <div class="mb-3 flex items-center justify-between gap-3">
+                <h2
+                    class="flex items-center gap-2 font-display text-lg leading-normal"
+                >
+                    <ListChecks class="size-5 text-paddy" />
+                    {{ t('আজকের কাজ') }}
+                </h2>
+                <span
+                    :class="[
+                        'num rounded-full px-2.5 py-1 text-xs font-semibold',
+                        todayDone === today.length
+                            ? 'bg-paddy/15 text-paddy'
+                            : 'bg-accent',
+                    ]"
+                    >{{
+                        t(':done/:all হয়েছে', {
+                            done: todayDone,
+                            all: today.length,
+                        })
+                    }}</span
+                >
+            </div>
+            <div class="mb-3 h-1.5 rounded-full bg-muted">
+                <div
+                    class="h-1.5 rounded-full bg-paddy transition-all"
+                    :style="{
+                        width: `${Math.round((todayDone / today.length) * 100)}%`,
+                    }"
+                />
+            </div>
+            <ul class="grid gap-2 sm:grid-cols-2">
+                <li v-for="item in today" :key="item.key">
+                    <Link
+                        :href="item.href"
+                        :class="[
+                            'flex items-start gap-3 rounded-lg border px-3 py-2.5 transition-colors active:bg-accent',
+                            item.done
+                                ? 'border-paddy/30 bg-paddy/5'
+                                : 'border-border hover:bg-accent/50',
+                        ]"
+                    >
+                        <CircleCheck
+                            v-if="item.done"
+                            class="mt-0.5 size-5 shrink-0 text-paddy"
+                        />
+                        <Circle
+                            v-else
+                            class="mt-0.5 size-5 shrink-0 text-muted-foreground"
+                        />
+                        <span class="min-w-0 flex-1">
+                            <span
+                                :class="[
+                                    'block leading-normal font-medium',
+                                    item.done &&
+                                        'text-muted-foreground line-through decoration-paddy/50',
+                                ]"
+                                >{{ item.title }}</span
+                            >
+                            <span
+                                class="block text-xs leading-normal text-muted-foreground"
+                                >{{ item.detail }}</span
+                            >
+                        </span>
+                        <ChevronRight
+                            v-if="!item.done"
+                            class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        />
+                    </Link>
+                </li>
+            </ul>
+        </section>
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <template v-if="canSeeMoney && farm">
