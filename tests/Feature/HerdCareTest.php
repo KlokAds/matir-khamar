@@ -11,6 +11,7 @@ use App\Models\FarmNote;
 use App\Models\Goal;
 use App\Models\JournalEntry;
 use App\Models\User;
+use App\Services\AnimalService;
 use App\Services\HerdCare;
 use App\Services\Ledger;
 use Database\Seeders\KhamarSetupSeeder;
@@ -147,4 +148,15 @@ it('warns when an enterprise budget head is nearly used up', function () {
     $warnings = collect(app(HerdCare::class)->budgetWarnings(now()))->pluck('title')->implode(' ');
 
     expect($warnings)->toContain('85%')->toContain('ভাউচার নেই');
+});
+
+it('takes a fattening animal kept as a cow out of its batch', function () {
+    ($this->addAnimal)(['tag' => 'M-9', 'sex' => 'female', 'batch' => 'new'])->assertRedirect();
+    $animal = Animal::query()->where('tag', 'M-9')->firstOrFail();
+    expect($animal->batch_id)->not->toBeNull();
+
+    app(AnimalService::class)->transfer($animal, ($this->center)('GAVI')->id, now()->toDateString());
+
+    expect($animal->fresh()->batch_id)->toBeNull()
+        ->and($animal->fresh()->cost_center_id)->toBe(($this->center)('GAVI')->id);
 });

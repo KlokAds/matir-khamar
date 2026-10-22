@@ -35,9 +35,28 @@ class AnimalController extends Controller
         $running = CostCenter::runningIds();
         $goats = CostCenter::query()->where('code', 'CHAGOL')->first()?->descendantIds() ?? [];
 
+        // Head count for the cards above the list: how many are here, sold and dead, and by category.
+        $all = Animal::query()->with('costCenter:id,name,sort')->whereIn('cost_center_id', $running)->get();
+        $summary = [];
+
+        foreach (['active', 'sold', 'dead'] as $key) {
+            $group = $all->where('status', $key);
+            $summary[$key] = [
+                'count' => $group->count(),
+                'female' => $group->where('sex', 'female')->count(),
+                'male' => $group->where('sex', '!=', 'female')->count(),
+                'amount' => (int) ($key === 'sold' ? $group->sum('sale_amount') : $group->sum('purchase_cost')),
+                'by_center' => $group->groupBy('cost_center_id')
+                    ->sortBy(fn ($animals) => $animals->first()->costCenter->sort)
+                    ->map(fn ($animals) => ['name' => $animals->first()->costCenter->name, 'count' => $animals->count()])
+                    ->values(),
+            ];
+        }
+
         return Inertia::render('animals/Index', [
             'status' => $status,
             'statuses' => Tr::all(Animal::STATUSES),
+            'summary' => $summary,
             'animals' => Animal::query()->with('costCenter:id,name')->where('status', $status)->whereIn('cost_center_id', $running)->orderBy('tag')->get()->map(fn (Animal $animal) => [
                 'id' => $animal->id,
                 'species' => in_array($animal->cost_center_id, $goats, true) ? 'goat' : 'cattle',
