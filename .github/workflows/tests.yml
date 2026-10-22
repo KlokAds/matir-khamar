@@ -39,13 +39,10 @@ jobs:
           set -o pipefail
           composer ci:check 2>&1 | tee ci.log
 
-      # Job logs need a GitHub login; the run summary does not, so a failure is readable there.
-      - name: Show the failure on the run page
+      # Job logs need a GitHub login; annotations do not, so the failure is readable from the API.
+      - name: Show the failure as an annotation
         if: failure()
         run: |
-          {
-            echo '### Last lines of the failed check'
-            echo '```'
-            tail -n 120 ci.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          msg=$(tail -n 80 ci.log | sed -e 's/%/%25/g' | sed -e ':a;N;$!ba;s/
+/%0A/g' | sed -e 's//%0D/g')
+          echo "::error title=Last lines of the failed check::${msg}"
