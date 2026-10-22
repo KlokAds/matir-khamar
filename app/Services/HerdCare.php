@@ -381,6 +381,10 @@ class HerdCare
             $items[] = $due;
         }
 
+        foreach (app(DebtBook::class)->reminders($today) as $debt) {
+            $items[] = $debt;
+        }
+
         foreach (app(DuesBook::class)->reminders($today) as $due) {
             $items[] = $due;
         }

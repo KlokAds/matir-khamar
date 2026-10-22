@@ -42,6 +42,7 @@ class KhamarSetupSeeder extends Seeder
             ['1510', 'শেড ও ঘর', 'asset', 'fixed_asset', '1000'],
             ['1520', 'যন্ত্রপাতি ও সরঞ্জাম', 'asset', 'fixed_asset', '1000'],
             ['1600', 'অগ্রিম লিজ (জমি/পুকুর)', 'asset', 'prepaid', '1000'],
+            ['1700', 'জমির জামানত / বন্ধক (ফেরতযোগ্য)', 'asset', null, '1000'],
 
             ['2000', 'দায়', 'liability', null, null],
             ['2100', 'সরবরাহকারীর পাওনা (বাকি ক্রয়)', 'liability', 'payable', '2000'],

@@ -103,6 +103,7 @@ const items = computed<NavItem[]>(() => {
             ['নতুন এন্ট্রি', '/entries/create', !!c['post-entries']],
             ['মজুরির খাতা', '/labour', !!c['view-reports']],
             ['নগদ ও পাওনা', '/cash', !!c['view-reports']],
+            ['ধার ও জামানত', '/debts', !!c['view-reports']],
             ['টাকা কোথায় আছে', '/money', !!c['view-reports']],
             ['খাতা (সব এন্ট্রি)', '/entries', !!c['view-reports']],
             ['খরচ ভাগ (মাস শেষে)', '/allocation', !!c['post-entries']],

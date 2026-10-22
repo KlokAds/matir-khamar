@@ -5,6 +5,7 @@ use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\HealthController;
@@ -98,6 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('prices', [PriceController::class, 'index'])->name('prices.index');
         Route::get('labour', [LabourController::class, 'index'])->name('labour.index');
         Route::get('cash', [CashController::class, 'index'])->name('cash.index');
+        Route::get('debts', [DebtController::class, 'index'])->name('debts.index');
         Route::get('land/seasons/{season}', [LandController::class, 'season'])->name('land.season');
         Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');
     });
@@ -116,6 +118,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('allocation', [AllocationController::class, 'create'])->name('allocation.create');
         Route::post('allocation', [AllocationController::class, 'store'])->name('allocation.store');
         Route::post('batches', [HerdController::class, 'storeBatch'])->name('batches.store');
+        Route::post('debts', [DebtController::class, 'store'])->name('debts.store');
+        Route::post('debts/{debt}/move', [DebtController::class, 'move'])->name('debts.move');
+        Route::put('debts/{debt}/plan', [DebtController::class, 'plan'])->name('debts.plan');
         Route::post('labour/workers', [LabourController::class, 'storeWorker'])->name('labour.workers.store');
         Route::put('labour/workers/{worker}', [LabourController::class, 'updateWorker'])->name('labour.workers.update');
         Route::post('labour/workers/{worker}/pay', [LabourController::class, 'pay'])->name('labour.workers.pay');
