@@ -57,6 +57,13 @@ const props = defineProps<{
     animals: { id: number; tag: string; name: string | null }[];
     vapidKey: string | null;
     devices: number;
+    deviceList: {
+        id: number;
+        device: string | null;
+        sent: string | null;
+        received: string | null;
+        mode: string;
+    }[];
     prefs: { reminders: boolean; morning: boolean; evening: boolean };
     stock: {
         id: number;
@@ -88,7 +95,7 @@ async function turnOn() {
         state.value = await enablePush(props.vapidKey);
 
         if (state.value === 'on') {
-            router.reload({ only: ['devices'] });
+            router.reload({ only: ['devices', 'deviceList'] });
         }
     } finally {
         busy.value = false;
@@ -99,7 +106,7 @@ async function turnOff() {
     busy.value = true;
     state.value = await disablePush();
     busy.value = false;
-    router.reload({ only: ['devices'] });
+    router.reload({ only: ['devices', 'deviceList'] });
 }
 
 /*
@@ -138,6 +145,40 @@ function sendTest() {
         }
     }, 30000);
     router.post('/push/test', {}, { preserveScroll: true });
+}
+
+/** Which phone or computer, from its browser's description. */
+const deviceName = (ua: string | null) =>
+    !ua
+        ? t('অজানা')
+        : /android/i.test(ua)
+          ? t('Android ফোন')
+          : /iphone|ipad/i.test(ua)
+            ? t('iPhone')
+            : /windows|macintosh|linux/i.test(ua)
+              ? t('কম্পিউটার')
+              : t('অজানা');
+
+/** Did the last notification reach this phone? */
+function deliveryNote(d: { sent: string | null; received: string | null }) {
+    if (!d.sent) {
+        return { ok: true, text: t('এখনো কিছু পাঠানো হয়নি') };
+    }
+
+    if (d.received && d.received >= d.sent) {
+        return { ok: true, text: t('ঠিকমতো পৌঁছাচ্ছে ✓') };
+    }
+
+    const age = (Date.now() - new Date(d.sent).getTime()) / 60000;
+
+    return age < 2
+        ? { ok: true, text: t('পাঠানো হলো — ফোন জানানোর অপেক্ষা…') }
+        : {
+              ok: false,
+              text: t(
+                  'ফোনে পৌঁছাচ্ছে না — নিচের ব্যাটারি ও অটোস্টার্ট সেটিং দিন, অ্যাপটা একবার খুলে রাখুন।',
+              ),
+          };
 }
 
 const checkText = computed<Record<string, string>>(() => ({
@@ -386,6 +427,29 @@ const trackedStock = computed(() =>
                                 )
                             }}
                         </p>
+                        <ul
+                            v-if="deviceList.length"
+                            class="mb-3 space-y-1.5 text-sm"
+                        >
+                            <li
+                                v-for="d in deviceList"
+                                :key="d.id"
+                                class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border border-border bg-background/60 px-3 py-2"
+                            >
+                                <span class="font-medium">{{
+                                    deviceName(d.device)
+                                }}</span>
+                                <span
+                                    :class="[
+                                        'text-xs leading-normal',
+                                        deliveryNote(d).ok
+                                            ? 'text-paddy'
+                                            : 'text-clay',
+                                    ]"
+                                    >{{ deliveryNote(d).text }}</span
+                                >
+                            </li>
+                        </ul>
                         <div class="flex flex-wrap gap-2">
                             <Button
                                 size="sm"

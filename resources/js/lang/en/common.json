@@ -286,5 +286,13 @@
     ":nটি নতুন": ":n new",
     "এখনো কোনো নোটিফিকেশন নেই।": "No notifications yet.",
     "লোড হচ্ছে…": "Loading…",
-    "আজ :n": "today :n"
+    "আজ :n": "today :n",
+    "সব মুছুন": "Clear all",
+    "অজানা": "Unknown",
+    "Android ফোন": "Android phone",
+    "কম্পিউটার": "Computer",
+    "এখনো কিছু পাঠানো হয়নি": "Nothing sent yet",
+    "ঠিকমতো পৌঁছাচ্ছে ✓": "Arriving fine ✓",
+    "পাঠানো হলো — ফোন জানানোর অপেক্ষা…": "Sent — waiting for the phone…",
+    "ফোনে পৌঁছাচ্ছে না — নিচের ব্যাটারি ও অটোস্টার্ট সেটিং দিন, অ্যাপটা একবার খুলে রাখুন।": "Not reaching the phone — set battery and autostart below, and open the app once."
 }

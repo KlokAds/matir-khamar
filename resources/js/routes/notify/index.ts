@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\ReminderController::prefs
-* @see app/Http/Controllers/ReminderController.php:155
+* @see app/Http/Controllers/ReminderController.php:179
 * @route '/notify-prefs'
 */
 export const prefs = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -16,7 +16,7 @@ prefs.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::prefs
-* @see app/Http/Controllers/ReminderController.php:155
+* @see app/Http/Controllers/ReminderController.php:179
 * @route '/notify-prefs'
 */
 prefs.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ prefs.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReminderController::prefs
-* @see app/Http/Controllers/ReminderController.php:155
+* @see app/Http/Controllers/ReminderController.php:179
 * @route '/notify-prefs'
 */
 prefs.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -35,7 +35,7 @@ prefs.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
 
 /**
 * @see \App\Http\Controllers\ReminderController::prefs
-* @see app/Http/Controllers/ReminderController.php:155
+* @see app/Http/Controllers/ReminderController.php:179
 * @route '/notify-prefs'
 */
 const prefsForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -50,7 +50,7 @@ const prefsForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\ReminderController::prefs
-* @see app/Http/Controllers/ReminderController.php:155
+* @see app/Http/Controllers/ReminderController.php:179
 * @route '/notify-prefs'
 */
 prefsForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

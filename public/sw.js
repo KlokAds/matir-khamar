@@ -165,7 +165,31 @@ self.addEventListener('fetch', (event) => {
  * Notifications. The server sends {title, body, url, tag, actions[{action, title, url}]};
  * the action buttons ("হয়ে গেছে", "১ ঘণ্টা পরে") post to their signed link, no app needed.
  */
+/** Tells the app this phone received a push, so it knows what reaches the phone. */
+async function reportReceived() {
+    try {
+        const subscription =
+            await self.registration.pushManager.getSubscription();
+
+        if (subscription) {
+            await fetch('/push/received', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({ endpoint: subscription.endpoint }),
+            });
+        }
+    } catch {
+        // Offline or signed out: nothing to report.
+    }
+}
+
 self.addEventListener('push', (event) => {
+    event.waitUntil(reportReceived());
+
     // A push that comes without its words (or with words the phone cannot read) fetches the
     // newest unseen notifications from the app instead, so nothing is lost silently.
     if (!event.data) {

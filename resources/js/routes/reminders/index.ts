@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\ReminderController::act
-* @see app/Http/Controllers/ReminderController.php:99
+* @see app/Http/Controllers/ReminderController.php:108
 * @route '/reminders/{reminder}/act/{action}'
 */
 export const act = (args: { reminder: number | { id: number }, action: string | number } | [reminder: number | { id: number }, action: string | number ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ act.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::act
-* @see app/Http/Controllers/ReminderController.php:99
+* @see app/Http/Controllers/ReminderController.php:108
 * @route '/reminders/{reminder}/act/{action}'
 */
 act.url = (args: { reminder: number | { id: number }, action: string | number } | [reminder: number | { id: number }, action: string | number ], options?: RouteQueryOptions) => {
@@ -44,7 +44,7 @@ act.url = (args: { reminder: number | { id: number }, action: string | number } 
 
 /**
 * @see \App\Http\Controllers\ReminderController::act
-* @see app/Http/Controllers/ReminderController.php:99
+* @see app/Http/Controllers/ReminderController.php:108
 * @route '/reminders/{reminder}/act/{action}'
 */
 act.post = (args: { reminder: number | { id: number }, action: string | number } | [reminder: number | { id: number }, action: string | number ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -54,7 +54,7 @@ act.post = (args: { reminder: number | { id: number }, action: string | number }
 
 /**
 * @see \App\Http\Controllers\ReminderController::act
-* @see app/Http/Controllers/ReminderController.php:99
+* @see app/Http/Controllers/ReminderController.php:108
 * @route '/reminders/{reminder}/act/{action}'
 */
 const actForm = (args: { reminder: number | { id: number }, action: string | number } | [reminder: number | { id: number }, action: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -64,7 +64,7 @@ const actForm = (args: { reminder: number | { id: number }, action: string | num
 
 /**
 * @see \App\Http\Controllers\ReminderController::act
-* @see app/Http/Controllers/ReminderController.php:99
+* @see app/Http/Controllers/ReminderController.php:108
 * @route '/reminders/{reminder}/act/{action}'
 */
 actForm.post = (args: { reminder: number | { id: number }, action: string | number } | [reminder: number | { id: number }, action: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -157,7 +157,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\ReminderController::store
-* @see app/Http/Controllers/ReminderController.php:67
+* @see app/Http/Controllers/ReminderController.php:76
 * @route '/reminders'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -172,7 +172,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::store
-* @see app/Http/Controllers/ReminderController.php:67
+* @see app/Http/Controllers/ReminderController.php:76
 * @route '/reminders'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -181,7 +181,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\ReminderController::store
-* @see app/Http/Controllers/ReminderController.php:67
+* @see app/Http/Controllers/ReminderController.php:76
 * @route '/reminders'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -191,7 +191,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\ReminderController::store
-* @see app/Http/Controllers/ReminderController.php:67
+* @see app/Http/Controllers/ReminderController.php:76
 * @route '/reminders'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -201,7 +201,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\ReminderController::store
-* @see app/Http/Controllers/ReminderController.php:67
+* @see app/Http/Controllers/ReminderController.php:76
 * @route '/reminders'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -213,7 +213,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\ReminderController::update
-* @see app/Http/Controllers/ReminderController.php:86
+* @see app/Http/Controllers/ReminderController.php:95
 * @route '/reminders/{reminder}'
 */
 export const update = (args: { reminder: number | { id: number } } | [reminder: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -228,7 +228,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\ReminderController::update
-* @see app/Http/Controllers/ReminderController.php:86
+* @see app/Http/Controllers/ReminderController.php:95
 * @route '/reminders/{reminder}'
 */
 update.url = (args: { reminder: number | { id: number } } | [reminder: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -261,7 +261,7 @@ update.url = (args: { reminder: number | { id: number } } | [reminder: number | 
 
 /**
 * @see \App\Http\Controllers\ReminderController::update
-* @see app/Http/Controllers/ReminderController.php:86
+* @see app/Http/Controllers/ReminderController.php:95
 * @route '/reminders/{reminder}'
 */
 update.put = (args: { reminder: number | { id: number } } | [reminder: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -271,7 +271,7 @@ update.put = (args: { reminder: number | { id: number } } | [reminder: number | 
 
 /**
 * @see \App\Http\Controllers\ReminderController::update
-* @see app/Http/Controllers/ReminderController.php:86
+* @see app/Http/Controllers/ReminderController.php:95
 * @route '/reminders/{reminder}'
 */
 const updateForm = (args: { reminder: number | { id: number } } | [reminder: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -286,7 +286,7 @@ const updateForm = (args: { reminder: number | { id: number } } | [reminder: num
 
 /**
 * @see \App\Http\Controllers\ReminderController::update
-* @see app/Http/Controllers/ReminderController.php:86
+* @see app/Http/Controllers/ReminderController.php:95
 * @route '/reminders/{reminder}'
 */
 updateForm.put = (args: { reminder: number | { id: number } } | [reminder: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
