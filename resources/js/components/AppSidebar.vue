@@ -20,25 +20,49 @@ import type { NavItem } from '@/types';
 
 const nav = useNav();
 
-/** The sidebar tree: the day-to-day pages first, then one folding group per part of the farm. */
-const items = computed<NavItem[]>(() => [
-    ...nav.top.value.map((link) => ({
+/**
+ * The sidebar in sections, each under a small heading: the day-to-day pages, then the farm's
+ * own parts, then money and reports, then setup.
+ */
+const SECTION_OF: Record<string, 'farm' | 'money' | 'setup'> = {
+    'টাকার হিসাব': 'money',
+    রিপোর্ট: 'money',
+    'সেটআপ ও নিরাপত্তা': 'setup',
+};
+
+const toItem = (g: (typeof nav.groups.value)[number]): NavItem => ({
+    title: t(g.title),
+    href: g.links[0].href,
+    icon: g.icon,
+    children: g.links.map((link) => ({
         title: t(link.title),
         href: link.href,
-        icon: link.icon,
-        reload: link.reload,
-        badge: link.badge,
     })),
-    ...nav.groups.value.map((g) => ({
-        title: t(g.title),
-        href: g.links[0].href,
-        icon: g.icon,
-        children: g.links.map((link) => ({
-            title: t(link.title),
-            href: link.href,
-        })),
-    })),
-]);
+});
+
+const sections = computed(() => {
+    const groups = nav.groups.value;
+    const of = (key: 'farm' | 'money' | 'setup') =>
+        groups
+            .filter((g) => (SECTION_OF[g.title] ?? 'farm') === key)
+            .map(toItem);
+
+    return [
+        {
+            label: t('প্রতিদিন'),
+            items: nav.top.value.map((link) => ({
+                title: t(link.title),
+                href: link.href,
+                icon: link.icon,
+                reload: link.reload,
+                badge: link.badge,
+            })),
+        },
+        { label: t('খামার'), items: of('farm') },
+        { label: t('টাকা ও রিপোর্ট'), items: of('money') },
+        { label: t('সেটআপ'), items: of('setup') },
+    ].filter((section) => section.items.length);
+});
 </script>
 
 <template>
@@ -56,7 +80,12 @@ const items = computed<NavItem[]>(() => [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavTree :items="items" />
+            <NavTree
+                v-for="section in sections"
+                :key="section.label"
+                :items="section.items"
+                :label="section.label"
+            />
         </SidebarContent>
 
         <SidebarFooter>

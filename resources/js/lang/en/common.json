@@ -251,5 +251,9 @@
     ":done/:all হয়েছে": ":done/:all done",
     "উদ্যোগ ঋণ (সরকারি)": "Udyog loan (government)",
     "JPG, PNG বা PDF, প্রতিটি :mb MB পর্যন্ত। রসিদের ছবি থাকলে হিসাব পাকা হয়।": "JPG, PNG or PDF, up to :mb MB each. A receipt photo makes the record solid.",
-    "\"উদ্যোগ ঋণ (সরকারি)\"-এ আবেদনের অবস্থা আর শর্ত; অনুমোদন হলে কিস্তি আর বাজেটের তুলনায় খরচ।": "\"Udyog loan\" shows the application and its terms; once approved, the instalments and spending against the budget."
+    "\"উদ্যোগ ঋণ (সরকারি)\"-এ আবেদনের অবস্থা আর শর্ত; অনুমোদন হলে কিস্তি আর বাজেটের তুলনায় খরচ।": "\"Udyog loan\" shows the application and its terms; once approved, the instalments and spending against the budget.",
+    "প্রতিদিন": "Every day",
+    "খামার": "Farm",
+    "টাকা ও রিপোর্ট": "Money & reports",
+    "সেটআপ": "Setup"
 }
