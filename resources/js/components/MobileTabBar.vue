@@ -1,41 +1,75 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, Menu, Milk, Plus, Wheat } from '@lucide/vue';
+import {
+    AlarmClock,
+    BookOpen,
+    LayoutGrid,
+    Menu,
+    Milk,
+    Plus,
+    ReceiptText,
+    Wallet,
+    Wheat,
+} from '@lucide/vue';
 import { computed } from 'vue';
 import QuickAddMenu from '@/components/QuickAddMenu.vue';
-import { useSidebar } from '@/components/ui/sidebar';
 import { t } from '@/lib/i18n';
 import { useCan, useModules } from '@/lib/khamar';
+import { mobileMenuOpen } from '@/lib/nav';
 
 /**
- * The phone's bottom bar, like an app: today, milk, the big ＋, feed and the full menu, all
- * within reach of a thumb while the other hand holds a bucket.
+ * The phone's bottom bar, like an app: today, two daily jobs, the big ＋ and the full menu, all
+ * within reach of a thumb. The two daily jobs are the first ones that apply: milk and feed while
+ * those projects run, otherwise writing an expense, the money, the book or the reminders — so a
+ * project turned off never leaves a hole in the bar.
  */
-const { setOpenMobile } = useSidebar();
 const can = useCan();
 const modules = useModules();
 const page = usePage();
 const path = computed(() => page.url.split('?')[0]);
 
-const tabs = computed(() =>
-    [
-        { href: '/dashboard', label: 'আজ', icon: LayoutGrid, show: true },
+const tabs = computed(() => {
+    const c = can.value;
+    const m = modules.value;
+    const daily = [
         {
             href: '/milk',
             label: 'দুধ',
             icon: Milk,
-            show: !!can.value['post-daily'] && modules.value.milk,
+            show: !!c['post-daily'] && m.milk,
         },
         {
             href: '/stock/move?mode=issue',
             label: 'খাবার',
             icon: Wheat,
-            show:
-                !!can.value['post-daily'] &&
-                (modules.value.cattle || modules.value.goat),
+            show: !!c['post-daily'] && (m.cattle || m.goat),
         },
-    ].filter((tab) => tab.show),
-);
+        {
+            href: '/entries/create',
+            label: 'খরচ',
+            icon: ReceiptText,
+            show: !!c['post-entries'],
+        },
+        {
+            href: '/money',
+            label: 'টাকা',
+            icon: Wallet,
+            show: !!c['view-reports'],
+        },
+        {
+            href: '/entries',
+            label: 'খাতা',
+            icon: BookOpen,
+            show: !!c['view-reports'],
+        },
+        { href: '/reminders', label: 'মনে রাখা', icon: AlarmClock, show: true },
+    ].filter((tab) => tab.show);
+
+    return [
+        { href: '/dashboard', label: 'আজ', icon: LayoutGrid },
+        ...daily.slice(0, 2),
+    ];
+});
 
 const isOn = (href: string) => path.value === href.split('?')[0];
 </script>
@@ -55,10 +89,6 @@ const isOn = (href: string) => path.value === href.split('?')[0];
                 <component :is="tab.icon" class="size-5" />
                 <span>{{ t(tab.label) }}</span>
             </Link>
-            <span
-                v-for="n in Math.max(0, 2 - tabs.slice(0, 2).length)"
-                :key="`a${n}`"
-            />
 
             <div class="flex justify-center">
                 <QuickAddMenu
@@ -76,17 +106,20 @@ const isOn = (href: string) => path.value === href.split('?')[0];
             </div>
 
             <Link
-                v-for="tab in tabs.slice(2)"
-                :key="tab.href"
-                :href="tab.href"
-                :class="['tab', isOn(tab.href) && 'is-on']"
+                v-if="tabs[2]"
+                :href="tabs[2].href"
+                :class="['tab', isOn(tabs[2].href) && 'is-on']"
             >
-                <component :is="tab.icon" class="size-5" />
-                <span>{{ t(tab.label) }}</span>
+                <component :is="tabs[2].icon" class="size-5" />
+                <span>{{ t(tabs[2].label) }}</span>
             </Link>
-            <span v-if="tabs.length < 3" />
+            <span v-else />
 
-            <button type="button" class="tab" @click="setOpenMobile(true)">
+            <button
+                type="button"
+                :class="['tab', mobileMenuOpen && 'is-on']"
+                @click="mobileMenuOpen = true"
+            >
                 <Menu class="size-5" />
                 <span>{{ t('মেনু') }}</span>
             </button>
@@ -102,7 +135,7 @@ const isOn = (href: string) => path.value === href.split('?')[0];
 }
 
 .tab {
-    @apply flex flex-col items-center gap-0.5 rounded-lg py-1 text-[11px] font-medium text-muted-foreground;
+    @apply flex flex-col items-center gap-0.5 rounded-lg py-1 text-[11px] leading-normal font-medium text-muted-foreground;
 }
 
 .tab.is-on {
