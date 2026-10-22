@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:83
+* @see app/Http/Controllers/LandController.php:84
 * @route '/land/plots'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:83
+* @see app/Http/Controllers/LandController.php:84
 * @route '/land/plots'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:83
+* @see app/Http/Controllers/LandController.php:84
 * @route '/land/plots'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:83
+* @see app/Http/Controllers/LandController.php:84
 * @route '/land/plots'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:83
+* @see app/Http/Controllers/LandController.php:84
 * @route '/land/plots'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:91
+* @see app/Http/Controllers/LandController.php:92
 * @route '/land/plots/{plot}'
 */
 export const update = (args: { plot: number | { id: number } } | [plot: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -72,7 +72,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:91
+* @see app/Http/Controllers/LandController.php:92
 * @route '/land/plots/{plot}'
 */
 update.url = (args: { plot: number | { id: number } } | [plot: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -105,7 +105,7 @@ update.url = (args: { plot: number | { id: number } } | [plot: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:91
+* @see app/Http/Controllers/LandController.php:92
 * @route '/land/plots/{plot}'
 */
 update.put = (args: { plot: number | { id: number } } | [plot: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -115,7 +115,7 @@ update.put = (args: { plot: number | { id: number } } | [plot: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:91
+* @see app/Http/Controllers/LandController.php:92
 * @route '/land/plots/{plot}'
 */
 const updateForm = (args: { plot: number | { id: number } } | [plot: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -130,7 +130,7 @@ const updateForm = (args: { plot: number | { id: number } } | [plot: number | { 
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:91
+* @see app/Http/Controllers/LandController.php:92
 * @route '/land/plots/{plot}'
 */
 updateForm.put = (args: { plot: number | { id: number } } | [plot: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

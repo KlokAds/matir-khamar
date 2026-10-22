@@ -41,6 +41,8 @@ type Plot = {
     cost_center_id: number | null;
     center: string | null;
     area_decimals: number;
+    bigha_decimals: number | null;
+    bigha_size: number;
     bigha: number;
     tenure: Tenure;
     tenure_label: string;
@@ -99,6 +101,7 @@ const props = defineProps<{
     plots: Plot[];
     seasons: SeasonCard[];
     bighaDecimals: number;
+    bighaSizes: number[];
     tenures: Record<string, string>;
     centers: Center[];
     defaultCenterId: number | null;
@@ -119,8 +122,11 @@ const localDigits = (value: number | string): string =>
         ? String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)])
         : String(value);
 
-const toBigha = (decimals: number): number =>
-    props.bighaDecimals > 0 ? decimals / props.bighaDecimals : 0;
+const toBigha = (decimals: number, size?: number | null): number => {
+    const bigha = size || props.bighaDecimals;
+
+    return bigha > 0 ? decimals / bigha : 0;
+};
 
 const tenureTone: Record<Tenure, string> = {
     own: 'bg-paddy/12 text-paddy',
@@ -193,7 +199,19 @@ const plotForm = useForm({
     yearly_rent: '' as string | number,
     notes: '',
     is_active: true,
+    // This plot's bigha in decimals: 33 in one mouza, 50 or more in another.
+    bigha_decimals: props.bighaDecimals as number | string,
 });
+
+const sizeChoices = computed(() =>
+    [...new Set([...props.bighaSizes, props.bighaDecimals])].sort(
+        (a, b) => a - b,
+    ),
+);
+const customSize = ref(false);
+const plotSize = computed(
+    () => Number(plotForm.bigha_decimals) || props.bighaDecimals,
+);
 
 const areaDecimals = computed((): number => {
     const value = Number(areaInput.value);
@@ -203,7 +221,7 @@ const areaDecimals = computed((): number => {
     }
 
     return areaUnit.value === 'bigha'
-        ? Math.round(value * props.bighaDecimals * 100) / 100
+        ? Math.round(value * plotSize.value * 100) / 100
         : value;
 });
 
@@ -218,7 +236,7 @@ function setUnit(unit: AreaUnit) {
     if (decimals > 0) {
         areaInput.value =
             unit === 'bigha'
-                ? Math.round(toBigha(decimals) * 100) / 100
+                ? Math.round(toBigha(decimals, plotSize.value) * 100) / 100
                 : decimals;
     }
 }
@@ -228,6 +246,8 @@ function openNewPlot() {
     plotForm.clearErrors();
     areaUnit.value = 'bigha';
     areaInput.value = '';
+    plotForm.bigha_decimals = props.bighaDecimals;
+    customSize.value = false;
     editingPlot.value = 0;
 }
 
@@ -245,6 +265,8 @@ function startEditPlot(p: Plot) {
     plotForm.is_active = p.is_active;
     areaUnit.value = 'decimal';
     areaInput.value = p.area_decimals;
+    plotForm.bigha_decimals = p.bigha_size;
+    customSize.value = !sizeChoices.value.includes(p.bigha_size);
     editingPlot.value = p.id;
 }
 
@@ -255,6 +277,7 @@ function savePlot() {
     plotForm.transform((data) => ({
         ...data,
         area_decimals: areaDecimals.value,
+        bigha_decimals: plotSize.value,
         owner_name: leased ? data.owner_name.trim() || null : null,
         owner_phone: leased ? data.owner_phone.trim() || null : null,
         lease_from: leased ? data.lease_from || null : null,
@@ -293,6 +316,7 @@ function setActive(p: Plot, value: boolean) {
             name: p.name,
             cost_center_id: p.cost_center_id,
             area_decimals: p.area_decimals,
+            bigha_decimals: p.bigha_decimals,
             tenure: p.tenure,
             owner_name: p.owner_name,
             owner_phone: p.owner_phone,
@@ -411,6 +435,17 @@ const pickedDecimals = computed(() =>
         (sum, id) => sum + (Number(plotAreas.value[id]) || 0),
         0,
     ),
+);
+
+// Each plot in its own bigha, so plots measured differently add up right.
+const pickedBigha = computed(() =>
+    pickedIds.value.reduce((sum, id) => {
+        const plot = props.plots.find((p) => p.id === id);
+
+        return (
+            sum + toBigha(Number(plotAreas.value[id]) || 0, plot?.bigha_size)
+        );
+    }, 0),
 );
 
 function openSeasonForm() {
@@ -744,7 +779,9 @@ const perUnitTaka = (value: number | null): string =>
                                 <span class="num font-medium text-foreground">{{
                                     t(':d শতাংশ · :b বিঘা', {
                                         d: num(pickedDecimals),
-                                        b: num(toBigha(pickedDecimals)),
+                                        b: num(
+                                            Math.round(pickedBigha * 100) / 100,
+                                        ),
                                     })
                                 }}</span>
                             </p>
@@ -923,7 +960,12 @@ const perUnitTaka = (value: number | null): string =>
                                               n: num(areaDecimals),
                                           })
                                         : t('= :n বিঘা', {
-                                              n: num(toBigha(areaDecimals)),
+                                              n: num(
+                                                  toBigha(
+                                                      areaDecimals,
+                                                      plotSize,
+                                                  ),
+                                              ),
                                           })
                                     : undefined
                             "
@@ -956,6 +998,60 @@ const perUnitTaka = (value: number | null): string =>
                                         {{ u.label }}
                                     </button>
                                 </div>
+                            </div>
+                        </Field>
+
+                        <Field
+                            :label="t('এই জমির বিঘা কত শতাংশে')"
+                            :hint="
+                                t(
+                                    'এলাকা ভেদে বিঘা আলাদা — মালিক যে মাপে বলেন সেটা বাছুন',
+                                )
+                            "
+                            :error="
+                                (plotForm.errors as Record<string, string>)
+                                    .bigha_decimals
+                            "
+                        >
+                            <div class="flex flex-wrap gap-1.5">
+                                <button
+                                    v-for="size in sizeChoices"
+                                    :key="size"
+                                    type="button"
+                                    :class="[
+                                        'h-10 rounded-md border px-3 text-sm transition-colors',
+                                        !customSize && plotSize === size
+                                            ? 'border-primary bg-primary text-primary-foreground'
+                                            : 'border-input bg-card hover:bg-accent',
+                                    ]"
+                                    @click="
+                                        customSize = false;
+                                        plotForm.bigha_decimals = size;
+                                    "
+                                >
+                                    {{ t(':n শতাংশ', { n: num(size) }) }}
+                                </button>
+                                <button
+                                    type="button"
+                                    :class="[
+                                        'h-10 rounded-md border px-3 text-sm transition-colors',
+                                        customSize
+                                            ? 'border-primary bg-primary text-primary-foreground'
+                                            : 'border-input bg-card hover:bg-accent',
+                                    ]"
+                                    @click="customSize = true"
+                                >
+                                    {{ t('নিজে লিখুন') }}
+                                </button>
+                                <Input
+                                    v-if="customSize"
+                                    v-model="plotForm.bigha_decimals"
+                                    type="number"
+                                    min="10"
+                                    max="200"
+                                    step="0.5"
+                                    class="h-10 w-24"
+                                />
                             </div>
                         </Field>
 

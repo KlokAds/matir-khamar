@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\LandController::bigha
-* @see app/Http/Controllers/LandController.php:143
+* @see app/Http/Controllers/LandController.php:144
 * @route '/setup/land/bigha'
 */
 export const bigha = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -16,7 +16,7 @@ bigha.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::bigha
-* @see app/Http/Controllers/LandController.php:143
+* @see app/Http/Controllers/LandController.php:144
 * @route '/setup/land/bigha'
 */
 bigha.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ bigha.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LandController::bigha
-* @see app/Http/Controllers/LandController.php:143
+* @see app/Http/Controllers/LandController.php:144
 * @route '/setup/land/bigha'
 */
 bigha.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -35,7 +35,7 @@ bigha.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
 
 /**
 * @see \App\Http\Controllers\LandController::bigha
-* @see app/Http/Controllers/LandController.php:143
+* @see app/Http/Controllers/LandController.php:144
 * @route '/setup/land/bigha'
 */
 const bighaForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -50,7 +50,7 @@ const bighaForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\LandController::bigha
-* @see app/Http/Controllers/LandController.php:143
+* @see app/Http/Controllers/LandController.php:144
 * @route '/setup/land/bigha'
 */
 bighaForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

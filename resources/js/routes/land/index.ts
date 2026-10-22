@@ -85,7 +85,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 export const season = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -100,7 +100,7 @@ season.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 season.url = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -133,7 +133,7 @@ season.url = (args: { season: number | { id: number } } | [season: number | { id
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 season.get = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -143,7 +143,7 @@ season.get = (args: { season: number | { id: number } } | [season: number | { id
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 season.head = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -153,7 +153,7 @@ season.head = (args: { season: number | { id: number } } | [season: number | { i
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 const seasonForm = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -163,7 +163,7 @@ const seasonForm = (args: { season: number | { id: number } } | [season: number 
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 seasonForm.get = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -173,7 +173,7 @@ seasonForm.get = (args: { season: number | { id: number } } | [season: number | 
 
 /**
 * @see \App\Http\Controllers\LandController::season
-* @see app/Http/Controllers/LandController.php:42
+* @see app/Http/Controllers/LandController.php:43
 * @route '/land/seasons/{season}'
 */
 seasonForm.head = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

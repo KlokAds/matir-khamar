@@ -33,6 +33,7 @@ class LandController extends Controller
             'seasons' => CropSeason::query()->orderByRaw('closed_on IS NOT NULL')->orderByDesc('started_on')->get()
                 ->map(fn (CropSeason $s) => $book->seasonCard($s)),
             'bighaDecimals' => $book->bighaDecimals(),
+            'bighaSizes' => Plot::BIGHA_SIZES,
             'tenures' => Tr::all(Plot::TENURES),
             'centers' => array_values(array_filter(Lookups::centers(), fn ($c) => ! $c['holds_animals'] && $c['kind'] !== 'overhead')),
             'defaultCenterId' => CostCenter::query()->where('code', 'DHAN')->value('id'),
@@ -171,6 +172,7 @@ class LandController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'cost_center_id' => ['nullable', 'exists:cost_centers,id'],
             'area_decimals' => ['required', 'numeric', 'min:0.5', 'max:100000'],
+            'bigha_decimals' => ['nullable', 'numeric', 'min:10', 'max:200'],
             'tenure' => ['required', Rule::in(array_keys(Plot::TENURES))],
             'owner_name' => ['nullable', 'string', 'max:120'],
             'owner_phone' => ['nullable', 'string', 'max:30'],

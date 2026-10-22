@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:99
+* @see app/Http/Controllers/LandController.php:100
 * @route '/land/seasons'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:99
+* @see app/Http/Controllers/LandController.php:100
 * @route '/land/seasons'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:99
+* @see app/Http/Controllers/LandController.php:100
 * @route '/land/seasons'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:99
+* @see app/Http/Controllers/LandController.php:100
 * @route '/land/seasons'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\LandController::store
-* @see app/Http/Controllers/LandController.php:99
+* @see app/Http/Controllers/LandController.php:100
 * @route '/land/seasons'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:114
+* @see app/Http/Controllers/LandController.php:115
 * @route '/land/seasons/{season}'
 */
 export const update = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -72,7 +72,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:114
+* @see app/Http/Controllers/LandController.php:115
 * @route '/land/seasons/{season}'
 */
 update.url = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -105,7 +105,7 @@ update.url = (args: { season: number | { id: number } } | [season: number | { id
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:114
+* @see app/Http/Controllers/LandController.php:115
 * @route '/land/seasons/{season}'
 */
 update.put = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -115,7 +115,7 @@ update.put = (args: { season: number | { id: number } } | [season: number | { id
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:114
+* @see app/Http/Controllers/LandController.php:115
 * @route '/land/seasons/{season}'
 */
 const updateForm = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -130,7 +130,7 @@ const updateForm = (args: { season: number | { id: number } } | [season: number 
 
 /**
 * @see \App\Http\Controllers\LandController::update
-* @see app/Http/Controllers/LandController.php:114
+* @see app/Http/Controllers/LandController.php:115
 * @route '/land/seasons/{season}'
 */
 updateForm.put = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -147,7 +147,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\LandController::harvest
-* @see app/Http/Controllers/LandController.php:127
+* @see app/Http/Controllers/LandController.php:128
 * @route '/land/seasons/{season}/harvest'
 */
 export const harvest = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -162,7 +162,7 @@ harvest.definition = {
 
 /**
 * @see \App\Http\Controllers\LandController::harvest
-* @see app/Http/Controllers/LandController.php:127
+* @see app/Http/Controllers/LandController.php:128
 * @route '/land/seasons/{season}/harvest'
 */
 harvest.url = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -195,7 +195,7 @@ harvest.url = (args: { season: number | { id: number } } | [season: number | { i
 
 /**
 * @see \App\Http\Controllers\LandController::harvest
-* @see app/Http/Controllers/LandController.php:127
+* @see app/Http/Controllers/LandController.php:128
 * @route '/land/seasons/{season}/harvest'
 */
 harvest.post = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -205,7 +205,7 @@ harvest.post = (args: { season: number | { id: number } } | [season: number | { 
 
 /**
 * @see \App\Http\Controllers\LandController::harvest
-* @see app/Http/Controllers/LandController.php:127
+* @see app/Http/Controllers/LandController.php:128
 * @route '/land/seasons/{season}/harvest'
 */
 const harvestForm = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -215,7 +215,7 @@ const harvestForm = (args: { season: number | { id: number } } | [season: number
 
 /**
 * @see \App\Http\Controllers\LandController::harvest
-* @see app/Http/Controllers/LandController.php:127
+* @see app/Http/Controllers/LandController.php:128
 * @route '/land/seasons/{season}/harvest'
 */
 harvestForm.post = (args: { season: number | { id: number } } | [season: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
