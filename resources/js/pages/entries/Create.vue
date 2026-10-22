@@ -512,7 +512,10 @@ const help = computed<Record<string, string>>(() => ({
                         </template>
 
                         <Field
-                            v-if="['asset', 'lease'].includes(f.form)"
+                            v-if="
+                                budgetHeads.length &&
+                                ['asset', 'lease'].includes(f.form)
+                            "
                             :label="t('উদ্যোগ বাজেটের খাত (থাকলে)')"
                             :error="f.errors.budget_head_id"
                         >
@@ -643,7 +646,10 @@ const help = computed<Record<string, string>>(() => ({
                                     />
                                 </Field>
                                 <Field
-                                    v-if="f.form === 'expense'"
+                                    v-if="
+                                        budgetHeads.length &&
+                                        f.form === 'expense'
+                                    "
                                     :label="t('উদ্যোগ বাজেট খাত')"
                                     :error="lineError(index, 'budget_head_id')"
                                 >
@@ -729,7 +735,7 @@ const help = computed<Record<string, string>>(() => ({
                             "
                             :hint="
                                 t(
-                                    'JPG, PNG বা PDF, প্রতিটি :mb MB পর্যন্ত। উদ্যোগের টাকার খরচে ভাউচার বাধ্যতামূলক।',
+                                    'JPG, PNG বা PDF, প্রতিটি :mb MB পর্যন্ত। রসিদের ছবি থাকলে হিসাব পাকা হয়।',
                                     { mb: Math.round(maxVoucherKb / 1024) },
                                 )
                             "

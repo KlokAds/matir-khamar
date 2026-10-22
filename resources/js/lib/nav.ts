@@ -245,12 +245,7 @@ export function useNav() {
                     FileText,
                     !!c['view-reports'],
                 ],
-                [
-                    'উদ্যোগ বাজেট',
-                    '/reports/budget',
-                    PiggyBank,
-                    !!c['view-reports'],
-                ],
+                ['উদ্যোগ ঋণ (সরকারি)', '/udyog', PiggyBank, !!c['view-reports']],
                 [
                     'ভাগ কীভাবে হয় (উদাহরণ)',
                     '/guide/split',

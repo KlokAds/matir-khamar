@@ -11,6 +11,7 @@ use App\Services\AccountCodes;
 use App\Services\Ledger;
 use App\Services\PartyAccounts;
 use App\Services\PrepaidService;
+use App\Services\Udyog;
 use App\Support\Lookups;
 use App\Support\Money;
 use App\Support\Tr;
@@ -139,7 +140,8 @@ class EntryController extends Controller
 
         return Inertia::render('entries/Create', [
             'form' => array_key_exists($form, self::FORMS) ? $form : 'expense',
-            'forms' => Tr::all(self::FORMS),
+            // A grant only comes with the Udyog programme once it is approved.
+            'forms' => Tr::all(Udyog::approved() ? self::FORMS : array_diff_key(self::FORMS, ['grant' => true])),
             'centers' => Lookups::centers(),
             'moneyAccounts' => Lookups::moneyAccounts(),
             'expenseAccounts' => Lookups::accounts('expense'),

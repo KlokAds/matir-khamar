@@ -342,9 +342,9 @@ export const pageLinks: PageLink[] = [
         ability: 'view-reports',
     },
     {
-        title: 'উদ্যোগ বাজেট',
-        words: 'budget loan বাজেট ঋণ',
-        href: '/reports/budget',
+        title: 'উদ্যোগ ঋণ (সরকারি)',
+        words: 'udyog loan grant budget government উদ্যোগ ঋণ অনুদান বাজেট সরকারি',
+        href: '/udyog',
         icon: ChartColumnBig,
         ability: 'view-reports',
     },

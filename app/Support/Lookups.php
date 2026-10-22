@@ -9,6 +9,7 @@ use App\Models\BudgetHead;
 use App\Models\CostCenter;
 use App\Models\Item;
 use App\Models\Party;
+use App\Services\Udyog;
 
 /** Option lists the entry forms need, in one place. */
 final class Lookups
@@ -76,6 +77,12 @@ final class Lookups
     /** @return array<int, BudgetHead> id, code, name */
     public static function budgetHeads(): array
     {
+        // The Udyog budget heads are a plan until the government loan is approved: nothing is
+        // spent "from" them before that, so forms do not offer them.
+        if (! Udyog::approved()) {
+            return [];
+        }
+
         return BudgetHead::query()->orderBy('sort')->get(['id', 'code', 'name'])->all();
     }
 
