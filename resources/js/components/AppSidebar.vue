@@ -8,6 +8,7 @@ import {
     HandCoins,
     LayoutGrid,
     Settings2,
+    Sprout,
     Wheat,
 } from '@lucide/vue';
 import { computed } from 'vue';
@@ -76,6 +77,10 @@ const items = computed<NavItem[]>(() => {
             ['মোটাতাজা ব্যাচ', '/batches', !!c['view-reports']],
             ['খামার ডায়েরি ও লক্ষ্য', '/diary', !!c['view-reports']],
         ]),
+        ...group('জমি ও ফসল', Sprout, [
+            ['জমি ও মৌসুম', '/land', !!c['view-reports']],
+            ['প্রজেক্ট সাজান', '/setup/centers', !!c['manage-setup']],
+        ]),
         ...group('খাবার ও স্টক', Wheat, [
             ['গরুকে খাবার দেওয়া', '/stock/move?mode=issue', !!c['post-daily']],
             ['মাল কেনা', '/stock/move?mode=purchase', !!c['post-entries']],
@@ -94,6 +99,7 @@ const items = computed<NavItem[]>(() => {
             ['খরচ ভাগ (মাস শেষে)', '/allocation', !!c['post-entries']],
         ]),
         ...group('রিপোর্ট', ChartColumnBig, [
+            ['লাভের হিসাব ও পরিকল্পনা', '/profit', !!c['view-reports']],
             ['ক্যাটাগরি ও প্রজেক্ট', '/centers', !!c['view-reports']],
             ['লাভ-ক্ষতি ও সম্পদ', '/reports', !!c['view-reports']],
             ['মাসিক রিপোর্ট', '/reports/monthly', !!c['view-reports']],

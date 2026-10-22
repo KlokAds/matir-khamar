@@ -13,6 +13,8 @@ import EntryController from './EntryController'
 import AnimalController from './AnimalController'
 import ReportController from './ReportController'
 import MoneyController from './MoneyController'
+import LandController from './LandController'
+import ProfitController from './ProfitController'
 import AllocationController from './AllocationController'
 import SetupController from './SetupController'
 import ImportController from './ImportController'
@@ -36,6 +38,8 @@ const Controllers = {
     AnimalController: Object.assign(AnimalController, AnimalController),
     ReportController: Object.assign(ReportController, ReportController),
     MoneyController: Object.assign(MoneyController, MoneyController),
+    LandController: Object.assign(LandController, LandController),
+    ProfitController: Object.assign(ProfitController, ProfitController),
     AllocationController: Object.assign(AllocationController, AllocationController),
     SetupController: Object.assign(SetupController, SetupController),
     ImportController: Object.assign(ImportController, ImportController),

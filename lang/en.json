@@ -356,5 +356,19 @@
     "৬০–৯০ দিনের মধ্যে ডাক্তার দিয়ে গর্ভ পরীক্ষা করান, ফল এখানে লিখে রাখুন।": "Between day 60 and 90, have a vet do a pregnancy check and write the result here.",
     "৭ মাস — দুধ বন্ধ ও বাড়তি খাবার": "Month 7 — stop milking and give extra feed",
     "৮–৯ মাস — বাচ্চা হওয়ার প্রস্তুতি": "Months 8–9 — getting ready for calving",
-    "…আরও :countটি": "…and :count more"
+    "…আরও :countটি": "…and :count more",
+    "নিজের": "Own",
+    "লিজ নেওয়া": "Leased",
+    "বর্গা / ভাগে": "Sharecropped",
+    "\":name\" জমির তালিকায় যোগ হলো।": "\":name\" added to the land list.",
+    "জমির তথ্য হালনাগাদ হলো।": "Land details updated.",
+    "মৌসুম \":name\" শুরু হলো।": "Season \":name\" started.",
+    "মৌসুম হালনাগাদ হলো।": "Season updated.",
+    "ফসল স্টকে উঠলো (:n টি এন্ট্রি)।": "Harvest added to stock (:n entries).",
+    "এক বিঘা = :n শতাংশ ধরা হলো।": "One bigha now counts as :n decimals.",
+    "\":name\" মালের তালিকায় যোগ হলো।": "\":name\" added to the items.",
+    "অন্তত একটি ফসলের পরিমাণ ও দর দিন।": "Enter the quantity and rate of at least one crop.",
+    ":name: লিজ শেষ হবে :n দিন পর": ":name: lease ends in :n days",
+    ":name: লিজ শেষ হয়ে গেছে": ":name: lease has ended",
+    "মালিক :owner · নবায়নের কথা বলুন": "Owner :owner · talk about renewing"
 }

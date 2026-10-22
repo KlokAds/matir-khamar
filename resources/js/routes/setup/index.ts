@@ -1,5 +1,6 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 import centers from './centers'
+import land from './land'
 import items from './items'
 import accountsDb024e from './accounts'
 import partiesBccebf from './parties'
@@ -660,6 +661,7 @@ audit.form = auditForm
 
 const setup = {
     centers: Object.assign(centers, centers),
+    land: Object.assign(land, land),
     items: Object.assign(items, items),
     accounts: Object.assign(accounts, accountsDb024e),
     parties: Object.assign(parties, partiesBccebf),

@@ -9,10 +9,12 @@ use App\Http\Controllers\EntryController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HerdController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\LandController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MilkController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\OfflineController;
+use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
@@ -81,6 +83,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('batches', [HerdController::class, 'batches'])->name('batches.index');
         Route::get('diary', [DiaryController::class, 'index'])->name('diary.index');
         Route::get('health', [HealthController::class, 'index'])->name('health.index');
+        Route::get('land', [LandController::class, 'index'])->name('land.index');
+        Route::get('profit', [ProfitController::class, 'index'])->name('profit.index');
+        Route::get('land/seasons/{season}', [LandController::class, 'season'])->name('land.season');
         Route::get('diary/files/{file}', [DiaryController::class, 'file'])->name('diary.files.show');
     });
 
@@ -98,6 +103,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('allocation', [AllocationController::class, 'create'])->name('allocation.create');
         Route::post('allocation', [AllocationController::class, 'store'])->name('allocation.store');
         Route::post('batches', [HerdController::class, 'storeBatch'])->name('batches.store');
+        Route::post('land/plots', [LandController::class, 'storePlot'])->name('land.plots.store');
+        Route::put('land/plots/{plot}', [LandController::class, 'updatePlot'])->name('land.plots.update');
+        Route::post('land/seasons', [LandController::class, 'storeSeason'])->name('land.seasons.store');
+        Route::put('land/seasons/{season}', [LandController::class, 'updateSeason'])->name('land.seasons.update');
+        Route::post('land/seasons/{season}/harvest', [LandController::class, 'harvest'])->name('land.seasons.harvest');
+        Route::post('land/items', [LandController::class, 'storeItem'])->name('land.items.store');
         Route::put('batches/{batch}', [HerdController::class, 'updateBatch'])->name('batches.update');
         Route::post('diary/goals', [DiaryController::class, 'storeGoal'])->name('diary.goals.store');
         Route::put('diary/goals/{goal}', [DiaryController::class, 'updateGoal'])->name('diary.goals.update');
@@ -109,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('centers', [CostCenterController::class, 'store'])->name('centers.store');
         Route::put('centers/{center}', [CostCenterController::class, 'update'])->name('centers.update');
         Route::get('centers', [CostCenterController::class, 'manage'])->name('centers.manage');
+        Route::put('land/bigha', [LandController::class, 'bigha'])->name('land.bigha');
         Route::post('centers/{center}/toggle', [CostCenterController::class, 'toggle'])->name('centers.toggle');
         Route::post('centers/{center}/move', [CostCenterController::class, 'move'])->name('centers.move');
         Route::delete('centers/{center}', [CostCenterController::class, 'destroy'])->name('centers.destroy');

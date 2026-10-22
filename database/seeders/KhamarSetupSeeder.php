@@ -20,6 +20,7 @@ class KhamarSetupSeeder extends Seeder
         $this->costCenters();
         $this->budgetHeads();
         $this->items();
+        $this->call(CropSetupSeeder::class);
     }
 
     private function accounts(): void

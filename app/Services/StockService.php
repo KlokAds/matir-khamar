@@ -51,7 +51,7 @@ class StockService
      * the rate the owner sets and is credited to the producing center as
      * internal income, so that center shows whether growing beats buying.
      */
-    public function produce(Item $item, string $date, float $qty, int $ratePerUnit, int $producerCenterId, ?string $note, ?float $landDecimals = null): JournalEntry
+    public function produce(Item $item, string $date, float $qty, int $ratePerUnit, int $producerCenterId, ?string $note, ?float $landDecimals = null, ?string $reference = null): JournalEntry
     {
         $qty = round($qty, 3);
         $amount = (int) round($qty * $ratePerUnit);
@@ -60,11 +60,11 @@ class StockService
             throw ValidationException::withMessages(['rate' => __('পরিমাণ ও দর দিন।')]);
         }
 
-        return DB::transaction(function () use ($item, $date, $qty, $amount, $producerCenterId, $note, $landDecimals) {
+        return DB::transaction(function () use ($item, $date, $qty, $amount, $producerCenterId, $note, $landDecimals, $reference) {
             $entry = $this->ledger->post('production', $date, $note ?: "{$item->name} উৎপাদন — ".$this->qtyLabel($item, $qty), [
                 ['account_id' => $item->inventory_account_id, 'debit' => $amount, 'memo' => $item->name],
                 ['account_id' => Account::byCode(AccountCodes::INTERNAL_INCOME)->id, 'credit' => $amount, 'cost_center_id' => $producerCenterId],
-            ]);
+            ], ['reference' => $reference]);
 
             $this->move($item, $entry, 'in', $qty, $amount, $producerCenterId, $date, null, ['land_decimals' => $landDecimals ?: null]);
 
