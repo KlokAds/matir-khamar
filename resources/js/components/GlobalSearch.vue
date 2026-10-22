@@ -237,11 +237,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', shortcut));
                     />
                     <button
                         type="button"
-                        class="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+                        class="btn-icon"
                         :aria-label="t('বন্ধ')"
+                        :title="t('বন্ধ')"
                         @click="open = false"
                     >
-                        <X class="size-5" />
+                        <X />
                     </button>
                 </div>
 

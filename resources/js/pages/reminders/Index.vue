@@ -5,10 +5,12 @@ import {
     BellOff,
     BellRing,
     Check,
+    ChevronDown,
     Package,
     Repeat,
     Send,
     Smartphone,
+    Undo2,
 } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
@@ -315,7 +317,7 @@ const trackedStock = computed(() =>
                             >
                             <Button
                                 size="sm"
-                                variant="ghost"
+                                variant="secondary"
                                 :disabled="busy"
                                 @click="turnOff"
                                 ><BellOff /> {{ t('এই ফোনে বন্ধ') }}</Button
@@ -501,14 +503,16 @@ const trackedStock = computed(() =>
                             </Field>
                         </div>
 
-                        <button
+                        <Button
                             v-if="!more"
                             type="button"
-                            class="text-left text-sm text-muted-foreground underline-offset-4 hover:underline"
+                            size="sm"
+                            variant="secondary"
+                            class="h-auto min-h-9 justify-self-start py-2 text-left leading-snug whitespace-normal"
                             @click="more = true"
                         >
                             {{ t('+ বিস্তারিত, ক্যাটাগরি বা গরু যোগ করুন') }}
-                        </button>
+                        </Button>
                         <template v-else>
                             <Field :label="t('বিস্তারিত (ঐচ্ছিক)')">
                                 <Input
@@ -645,14 +649,15 @@ const trackedStock = computed(() =>
                                 <div class="flex items-start gap-3">
                                     <button
                                         type="button"
-                                        class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-paddy/60 text-paddy hover:bg-paddy hover:text-primary-foreground"
+                                        class="flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-paddy/60 bg-card text-paddy shadow-xs transition-colors hover:bg-paddy hover:text-primary-foreground active:bg-paddy active:text-primary-foreground"
                                         :aria-label="t('হয়ে গেছে')"
+                                        :title="t('হয়ে গেছে')"
                                         @click="act(r, 'done')"
                                     >
-                                        <Check class="size-3.5" />
+                                        <Check class="size-4" />
                                     </button>
                                     <div class="min-w-0 flex-1">
-                                        <p class="font-medium">
+                                        <p class="leading-snug font-medium">
                                             {{ r.alarm ? '🔔 ' : ''
                                             }}{{ r.title }}
                                         </p>
@@ -691,23 +696,24 @@ const trackedStock = computed(() =>
                                             <Link
                                                 v-if="r.animal_id"
                                                 :href="`/animals/${r.animal_id}`"
-                                                class="underline"
+                                                class="font-medium text-primary underline underline-offset-2"
                                                 >{{ r.animal }}</Link
                                             >
                                         </p>
                                     </div>
                                 </div>
-                                <div class="mt-2 flex gap-1.5 pl-9">
+                                <div class="mt-2 flex flex-wrap gap-2 pl-11">
                                     <Button
                                         size="sm"
-                                        variant="ghost"
+                                        variant="secondary"
                                         class="h-8"
                                         @click="act(r, 'snooze', 60)"
-                                        >{{ t('১ ঘণ্টা পরে') }}</Button
+                                        ><AlarmClock />
+                                        {{ t('১ ঘণ্টা পরে') }}</Button
                                     >
                                     <Button
                                         size="sm"
-                                        variant="ghost"
+                                        variant="secondary"
                                         class="h-8"
                                         @click="
                                             act(
@@ -733,9 +739,12 @@ const trackedStock = computed(() =>
 
                 <details v-if="done.length" class="group">
                     <summary
-                        class="cursor-pointer text-sm text-muted-foreground"
+                        class="btn-chip cursor-pointer list-none text-muted-foreground [&::-webkit-details-marker]:hidden"
                     >
                         {{ t('হয়ে যাওয়া (:n)', { n: done.length }) }}
+                        <ChevronDown
+                            class="transition-transform group-open:rotate-180"
+                        />
                     </summary>
                     <ul class="mt-2 divide-y divide-border/60 text-sm">
                         <li
@@ -748,10 +757,10 @@ const trackedStock = computed(() =>
                             }}</span>
                             <button
                                 type="button"
-                                class="shrink-0 text-xs underline"
+                                class="btn-chip"
                                 @click="act(r, 'undo')"
                             >
-                                {{ t('ফিরিয়ে আনুন') }}
+                                <Undo2 /> {{ t('ফিরিয়ে আনুন') }}
                             </button>
                         </li>
                     </ul>

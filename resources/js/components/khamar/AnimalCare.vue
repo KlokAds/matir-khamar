@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { Link, router, useForm } from '@inertiajs/vue3';
-import { Baby, CalendarHeart, Layers, Scale, Syringe } from '@lucide/vue';
+import {
+    Baby,
+    CalendarHeart,
+    ChevronRight,
+    Eye,
+    Layers,
+    Plus,
+    Scale,
+    Syringe,
+} from '@lucide/vue';
 import { computed, ref } from 'vue';
 import Field from '@/components/khamar/Field.vue';
 import NSelect from '@/components/khamar/NSelect.vue';
@@ -167,7 +176,7 @@ const marks = [
                     size="sm"
                     variant="secondary"
                     @click="serving = !serving"
-                    >{{ t('বীজ / গর্ভ লিখুন') }}</Button
+                    ><Plus /> {{ t('বীজ / গর্ভ লিখুন') }}</Button
                 >
             </div>
 
@@ -243,7 +252,7 @@ const marks = [
                     }}</Button>
                     <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         @click="serving = false"
                         >{{ t('বাদ') }}</Button
                     >
@@ -385,7 +394,7 @@ const marks = [
                         }}</Button>
                         <Button
                             type="button"
-                            variant="ghost"
+                            variant="secondary"
                             @click="calving = false"
                             >{{ t('বাদ') }}</Button
                         >
@@ -407,7 +416,7 @@ const marks = [
                 <li
                     v-for="b in past"
                     :key="b.id"
-                    class="flex flex-wrap justify-between gap-2 py-2"
+                    class="flex flex-wrap items-center justify-between gap-2 py-2"
                 >
                     <span
                         >{{ t('বীজ') }} {{ day(b.served_on) }} ·
@@ -417,15 +426,17 @@ const marks = [
                                 : t(b.result_label)
                         }}</span
                     >
-                    <span class="text-muted-foreground">
+                    <span
+                        class="flex flex-wrap items-center gap-2 text-muted-foreground"
+                    >
                         <template v-if="b.outcome_label">{{
                             t(b.outcome_label)
                         }}</template>
                         <Link
                             v-if="b.calf_id"
                             :href="`/animals/${b.calf_id}`"
-                            class="ml-1 underline"
-                            >{{ t('বাছুর') }}</Link
+                            class="btn-chip"
+                            ><Eye /> {{ t('বাছুর') }}</Link
                         >
                         <Link
                             v-else-if="
@@ -437,8 +448,8 @@ const marks = [
                                 can['post-entries']
                             "
                             :href="`/animals/create?mother=${animalId}`"
-                            class="ml-1 underline"
-                            >{{ t('বাছুর তালিকায় যোগ করুন') }}</Link
+                            class="btn-chip-primary"
+                            ><Plus /> {{ t('বাছুর তালিকায় যোগ করুন') }}</Link
                         >
                     </span>
                 </li>
@@ -454,8 +465,8 @@ const marks = [
                 <Link
                     v-if="can['post-daily'] && active"
                     href="/health"
-                    class="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                    >{{ t('লিখুন') }} →</Link
+                    class="btn-chip"
+                    ><Plus /> {{ t('লিখুন') }}</Link
                 >
             </div>
             <ul v-if="health.length" class="divide-y divide-border/60 text-sm">
@@ -502,14 +513,14 @@ const marks = [
                     size="sm"
                     variant="secondary"
                     @click="weighing = !weighing"
-                    >{{ t('ওজন লিখুন') }}</Button
+                    ><Plus /> {{ t('ওজন লিখুন') }}</Button
                 >
             </div>
 
             <Link
                 v-if="batch"
                 href="/batches"
-                class="mb-3 flex items-center gap-2 rounded-lg bg-turmeric/12 p-3 text-sm hover:bg-turmeric/20"
+                class="mb-3 flex items-center gap-2 rounded-lg border border-turmeric/30 bg-turmeric/12 p-3 text-sm hover:bg-turmeric/20"
             >
                 <Layers class="size-4 text-turmeric" />
                 <span
@@ -521,6 +532,9 @@ const marks = [
                         })
                     }}</span
                 >
+                <ChevronRight
+                    class="ml-auto size-4 shrink-0 text-muted-foreground"
+                />
             </Link>
 
             <form

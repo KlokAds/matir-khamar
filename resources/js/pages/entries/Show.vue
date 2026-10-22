@@ -111,7 +111,7 @@ function pick(event: Event) {
             {{ reversedText.before }}
             <Link
                 :href="`/entries/${entry.reversed_by.id}`"
-                class="font-medium underline"
+                class="font-medium text-primary underline underline-offset-2"
                 >{{ entry.reversed_by.number }}</Link
             >
             {{ reversedText.after }}
@@ -123,7 +123,7 @@ function pick(event: Event) {
             {{ reversalOfText.before }}
             <Link
                 :href="`/entries/${entry.reversal_of.id}`"
-                class="font-medium underline"
+                class="font-medium text-primary underline underline-offset-2"
                 >{{ entry.reversal_of.number }}</Link
             >
             {{ reversalOfText.after }}

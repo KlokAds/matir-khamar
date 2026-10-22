@@ -10,6 +10,7 @@ import {
     CloudOff,
     FileText,
     FolderTree,
+    Gauge,
     HandCoins,
     HeartPulse,
     History,
@@ -204,6 +205,7 @@ export function useNav() {
                 ],
             ]),
             ...group('রিপোর্ট', ChartColumnBig, 'paddy', [
+                ['হিসাবের সারাংশ', '/summary', Gauge, !!c['view-reports']],
                 [
                     'লাভের হিসাব ও পরিকল্পনা',
                     '/profit',

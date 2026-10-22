@@ -194,8 +194,9 @@ onBeforeUnmount(() => {
         <button
             v-if="!recording"
             type="button"
-            class="absolute top-2 right-2 rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+            class="btn-icon absolute top-2 right-2"
             :aria-label="t('বন্ধ করুন')"
+            :title="t('বন্ধ করুন')"
             @click="emit('close')"
         >
             <X class="size-4" />

@@ -640,8 +640,9 @@ const outcomeText: Record<SyncOutcome, string> = {
                         <button
                             v-if="q.status !== 'done'"
                             type="button"
-                            class="rounded p-1 text-muted-foreground hover:bg-accent"
+                            class="btn-icon hover:text-destructive"
                             :aria-label="t('মুছুন')"
+                            :title="t('মুছুন')"
                             @click="discard(q.uuid)"
                         >
                             <Trash2 class="size-4" />

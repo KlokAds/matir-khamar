@@ -606,8 +606,10 @@ const sides = computed(() => [
                         :key="m.month"
                         :class="['rounded-xl border p-4', flagStyle[m.flag]]"
                     >
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
+                        <div
+                            class="flex flex-wrap items-start justify-between gap-x-2 gap-y-1"
+                        >
+                            <div class="min-w-0">
                                 <h3 class="font-display text-lg">
                                     {{ monthTitle(m) }}
                                 </h3>
@@ -617,7 +619,7 @@ const sides = computed(() => [
                             </div>
                             <span
                                 :class="[
-                                    'rounded-full px-2 py-0.5 text-xs font-medium',
+                                    'rounded-full px-2 py-0.5 text-xs leading-normal font-medium',
                                     m.flag === 'danger'
                                         ? 'bg-expense/12 text-expense'
                                         : m.flag === 'thin'
@@ -647,7 +649,7 @@ const sides = computed(() => [
                                     <button
                                         v-if="part.optional"
                                         type="button"
-                                        class="mt-0.5 text-xs font-medium text-pond underline-offset-2 hover:underline"
+                                        class="btn-chip mt-1.5 h-7 text-xs"
                                         @click="toggle(part)"
                                     >
                                         {{
@@ -695,8 +697,9 @@ const sides = computed(() => [
                                     >
                                     <button
                                         type="button"
-                                        class="rounded p-1 text-muted-foreground hover:text-expense"
+                                        class="btn-icon size-8 hover:text-expense"
                                         :aria-label="t('মুছুন')"
+                                        :title="t('মুছুন')"
                                         @click="removeExtra(e.id)"
                                     >
                                         <Trash2 class="size-3.5" />
@@ -742,7 +745,7 @@ const sides = computed(() => [
                         </h2>
                         <Button
                             v-if="changed"
-                            variant="ghost"
+                            variant="secondary"
                             size="sm"
                             @click="resetWhatIf"
                             >{{ t('আগের মতো করুন') }}</Button

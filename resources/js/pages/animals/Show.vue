@@ -115,7 +115,8 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                     ><Coins /> {{ t('বিক্রি') }}</Button
                 >
                 <Button
-                    variant="ghost"
+                    variant="secondary"
+                    class="text-destructive hover:text-destructive"
                     @click="action = action === 'death' ? '' : 'death'"
                     ><HeartCrack /> {{ t('মৃত্যু') }}</Button
                 >
@@ -345,7 +346,7 @@ const totalCost = props.cost.purchase + props.cost.direct + props.cost.shared;
                             <td class="px-4 py-2.5">
                                 <Link
                                     :href="`/entries/${l.entry_id}`"
-                                    class="num text-primary hover:underline"
+                                    class="num font-medium text-primary underline underline-offset-2"
                                     >{{ l.number }}</Link
                                 >
                             </td>

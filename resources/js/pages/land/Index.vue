@@ -604,8 +604,9 @@ const perUnitTaka = (value: number | null): string =>
                 </h2>
                 <button
                     type="button"
-                    class="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+                    class="btn-icon"
                     :aria-label="t('বন্ধ করুন')"
+                    :title="t('বন্ধ করুন')"
                     @click="seasonOpen = false"
                 >
                     <X class="size-4" />
@@ -615,13 +616,13 @@ const perUnitTaka = (value: number | null): string =>
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="grid content-start gap-3">
                     <Field :label="t('ফসল')" :error="seasonErrors.crop">
-                        <div class="flex flex-wrap gap-1.5">
+                        <div class="flex flex-wrap gap-2">
                             <button
                                 v-for="c in crops"
                                 :key="c.crop"
                                 type="button"
                                 :class="[
-                                    'rounded-full border px-3 py-1.5 text-sm transition-colors',
+                                    'min-h-9 rounded-full border px-3.5 py-1.5 text-sm shadow-xs transition-colors',
                                     cropPick === c.crop
                                         ? 'border-primary bg-primary text-primary-foreground'
                                         : 'border-input bg-card hover:bg-accent',
@@ -633,7 +634,7 @@ const perUnitTaka = (value: number | null): string =>
                             <button
                                 type="button"
                                 :class="[
-                                    'rounded-full border px-3 py-1.5 text-sm transition-colors',
+                                    'min-h-9 rounded-full border px-3.5 py-1.5 text-sm shadow-xs transition-colors',
                                     cropPick === OTHER
                                         ? 'border-primary bg-primary text-primary-foreground'
                                         : 'border-dashed border-input bg-card hover:bg-accent',
@@ -654,13 +655,13 @@ const perUnitTaka = (value: number | null): string =>
                     </Field>
 
                     <Field v-if="cropSeasons.length" :label="t('মৌসুম')">
-                        <div class="flex flex-wrap gap-1.5">
+                        <div class="flex flex-wrap gap-2">
                             <button
                                 v-for="s in cropSeasons"
                                 :key="s"
                                 type="button"
                                 :class="[
-                                    'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                                    'min-h-8 rounded-full border px-3 py-1 text-[13px] shadow-xs transition-colors',
                                     seasonPick === s
                                         ? 'border-paddy bg-paddy/12 text-paddy'
                                         : 'border-input bg-card hover:bg-accent',
@@ -721,9 +722,9 @@ const perUnitTaka = (value: number | null): string =>
                     <Link
                         v-if="canSetup"
                         href="/setup/centers"
-                        class="-mt-1 text-xs font-medium text-paddy hover:underline"
-                        >{{ t('প্রজেক্ট সাজান') }} →</Link
-                    >
+                        class="btn-chip -mt-1 justify-self-start"
+                        >{{ t('প্রজেক্ট সাজান') }} <ChevronRight
+                    /></Link>
 
                     <div class="grid grid-cols-2 gap-3">
                         <Field
@@ -877,8 +878,9 @@ const perUnitTaka = (value: number | null): string =>
                         <button
                             v-if="canSetup"
                             type="button"
-                            class="rounded p-1 hover:bg-accent hover:text-foreground"
+                            class="btn-icon ml-1 size-8"
                             :aria-label="t('বিঘার মাপ বদলান')"
+                            :title="t('বিঘার মাপ বদলান')"
                             @click="bighaEditing = true"
                         >
                             <Pencil class="size-3.5" />
@@ -908,7 +910,7 @@ const perUnitTaka = (value: number | null): string =>
                         <Button
                             type="button"
                             size="sm"
-                            variant="ghost"
+                            variant="secondary"
                             :aria-label="t('বাতিল')"
                             @click="bighaEditing = false"
                             ><X class="size-4"
@@ -1209,7 +1211,7 @@ const perUnitTaka = (value: number | null): string =>
                                     >
                                 </p>
                             </div>
-                            <div class="flex shrink-0 items-center gap-1">
+                            <div class="flex shrink-0 items-center gap-2">
                                 <span
                                     :class="[
                                         'rounded-full px-2 py-0.5 text-[11px] font-medium',
@@ -1221,8 +1223,9 @@ const perUnitTaka = (value: number | null): string =>
                                 <button
                                     v-if="canWrite"
                                     type="button"
-                                    class="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                                    class="btn-icon"
                                     :aria-label="t('সম্পাদনা')"
+                                    :title="t('সম্পাদনা')"
                                     @click="startEditPlot(p)"
                                 >
                                     <Pencil class="size-4" />
@@ -1399,7 +1402,7 @@ const perUnitTaka = (value: number | null): string =>
                                     {{ t(':n বিঘা', { n: num(s.bigha) }) }}
                                 </p>
                             </div>
-                            <div class="flex shrink-0 items-center gap-1">
+                            <div class="flex shrink-0 items-center gap-2">
                                 <span
                                     :class="[
                                         'rounded-full px-2 py-0.5 text-[11px] font-medium',

@@ -2,6 +2,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
     BookOpen,
+    ChevronDown,
     CalendarDays,
     Flag,
     Pencil,
@@ -291,9 +292,12 @@ async function closeBatch(card: BatchCard) {
                 <Button type="submit" :disabled="batch.processing">{{
                     t('ব্যাচ খুলুন')
                 }}</Button>
-                <Button type="button" variant="ghost" @click="adding = false">{{
-                    t('বাদ')
-                }}</Button>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    @click="adding = false"
+                    >{{ t('বাদ') }}</Button
+                >
             </div>
         </form>
 
@@ -513,7 +517,7 @@ async function closeBatch(card: BatchCard) {
                             <div class="min-w-0">
                                 <Link
                                     :href="`/animals/${a.id}`"
-                                    class="font-medium text-primary underline-offset-4 hover:underline"
+                                    class="font-medium text-primary underline underline-offset-2"
                                     >{{ a.tag
                                     }}<span
                                         v-if="a.name"
@@ -635,7 +639,7 @@ async function closeBatch(card: BatchCard) {
                         <Button
                             type="button"
                             size="sm"
-                            variant="ghost"
+                            variant="secondary"
                             @click="editingId = null"
                             >{{ t('বাদ') }}</Button
                         >
@@ -654,7 +658,7 @@ async function closeBatch(card: BatchCard) {
                         @click="closeBatch(b)"
                         ><Flag /> {{ t('ব্যাচ শেষ') }}</Button
                     >
-                    <Button size="sm" variant="ghost" @click="startEdit(b)"
+                    <Button size="sm" variant="secondary" @click="startEdit(b)"
                         ><Pencil /> {{ t('সম্পাদনা') }}</Button
                     >
                 </footer>
@@ -666,10 +670,16 @@ async function closeBatch(card: BatchCard) {
             class="group rounded-xl border border-border bg-card p-4"
         >
             <summary
-                class="flex cursor-pointer list-none items-center gap-2 font-display text-lg"
+                class="flex min-h-9 cursor-pointer list-none items-center gap-2 font-display text-lg leading-snug [&::-webkit-details-marker]:hidden"
             >
-                <BookOpen class="size-5 text-paddy" />
-                {{ t('মোটাতাজার গাইড — দিন অনুযায়ী') }}
+                <BookOpen class="size-5 shrink-0 text-paddy" />
+                <span class="min-w-0 flex-1">{{
+                    t('মোটাতাজার গাইড — দিন অনুযায়ী')
+                }}</span>
+                <span class="btn-icon" aria-hidden="true"
+                    ><ChevronDown
+                        class="transition-transform group-open:rotate-180"
+                /></span>
             </summary>
             <ol class="mt-3 grid gap-3">
                 <li

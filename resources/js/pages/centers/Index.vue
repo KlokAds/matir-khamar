@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { Plus, Settings2 } from '@lucide/vue';
+import { Eye, EyeOff, Plus, Settings2 } from '@lucide/vue';
 import { computed, reactive, ref } from 'vue';
 import CenterRows from '@/components/khamar/CenterRows.vue';
 import Field from '@/components/khamar/Field.vue';
@@ -159,13 +159,16 @@ const applyRange = () =>
                 />
                 {{ t('এখনই চালু') }}</label
             >
-            <div class="flex gap-2 lg:col-span-2 lg:justify-end">
+            <div class="flex flex-wrap gap-2 lg:col-span-2 lg:justify-end">
                 <Button type="submit" :disabled="center.processing">{{
                     t('যোগ করুন')
                 }}</Button>
-                <Button type="button" variant="ghost" @click="adding = false">{{
-                    t('বাদ')
-                }}</Button>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    @click="adding = false"
+                    >{{ t('বাদ') }}</Button
+                >
             </div>
         </form>
 
@@ -223,9 +226,11 @@ const applyRange = () =>
             <button
                 v-if="closed > 0"
                 type="button"
-                class="mt-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                class="btn-chip mt-3"
                 @click="showClosed = !showClosed"
             >
+                <EyeOff v-if="showClosed" />
+                <Eye v-else />
                 {{
                     showClosed
                         ? t('বন্ধ প্রজেক্টগুলো লুকান')

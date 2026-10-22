@@ -32,7 +32,7 @@ withDefaults(defineProps<Props>(), {
         <MobileTabBar />
         <MobileMenu />
         <Toaster
-            position="top-center"
+            position="top-right"
             rich-colors
             close-button
             :offset="{ top: '4.5rem' }"

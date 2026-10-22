@@ -346,7 +346,7 @@ const place = useForm({
                             <td class="px-4 py-2.5">
                                 <Link
                                     :href="`/entries/${r.entry_id}`"
-                                    class="hover:underline"
+                                    class="font-medium text-primary underline underline-offset-2"
                                     >{{ r.description }}</Link
                                 >
                             </td>

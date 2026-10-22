@@ -191,7 +191,7 @@ const toggle = async (a: { id: number; name: string; is_active: boolean }) => {
                             >{{ taka(a.balance) }}</span
                         >
                         <Button
-                            variant="ghost"
+                            variant="secondary"
                             size="icon-sm"
                             :title="t('নাম বদলান')"
                             :aria-label="t('নাম বদলান')"

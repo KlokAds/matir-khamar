@@ -37,16 +37,17 @@ const visible = (node: TreeNode): boolean =>
             <td class="py-2.5 pr-3">
                 <Link
                     :href="`/centers/${node.id}${query}`"
-                    class="flex items-center gap-2 hover:underline"
+                    class="group flex items-center gap-2"
                     :style="{ paddingLeft: `${depth * 1.25}rem` }"
                 >
                     <CenterIcon :kind="node.kind" />
                     <span
-                        :class="
+                        :class="[
+                            'text-primary underline decoration-primary/40 underline-offset-4 group-hover:decoration-primary',
                             depth === 0 || node.children.length
                                 ? 'font-semibold'
-                                : ''
-                        "
+                                : 'font-medium',
+                        ]"
                         >{{ t(node.name) }}</span
                     >
                     <span
@@ -56,15 +57,19 @@ const visible = (node: TreeNode): boolean =>
                     >
                 </Link>
             </td>
-            <td class="num py-2.5 pr-3 text-right text-income">
+            <td
+                class="num py-2.5 pr-3 text-right whitespace-nowrap text-income"
+            >
                 {{ taka(node.income) }}
             </td>
-            <td class="num py-2.5 pr-3 text-right text-expense">
+            <td
+                class="num py-2.5 pr-3 text-right whitespace-nowrap text-expense"
+            >
                 {{ taka(node.expense) }}
             </td>
             <td
                 :class="[
-                    'num py-2.5 text-right font-medium',
+                    'num py-2.5 text-right font-medium whitespace-nowrap',
                     node.profit < 0 ? 'text-destructive' : 'text-foreground',
                 ]"
             >

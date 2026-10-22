@@ -172,32 +172,34 @@ const sum = (rows: { balance: number }[]) =>
                 <h2 class="mb-3 font-display text-lg">
                     {{ t('ক্যাটাগরি / প্রজেক্ট অনুযায়ী') }}
                 </h2>
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr
-                            class="border-b border-border text-left text-xs text-muted-foreground"
-                        >
-                            <th class="pb-2 font-medium">
-                                {{ t('ক্যাটাগরি') }}
-                            </th>
-                            <th class="pb-2 text-right font-medium">
-                                {{ t('আয়') }}
-                            </th>
-                            <th class="pb-2 text-right font-medium">
-                                {{ t('খরচ') }}
-                            </th>
-                            <th class="pb-2 text-right font-medium">
-                                {{ t('লাভ') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <CenterRows
-                            :nodes="tree"
-                            :query="`?from=${from}&to=${to}`"
-                        />
-                    </tbody>
-                </table>
+                <div class="-mx-4 overflow-x-auto px-4">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr
+                                class="border-b border-border text-left text-xs text-muted-foreground"
+                            >
+                                <th class="pb-2 font-medium">
+                                    {{ t('ক্যাটাগরি') }}
+                                </th>
+                                <th class="pb-2 text-right font-medium">
+                                    {{ t('আয়') }}
+                                </th>
+                                <th class="pb-2 text-right font-medium">
+                                    {{ t('খরচ') }}
+                                </th>
+                                <th class="pb-2 text-right font-medium">
+                                    {{ t('লাভ') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <CenterRows
+                                :nodes="tree"
+                                :query="`?from=${from}&to=${to}`"
+                            />
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section

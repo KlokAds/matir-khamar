@@ -204,13 +204,13 @@ function submit() {
             "
         />
 
-        <div class="mb-5 flex flex-wrap gap-1.5">
+        <div class="mb-5 flex flex-wrap gap-2">
             <button
                 v-for="tab in tabs"
                 :key="tab.key"
                 type="button"
                 :class="[
-                    'flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm',
+                    'flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm shadow-xs transition-colors',
                     f.mode === tab.key
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-card hover:bg-accent',
@@ -316,8 +316,9 @@ function submit() {
                             >
                             <button
                                 type="button"
-                                class="rounded p-1.5 text-muted-foreground hover:bg-accent"
+                                class="btn-icon hover:text-destructive"
                                 :aria-label="t('সরান')"
+                                :title="t('সরান')"
                                 @click="f.splits.splice(index, 1)"
                             >
                                 <X class="size-4" />

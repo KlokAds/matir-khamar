@@ -633,8 +633,9 @@ const countOf = (dir: Direction): number =>
                         />
                         <button
                             type="button"
-                            class="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-destructive"
+                            class="btn-icon hover:text-destructive"
                             :aria-label="t('মুছুন')"
+                            :title="t('মুছুন')"
                             @click="planner.rows.splice(i, 1)"
                         >
                             <Trash2 class="size-4" />
@@ -643,10 +644,10 @@ const countOf = (dir: Direction): number =>
                 </ul>
                 <button
                     type="button"
-                    class="justify-self-start text-xs font-medium text-paddy hover:underline"
+                    class="btn-chip justify-self-start"
                     @click="addRow"
                 >
-                    + {{ t('আরেকটি কিস্তি') }}
+                    <Plus /> {{ t('আরেকটি কিস্তি') }}
                 </button>
 
                 <p
@@ -745,8 +746,9 @@ const countOf = (dir: Direction): number =>
                 </h2>
                 <button
                     type="button"
-                    class="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+                    class="btn-icon"
                     :aria-label="t('বন্ধ করুন')"
+                    :title="t('বন্ধ করুন')"
                     @click="newOpen = false"
                 >
                     <X class="size-4" />
@@ -1146,7 +1148,7 @@ const countOf = (dir: Direction): number =>
                     <Button
                         v-if="!c.closed_on"
                         size="sm"
-                        :variant="planFor === c.id ? 'default' : 'ghost'"
+                        :variant="planFor === c.id ? 'default' : 'outline'"
                         @click="openPlan(c)"
                     >
                         <Pencil class="size-4" /> {{ t('পরিকল্পনা বদলান') }}
@@ -1314,7 +1316,8 @@ const countOf = (dir: Direction): number =>
                 <button
                     v-if="c.history.length"
                     type="button"
-                    class="mt-3 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    class="btn-chip mt-3"
+                    :aria-expanded="historyOpen === c.id"
                     @click="historyOpen = historyOpen === c.id ? null : c.id"
                 >
                     <History class="size-3.5" />
@@ -1366,7 +1369,8 @@ const countOf = (dir: Direction): number =>
         <button
             v-if="closedOnes.length"
             type="button"
-            class="mt-4 flex items-center gap-1 self-start text-sm font-medium text-muted-foreground hover:text-foreground"
+            class="btn-chip mt-4 self-start"
+            :aria-expanded="showClosed"
             @click="showClosed = !showClosed"
         >
             <ChevronDown
