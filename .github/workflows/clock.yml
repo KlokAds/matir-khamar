@@ -16,5 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
+      # Only a knock: if the host is busy for a moment (it answers 503 now and then at night),
+      # the next knock five minutes later does the job, so a missed one is not a failure and
+      # sends no email.
       - name: Visit the site
-        run: curl -fsS --retry 3 --retry-delay 5 -o /dev/null -w '%{http_code}\n' https://khamar.klokads.com/up
+        run: |
+          code=$(curl -sS --max-time 25 --retry 2 --retry-delay 5 -o /dev/null -w '%{http_code}' https://khamar.klokads.com/up || true)
+          echo "khamar.klokads.com/up answered: ${code:-no answer}"
+          if [ "$code" != "200" ]; then
+            echo "::notice::The site did not answer this time; the next knock will try again."
+          fi
